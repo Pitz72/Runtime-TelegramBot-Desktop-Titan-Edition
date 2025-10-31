@@ -1,0 +1,88 @@
+# BotTelegramRSS v0.8.1 - Git Ignore Rules
+
+# ===== FILE SENSIBILI - SICUREZZA =====
+.env
+.env.*
+!env.example
+token_eliminare.txt
+*token*.txt
+*.key
+*.pem
+config_local.py
+
+# ===== BUILD ARTIFACTS =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ===== BACKUP E TEMP =====
+*.backup
+*.bak
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===== DATABASE E CACHE =====
+processed_episodes.json.backup
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== IDE E EDITOR =====
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ===== TESTING =====
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ===== DOCS BUILD =====
+docs/_build/
+.readthedocs.yml
+
+# ===== OS SPECIFIC =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== VIRTUAL ENVIRONMENTS =====
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# ===== LOCAL CONFIG =====
+local_settings.py
+settings_local.py

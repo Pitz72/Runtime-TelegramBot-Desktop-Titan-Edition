@@ -1,0 +1,12 @@
+# Requirements per lo script di controllo remoto
+# Telegram RSS Bot Remote Control v1.0.0
+
+# SSH Connection
+paramiko>=3.4.0
+
+# Rich UI Components  
+rich>=13.7.0
+
+# Optional: Per funzionalità avanzate
+# pycryptodome>=3.19.0  # Per crittografia avanzata SSH
+# keyring>=24.3.0       # Per gestione sicura delle password

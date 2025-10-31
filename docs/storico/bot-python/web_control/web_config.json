@@ -1,0 +1,13 @@
+{
+    "SSH_HOST": "your-server.com",
+    "SSH_PORT": 22,
+    "SSH_USERNAME": "your-username",
+    "SSH_PASSWORD": null,
+    "SSH_KEY_PATH": "~/.ssh/id_rsa",
+    "BOT_PATH": "/home/your-username/bot-telegram-rss",
+    "BOT_SCRIPT": "main.py",
+    "PYTHON_CMD": "python3",
+    "AUTH_ENABLED": true,
+    "AUTH_USERNAME": "admin",
+    "AUTH_PASSWORD_HASH": null
+}
