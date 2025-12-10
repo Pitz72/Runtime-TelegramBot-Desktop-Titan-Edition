@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 """
-BotTelegramRSS v1.0.0 "Phoenix"
+BotTelegramRSS v2.0.3 "Phantom"
 Bot Telegram RSS Feed Monitor con architettura multi-feed production-ready
 
-Miglioramenti v1.0.0 "Phoenix":
-- Refactoring completo architettura multi-feed
-- Supporto simultaneo 30 feed RSS
-- Template messaggio personalizzato italiano
-- Data cutoff per evitare spam su cambio canale
-- Pulizia codebase e rimozione dipendenze legacy
-- Identificazione feed in ogni messaggio
+Miglioramenti recenti:
+- v2.0.3: Fix glitch grafico zero-width space
+- v2.0.2: Sincronizzazione documentazione e code cleaning
+- v2.0.1: Supporto Azuracast e fix anteprime immagini
 
 Precedenti versioni:
 - v0.8.2 "Fortress": Sicurezza hardened, validazioni avanzate
@@ -32,6 +29,8 @@ import platform
 import psutil
 import threading
 from functools import lru_cache
+import re
+from html import unescape
 
 # Configurazione nest_asyncio solo per Windows
 if platform.system() == 'Windows':
@@ -267,12 +266,71 @@ def cleanup_old_episodes(episodes: Dict[str, Any], days_to_keep: int = 30) -> Di
 
 # ===== FUNZIONI MODULI v0.8.1 MANTENUTE =====
 
+def strip_html_tags(text: str) -> str:
+    """Rimuove tutti i tag HTML e converte entity HTML in caratteri normali."""
+    if not isinstance(text, str):
+        return ''
+    
+    # Rimuove tutti i tag HTML
+    text = re.sub(r'<[^>]+>', '', text)
+    
+    # Converte entity HTML (es: &amp; → &, &quot; → ", &#039; → ')
+    text = unescape(text)
+    
+    # Pulisce spazi multipli
+    text = re.sub(r'\s+', ' ', text)
+    
+    return text.strip()
+
+    return text.strip()
+
 def escape_markdown_v2(text: str) -> str:
     """Escapes characters for Telegram MarkdownV2."""
     if not isinstance(text, str):
         return ''
     escape_chars = r'_*[]()~`>#+-=|{}.!'
     return ''.join(f'\\{char}' if char in escape_chars else char for char in text)
+
+def extract_link_from_entry(entry) -> str:
+    """
+    Estrae il link migliore dall'entry RSS.
+    Se entry.link è vuoto (es. Azuracast), cerca nelle enclosures (mp3).
+    """
+    # 1. Prova link standard
+    if hasattr(entry, 'link') and entry.link:
+        return entry.link
+        
+    # 2. Fallback su enclosures (file audio)
+    if hasattr(entry, 'enclosures') and entry.enclosures:
+        for enclosure in entry.enclosures:
+            if hasattr(enclosure, 'href') and enclosure.href:
+                return enclosure.href
+                
+    return ""
+
+def extract_image_from_entry(entry) -> Optional[str]:
+    """
+    Estrae URL immagine dall'entry RSS.
+    Supporta itunes:image e media_content.
+    """
+    # 1. Prova itunes_image (standard podcast)
+    if hasattr(entry, 'itunes_image'):
+        return entry.itunes_image
+        
+    # 2. Prova image standard
+    if hasattr(entry, 'image'):
+        if isinstance(entry.image, dict) and 'href' in entry.image:
+            return entry.image['href']
+        elif hasattr(entry.image, 'href'):
+            return entry.image.href
+            
+    # 3. Prova media_content (spesso usato per thumbnail)
+    if hasattr(entry, 'media_content'):
+        for media in entry.media_content:
+            if 'url' in media and ('image' in media.get('type', '') or 'jpg' in media.get('url', '')):
+                return media['url']
+                
+    return None
 
 def extract_tags_from_entry(entry) -> List[str]:
     """
@@ -338,27 +396,32 @@ def format_tags_for_message(tags: List[str]) -> str:
     
     return result
 
-def create_improved_message(title: str, link: str, summary: str, tags: List[str]) -> str:
+def create_improved_message(title: str, link: str, summary: str, tags: List[str], image_url: Optional[str] = None) -> str:
     """
     Crea messaggio con template v0.8.1 ottimizzato
-    
-    v0.8.1: Template performante con link puliti e tag reali
     """
-    # Pulisci titolo da caratteri HTML
-    clean_title_no_html = title.replace('&amp;', '&').replace('&quot;', '"').replace('&#039;', "'")
+    # Pulisci titolo da tutti i tag HTML
+    clean_title_no_html = strip_html_tags(title)
     clean_title = escape_markdown_v2(clean_title_no_html)
 
     # Formatta tag
     formatted_tags = format_tags_for_message(tags)
     
-    # Crea summary ottimizzato
-    if summary and len(summary) > 100:
-        summary = summary[:97] + "..."
+    # Pulisci summary da HTML e ottimizza lunghezza
+    if summary:
+        summary = strip_html_tags(summary)
+        if len(summary) > 200:
+            summary = summary[:197] + "..."
     
-    escaped_summary = escape_markdown_v2(summary)
+    escaped_summary = escape_markdown_v2(summary) if summary else ""
+
+    message = ""
+    # Hack per anteprima immagine: link invisibile come primo elemento
+    if image_url:
+        message += f"[\u200b]({image_url})"
 
     # Template v0.8.1 - link pulito senza ripetizione titolo
-    message = f"🎙️ **{clean_title}**\n\n"
+    message += f"🎙️ **{clean_title}**\n\n"
     
     if escaped_summary:
         message += f"{escaped_summary}\n\n"
@@ -368,28 +431,34 @@ def create_improved_message(title: str, link: str, summary: str, tags: List[str]
     
     return message
 
-def create_improved_message_with_feed(feed_name: str, title: str, link: str, summary: str, tags: List[str]) -> str:
+def create_improved_message_with_feed(feed_name: str, title: str, link: str, summary: str, tags: List[str], image_url: Optional[str] = None) -> str:
     """
     Crea messaggio con nome feed incluso
-    
-    v1.0.0: Template personalizzato con formato naturale italiano
     """
-    # Pulisci titolo da caratteri HTML
-    clean_title_no_html = title.replace('&amp;', '&').replace('&quot;', '"').replace('&#039;', "'")
+    # Pulisci titolo e feed name da tutti i tag HTML
+    clean_title_no_html = strip_html_tags(title)
     clean_title = escape_markdown_v2(clean_title_no_html)
-    escaped_feed_name = escape_markdown_v2(feed_name)
+    clean_feed_name = strip_html_tags(feed_name)
+    escaped_feed_name = escape_markdown_v2(clean_feed_name)
 
     # Formatta tag
     formatted_tags = format_tags_for_message(tags)
     
-    # Crea summary ottimizzato
-    if summary and len(summary) > 100:
-        summary = summary[:97] + "..."
+    # Pulisci summary da HTML e ottimizza lunghezza
+    if summary:
+        summary = strip_html_tags(summary)
+        if len(summary) > 200:
+            summary = summary[:197] + "..."
     
-    escaped_summary = escape_markdown_v2(summary)
+    escaped_summary = escape_markdown_v2(summary) if summary else ""
+
+    message = ""
+    # Hack per anteprima immagine: link invisibile come primo elemento
+    if image_url:
+        message += f"[\u200b]({image_url})"
 
     # Template v1.0.0 - formato naturale italiano
-    message = f"È uscito un nuovo episodio di {escaped_feed_name}\n"
+    message += f"È uscito un nuovo episodio di {escaped_feed_name}\n"
     message += f"Ascolta **{clean_title}**\n\n"
     
     if escaped_summary:
@@ -406,17 +475,19 @@ def create_legacy_message(title: str, link: str, summary: str) -> str:
     
     v0.8.1: Mantiene compatibilità con versioni precedenti
     """
-    # Pulisci titolo
-    clean_title_no_html = title.replace('&amp;', '&').replace('&quot;', '"').replace('&#039;', "'")
+    # Pulisci titolo da tutti i tag HTML
+    clean_title_no_html = strip_html_tags(title)
     clean_title = escape_markdown_v2(clean_title_no_html)
 
     # Template legacy
     message = f"🎙️ **{clean_title}**\n\n"
     
-    if summary and len(summary) > 100:
-        summary = summary[:97] + "..."
+    if summary:
+        summary = strip_html_tags(summary)
+        if len(summary) > 200:
+            summary = summary[:197] + "..."
     
-    escaped_summary = escape_markdown_v2(summary)
+    escaped_summary = escape_markdown_v2(summary) if summary else ""
 
     if escaped_summary:
         message += f"{escaped_summary}\n\n"
@@ -649,9 +720,17 @@ async def check_new_episodes() -> None:
         
         # Controlla ogni episodio
         for feed_name, entry in all_episodes:
-            logger.info(f"Processing entry '{entry.title}' from feed '{feed_name}'")
-            # Controllo 1: Solo episodi pubblicati da oggi
+            entry_title = getattr(entry, 'title', 'Senza titolo')
+            logger.debug(f"🔍 Processing entry '{entry_title}' from feed '{feed_name}'")
+            
+            # Log speciale per DataKnightmare per debugging
+            if 'DataKnightmare' in feed_name:
+                logger.info(f"📊 DataKnightmare: Processando '{entry_title}'")
+            
+            # Controllo 1: Solo episodi pubblicati dopo cutoff
             if not is_episode_after_cutoff(entry):
+                if 'DataKnightmare' in feed_name:
+                    logger.info(f"⏸️ DataKnightmare: Episodio '{entry_title}' è pre-cutoff, saltato")
                 continue
             
             episode_id = get_episode_id(entry)
@@ -662,17 +741,19 @@ async def check_new_episodes() -> None:
                 logger.info(f"🆕 Nuovo episodio da {feed_name}: {entry.title}")
                 
                 # Estrai informazioni
+                # Estrai informazioni con nuovi helper
                 title = entry.title
-                link = entry.link
+                link = extract_link_from_entry(entry)
+                image_url = extract_image_from_entry(entry)
                 summary = getattr(entry, 'summary', '')
                 tags = extract_tags_from_entry(entry)
                 
                 # Crea messaggio con nome feed
                 try:
-                    message = create_improved_message_with_feed(feed_name, title, link, summary, tags)
+                    message = create_improved_message_with_feed(feed_name, title, link, summary, tags, image_url)
                 except Exception as e:
                     logger.warning(f"⚠️ Errore template migliorato, uso standard: {e}")
-                    message = create_improved_message(title, link, summary, tags)
+                    message = create_improved_message(title, link, summary, tags, image_url)
                 
                 # Invia messaggio
                 if await send_telegram_message_with_retry(application, message):

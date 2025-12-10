@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-BotTelegramRSS v1.0.0 "Phoenix" - Main Launcher
+BotTelegramRSS v2.0.3 "Phantom" - Main Launcher
 Launcher principale per avviare il bot dalla nuova struttura src/
 
 Usage:

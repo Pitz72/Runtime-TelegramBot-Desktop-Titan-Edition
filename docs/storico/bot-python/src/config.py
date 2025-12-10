@@ -1,4 +1,4 @@
-# config.py - BotTelegramRSS v2.0.0 "Phoenix"
+# config.py - BotTelegramRSS v2.0.3 "Phantom"
 
 import os
 import logging
@@ -271,6 +271,7 @@ PODCAST_FEEDS = [
     {"name": "Le [O]Razioni della Sera", "url": "https://www.spreaker.com/show/5090803/episodes/feed"},
     {"name": "Ludico Forum", "url": "https://www.spreaker.com/show/4692894/episodes/feed"},
     {"name": "MDB Summah Radio", "url": "https://www.spreaker.com/show/1978446/episodes/feed"},
+    {"name": "MICHELA DE PAOLA'S MONO 2026", "url": "https://player.runtimeradio.com/public/1/podcast/1f0d3f60-12b8-6e56-9490-69efb7933106/feed"},
     {"name": "POP CORNER", "url": "https://www.spreaker.com/show/6036719/episodes/feed"},
     {"name": "Runtime By Night (Nuovo Feed 2024)", "url": "https://www.spreaker.com/show/6307347/episodes/feed"},
     {"name": "SNAP - Architettura Imperfetta", "url": "https://www.spreaker.com/show/2949759/episodes/feed"},

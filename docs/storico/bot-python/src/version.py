@@ -4,30 +4,29 @@ Version information for BotTelegramRSS
 """
 
 # Versione principale
-VERSION = "2.0.0"
-VERSION_NAME = "Connection"
-VERSION_BUILD = "20250123a"
+VERSION = "2.0.3"
+VERSION_NAME = "Phantom"
+VERSION_BUILD = "20251210b"
 
 # Informazioni versione
 VERSION_INFO = {
     "version": VERSION,
     "name": VERSION_NAME,
     "build": VERSION_BUILD,
-    "release_date": "2025-01-19",
+    "release_date": "2025-12-10",
     "codename": "Phoenix - Multi-Feed Production Release",
-    "description": "Release 1.0 con refactoring completo e architettura multi-feed",
+    "description": "Hotfix per glitch grafico nel messaggio Telegram",
     "changelog": [
-        "🔥 REFACTORING COMPLETO: Architettura multi-feed da zero",
-        "📡 MULTI-FEED: Supporto per 30 feed RSS simultanei",
+        "🐛 FIX: Corretto glitch 'u200b' visibile nei messaggi (zero-width space escape)",
+        "📚 DOCS: Sincronizzazione completa versione e documentazione (v2.0.2)",
+        "🔊 AZURACAST: Supporto completo feed Azuracast e fallback immagini (v2.0.1)",
+        "🔥 REFACTORING COMPLETO: Architettura multi-feed da zero (v2.0.0)",
+        "📡 MULTI-FEED: Supporto per 30+ feed RSS simultanei",
         "🧹 PULIZIA CODEBASE: Rimossi file obsoleti e codice legacy",
-        "🎯 RISOLUZIONE BUG: Eliminato feed Gitbar hardcodato",
-        "🗃️ DATABASE CLEANUP: Rimossi episodi non pertinenti",
         "📝 TEMPLATE PERSONALIZZATO: Formato messaggio italiano naturale",
         "📅 DATA CUTOFF: Evita spam su cambio canale con logica temporale",
-        "🔍 IDENTIFICAZIONE FEED: Nome podcast in ogni messaggio",
         "⚡ PERFORMANCE: Rate limiting ottimizzato per multi-feed",
-        "🔒 SICUREZZA: Mantenute tutte le protezioni v0.8.2",
-        "📚 DOCUMENTAZIONE: Aggiornata per architettura 1.0"
+        "🔒 SICUREZZA: Mantenute tutte le protezioni"
     ]
 }
 
