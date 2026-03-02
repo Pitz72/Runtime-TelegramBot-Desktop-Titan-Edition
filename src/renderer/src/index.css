@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════
+   TITAN EDITION — Sci-Fi Terminal Theme
+   ═══════════════════════════════════════════════════ */
+
+/* === BASE === */
+body {
+    background-color: #050510;
+    color: #e0e7ff;
+    font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+/* === SCROLLBAR — Sci-Fi Style === */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(5, 5, 16, 0.5);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.25);
+    border-radius: 3px;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.3);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* === SCANLINE OVERLAY FOR LOG === */
+.scanline-bg {
+    position: relative;
+    overflow: hidden;
+}
+
+.scanline-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(59, 130, 246, 0.015) 2px,
+        rgba(59, 130, 246, 0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+.scanline-bg::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        rgba(59, 130, 246, 0.03) 0%,
+        transparent 50%,
+        rgba(59, 130, 246, 0.03) 100%
+    );
+    animation: scanline-sweep 8s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.5;
+}
+
+@keyframes scanline-sweep {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+/* === IGNITION BUTTON === */
+.ignition-btn {
+    position: relative;
+    isolation: isolate;
+}
+
+.ignition-btn::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 20px;
+    padding: 3px;
+    background: conic-gradient(
+        from 0deg,
+        rgba(59, 130, 246, 0) 0%,
+        rgba(59, 130, 246, 0.4) 25%,
+        rgba(59, 130, 246, 0) 50%,
+        rgba(59, 130, 246, 0.4) 75%,
+        rgba(59, 130, 246, 0) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.ignition-btn:hover::before {
+    opacity: 1;
+    animation: ignition-spin 3s linear infinite;
+}
+
+.ignition-btn.active::before {
+    opacity: 1;
+    animation: ignition-spin 1.5s linear infinite;
+    background: conic-gradient(
+        from 0deg,
+        rgba(59, 130, 246, 0) 0%,
+        rgba(59, 130, 246, 0.7) 25%,
+        rgba(6, 182, 212, 0.4) 50%,
+        rgba(59, 130, 246, 0.7) 75%,
+        rgba(59, 130, 246, 0) 100%
+    );
+}
+
+.ignition-btn.stopping::before {
+    background: conic-gradient(
+        from 0deg,
+        rgba(239, 68, 68, 0) 0%,
+        rgba(239, 68, 68, 0.7) 25%,
+        rgba(239, 68, 68, 0.4) 50%,
+        rgba(239, 68, 68, 0.7) 75%,
+        rgba(239, 68, 68, 0) 100%
+    );
+    opacity: 1;
+    animation: ignition-spin 1.5s linear infinite;
+}
+
+@keyframes ignition-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* === IGNITION GLOW RING — ACTIVE STATE === */
+.ignition-glow {
+    position: absolute;
+    inset: -12px;
+    border-radius: 26px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    animation: glow-ring 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes glow-ring {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.15), inset 0 0 15px rgba(59, 130, 246, 0.05);
+        border-color: rgba(59, 130, 246, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.3), inset 0 0 30px rgba(59, 130, 246, 0.1);
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+}
+
+/* === PANEL BORDERS — SCI-FI GLOW === */
+.panel-border {
+    border: 1px solid rgba(59, 130, 246, 0.08);
+    box-shadow: inset 0 0 30px rgba(59, 130, 246, 0.02);
+}
+
+.panel-border-active {
+    border-color: rgba(59, 130, 246, 0.15);
+    box-shadow: inset 0 0 40px rgba(59, 130, 246, 0.04), 0 0 20px rgba(59, 130, 246, 0.05);
+}
+
+/* === GRID DOT BACKGROUND === */
+.grid-dots {
+    background-image: radial-gradient(rgba(59, 130, 246, 0.06) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* === SELECTION HIGHLIGHT === */
+::selection {
+    background: rgba(59, 130, 246, 0.3);
+    color: #fff;
+}
+
+/* === STATUS DOT GLOW === */
+.status-dot-active {
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6), 0 0 16px rgba(59, 130, 246, 0.3);
+}
+
+.status-dot-stopped {
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}

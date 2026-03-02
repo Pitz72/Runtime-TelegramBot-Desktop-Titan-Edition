@@ -1,0 +1,169 @@
+{
+    "app": {
+        "title": "Runtime TelegramBot",
+        "edition": "Titan Edition",
+        "version": "v1.7.1",
+        "copyright": "© 2026 Simone Pizzi für Runtime Radio"
+    },
+    "setup": {
+        "subtitle": "Initialisieren Sie Ihre Bot-Umgebung",
+        "step1Label": "1. Bot-Name",
+        "step1Placeholder": "z. B. Runtime Radio Bot",
+        "step1Desc": "Ein aussagekräftiger Name zur Identifizierung dieses Bots",
+        "step2Label": "2. Telegram Bot-Token",
+        "step2Desc": "Holen Sie sich diesen von @BotFather auf Telegram",
+        "step3Label": "3. Kanal-ID / Benutzername",
+        "step3Placeholder": "@ihrtelegramkanal oder -10012345678",
+        "step3Desc": "Das Ziel für Ihre Beiträge",
+        "step4Label": "4. Startdatum",
+        "step4Desc": "Titan ignoriert Inhalte, die vor diesem Datum veröffentlicht wurden.",
+        "invalidDate": "Ungültiges Datum",
+        "btnNext": "Nächster Schritt",
+        "btnLaunch": "Titan Starten",
+        "btnInit": "Initialisieren",
+        "btnSkip": "Überspringen"
+    },
+    "status": {
+        "online": "ONLINE",
+        "offline": "OFFLINE",
+        "start": "START",
+        "stop": "STOP",
+        "awaiting": "Wartet auf Start...",
+        "selectBot": "Wählen Sie einen Bot aus."
+    },
+    "stats": {
+        "today": "Heute",
+        "week": "7 Tage",
+        "total": "Gesamt",
+        "statsLabel": "Statistiken"
+    },
+    "dashboard": {
+        "systemSettingsTitle": "System- und Datenbankeinstellungen"
+    },
+    "logs": {
+        "title": "Systemprotokolle",
+        "export": "Exportieren",
+        "exportTitle": "Protokolle in .txt-Datei exportieren",
+        "clear": "Leeren"
+    },
+    "botSelector": {
+        "title": "Aktive Bots",
+        "desc": "Verwalten Sie Ihre Bots",
+        "newBot": "Neuer Bot",
+        "setup": "Bot-Setup",
+        "successCreate": "Neuer Bot erstellt",
+        "successImport": "Bot erfolgreich importiert",
+        "errorImport": "Importfehler:",
+        "importTitle": "Bot importieren (.rtb)"
+    },
+    "botModal": {
+        "editTitle": "Bot Bearbeiten",
+        "newTitle": "Neuer Bot Konfiguration",
+        "nameLabel": "Bot-Name",
+        "namePlaceholder": "z. B. Radio News Bot",
+        "tokenLabel": "Telegram Bot-Token",
+        "tokenPlaceholder": "Token von @BotFather einfügen",
+        "channelLabel": "Zielkanal-ID",
+        "channelPlaceholder": "z. B. @meinkanal oder -10012345678",
+        "intervalLabel": "Überprüfungsintervall",
+        "intervalHint": "Minuten zwischen Feed-Überprüfungen",
+        "startDateLabel": "Stichtag",
+        "startDateHint": "Artikel vor diesem Datum ignorieren",
+        "activeLabel": "Bot Aktiv",
+        "activeHint": "Wenn deaktiviert, überprüft der Bot nichts",
+        "cancel": "Abbrechen",
+        "save": "Bot Speichern",
+        "delete": "Bot Löschen",
+        "deleteTitle": "Bot Löschen?",
+        "deletePrompt": "Möchten Sie diesen Bot wirklich löschen?",
+        "confirmDelete": "Ja, Löschen",
+        "dangerZone": "Gefahrenzone",
+        "clearHistoryTitle": "Übertragungsverlauf leeren",
+        "clearHistoryDesc": "Der Bot wird vergessen, was er gesendet hat.\nMIT VORSICHT VERWENDEN!",
+        "clearHistoryBtn": "Verlauf Löschen",
+        "successClear": "Verlauf erfolgreich gelöscht.",
+        "errorClear": "Verlauf konnte nicht gelöscht werden.",
+        "confirmClearHistoryTitle": "Verlauf Leeren?",
+        "confirmClearHistoryPrompt": "⚠️ UNUMKEHRBARE AKTION! ⚠️",
+        "confirmClearHistoryBtn": "Verlauf Leeren",
+        "exportTitle": "Exportieren nach .rtb",
+        "exportDesc": "Erstellen Sie eine selbstinstallierende Datei mit den Parametern und Feeds dieses Bots, um sie auf einem anderen Computer zu teilen.",
+        "exportBtn": "Exportieren",
+        "shareZone": "Teilen",
+        "successExport": "Profil erfolgreich exportiert",
+        "errorExport": "Exportfehler:"
+    },
+    "feedManager": {
+        "title": "Feed-Quellen",
+        "subtitle": "Verwalten Sie RSS-Feeds",
+        "addSource": "Quelle Hinzufügen",
+        "sourceName": "Quellname",
+        "namePlaceholder": "z. B. Tech News...",
+        "sourceType": "Quellentyp",
+        "typePodcast": "Podcast (Audio)",
+        "typeNews": "Nachrichten (Text/Link)",
+        "typeYoutube": "YouTube (Video)",
+        "feedUrl": "Feed-URL",
+        "testTitle": "Feed-Verbindung testen",
+        "testBtn": "Testen",
+        "testSuccess": "✅ Gültiger Feed — %d Elemente",
+        "testError": "❌ Fehler: %s",
+        "testErrorFallback": "Test fehlgeschlagen",
+        "updateFeed": "Feed Aktualisieren",
+        "saveFeed": "Feed Speichern",
+        "noFeeds": "Keine Feeds konfiguriert.",
+        "addPrompt": "Quelle hinzufügen, um zu starten.",
+        "deleteTitle": "Quelle entfernen?",
+        "deletePrompt": "Möchten Sie diese RSS-Quelle wirklich entfernen?",
+        "deleteConfirm": "Entfernen",
+        "successAdd": "Neue Quelle hinzugefügt",
+        "successUpdate": "Quelle erfolgreich aktualisiert",
+        "successDelete": "Quelle entfernt"
+    },
+    "systemSettings": {
+        "title": "Systemeinstellungen",
+        "subtitle": "Daten- und Datenbankmanagement",
+        "close": "Schließen",
+        "dbSection": {
+            "title": "Datenbankmanagement",
+            "desc": "Exportieren oder importieren Sie das gesamte Bot-Archiv.",
+            "exportBtn": "DB Exportieren",
+            "exportHint": "titan.db speichern",
+            "importBtn": "DB Importieren",
+            "importHint": "Erfordert Neustart"
+        },
+        "jsonSection": {
+            "title": "JSON-Konfiguration",
+            "desc": "Verwalten Sie die Konfiguration im Textformat.",
+            "exportBtn": "Exportieren",
+            "exportHint": "JSON speichern",
+            "importBtn": "Zusammenführen",
+            "importHint": "Vorhandene Bots zusammenführen"
+        },
+        "langSection": {
+            "title": "Oberflächensprache",
+            "desc": "Ändern Sie die Sprache der Anwendung"
+        },
+        "toasts": {
+            "dbExportSuccessTitle": "Export Abgeschlossen",
+            "dbExportSuccessMsg": "Datenbank erfolgreich exportiert nach:",
+            "dbExportErrorTitle": "Export Fehlgeschlagen",
+            "dbExportErrorMsg": "Fehler beim Exportieren:",
+            "dbImportErrorTitle": "Import Fehlgeschlagen",
+            "dbImportErrorMsg": "Fehler beim Importieren:",
+            "configExportSuccessTitle": "Export Abgeschlossen",
+            "configExportSuccessMsg": "Profile erfolgreich exportiert nach:",
+            "configExportErrorTitle": "Export Fehlgeschlagen",
+            "configExportErrorMsg": "Konfigurationsexportfehler:",
+            "configImportSuccessTitle": "Import Abgeschlossen",
+            "configImportSuccessMsg": "Profile erfolgreich importiert. Oberfläche neu laden, um Änderungen zu sehen.",
+            "configImportErrorTitle": "Import Fehlgeschlagen",
+            "configImportErrorMsg": "Fehler beim Importieren der Konfiguration:",
+            "fsError": "Zugriff auf das Dateisystem nicht möglich."
+        }
+    },
+    "youtubeError": {
+        "title": "⚠️ YouTube-Änderungen erkannt",
+        "message": "Die internen Strukturen von YouTube haben sich geändert. Der Videoabruf ist vorübergehend unterbrochen. Wir empfehlen, YouTube-Feeds vorerst zu deaktivieren. Das Team arbeitet bereits an einem Update, um dieses Problem zu beheben!"
+    }
+}

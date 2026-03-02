@@ -1,0 +1,169 @@
+{
+    "app": {
+        "title": "Runtime TelegramBot",
+        "edition": "Titan Edition",
+        "version": "v1.7.1",
+        "copyright": "© 2026 Simone Pizzi для Runtime Radio"
+    },
+    "setup": {
+        "subtitle": "Инициализируйте вашу среду",
+        "step1Label": "1. Имя Бота",
+        "step1Placeholder": "например, Runtime Radio Bot",
+        "step1Desc": "Имя для идентификации этого бота",
+        "step2Label": "2. Токен Telegram Бота",
+        "step2Desc": "Получите его у @BotFather в Telegram",
+        "step3Label": "3. ID Канала / Имя пользователя",
+        "step3Placeholder": "@yourtelegramchannel или -10012345678",
+        "step3Desc": "Место назначения ваших публикаций",
+        "step4Label": "4. Дата начала",
+        "step4Desc": "Titan будет игнорировать контент до этой даты.",
+        "invalidDate": "Неверная дата",
+        "btnNext": "Следующий шаг",
+        "btnLaunch": "Запустить Titan",
+        "btnInit": "Инициализировать",
+        "btnSkip": "Пропустить"
+    },
+    "status": {
+        "online": "В СЕТИ",
+        "offline": "НЕ В СЕТИ",
+        "start": "СТАРТ",
+        "stop": "СТОП",
+        "awaiting": "Ожидание запуска...",
+        "selectBot": "Выберите бота."
+    },
+    "stats": {
+        "today": "Сегодня",
+        "week": "7 Дней",
+        "total": "Всего",
+        "statsLabel": "Статистика"
+    },
+    "dashboard": {
+        "systemSettingsTitle": "Настройки Системы и Базы Данных"
+    },
+    "logs": {
+        "title": "Системные Журналы",
+        "export": "Экспорт",
+        "exportTitle": "Экспорт журналов в файл .txt",
+        "clear": "Очистить"
+    },
+    "botSelector": {
+        "title": "Активные Боты",
+        "desc": "Управление вашими ботами",
+        "newBot": "Новый Бот",
+        "setup": "Настройка",
+        "successCreate": "Новый бот создан",
+        "successImport": "Бот успешно импортирован",
+        "errorImport": "Ошибка импорта:",
+        "importTitle": "Импорт бота (.rtb)"
+    },
+    "botModal": {
+        "editTitle": "Изменить Бота",
+        "newTitle": "Настройка Нового Бота",
+        "nameLabel": "Имя Бота",
+        "namePlaceholder": "напр. Radio News Bot",
+        "tokenLabel": "Токен Telegram Бота",
+        "tokenPlaceholder": "вставьте токен от @BotFather",
+        "channelLabel": "ID Канала назначения",
+        "channelPlaceholder": "напр. @mychannel или -10012345678",
+        "intervalLabel": "Интервал проверки",
+        "intervalHint": "Минуты между проверками фидов",
+        "startDateLabel": "Дата отсечения",
+        "startDateHint": "Игнорировать статьи до этой даты",
+        "activeLabel": "Бот Активен",
+        "activeHint": "Если отключено, бот ничего не проверяет",
+        "cancel": "Отмена",
+        "save": "Сохранить",
+        "delete": "Удалить",
+        "deleteTitle": "Удалить Бота?",
+        "deletePrompt": "Вы уверены, что хотите удалить этого бота?",
+        "confirmDelete": "Да, Удалить",
+        "dangerZone": "Опасная Зона",
+        "clearHistoryTitle": "Очистить историю рассылки",
+        "clearHistoryDesc": "Бот забудет, что он отправлял.\nИСПОЛЬЗУЙТЕ С ОСТОРОЖНОСТЬЮ!",
+        "clearHistoryBtn": "Очистить историю",
+        "successClear": "История успешно очищена.",
+        "errorClear": "Не удалось очистить историю.",
+        "confirmClearHistoryTitle": "Очистить Историю?",
+        "confirmClearHistoryPrompt": "⚠️ НЕОБРАТИМОЕ ДЕЙСТВИЕ! ⚠️",
+        "confirmClearHistoryBtn": "Очистить",
+        "exportTitle": "Экспорт в .rtb",
+        "exportDesc": "Создайте самоустанавливающийся файл с параметрами и фидами этого бота для переноса на другой компьютер.",
+        "exportBtn": "Экспорт",
+        "shareZone": "Поделиться",
+        "successExport": "Профиль успешно экспортирован",
+        "errorExport": "Ошибка экспорта:"
+    },
+    "feedManager": {
+        "title": "Источники фидов",
+        "subtitle": "Управление RSS фидами",
+        "addSource": "Добавить источник",
+        "sourceName": "Имя источника",
+        "namePlaceholder": "напр. Tech News...",
+        "sourceType": "Тип источника",
+        "typePodcast": "Подкаст (Аудио)",
+        "typeNews": "Новости (Текст/Ссылка)",
+        "typeYoutube": "YouTube (Видео)",
+        "feedUrl": "URL фида",
+        "testTitle": "Тест соединения",
+        "testBtn": "Тест",
+        "testSuccess": "✅ Действительный фид — %d элементов",
+        "testError": "❌ Ошибка: %s",
+        "testErrorFallback": "Тест не пройден",
+        "updateFeed": "Обновить",
+        "saveFeed": "Сохранить",
+        "noFeeds": "Нет настроенных фидов.",
+        "addPrompt": "Добавьте источник для начала.",
+        "deleteTitle": "Удалить источник?",
+        "deletePrompt": "Вы уверены, что хотите удалить этот источник RSS?",
+        "deleteConfirm": "Удалить",
+        "successAdd": "Новый источник добавлен",
+        "successUpdate": "Источник успешно обновлен",
+        "successDelete": "Источник удален"
+    },
+    "systemSettings": {
+        "title": "Системные Настройки",
+        "subtitle": "Управление данными",
+        "close": "Закрыть",
+        "dbSection": {
+            "title": "Управление Базой Данных",
+            "desc": "Экспорт или импорт архива.",
+            "exportBtn": "Экспорт БД",
+            "exportHint": "Сохранить titan.db",
+            "importBtn": "Импорт БД",
+            "importHint": "Требуется перезапуск"
+        },
+        "jsonSection": {
+            "title": "Конфигурация JSON",
+            "desc": "Управление конфигурацией в тексте.",
+            "exportBtn": "Экспорт JSON",
+            "exportHint": "Сохранить JSON",
+            "importBtn": "Объединить",
+            "importHint": "Добавить ботов"
+        },
+        "langSection": {
+            "title": "Язык Интерфейса",
+            "desc": "Изменить язык приложения"
+        },
+        "toasts": {
+            "dbExportSuccessTitle": "Экспорт Завершен",
+            "dbExportSuccessMsg": "База данных успешно экспортирована в:",
+            "dbExportErrorTitle": "Ошибка Экспорта",
+            "dbExportErrorMsg": "Ошибка во время экспорта:",
+            "dbImportErrorTitle": "Ошибка Импорта",
+            "dbImportErrorMsg": "Ошибка во время импорта:",
+            "configExportSuccessTitle": "Экспорт Завершен",
+            "configExportSuccessMsg": "Профили успешно экспортированы в:",
+            "configExportErrorTitle": "Ошибка Экспорта",
+            "configExportErrorMsg": "Ошибка экспорта конфигурации:",
+            "configImportSuccessTitle": "Импорт Завершен",
+            "configImportSuccessMsg": "Профили успешно импортированы. Перезагрузите интерфейс, чтобы увидеть изменения.",
+            "configImportErrorTitle": "Ошибка Импорта",
+            "configImportErrorMsg": "Ошибка во время импорта конфигурации:",
+            "fsError": "Невозможно получить доступ к файловой системе."
+        }
+    },
+    "youtubeError": {
+        "title": "⚠️ Обнаружены изменения в YouTube",
+        "message": "Внутренние структуры YouTube изменились. Получение видео временно приостановлено. Мы рекомендуем пока отключить фиды YouTube. Команда уже работает над обновлением для решения этой проблемы!"
+    }
+}

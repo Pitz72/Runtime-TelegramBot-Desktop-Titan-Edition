@@ -1,0 +1,77 @@
+{
+    "name": "titan-desktop",
+    "version": "1.7.5",
+    "description": "Desktop Application for Runtime Radio Telegram Bot",
+    "author": {
+        "name": "Runtime Radio",
+        "email": "info@runtimeradio.it"
+    },
+    "homepage": "https://github.com/runtimeradio/titan-desktop",
+    "private": true,
+    "type": "module",
+    "main": "dist-electron/main/index.cjs",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build && electron-builder",
+        "preview": "vite preview",
+        "typecheck": "tsc --noEmit",
+        "rebuild": "electron-builder install-app-deps",
+        "postinstall": "electron-builder install-app-deps"
+    },
+    "build": {
+        "appId": "com.runtimeradio.titandesktop",
+        "productName": "Runtime Telegram Bot Titan Edition",
+        "directories": {
+            "output": "Builds"
+        },
+        "fileAssociations": [
+            {
+                "ext": "rtb",
+                "name": "Titan Bot Profile",
+                "description": "Runtime Telegram Bot Configuration File",
+                "role": "Editor"
+            }
+        ],
+        "linux": {
+            "maintainer": "Runtime Radio <info@runtimeradio.it>",
+            "target": [
+                "AppImage",
+                "deb"
+            ],
+            "category": "Utility"
+        }
+    },
+    "dependencies": {
+        "@electron-toolkit/preload": "^2.0.0",
+        "@electron-toolkit/utils": "^2.0.0",
+        "better-sqlite3": "^11.8.1",
+        "clsx": "^2.1.0",
+        "framer-motion": "^11.0.3",
+        "lucide-react": "^0.316.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "rss-parser": "^3.13.0",
+        "tailwind-merge": "^2.2.1",
+        "telegraf": "^4.15.3",
+        "youtube-sr": "^4.3.12",
+        "youtubei.js": "^14.0.0",
+        "yt-channel-info": "^3.2.1",
+        "ytpl": "^2.3.0"
+    },
+    "devDependencies": {
+        "@types/better-sqlite3": "^7.6.9",
+        "@types/node": "^18.19.0",
+        "@types/react": "^18.2.48",
+        "@types/react-dom": "^18.2.18",
+        "@vitejs/plugin-react": "^4.2.1",
+        "autoprefixer": "^10.4.17",
+        "electron": "^28.2.0",
+        "electron-builder": "^24.9.1",
+        "postcss": "^8.4.33",
+        "tailwindcss": "^3.4.1",
+        "typescript": "^5.3.3",
+        "vite": "^4.5.2",
+        "vite-plugin-electron": "^0.15.4",
+        "vite-plugin-electron-renderer": "^0.14.5"
+    }
+}

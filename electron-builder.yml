@@ -1,0 +1,36 @@
+appId: com.runtimeradio.titandesktop
+productName: Runtime Telegram Bot Titan Edition
+directories:
+  buildResources: build
+  output: Builds
+files:
+  - dist-electron/**/*
+  - dist/**/*
+  - resources/**/*
+  - package.json
+asarUnpack:
+  - resources/**
+
+# === Windows ===
+win:
+  executableName: TitanDesktop
+  target: nsis
+nsis:
+  artifactName: ${productName}-Setup-${version}.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: true
+
+# === macOS ===
+mac:
+  target: dmg
+  category: public.app-category.utilities
+  artifactName: ${productName}-${version}.${ext}
+
+# === Linux ===
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Utility
+  artifactName: ${productName}-${version}.${ext}

@@ -1,0 +1,169 @@
+{
+    "app": {
+        "title": "Runtime TelegramBot",
+        "edition": "Titan Edition",
+        "version": "v1.7.1",
+        "copyright": "© 2026 Simone Pizzi para Runtime Radio"
+    },
+    "setup": {
+        "subtitle": "Inicializa el entorno de tu bot",
+        "step1Label": "1. Nombre del Bot",
+        "step1Placeholder": "ej. Runtime Radio Bot",
+        "step1Desc": "Un nombre descriptivo para identificar este bot",
+        "step2Label": "2. Token del Bot Telegram",
+        "step2Desc": "Pídeselo a @BotFather en Telegram",
+        "step3Label": "3. ID del Canal / Nombre de Usuario",
+        "step3Placeholder": "@tucanaltelegram o -10012345678",
+        "step3Desc": "El destino de tus publicaciones",
+        "step4Label": "4. Fecha de Inicio",
+        "step4Desc": "Titan ignorará el contenido publicado antes de esta fecha.",
+        "invalidDate": "Fecha Inválida",
+        "btnNext": "Siguiente Paso",
+        "btnLaunch": "Lanzar Titan",
+        "btnInit": "Inicializar",
+        "btnSkip": "Omitir"
+    },
+    "status": {
+        "online": "EN LÍNEA",
+        "offline": "DESCONECTADO",
+        "start": "INICIAR",
+        "stop": "DETENER",
+        "awaiting": "Esperando encendido...",
+        "selectBot": "Selecciona un bot."
+    },
+    "stats": {
+        "today": "Hoy",
+        "week": "7 Días",
+        "total": "Total",
+        "statsLabel": "Estadísticas"
+    },
+    "dashboard": {
+        "systemSettingsTitle": "Ajustes de Sistema y Base de Datos"
+    },
+    "logs": {
+        "title": "Registros del Sistema",
+        "export": "Exportar",
+        "exportTitle": "Exportar registros a archivo .txt",
+        "clear": "Limpiar"
+    },
+    "botSelector": {
+        "title": "Bots Activos",
+        "desc": "Gestiona tus bots",
+        "newBot": "Nuevo Bot",
+        "setup": "Configuración",
+        "successCreate": "Nuevo Bot creado",
+        "successImport": "Bot importado correctamente",
+        "errorImport": "Error de importación:",
+        "importTitle": "Importar Bot (.rtb)"
+    },
+    "botModal": {
+        "editTitle": "Editar Bot",
+        "newTitle": "Configuración Nuevo Bot",
+        "nameLabel": "Nombre del Bot",
+        "namePlaceholder": "ej. Radio News Bot",
+        "tokenLabel": "Token del Bot Telegram",
+        "tokenPlaceholder": "pega el token de @BotFather",
+        "channelLabel": "ID del Canal Destino",
+        "channelPlaceholder": "ej. @micanal o -10012345678",
+        "intervalLabel": "Intervalo de Revisión",
+        "intervalHint": "Minutos entre revisiones",
+        "startDateLabel": "Fecha de Corte",
+        "startDateHint": "Ignorar artículos antes de esta fecha",
+        "activeLabel": "Bot Activo",
+        "activeHint": "Si está desactivado, el bot no revisará nada",
+        "cancel": "Cancelar",
+        "save": "Guardar Bot",
+        "delete": "Eliminar Bot",
+        "deleteTitle": "¿Eliminar Bot?",
+        "deletePrompt": "¿Estás seguro de que quieres eliminar este bot?",
+        "confirmDelete": "Sí, Eliminar",
+        "dangerZone": "Zona de Peligro",
+        "clearHistoryTitle": "Borrar Historial de Difusión",
+        "clearHistoryDesc": "El bot olvidará lo que ha enviado.\n¡USE CON PRECAUCIÓN!",
+        "clearHistoryBtn": "Borrar Historial",
+        "successClear": "Historial borrado con éxito.",
+        "errorClear": "No se pudo borrar el historial.",
+        "confirmClearHistoryTitle": "¿Vaciar Historial?",
+        "confirmClearHistoryPrompt": "⚠️ ¡ACCIÓN IRREVERSIBLE! ⚠️",
+        "confirmClearHistoryBtn": "Vaciar",
+        "exportTitle": "Exportar a .rtb",
+        "exportDesc": "Crea un archivo autoinstalable con los parámetros y feeds de este bot para compartir en otra computadora.",
+        "exportBtn": "Exportar",
+        "shareZone": "Compartir",
+        "successExport": "Perfil exportado con éxito",
+        "errorExport": "Error de exportación:"
+    },
+    "feedManager": {
+        "title": "Fuentes de Feed",
+        "subtitle": "Gestiona canales RSS",
+        "addSource": "Añadir Fuente",
+        "sourceName": "Nombre de la Fuente",
+        "namePlaceholder": "ej. Tech News...",
+        "sourceType": "Tipo de Fuente",
+        "typePodcast": "Podcast (Audio)",
+        "typeNews": "Noticias (Texto/Enlace)",
+        "typeYoutube": "YouTube (Video)",
+        "feedUrl": "URL del Feed",
+        "testTitle": "Probar conexión del feed",
+        "testBtn": "Probar",
+        "testSuccess": "✅ Feed Válido — %d elementos",
+        "testError": "❌ Error: %s",
+        "testErrorFallback": "Prueba fallida",
+        "updateFeed": "Actualizar Feed",
+        "saveFeed": "Guardar Feed",
+        "noFeeds": "No hay feeds configurados.",
+        "addPrompt": "Añade una fuente para comenzar.",
+        "deleteTitle": "¿Quitar Fuente?",
+        "deletePrompt": "¿Estás seguro de que quieres quitar esta fuente RSS?",
+        "deleteConfirm": "Quitar",
+        "successAdd": "Nueva fuente añadida",
+        "successUpdate": "Fuente actualizada con éxito",
+        "successDelete": "Fuente eliminada"
+    },
+    "systemSettings": {
+        "title": "Ajustes del Sistema",
+        "subtitle": "Gestión de datos",
+        "close": "Cerrar",
+        "dbSection": {
+            "title": "Gestión de Base de Datos",
+            "desc": "Exporta o importa todo el archivo del bot.",
+            "exportBtn": "Exportar BD",
+            "exportHint": "Guardar titan.db",
+            "importBtn": "Importar BD",
+            "importHint": "Requiere reinicio"
+        },
+        "jsonSection": {
+            "title": "Configuración JSON",
+            "desc": "Gestiona la configuración en formato de texto.",
+            "exportBtn": "Exportar",
+            "exportHint": "Guardar JSON",
+            "importBtn": "Fusionar",
+            "importHint": "Añadir bots existentes"
+        },
+        "langSection": {
+            "title": "Idioma de la Interfaz",
+            "desc": "Cambiar el idioma de la aplicación"
+        },
+        "toasts": {
+            "dbExportSuccessTitle": "Exportación Completada",
+            "dbExportSuccessMsg": "Base de datos exportada con éxito a:",
+            "dbExportErrorTitle": "Exportación Fallida",
+            "dbExportErrorMsg": "Error durante la exportación:",
+            "dbImportErrorTitle": "Importación Fallida",
+            "dbImportErrorMsg": "Error durante la importación:",
+            "configExportSuccessTitle": "Exportación Completada",
+            "configExportSuccessMsg": "Perfiles exportados con éxito a:",
+            "configExportErrorTitle": "Exportación Fallida",
+            "configExportErrorMsg": "Error de exportación de configuración:",
+            "configImportSuccessTitle": "Importación Completada",
+            "configImportSuccessMsg": "Perfiles importados con éxito. Recarga la interfaz para ver los cambios.",
+            "configImportErrorTitle": "Importación Fallida",
+            "configImportErrorMsg": "Error durante la importación de configuración:",
+            "fsError": "Imposible acceder al sistema de archivos."
+        }
+    },
+    "youtubeError": {
+        "title": "⚠️ Cambios detectados en YouTube",
+        "message": "Las estructuras internas de YouTube han cambiado. La obtención de videos está interrumpida temporalmente. Sugerimos desactivar los feeds de YouTube por ahora. ¡El equipo ya está trabajando en una actualización para solucionar este problema!"
+    }
+}
