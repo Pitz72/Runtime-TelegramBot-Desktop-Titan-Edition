@@ -1,0 +1,57 @@
+*****************************************************************
+*                                                               *
+*           RUNTIME TELEGRAMBOT: TITAN EDITION                  *
+*               Benvenuto a Bordo!                              *
+*                                                               *
+*****************************************************************
+
+Grazie per aver acquistato Runtime TelegramBot Titan Edition.
+Hai appena sbloccato l'automazione multi-canale definitiva, 
+senza limiti, senza abbonamenti e con il pieno controllo dei 
+tuoi dati.
+
+=== COSA CONTIENE QUESTO PACCHETTO ===
+1. L'eseguibile di installazione di Titan Edition (Setup.exe o .dmg / .AppImage).
+2. La cartella "Documentation" contenente i Manuali d'Uso Pro (in 8 lingue) e la Quick Start Guide.
+
+=== ISTRUZIONI DI INSTALLAZIONE RAPIDA ===
+Avvia il file di installazione. Il software installerà l'interfaccia 
+e creerà automaticamente un collegamento per avviarlo.
+Al primo avvio, un Setup Wizard ti guiderà passo dopo passo.
+
+*** ATTENZIONE UTENTI WINDOWS (SMARTSCREEN) ***
+Titan Edition è un software indipendente, distribuito senza
+intermediari. Al primo avvio del file ".exe", Windows Defender
+potrebbe mostrare una schermata blu con la dicitura:
+"PC Protetto da Windows - Autore Sconosciuto".
+
+Questa è una normale procedura di sicurezza di Windows per i software
+distribuiti al di fuori del Microsoft Store.
+Il file che hai scaricato è SICURO al 100% e privo di malware.
+
+Per procedere con l'installazione:
+1. Clicca sulla scritta piccola "Ulteriori informazioni".
+2. Clicca sul pulsante che apparirà in basso a destra "Esegui comunque".
+
+Il messaggio scomparirà per sempre.
+
+=== AGGIORNAMENTI SOFTWARE ===
+Non dovrai mai controllare manualmente le nuove versioni. 
+Titan è dotato di un sistema intelligente che verifica la presenza
+di aggiornamenti all'avvio. Se sarà disponibile una versione più recente,
+vedrai apparire un avviso (Toast) all'interno dell'applicazione.
+
+=== SUPPORTO E DOCUMENTAZIONE ===
+Prima di avviare il software, ti invitiamo a leggere la "Quick Start Guide" 
+per capire come procurarti il Token di Telegram necessario al funzionamento.
+Per dubbi tecnici avanzati (es. Formattazione Template o Backup), consulta 
+il "Manuale d'Uso Avanzato" allegato.
+
+Per assistenza tecnica o segnalazioni, puoi scriverci a:
+info@runtimeradio.it
+
+Ancora grazie per il tuo supporto all'ecosistema indipendente.
+Buona automazione!
+
+- Simone Pizzi (Runtime Radio)
+https://ecosystem.runtimeradio.com

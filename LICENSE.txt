@@ -1,0 +1,35 @@
+END USER LICENSE AGREEMENT (EULA)
+Runtime TelegramBot Titan Edition
+© 2026 Simone Pizzi for Runtime Radio - All Rights Reserved.
+
+PLEASE READ THIS EULA CAREFULLY BEFORE USING THIS SOFTWARE.
+
+1. LICENSE GRANT
+By purchasing and installing Runtime TelegramBot Titan Edition ("Software"), Simone Pizzi ("Licensor") grants you ("Licensee") a personal, non-exclusive, non-transferable license to use the Software for your personal or commercial business needs.
+
+2. RESTRICTIONS
+You may NOT:
+a) Distribute, share, sub-license, lend, lease, or otherwise make the Software available to third parties.
+b) Resell or monetize the Software executable or its components.
+c) Reverse engineer, decompile, disassemble, or attempt to extract the source code of the Software (including the .asar archives).
+d) Remove or alter any copyright notices or branding from the Software.
+
+3. ONE-TIME PAYMENT
+This license is granted upon a one-time payment. There are no recurring monthly fees for the use of the core features included in the purchased version. 
+
+4. DATA PRIVACY & TELEMETRY
+The Software operates locally on your machine. The Licensor does not collect, monitor, or store your Telegram Bot Tokens, passwords, or the contents of your messages. All sensitive data is encrypted via hardware-bound technology (safeStorage) and saved exclusively on your local hard drive.
+The Software may occasionally perform a silent HTTP request to the Licensor's servers solely for the purpose of checking for Software updates (checking versions). No personal data is transmitted during this process.
+
+5. EXTERNAL SERVICES & APIS
+The Software interacts with third-party services, including but not limited to Telegram APIs and YouTube's internal interfaces. The Licensor cannot be held responsible for interruptions of service caused by changes, rate limits, bans, or policy modifications enacted by these third-party platforms.
+
+6. DISCLAIMER OF WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+7. TERMINATION
+This License is effective until terminated. Your rights under this License will terminate automatically without notice if you fail to comply with any of its terms. Upon termination, you must cease all use of the Software and destroy all copies.
+
+By installing the Software, you acknowledge that you have read this agreement and agree to be bound by its terms and conditions.
+
+https://ecosystem.runtimeradio.com
