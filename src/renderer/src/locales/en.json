@@ -188,5 +188,9 @@
     "quickGuide": {
         "btn": "Quick Guide",
         "title": "Quick Start Guide"
+    },
+    "updater": {
+        "title": "New Version Available",
+        "msg": "Titan Edition v{{version}} is available! Go to the portal to download the update."
     }
 }

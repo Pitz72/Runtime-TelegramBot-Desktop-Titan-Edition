@@ -12,7 +12,7 @@ import { useToast } from './ui/Toast';
 
 export function Dashboard() {
     const { t } = useTranslation();
-    const { error } = useToast();
+    const { error, toast } = useToast();
     const [selectedBot, setSelectedBot] = useState<BotConfig | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [logs, setLogs] = useState<string[]>([]);
@@ -24,6 +24,14 @@ export function Dashboard() {
 
     useEffect(() => {
         window.api.getVersion().then(setVersion);
+
+        window.api.checkForUpdates().then((res) => {
+            if (res.hasUpdate && res.latestVersion) {
+                const msg = t('updater.msg').replace('{{version}}', res.latestVersion);
+                toast(msg, 'info', t('updater.title'));
+            }
+        });
+
         window.api.onLogsBatch((newLogs: string[]) => {
             setLogs(prev => [...newLogs.reverse(), ...prev].slice(0, 300));
         });
@@ -303,9 +311,6 @@ export function Dashboard() {
                 )
             }
 
-            {showGuide && (
-                <QuickGuideModal onClose={() => setShowGuide(false)} />
-            )}
         </div >
     );
 }

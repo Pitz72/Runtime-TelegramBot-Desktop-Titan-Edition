@@ -169,5 +169,9 @@
     "quickGuide": {
         "btn": "Guía Rápida",
         "title": "Guía de Inicio Rápido"
+    },
+    "updater": {
+        "title": "Nueva versión disponible",
+        "msg": "¡Titan Edition v{{version}} está disponible! Visite el portal para descargar la actualización."
     }
 }

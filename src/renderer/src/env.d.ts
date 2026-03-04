@@ -45,6 +45,7 @@ export interface TitanAPI {
 
     // System
     getVersion: () => Promise<string>
+    checkForUpdates: () => Promise<{ hasUpdate: boolean; latestVersion?: string; downloadUrl?: string; error?: string }>
     exportLogs: (logs: string[]) => Promise<{ success: boolean; path?: string; error?: string }>
     exportDatabase: () => Promise<{ success: boolean; path?: string; error?: string }>
     importDatabase: () => Promise<{ success: boolean; error?: string }>

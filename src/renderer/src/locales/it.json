@@ -188,5 +188,9 @@
     "quickGuide": {
         "btn": "Guida Rapida",
         "title": "Guida Rapida"
+    },
+    "updater": {
+        "title": "Nuova Versione Disponibile",
+        "msg": "È disponibile Titan Edition v{{version}}! Vai sul portale per scaricare l'aggiornamento."
     }
 }

@@ -58,6 +58,7 @@ const api = {
 
     // System
     getVersion: () => ipcRenderer.invoke('get-version'),
+    checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
     exportLogs: (logs: string[]) => ipcRenderer.invoke('export-logs', logs),
     exportDatabase: () => ipcRenderer.invoke('export-database'),
     importDatabase: () => ipcRenderer.invoke('import-database'),

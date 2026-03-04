@@ -169,5 +169,9 @@
     "quickGuide": {
         "btn": "快速指南",
         "title": "快速入门指南"
+    },
+    "updater": {
+        "title": "有新版本可用",
+        "msg": "Titan Edition v{{version}} 已发布！请前往门户下载更新。"
     }
 }

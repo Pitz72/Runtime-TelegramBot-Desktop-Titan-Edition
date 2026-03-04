@@ -9,8 +9,18 @@ Benvenuto nel centro documentale di **Runtime TelegramBot Titan Edition**. Quest
 La panoramica generale dell'architettura e delle scelte tecnologiche si trova principalmente nel README centrale. Le guide di compilazione cross-platform si trovano qui:
 
 - **[Panoramica Progetto](../README.md)** — Architettura, stack, funzionalità core, design system e path database.
+- **[Whitepaper Architetturale](whitepaper_titan_architecture.md)** — Analisi approfondita dell'architettura Titan, Producer-Consumer, OmniSync e sicurezza.
 - **[Compilazione Linux](build-linux.md)** — Istruzioni per pacchettizzare in `.AppImage` e `.deb`, incluse le fix per moduli nativi SQLite.
 - **[Compilazione macOS](build-mac.md)** — Istruzioni per la build di `.dmg` su sistemi Mac (senza Xcode completo).
+
+---
+
+## 📖 Manuali e Guide
+
+Informazioni per l'utilizzo dell'applicazione da parte dell'utente finale.
+
+- **[Manuale d'Uso Avanzato](manuale.md)** — Guida completa all'installazione, configurazione bot, feed, YouTube scraping e OmniSync.
+- **[Quick Start Guide (IT)](guide/quick-start-guide-it.md)** — Guida rapida in italiano (consultare la cartella `guide/` per altre lingue).
 
 ---
 
@@ -49,8 +59,6 @@ Documentazione relativa a moduli critici, troubleshooting avanzato e indagini te
 
 - **[Report YouTube (Issue v1.0.5)](relazione-youtube.md)**
   Un'analisi profonda del perché i canali YouTube restituiscono fallimenti 404 (Feed XML pubblici Atom deprecati) e il piano strutturato per migrarlo prossimamente alla YouTube Data API v3.
-- **[YouTube Status Temporaneo](1.0.5_YOUTUBE_STATUS.md)**
-  La nota che decreta ufficialmente lo stop tecnico della funzionalità di fetching canali YouTube.
 
 ---
 
