@@ -165,5 +165,9 @@
     "youtubeError": {
         "title": "⚠️ 检测到 YouTube 更改",
         "message": "YouTube 的内部结构已更改。视频获取暂时中断。我们建议暂时禁用 YouTube feed。团队已经在开发软件更新来解决此问题！"
+    },
+    "quickGuide": {
+        "btn": "快速指南",
+        "title": "快速入门指南"
     }
 }

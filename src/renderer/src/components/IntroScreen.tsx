@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation, Language } from '../locales/I18nContext';
 import { FlagIT, FlagFR, FlagDE, FlagES, FlagPT, FlagRU, FlagCN, FlagGB } from './ui/Flags';
@@ -91,6 +91,7 @@ export function IntroScreen({ onComplete }: Props) {
                     {t('setup.btnLaunch') || "Lancia Titan"}
                     <ChevronRight size={20} />
                 </motion.button>
+
             </motion.div>
         </div>
     );

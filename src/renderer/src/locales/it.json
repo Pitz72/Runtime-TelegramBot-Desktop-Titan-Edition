@@ -184,5 +184,9 @@
     "youtubeError": {
         "title": "⚠️ Modifiche a YouTube Rilevate",
         "message": "Le strutture interne di YouTube sono cambiate. Il fetching dei video è momentaneamente interrotto. Ti suggeriamo di disattivare i feed YouTube per ora. Il team è già al lavoro su un aggiornamento del software per risolvere il problema!"
+    },
+    "quickGuide": {
+        "btn": "Guida Rapida",
+        "title": "Guida Rapida"
     }
 }

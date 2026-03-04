@@ -165,5 +165,9 @@
     "youtubeError": {
         "title": "⚠️ Alterações no YouTube detectadas",
         "message": "As estruturas internas do YouTube mudaram. A busca de vídeos está temporariamente interrompida. Sugerimos desativar os feeds do YouTube por enquanto. A equipe já está trabalhando em uma atualização para corrigir esse problema!"
+    },
+    "quickGuide": {
+        "btn": "Guia Rápido",
+        "title": "Guia de Início Rápido"
     }
 }

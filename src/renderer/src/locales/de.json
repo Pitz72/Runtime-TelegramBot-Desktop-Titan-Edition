@@ -165,5 +165,9 @@
     "youtubeError": {
         "title": "⚠️ YouTube-Änderungen erkannt",
         "message": "Die internen Strukturen von YouTube haben sich geändert. Der Videoabruf ist vorübergehend unterbrochen. Wir empfehlen, YouTube-Feeds vorerst zu deaktivieren. Das Team arbeitet bereits an einem Update, um dieses Problem zu beheben!"
+    },
+    "quickGuide": {
+        "btn": "Kurzanleitung",
+        "title": "Schnellstartanleitung"
     }
 }

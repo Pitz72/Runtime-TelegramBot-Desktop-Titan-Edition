@@ -165,5 +165,9 @@
     "youtubeError": {
         "title": "⚠️ Modifications de YouTube détectées",
         "message": "Les structures internes de YouTube ont changé. La récupération des vidéos est temporairement interrompue. Nous vous suggérons de désactiver les flux YouTube pour le moment. L'équipe travaille déjà sur une mise à jour pour résoudre ce problème !"
+    },
+    "quickGuide": {
+        "btn": "Guide Rapide",
+        "title": "Guide de Démarrage Rapide"
     }
 }

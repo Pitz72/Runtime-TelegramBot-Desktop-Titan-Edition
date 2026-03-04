@@ -302,6 +302,10 @@ export function Dashboard() {
                     <SystemSettingsModal onClose={() => setShowSystemSettings(false)} />
                 )
             }
+
+            {showGuide && (
+                <QuickGuideModal onClose={() => setShowGuide(false)} />
+            )}
         </div >
     );
 }

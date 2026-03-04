@@ -184,5 +184,9 @@
     "youtubeError": {
         "title": "⚠️ YouTube API Changes Detected",
         "message": "YouTube's internal structures have changed. Video fetching is temporarily broken. We suggest disabling YouTube feeds for now. Our team is already working on a software update to fix this issue!"
+    },
+    "quickGuide": {
+        "btn": "Quick Guide",
+        "title": "Quick Start Guide"
     }
 }
