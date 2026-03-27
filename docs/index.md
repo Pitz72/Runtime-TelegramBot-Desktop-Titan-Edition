@@ -20,7 +20,7 @@ La panoramica generale dell'architettura e delle scelte tecnologiche si trova pr
 Informazioni per l'utilizzo dell'applicazione da parte dell'utente finale.
 
 - **[Manuale d'Uso Avanzato](manuale.md)** — Guida completa all'installazione, configurazione bot, feed, YouTube scraping e OmniSync.
-- **[Quick Start Guide (IT)](guide/quick-start-guide-it.md)** — Guida rapida in italiano (consultare la cartella `guide/` per altre lingue).
+- **[Quick Start Guide (IT)](guide/quick-start-guide-it.md)** — Guida rapida in italiano (consultare la cartella `guide/` per le altre 7 lingue supportate).
 
 ---
 
@@ -36,38 +36,56 @@ Norme e best practice per tenere in ordine la repository e ottimizzarne il peso 
 
 Per migliorare la consultazione da parte degli LLM, lo storico delle modifiche è stato suddiviso in blocchi cronologici (per Major e Minor Version) piuttosto che in un unico grande file di centinaia di righe:
 
-- **[v1.4.x (Corrente)](changelogs/v1.4.x.md)**
-  Dalla v1.4.0 in poi, introducendo notifiche native OS. Questa è l'attuale linea di sviluppo stabile.
+- **[v1.7.x (Corrente)](changelogs/v1.7.7.md)**
+  Versione attuale: **v1.7.7** — Security Patch. Cifratura AES-256-CBC dei token nei file `.rtb`, validazione anti-SSRF sugli URL feed, validazione input su tutti gli handler IPC, rimozione dipendenze orfane. Vedere anche [v1.7.6](changelogs/v1.7.6.md) per guide in-app, Auto-Updater e distribuzione Windows.
+
+- **[v1.6.x (Archivio)](changelogs/v1.6.1.md)**
+  Dalla v1.6.0 alla v1.6.1: sistema OmniSync con formato `.rtb` per la portabilità sicura dei bot tra macchine diverse, con ri-cifratura automatica tramite `safeStorage`.
+
+- **[v1.5.x (Archivio)](changelogs/v1.5.4.md)**
+  Dalla v1.5.0 alla v1.5.4: template messaggi personalizzabili con editor Smart Chips, variabili dinamiche (`{{title}}`, `{{link}}`, ecc.), gestione escaping HTML per Telegram.
+
+- **[v1.4.x (Archivio)](changelogs/v1.4.x.md)**
+  Dalla v1.4.0 alla v1.4.2: Quiet Hours (fasce orarie di silenzio), notifiche native OS, perfezionamento job queue asincrona.
+
 - **[v1.3.x (Archivio)](changelogs/v1.3.x.md)**
-  Dalla v1.3.0 alla v1.3.5: Ripristino YouTube base, Sistema Logging Ibrido, Refactoring Producer-Consumer, Backup DB e Error Boundaries.
+  Dalla v1.3.0 alla v1.3.5: integrazione YouTube tramite `youtubei.js` (InnerTube, zero-config), sistema di logging ibrido, refactoring Producer-Consumer, backup DB automatico e Error Boundaries React.
+
 - **[v1.2.x (Archivio)](changelogs/v1.2.x.md)**
-  Versione 1.2.x: Internazionalizzazione (i18n a 8 lingue), Import/Export JSON, Cifratura Token e Custom Toasts.
+  Versione 1.2.x: Internazionalizzazione (i18n a 8 lingue), Import/Export JSON, cifratura token e Custom Toasts.
+
 - **[v1.1.x (Archivio)](changelogs/v1.1.x.md)**
   Dalla v1.1.0 in poi (intervalli di check configurabili, statistiche out-of-the-box, export log manuale...).
+
 - **[v1.0.x (Release Ufficiali)](changelogs/v1.0.x.md)**
   Da RTB 1.0.0 (data in cui l'interfaccia ha ricevuto il restyling Titan) alle varie patch 1.0.x che hanno migliorato l'affidabilità del parser RSS.
-- **[Legacy (Pre-Release e Alpha)](changelogs/legacy-pre-v1.md)**
-  Include tutte le build primordiali (0.x, alpha, beta, e i vecchi cicli numerici pre v1 come 1.4.1) che segnano il passaggio dall'architettura Python a TypeScript/Electron.
 
-> Il file `CHANGELOG.md` globale posizionato nella cartella radice funge ora da puro rinvio a questi file storici.
+- **[Legacy (Pre-Release e Alpha)](changelogs/legacy-pre-v1.md)**
+  Include tutte le build primordiali (0.x, alpha, beta) che segnano il passaggio dall'architettura Python a TypeScript/Electron.
+
+> Il file `CHANGELOG.md` globale posizionato nella cartella radice funge da indice di rinvio a questi file storici.
 
 ---
 
-## 🛠️ Diagnostica, Bug Report e Feature Bloccate
+## 🔍 Analisi Tecnica e Qualità del Codice
+
+- **[Analisi Tecnica v1.7.6](analisi-tecnica.md)** — Report completo di criticità (gravissime, gravi, medie, lievi), dipendenze orfane, aree di miglioramento e decisione architetturale su Tauri. Redatto il 27/03/2026.
+
+---
+
+## 🛠️ Diagnostica e Bug Report
 
 Documentazione relativa a moduli critici, troubleshooting avanzato e indagini tecniche:
 
-- **[Report YouTube (Issue v1.0.5)](relazione-youtube.md)**
-  Un'analisi profonda del perché i canali YouTube restituiscono fallimenti 404 (Feed XML pubblici Atom deprecati) e il piano strutturato per migrarlo prossimamente alla YouTube Data API v3.
+- **[Report YouTube — Analisi e Soluzione (v1.0.5 → v1.3.1)](relazione-youtube.md)**
+  Analisi approfondita del problema dei feed Atom YouTube (HTTP 404 su endpoint pubblici) con diagnosi completa delle cause, valutazione delle alternative (YouTube Data API v3 poi scartata) e documentazione della soluzione adottata: scraping InnerTube via `youtubei.js`, implementata in v1.3.1. **Problema risolto definitivamente.**
 
 ---
 
-## 🗺️ Sviluppi Futuri
+## 🗺️ Storico Pianificazione
 
-Cosa è in cantiere per le prossime iterazioni.
-
-- **[Roadmap Marzo 2026](roadmap-marzo2026.md)**
-  Il piano formale che delinea le implementazioni da fare (tra cui il passaggio alla YouTube v3 API, l'uso di React Error Boundary, notifiche OS native e toast messages in-app).
+- **[Roadmap Marzo 2026 — Completata](roadmap-marzo2026.md)**
+  Piano di sviluppo formale redatto a v1.4.0 per le funzionalità mancanti verso la Gold Release. Tutte le feature pianificate (Quiet Hours, Template Smart Chips) sono state implementate nelle versioni successive. Documento conservato come riferimento storico.
 
 ---
 

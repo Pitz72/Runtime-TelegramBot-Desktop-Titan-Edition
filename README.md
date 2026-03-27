@@ -5,7 +5,7 @@
   
   **La Piattaforma Definitiva per l'Automazione Multi-Canale RSS & YouTube su Telegram**
 
-  ![Version](https://img.shields.io/badge/Version-1.7.5%20%22OmniSync%22-3b82f6?style=for-the-badge)
+  ![Version](https://img.shields.io/badge/Version-1.7.7-3b82f6?style=for-the-badge)
   ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-emerald?style=for-the-badge)
   ![Stack](https://img.shields.io/badge/Stack-Electron%20%7C%20React%20%7C%20SQLite-475569?style=for-the-badge)
   ![Lang](https://img.shields.io/badge/Languages-8%20Supported-purple?style=for-the-badge)
@@ -28,8 +28,9 @@ Nata per superare i limiti strutturali e operativi di un precedente bot Python b
 *   🔒 **OmniSync & Sicurezza Hardware:** I token dei bot sono salvati su SQLite in formato crittografato tramite la tecnologia `safeStorage` dell'OS. Il formato proprietario **`.rtb`** permette di esportare/importare configurazioni bot tra PC diversi gestendo la ri-cifratura in totale sicurezza.
 *   ⚙️ **Architettura Producer-Consumer:** Il download dei feed e l'invio su Telegram viaggiano su binari separati. Questo azzera i freeze dell'interfaccia e gestisce in modo fluido i *FloodWait* e i rate-limits delle API di Telegram.
 *   🌙 **Fasce Orarie di Silenzio (Quiet Hours):** Possibilità di definire orari di pausa per le notifiche. L'app continua ad accumulare le notizie in background, smaltendole automaticamente al termine della fascia di silenzio.
-*   📝 **Template "Smart Chips":** Editor visivo integrato per formattare in HTML i messaggi Telegram (News, Podcast, Video) con inserimento dinamico delle variabili (`{{title}}`, `{{link}}`, ecc.).
+*   📝 **Template "Smart Chips":** Editor visivo integrato per formattare in HTML i messaggi Telegram con inserimento dinamico delle variabili (`{{title}}`, `{{link}}`, `{{summary}}`, ecc.). Supporta **4 template separati** per tipo di contenuto: Avvio (startup), News, Podcast, YouTube.
 *   🌍 **I18n Globale:** Interfaccia tradotta nativamente in 8 lingue, mentre il core engine mantiene log di sistema standardizzati in puro inglese tecnico per il debug internazionale.
+*   🔔 **Auto-Updater:** Notifica Toast discreta nella Dashboard se è disponibile una versione più recente, interrogando `ecosystem.runtimeradio.com`. Nessun aggiornamento automatico forzato.
 
 ---
 

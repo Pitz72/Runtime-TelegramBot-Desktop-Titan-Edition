@@ -2,10 +2,51 @@ import { ipcMain, app, dialog } from 'electron';
 import { botEngine } from './bot/engine';
 import { db, initDB } from './database/schema';
 import { BotManager } from './bot/manager';
-import { fetchFeed } from './bot/parser';
+import { fetchFeed, validateFeedUrl } from './bot/parser';
 import { fetchYouTubeVideos } from './bot/youtube';
 import { writeFile, copyFile, readFile } from 'fs/promises';
 import { join } from 'path';
+
+// --- Input Validation Helpers ---
+const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+function assertString(value: unknown, field: string): string {
+    if (typeof value !== 'string' || value.trim() === '') {
+        throw new Error(`Campo obbligatorio mancante o non valido: "${field}"`);
+    }
+    return value.trim();
+}
+
+function assertPositiveInt(value: unknown, field: string): number {
+    const n = Number(value);
+    if (!Number.isInteger(n) || n <= 0) {
+        throw new Error(`"${field}" deve essere un intero positivo, ricevuto: ${value}`);
+    }
+    return n;
+}
+
+function assertCheckInterval(value: unknown): number {
+    const n = Number(value);
+    if (!Number.isInteger(n) || n < 1 || n > 1440) {
+        throw new Error(`check_interval deve essere compreso tra 1 e 1440 minuti, ricevuto: ${value}`);
+    }
+    return n;
+}
+
+function assertTimeOrDefault(value: unknown, defaultVal: string): string {
+    if (value === undefined || value === null) return defaultVal;
+    if (typeof value !== 'string' || !TIME_REGEX.test(value)) {
+        throw new Error(`Formato orario non valido: "${value}". Usare HH:MM (es. 08:00)`);
+    }
+    return value;
+}
+
+function assertFeedType(value: unknown): 'podcast' | 'news' | 'youtube' {
+    if (value !== 'podcast' && value !== 'news' && value !== 'youtube') {
+        throw new Error(`Tipo feed non valido: "${value}". Valori consentiti: podcast, news, youtube`);
+    }
+    return value;
+}
 
 export function setupIpc() {
     // Initialize Database
@@ -18,34 +59,55 @@ export function setupIpc() {
     ipcMain.handle('get-bots', () => BotManager.getBots());
 
     ipcMain.handle('create-bot', (_, data) => {
-        const channelId = data.channelId || data.channel_id;
-        return BotManager.createBot(data.name, data.token, channelId, data.startDate, data.checkInterval, data.notificationsEnabled, data.sendFrom, data.sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup);
+        const name = assertString(data.name, 'name');
+        const token = assertString(data.token, 'token');
+        const channelId = assertString(data.channelId || data.channel_id, 'channelId');
+        const checkInterval = data.checkInterval !== undefined ? assertCheckInterval(data.checkInterval) : 15;
+        const sendFrom = assertTimeOrDefault(data.sendFrom, '00:00');
+        const sendUntil = assertTimeOrDefault(data.sendUntil, '23:59');
+        return BotManager.createBot(name, token, channelId, data.startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup);
     });
 
     ipcMain.handle('delete-bot', (_, id) => {
-        botEngine.removeClient(id); // Sync engine with deletion
-        return BotManager.deleteBot(id);
+        const botId = assertPositiveInt(id, 'id');
+        botEngine.removeClient(botId);
+        return BotManager.deleteBot(botId);
     });
 
     ipcMain.handle('update-bot', (_, { id, name, token, channelId, isActive, startDate, checkInterval, notificationsEnabled, sendFrom, sendUntil, templatePodcast, templateNews, templateYoutube, templateStartup }) => {
-        return BotManager.updateBot(id, name, token, channelId, isActive, startDate, checkInterval, notificationsEnabled, sendFrom, sendUntil, templatePodcast, templateNews, templateYoutube, templateStartup);
+        const validId = assertPositiveInt(id, 'id');
+        const validName = assertString(name, 'name');
+        const validToken = assertString(token, 'token');
+        const validChannelId = assertString(channelId, 'channelId');
+        const validInterval = checkInterval !== undefined ? assertCheckInterval(checkInterval) : 15;
+        const validSendFrom = assertTimeOrDefault(sendFrom, '00:00');
+        const validSendUntil = assertTimeOrDefault(sendUntil, '23:59');
+        return BotManager.updateBot(validId, validName, validToken, validChannelId, isActive, startDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup);
     });
 
     // --- FEED MANAGEMENT ---
     ipcMain.handle('get-feeds', (_, botId) => BotManager.getFeeds(botId));
 
     ipcMain.handle('add-feed', (_, { botId, name, url, type }) => {
-        return BotManager.addFeed(botId, name, url, type);
+        const validBotId = assertPositiveInt(botId, 'botId');
+        const validName = assertString(name, 'name');
+        const validType = assertFeedType(type);
+        if (validType !== 'youtube') validateFeedUrl(assertString(url, 'url'));
+        return BotManager.addFeed(validBotId, validName, assertString(url, 'url'), validType);
     });
 
     ipcMain.handle('update-feed', (_, { id, name, url, type }) => {
-        return BotManager.updateFeed(id, name, url, type);
+        const validId = assertPositiveInt(id, 'id');
+        const validName = assertString(name, 'name');
+        const validType = assertFeedType(type);
+        if (validType !== 'youtube') validateFeedUrl(assertString(url, 'url'));
+        return BotManager.updateFeed(validId, validName, assertString(url, 'url'), validType);
     });
 
-    ipcMain.handle('delete-feed', (_, id) => BotManager.deleteFeed(id));
+    ipcMain.handle('delete-feed', (_, id) => BotManager.deleteFeed(assertPositiveInt(id, 'id')));
 
     ipcMain.handle('toggle-feed', (_, { id, isActive }) => {
-        BotManager.toggleFeed(id, isActive);
+        BotManager.toggleFeed(assertPositiveInt(id, 'id'), isActive);
     });
 
     ipcMain.handle('test-feed', async (_, { url, type }) => {
@@ -63,12 +125,12 @@ export function setupIpc() {
     });
 
     ipcMain.handle('clear-history', (_, botId) => {
-        return BotManager.clearHistory(botId);
+        return BotManager.clearHistory(assertPositiveInt(botId, 'botId'));
     });
 
     // --- STATS ---
     ipcMain.handle('get-stats', (_, botId) => {
-        return BotManager.getStats(botId);
+        return BotManager.getStats(assertPositiveInt(botId, 'botId'));
     });
 
     // --- ENGINE CONTROL ---

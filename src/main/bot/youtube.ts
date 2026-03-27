@@ -1,6 +1,7 @@
 
 import crypto from 'crypto';
 import { RssItem } from './types';
+import { validateFeedUrl } from './parser';
 
 let youtube: any = null;
 
@@ -24,6 +25,11 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
     try {
         const yt = await getYouTubeInstance();
         let targetId = channelIdOrHandle;
+
+        // Validazione anti-SSRF se l'input è un URL completo
+        if (targetId.startsWith('http://') || targetId.startsWith('https://')) {
+            validateFeedUrl(targetId);
+        }
 
         // Pulizia input
         if (targetId.includes('youtube.com/')) {

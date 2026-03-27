@@ -3,6 +3,33 @@ import Parser from 'rss-parser';
 import crypto from 'crypto';
 import { RssItem } from './types';
 
+// --- Anti-SSRF URL Validation ---
+// Blocca schemi non HTTP/HTTPS e indirizzi di rete privata/loopback.
+export function validateFeedUrl(url: string): void {
+    let parsed: URL;
+    try {
+        parsed = new URL(url);
+    } catch {
+        throw new Error(`URL non valido: "${url}"`);
+    }
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+        throw new Error(`Protocollo non consentito: "${parsed.protocol}". Usare http:// o https://`);
+    }
+    const h = parsed.hostname.toLowerCase();
+    if (
+        h === 'localhost' ||
+        h === '::1' ||
+        /^127\./.test(h) ||
+        /^0\.0\.0\.0/.test(h) ||
+        /^10\./.test(h) ||
+        /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h) ||
+        /^192\.168\./.test(h) ||
+        /^169\.254\./.test(h)  // link-local
+    ) {
+        throw new Error(`Indirizzo di rete privata/locale non consentito: "${h}"`);
+    }
+}
+
 const parser = new Parser({
     timeout: 30000, // 30 second timeout
     customFields: {
@@ -58,6 +85,7 @@ function cleanSummary(html: string): string {
 
 export async function fetchFeed(name: string, url: string): Promise<RssItem[]> {
     try {
+        validateFeedUrl(url);
         const feed = await parser.parseURL(url);
         const items: RssItem[] = [];
 

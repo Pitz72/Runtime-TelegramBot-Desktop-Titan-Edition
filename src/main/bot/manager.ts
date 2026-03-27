@@ -1,6 +1,38 @@
 import { db } from '../database/schema';
 import { BotConfig, FeedConfig } from '../../shared/types';
 import { safeStorage } from 'electron';
+import crypto from 'crypto';
+
+// --- RTB Export Encryption ---
+// Il token viene cifrato con AES-256-CBC + IV casuale prima di essere scritto nel file .rtb.
+// La chiave è derivata da un segreto fisso dell'app: il token non è mai in plaintext nel file.
+const RTB_SECRET = 'titan-rtb-v1-runtime-radio-2026x!'; // 33 chars → sha256 → 32 byte key
+
+function encryptTokenForExport(plaintext: string): string {
+    const iv = crypto.randomBytes(16);
+    const key = crypto.createHash('sha256').update(RTB_SECRET).digest();
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(plaintext, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    return JSON.stringify({ e: encrypted, iv: iv.toString('base64') });
+}
+
+function decryptTokenFromExport(data: string): string {
+    try {
+        const parsed = JSON.parse(data);
+        if (parsed.e && parsed.iv) {
+            const key = crypto.createHash('sha256').update(RTB_SECRET).digest();
+            const iv = Buffer.from(parsed.iv, 'base64');
+            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+            let decrypted = decipher.update(parsed.e, 'base64', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        }
+    } catch {
+        // Formato non cifrato: compatibilità con file .rtb precedenti alla v1.7.7
+    }
+    return data; // Fallback plaintext per file legacy
+}
 
 export class BotManager {
     // --- BOTS ---
@@ -105,7 +137,7 @@ export class BotManager {
             const feeds = BotManager.getFeeds(bot.id);
             return {
                 name: bot.name,
-                token: bot.token, // Questo verrà esportato in chiaro (decodificato da getBots)
+                token: encryptTokenForExport(bot.token), // AES-256-CBC cifrato per il file .rtb
                 channel_id: bot.channel_id,
                 start_date: bot.start_date,
                 check_interval: bot.check_interval,
@@ -136,7 +168,7 @@ export class BotManager {
             for (const bot of data) {
                 const botId = BotManager.createBot(
                     bot.name,
-                    bot.token,
+                    decryptTokenFromExport(bot.token),
                     bot.channel_id,
                     bot.start_date,
                     bot.check_interval,
@@ -196,7 +228,7 @@ export class BotManager {
             const exportData = {
                 bot: {
                     name: botRecord.name,
-                    token: plainToken,
+                    token: encryptTokenForExport(plainToken), // AES-256-CBC cifrato per il file .rtb
                     channelId: botRecord.channel_id,
                     isActive: botRecord.is_active === 1,
                     startDate: botRecord.start_date,
@@ -234,7 +266,7 @@ export class BotManager {
                 // Instanzio il bot e questo ne incapsula il token in sicirezza
                 const createdBotId = BotManager.createBot(
                     data.bot.name,
-                    data.bot.token,
+                    decryptTokenFromExport(data.bot.token),
                     data.bot.channelId,
                     data.bot.startDate,
                     data.bot.checkInterval,

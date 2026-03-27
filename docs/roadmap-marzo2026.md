@@ -1,4 +1,15 @@
-# 🗺️ Roadmap Attiva — Titan Desktop (Aggiornata a v1.4.0)
+# 🗺️ Roadmap Marzo 2026 — COMPLETATA ✅
+
+> **Nota storica:** Questa roadmap è stata completata. Tutte le feature pianificate sono state implementate:
+> - **Quiet Hours** → implementato in **v1.4.x**
+> - **Template Smart Chips** → implementato in **v1.5.x**
+> - **Test Vitest** → non implementato (bassa priorità, rimandato a sviluppi futuri)
+>
+> Il documento è conservato come riferimento storico del piano di sviluppo verso la Gold Release.
+
+---
+
+# Roadmap Attiva — Titan Desktop (Redatta a v1.4.0)
 
 > Runtime TelegramBot Titan Edition — Piano di sviluppo verso la Gold Release
 > Redatto: 26/02/2026
