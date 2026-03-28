@@ -9,6 +9,8 @@ release/
 Builds/
 out/
 distribuzione-windows/
+distribuzione-mac/
+distribuzione-linux/
 
 # Development cache
 .vite/

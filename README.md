@@ -58,7 +58,7 @@ Il software è compilato per essere autonomo e non richiede l'installazione di r
 2. Esegui l'installer corrispondente al tuo Sistema Operativo:
    * **Windows:** `.exe` (NSIS Installer)
    * **macOS:** `.dmg` — **Apple Silicon (M1/M2/M3/M4) only**. Al primo avvio seguire: *Impostazioni di Sistema → Privacy e Sicurezza → Apri comunque* (app non firmata).
-   * **Linux:** `.AppImage` o `.deb` (x64)
+   * **Linux:** `.AppImage` o `.deb` (x64) — Ubuntu 22.04+, Debian e derivate
 
 ### B. Sviluppatori (Sorgente)
 Per clonare e lavorare sulla codebase:

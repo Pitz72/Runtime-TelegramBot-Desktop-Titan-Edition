@@ -37,7 +37,7 @@ Norme e best practice per tenere in ordine la repository e ottimizzarne il peso 
 Per migliorare la consultazione da parte degli LLM, lo storico delle modifiche è stato suddiviso in blocchi cronologici (per Major e Minor Version) piuttosto che in un unico grande file di centinaia di righe:
 
 - **[v1.7.x (Corrente)](changelogs/v1.7.7.md)**
-  Versione attuale: **v1.7.7** — Security Patch + Build Cross-Platform. Cifratura AES-256-CBC dei token nei file `.rtb`, validazione anti-SSRF sugli URL feed, validazione input su tutti gli handler IPC, rimozione dipendenze orfane. **Nuovo:** build automatica tramite GitHub Actions CI per **macOS DMG (Apple Silicon arm64, confermato funzionante)** e **Linux AppImage/deb**. Vedere anche [v1.7.6](changelogs/v1.7.6.md) per guide in-app, Auto-Updater e distribuzione Windows.
+  Versione attuale: **v1.7.7** — Security Patch + Build Cross-Platform. Cifratura AES-256-CBC dei token nei file `.rtb`, validazione anti-SSRF sugli URL feed, validazione input su tutti gli handler IPC, rimozione dipendenze orfane. **Nuovo:** build automatica tramite GitHub Actions CI per **macOS DMG (Apple Silicon arm64, confermato ✅)** e **Linux AppImage/deb (confermato ✅)**. Vedere anche [v1.7.6](changelogs/v1.7.6.md) per guide in-app, Auto-Updater e distribuzione Windows.
 
 - **[v1.6.x (Archivio)](changelogs/v1.6.1.md)**
   Dalla v1.6.0 alla v1.6.1: sistema OmniSync con formato `.rtb` per la portabilità sicura dei bot tra macchine diverse, con ri-cifratura automatica tramite `safeStorage`.

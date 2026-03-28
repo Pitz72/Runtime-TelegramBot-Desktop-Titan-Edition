@@ -23,7 +23,7 @@ Per sfruttare al massimo Titan, è utile comprendere due concetti fondamentali s
 Titan Edition è un software leggero ma estremamente potente. È progettato per funzionare sui tre principali Sistemi Operativi:
 *   **Windows:** Windows 10 o superiore (64-bit).
 *   **macOS:** macOS 12.0 (Monterey) o superiore — **solo Apple Silicon (M1/M2/M3/M4, arm64)**. I Mac con processore Intel non sono supportati dalla build pre-compilata. Al primo avvio, Gatekeeper mostrerà un avviso di sicurezza (app non firmata): fare click destro → "Apri" per procedere.
-*   **Linux:** Ubuntu 22.04+, Debian, Fedora, Arch Linux (in formato `.AppImage` o `.deb`).
+*   **Linux:** Ubuntu 22.04+, Debian e derivate (in formato `.AppImage` o `.deb`, x64). Compatibilità confermata.
 
 *Nota per server VPS:* Titan può essere installato su Virtual Private Server. Il software è dotato di sistemi "Anti-Ghosting" che prevengono crash grafici su macchine prive di scheda video dedicata.
 

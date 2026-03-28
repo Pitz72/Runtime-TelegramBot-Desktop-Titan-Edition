@@ -2,7 +2,7 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.7.x (Corrente)](docs/changelogs/v1.7.7.md) — Versione attuale: v1.7.7. Security patch: cifratura token export `.rtb` (AES-256-CBC), validazione anti-SSRF URL feed, validazione input IPC. Rimozione dipendenze orfane. Build cross-platform: **macOS DMG (Apple Silicon arm64)** e **Linux AppImage/deb** tramite GitHub Actions CI.
+- [v1.7.x (Corrente)](docs/changelogs/v1.7.7.md) — Versione attuale: v1.7.7. Security patch: cifratura token export `.rtb` (AES-256-CBC), validazione anti-SSRF URL feed, validazione input IPC. Rimozione dipendenze orfane. Build cross-platform: **macOS DMG (Apple Silicon arm64, confermato ✅)** e **Linux AppImage/deb (confermato ✅)** tramite GitHub Actions CI.
 - [v1.6.x (Archivio)](docs/changelogs/v1.6.1.md) — v1.6.0–v1.6.1: OmniSync `.rtb` (portabilità bot cross-machine) e fix stabilità.
 - [v1.5.x (Archivio)](docs/changelogs/v1.5.4.md) — v1.5.0–v1.5.4: Template messaggi personalizzabili con Smart Chips, editor visivo integrato.
 - [v1.4.x (Archivio)](docs/changelogs/v1.4.x.md) — v1.4.0–v1.4.2: Quiet Hours, notifiche native OS, job queue asincrona.
