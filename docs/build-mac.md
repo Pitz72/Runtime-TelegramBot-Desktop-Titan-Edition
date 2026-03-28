@@ -1,6 +1,10 @@
 # 🍎 Istruzioni Compilazione — macOS
 
-## Runtime TelegramBot Titan Edition v1.0.0
+## Runtime TelegramBot Titan Edition v1.7.7+
+
+> **Nota:** Dalla v1.7.7 è disponibile un **DMG pre-compilato per Apple Silicon (arm64)** scaricabile direttamente dalla pagina GitHub Releases, generato automaticamente dal workflow CI `.github/workflows/build-release.yml`. Segui questa guida solo se hai bisogno di compilare manualmente (es. sviluppo, debug, o build Intel).
+>
+> **Compatibilità:** Il DMG pre-compilato funziona **solo su Mac Apple Silicon (M1/M2/M3/M4)**. I Mac Intel non sono supportati dalla build ufficiale.
 
 Questa guida spiega come compilare l'applicazione desktop sul tuo Mac
 e generare il file `.dmg` pronto per l'installazione.
@@ -225,4 +229,4 @@ Vedi il [README.md](../README.md) principale per la struttura aggiornata del pro
 
 ---
 
-*Runtime TelegramBot Titan Edition v1.0.0 — © 2026 Simone Pizzi per Runtime Radio*
+*Runtime TelegramBot Titan Edition v1.7.7+ — © 2026 Simone Pizzi per Runtime Radio*

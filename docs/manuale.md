@@ -22,7 +22,7 @@ Per sfruttare al massimo Titan, è utile comprendere due concetti fondamentali s
 ### 2.1 Requisiti di Sistema
 Titan Edition è un software leggero ma estremamente potente. È progettato per funzionare sui tre principali Sistemi Operativi:
 *   **Windows:** Windows 10 o superiore (64-bit).
-*   **macOS:** macOS 11.0 (Big Sur) o superiore (Intel e Apple Silicon M1/M2/M3).
+*   **macOS:** macOS 12.0 (Monterey) o superiore — **solo Apple Silicon (M1/M2/M3/M4, arm64)**. I Mac con processore Intel non sono supportati dalla build pre-compilata. Al primo avvio, Gatekeeper mostrerà un avviso di sicurezza (app non firmata): fare click destro → "Apri" per procedere.
 *   **Linux:** Ubuntu 22.04+, Debian, Fedora, Arch Linux (in formato `.AppImage` o `.deb`).
 
 *Nota per server VPS:* Titan può essere installato su Virtual Private Server. Il software è dotato di sistemi "Anti-Ghosting" che prevengono crash grafici su macchine prive di scheda video dedicata.
@@ -31,7 +31,7 @@ Titan Edition è un software leggero ma estremamente potente. È progettato per 
 L'installazione è un processo "Plug & Play". 
 1. Scarica l'eseguibile fornito dal tuo amministratore o dalla pagina delle release ufficiale.
 2. **Su Windows:** Avvia il file `.exe` e segui le istruzioni a schermo. Il programma creerà automaticamente un collegamento sul desktop.
-3. **Su macOS:** Apri il file `.dmg` e trascina l'icona dell'applicazione nella cartella *Applicazioni*. Al primo avvio, se il sistema lo richiede, vai in *Impostazioni di Sistema -> Privacy e Sicurezza* e clicca su "Apri comunque".
+3. **Su macOS (Apple Silicon):** Apri il file `.dmg` e trascina l'icona dell'applicazione nella cartella *Applicazioni*. Al primo avvio macOS bloccherà l'app perché non è firmata con certificato Apple: vai in *Impostazioni di Sistema → Privacy e Sicurezza* e clicca su **"Apri comunque"**, oppure usa click destro → "Apri" direttamente sull'icona.
 4. **Su Linux:** Rendi eseguibile il file `.AppImage` (clic destro -> Proprietà -> Permessi -> Consenti l'esecuzione) e avvialo con un doppio clic.
 
 ### 2.3 Il Setup Wizard (Primo Avvio)
