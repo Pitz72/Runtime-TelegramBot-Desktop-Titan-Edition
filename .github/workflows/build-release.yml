@@ -29,7 +29,7 @@ jobs:
         # CSC_IDENTITY_AUTO_DISCOVERY=false salta la firma del codice (nessun certificato Apple)
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npx tsc && npx vite build && npx electron-builder --mac
+        run: npx tsc && npx vite build && npx electron-builder --mac --publish never
 
       - name: Upload DMG
         uses: actions/upload-artifact@v4
@@ -55,7 +55,7 @@ jobs:
         run: npm ci
 
       - name: Build Linux (AppImage + deb)
-        run: npx tsc && npx vite build && npx electron-builder --linux
+        run: npx tsc && npx vite build && npx electron-builder --linux --publish never
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v4
