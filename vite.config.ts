@@ -33,6 +33,13 @@ export default defineConfig({
                                 entryFileNames: '[name].cjs',
                             }
                         }
+                    },
+                    // Forza il bundling inline di TUTTE le dipendenze JS
+                    // (tranne better-sqlite3 nativo ed electron, già in rollupOptions.external).
+                    // Senza questo, SSR mode esternalizza tutto e l'intero node_modules
+                    // finisce nell'asar, gonfiando l'installer da ~90MB a 1.5GB.
+                    ssr: {
+                        noExternal: true
                     }
                 }
             },

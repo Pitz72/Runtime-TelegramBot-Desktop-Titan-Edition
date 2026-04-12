@@ -4,14 +4,14 @@ Durante l'assistenza odierna sono state identificate delle criticità nel motore
 
 ## 🐛 Bug Identificati
 
-### 1. Mancato Escape delle URL (telegram.ts)
+### 1. ~~Mancato Escape delle URL (telegram.ts)~~ ✅ RISOLTO in v1.7.8
 - **Problema**: I campi `{{link}}` e `item.image` (nel `previewHack`) vengono inseriti nei tag HTML senza codifica. Se la URL contiene un carattere `&` (comune in WordPress e podcast), Telegram fallisce il parsing dell'entità HTML.
 - **Sintomo**: Il bot tenta l'invio 5 volte ( timeout di ~30s) e poi logga "Send failed", entrando in un loop infinito di tentativi ad ogni scansione del feed.
-- **Soluzione**: Applicare `this.escape()` anche a `item.link` e `item.image` prima della sostituzione nel template.
+- **Soluzione applicata**: Introdotta `escapeUrl()` separata dall'escape generico, applicata a `item.link` e `item.image`.
 
-### 2. Log "Ciechi" nell'Interfaccia
+### 2. ~~Log "Ciechi" nell'Interfaccia~~ ✅ RISOLTO in v1.7.8
 - **Problema**: Gli errori dettagliati di Telegram (es. `Bad Request: can't parse entities`) vengono inviati su un canale IPC (`bot-log`) che il frontend (`Dashboard.tsx`) attualmente ignora. L'utente vede solo un generico "Send failed" dai log dell'engine.
-- **Soluzione**: Aggiungere un listener nel frontend per mostrare i log tecnici del client Telegram nella console di sistema.
+- **Soluzione applicata**: `TelegramClient.logToUI()` ora delega a `TitanLogger.log()`, unificando tutti i log su un unico canale `bot-logs-batch`.
 
 ---
 
@@ -36,4 +36,10 @@ L'interfaccia "Titan Glass" può risultare pesante su risoluzioni elevate (4K) o
 - **Tecnico**: Utilizzare la proprietà CSS `will-change` per ottimizzare i layer di animazione rimasti attivi.
 
 ---
-*Note registrate il 01/04/2026 per la pianificazione della v1.7.8+*
+
+## 📦 Build Bloat — ✅ RISOLTO in v1.7.8
+- **Problema**: L'installer Windows era cresciuto da ~94 MB (v1.7.6) a 1.5 GB a causa dell'inclusione non necessaria dell'intero `node_modules` nell'asar (SSR mode externalizzava tutto + config electron-builder duplicata con precedenza errata).
+- **Soluzione applicata**: `ssr.noExternal: true` in `vite.config.ts` + pattern `files` espliciti in `package.json`. Installer ridotto a **80.9 MB**.
+
+---
+*Note registrate il 01/04/2026, aggiornate il 12/04/2026 con le risoluzioni della v1.7.8*

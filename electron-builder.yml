@@ -8,8 +8,17 @@ files:
   - dist/**/*
   - resources/**/*
   - package.json
+  # Escludi TUTTO node_modules tranne le dipendenze native di better-sqlite3.
+  # Tutte le altre dipendenze JS (telegraf, rss-parser, youtubei.js, react, ecc.)
+  # sono già bundlate inline da Vite grazie a ssr.noExternal: true.
+  - "!node_modules/**/*"
+  - node_modules/better-sqlite3/**/*
+  - node_modules/bindings/**/*
+  - node_modules/file-uri-to-path/**/*
 asarUnpack:
   - resources/**
+  # I moduli nativi (.node) non possono essere caricati dall'interno di un archivio asar
+  - node_modules/better-sqlite3/build/**/*
 
 # === Windows ===
 win:

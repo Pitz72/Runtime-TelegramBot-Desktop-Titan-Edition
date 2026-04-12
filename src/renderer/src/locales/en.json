@@ -54,7 +54,8 @@
         "successCreate": "New Bot created",
         "successImport": "Bot successfully imported",
         "errorImport": "Import error:",
-        "importTitle": "Import Bot (.rtb)"
+        "importTitle": "Import Bot (.rtb)",
+        "successDelete": "Bot profile deleted"
     },
     "botModal": {
         "editTitle": "Edit Bot",
@@ -71,6 +72,9 @@
         "startDateHint": "Ignore articles published before this date",
         "activeLabel": "Bot Active",
         "activeHint": "If disabled, the bot will not check anything",
+        "statusActive": "Active",
+        "statusDisabled": "Disabled",
+        "statusEnabled": "Enabled",
         "notificationsLabel": "Desktop Notifications",
         "notificationsHint": "Show an OS alert when a post is sent",
         "quietHoursLabel": "Active Hours",

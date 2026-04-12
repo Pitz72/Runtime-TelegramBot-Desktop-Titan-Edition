@@ -54,7 +54,8 @@
         "successCreate": "Nouveau Bot créé",
         "successImport": "Bot importé avec succès",
         "errorImport": "Erreur d'importation :",
-        "importTitle": "Importer le Bot (.rtb)"
+        "importTitle": "Importer le Bot (.rtb)",
+        "successDelete": "Profil Bot supprimé"
     },
     "botModal": {
         "editTitle": "Modifier le Bot",
@@ -71,6 +72,15 @@
         "startDateHint": "Ignorer les articles publiés avant cette date",
         "activeLabel": "Bot Actif",
         "activeHint": "S'il est désactivé, le bot ne vérifiera rien",
+        "statusActive": "Actif",
+        "statusDisabled": "Désactivé",
+        "statusEnabled": "Activé",
+        "notificationsLabel": "Notifications Bureau",
+        "notificationsHint": "Afficher une alerte système lorsqu'un post est envoyé",
+        "quietHoursLabel": "Heures Actives",
+        "quietHoursHint": "Le bot n'enverra des messages que pendant cette période",
+        "timeFrom": "De",
+        "timeUntil": "À",
         "cancel": "Annuler",
         "save": "Enregistrer Bot",
         "delete": "Supprimer Bot",

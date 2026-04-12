@@ -1,6 +1,6 @@
 
 import { Telegram } from 'telegraf';
-import { BrowserWindow } from 'electron';
+import { TitanLogger } from '../logger';
 
 export class TelegramClient {
     private client: Telegram;
@@ -60,14 +60,19 @@ export class TelegramClient {
         }
 
         // Parsing Logica
+        // Escape di TUTTI i campi per prevenire errori di parsing HTML Telegram
+        // (URL con '&' causano "Bad Request: can't parse entities")
+        const safeLink = this.escapeUrl(item.link || '');
+        const safeImage = item.image ? this.escapeUrl(item.image) : '';
+
         text = text
             .replace(/\{\{title\}\}/g, this.escape(item.title || ''))
-            .replace(/\{\{link\}\}/g, item.link || '')
+            .replace(/\{\{link\}\}/g, safeLink)
             .replace(/\{\{feedName\}\}/g, this.escape(item.feedName || ''))
             .replace(/\{\{summary\}\}/g, item.summary ? this.escape(item.summary) : '');
 
         // Image hack prepended to formatting
-        const previewHack = item.image ? `<a href="${item.image}">&#8203;</a>` : "";
+        const previewHack = safeImage ? `<a href="${safeImage}">&#8203;</a>` : "";
         const finalMessage = previewHack + text;
 
         return this.sendMessage(finalMessage);
@@ -142,11 +147,17 @@ export class TelegramClient {
         return false;
     }
 
+    /** Escape testo generico per HTML Telegram (titoli, summary, nomi) */
     private escape(text: string): string {
         return text
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
+    }
+
+    /** Escape URL per uso dentro attributi href — codifica solo & che non è già &amp; */
+    private escapeUrl(url: string): string {
+        return url.replace(/&(?!amp;)/g, '&amp;');
     }
 
     /** Sleep that can be interrupted by abort(). Returns true if aborted. */
@@ -164,15 +175,8 @@ export class TelegramClient {
         });
     }
 
+    /** Log unificato tramite TitanLogger (visibile sia in console che nella UI) */
     private logToUI(message: string): void {
-        const timestamp = new Date().toLocaleTimeString();
-        const logMsg = `[${timestamp}] ${message}`;
-        console.log(logMsg);
-
-        BrowserWindow.getAllWindows().forEach(win => {
-            if (!win.isDestroyed()) {
-                win.webContents.send('bot-log', logMsg);
-            }
-        });
+        TitanLogger.log(message);
     }
 }

@@ -92,7 +92,7 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
     const confirmDelete = async () => {
         if (botToDelete) {
             await window.api.deleteBot(botToDelete);
-            toast('Profilo Bot eliminato', 'success');
+            toast(t('botSelector.successDelete') as string, 'success');
             await loadBots();
         }
         setDeleteConfirmOpen(false);
@@ -144,7 +144,7 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                             autoFocus
                         />
                         <input
-                            type="text"
+                            type="password"
                             placeholder={t('botModal.tokenPlaceholder')}
                             className="w-full bg-dark-950 text-xs text-neutral-400 mb-2 p-2 rounded border border-titan-500/10 focus:border-titan-500/40 outline-none font-mono"
                             value={newBot.token}

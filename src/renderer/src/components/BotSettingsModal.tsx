@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, Trash2, AlertTriangle, Clock, X, Database, Settings, LayoutTemplate, Download } from 'lucide-react';
+import { Save, Trash2, AlertTriangle, Clock, X, Database, Settings, LayoutTemplate, Download, Eye, EyeOff } from 'lucide-react';
 import { BotConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -31,6 +31,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
     const [saving, setSaving] = useState(false);
     const [clearing, setClearing] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [showToken, setShowToken] = useState(false);
 
     const [activeTab, setActiveTab] = useState<'general' | 'templates'>('general');
 
@@ -184,13 +185,23 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
 
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider">{t('botModal.tokenLabel')}</label>
-                                    <input
-                                        type="text"
-                                        value={token}
-                                        onChange={(e) => setToken(e.target.value)}
-                                        className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3 text-white focus:outline-none focus:border-titan-500/40 transition-colors font-mono text-xs"
-                                        placeholder={t('botModal.tokenPlaceholder') as string}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showToken ? 'text' : 'password'}
+                                            value={token}
+                                            onChange={(e) => setToken(e.target.value)}
+                                            className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3 pr-10 text-white focus:outline-none focus:border-titan-500/40 transition-colors font-mono text-xs"
+                                            placeholder={t('botModal.tokenPlaceholder') as string}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowToken(!showToken)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-titan-400 transition-colors"
+                                            tabIndex={-1}
+                                        >
+                                            {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-1.5">
@@ -221,7 +232,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                             className={`w-full h-[46px] rounded-lg border flex items-center px-4 cursor-pointer transition-all ${isActive ? 'bg-titan-500/10 border-titan-500/20 text-titan-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}
                                         >
                                             <div className={`w-2 h-2 rounded-full mr-2 ${isActive ? 'bg-titan-400 status-dot-active' : 'bg-red-500 status-dot-stopped'}`}></div>
-                                            {isActive ? 'Active' : 'Disabled'}
+                                            {isActive ? t('botModal.statusActive') : t('botModal.statusDisabled')}
                                         </div>
                                     </div>
                                 </div>
@@ -233,7 +244,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                         className={`w-full h-[46px] rounded-lg border flex items-center px-4 cursor-pointer transition-all ${notificationsEnabled ? 'bg-titan-500/10 border-titan-500/20 text-titan-400' : 'bg-dark-950 border-titan-500/10 text-neutral-500'}`}
                                     >
                                         <div className={`w-2 h-2 rounded-full mr-2 ${notificationsEnabled ? 'bg-titan-400 status-dot-active' : 'bg-neutral-600 status-dot-stopped'}`}></div>
-                                        {notificationsEnabled ? 'Enabled' : 'Disabled'}
+                                        {notificationsEnabled ? t('botModal.statusEnabled') : t('botModal.statusDisabled')}
                                     </div>
                                     <p className="text-[9px] text-neutral-700">{t('botModal.notificationsHint')}</p>
                                 </div>

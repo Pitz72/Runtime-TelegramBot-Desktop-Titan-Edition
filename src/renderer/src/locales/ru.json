@@ -54,7 +54,8 @@
         "successCreate": "Новый бот создан",
         "successImport": "Бот успешно импортирован",
         "errorImport": "Ошибка импорта:",
-        "importTitle": "Импорт бота (.rtb)"
+        "importTitle": "Импорт бота (.rtb)",
+        "successDelete": "Профиль бота удалён"
     },
     "botModal": {
         "editTitle": "Изменить Бота",
@@ -71,6 +72,15 @@
         "startDateHint": "Игнорировать статьи до этой даты",
         "activeLabel": "Бот Активен",
         "activeHint": "Если отключено, бот ничего не проверяет",
+        "statusActive": "Активен",
+        "statusDisabled": "Отключён",
+        "statusEnabled": "Включён",
+        "notificationsLabel": "Уведомления рабочего стола",
+        "notificationsHint": "Показывать системное уведомление при отправке поста",
+        "quietHoursLabel": "Активные часы",
+        "quietHoursHint": "Бот будет отправлять сообщения только в это время",
+        "timeFrom": "От",
+        "timeUntil": "До",
         "cancel": "Отмена",
         "save": "Сохранить",
         "delete": "Удалить",

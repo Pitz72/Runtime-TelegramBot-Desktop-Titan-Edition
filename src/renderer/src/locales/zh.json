@@ -54,7 +54,8 @@
         "successCreate": "已创建新机器人",
         "successImport": "机器人导入成功",
         "errorImport": "导入错误：",
-        "importTitle": "导入机器人 (.rtb)"
+        "importTitle": "导入机器人 (.rtb)",
+        "successDelete": "机器人配置已删除"
     },
     "botModal": {
         "editTitle": "编辑机器人",
@@ -71,6 +72,15 @@
         "startDateHint": "忽略此日期之前的文章",
         "activeLabel": "机器人已激活",
         "activeHint": "如果禁用，机器人将不检查任何内容",
+        "statusActive": "已激活",
+        "statusDisabled": "已禁用",
+        "statusEnabled": "已启用",
+        "notificationsLabel": "桌面通知",
+        "notificationsHint": "发送帖子时显示系统通知",
+        "quietHoursLabel": "活跃时间",
+        "quietHoursHint": "机器人仅在此时间段内发送消息",
+        "timeFrom": "从",
+        "timeUntil": "到",
         "cancel": "取消",
         "save": "保存机器人",
         "delete": "删除机器人",
