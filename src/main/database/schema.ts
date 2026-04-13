@@ -167,12 +167,18 @@ export function initDB() {
         );
     `);
 
+    // Indici su history (idempotenti — sicuri da rieseguire anche su DB esistenti)
+    db.exec(`
+        CREATE INDEX IF NOT EXISTS idx_history_bot_id ON history(bot_id);
+        CREATE INDEX IF NOT EXISTS idx_history_bot_id_sent_at ON history(bot_id, sent_at);
+    `);
+
     // 3. Sistema di Versionamento Deterministic
     if (isNewInstall) {
         // È un'installazione pulita. Lo schema è già alla versione massima.
-        // Saltiamo tutte le migrazioni e settiamo subito la versione a 5.
-        db.pragma('user_version = 5');
-        console.log("Nuova installazione rilevata. Database inizializzato alla v5.");
+        // Saltiamo tutte le migrazioni e settiamo subito la versione a 6.
+        db.pragma('user_version = 6');
+        console.log("Nuova installazione rilevata. Database inizializzato alla v6.");
     } else {
         // È un database esistente, applichiamo le migrazioni sequenziali
         let currentVersion = db.pragma('user_version', { simple: true }) as number;
@@ -221,6 +227,17 @@ export function initDB() {
             db.pragma('user_version = 5');
             currentVersion = 5;
             console.log("Database version set to 5");
+        }
+
+        if (currentVersion < 6) {
+            console.log("Migration: Adding indexes on history table...");
+            try {
+                db.exec(`CREATE INDEX IF NOT EXISTS idx_history_bot_id ON history(bot_id)`);
+                db.exec(`CREATE INDEX IF NOT EXISTS idx_history_bot_id_sent_at ON history(bot_id, sent_at)`);
+            } catch (e) { }
+            db.pragma('user_version = 6');
+            currentVersion = 6;
+            console.log("Database version set to 6");
         }
     }
 

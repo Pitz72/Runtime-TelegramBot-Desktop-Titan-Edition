@@ -4,7 +4,7 @@ import { TelegramClient } from './telegram';
 import { BotManager } from './manager';
 import { BotConfig, FeedConfig } from '../../shared/types';
 import { TitanLogger } from '../logger';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Notification } from 'electron';
 
 interface PublishJob {
     bot: BotConfig;
@@ -273,15 +273,11 @@ export class BotEngine {
                 BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
                 TitanLogger.log(`  ✅ ${tag} Sent: ${item.title}`);
 
-                if (bot.notifications_enabled) {
-                    import('electron').then(({ Notification }) => {
-                        if (Notification.isSupported()) {
-                            new Notification({
-                                title: `Titan: ${bot.name}`,
-                                body: `Inviato: ${item.title}`
-                            }).show();
-                        }
-                    });
+                if (bot.notifications_enabled && Notification.isSupported()) {
+                    new Notification({
+                        title: `Titan: ${bot.name}`,
+                        body: `Inviato: ${item.title}`
+                    }).show();
                 }
 
                 await new Promise(resolve => setTimeout(resolve, 3000));
@@ -301,4 +297,10 @@ export class BotEngine {
     }
 }
 
-export const botEngine = new BotEngine();
+// Lazy singleton: istanziato solo al primo accesso, non all'import del modulo.
+// Evita side-effect al momento del require e permette reset nei test.
+let _botEngine: BotEngine | null = null;
+export function getBotEngine(): BotEngine {
+    if (!_botEngine) _botEngine = new BotEngine();
+    return _botEngine;
+}

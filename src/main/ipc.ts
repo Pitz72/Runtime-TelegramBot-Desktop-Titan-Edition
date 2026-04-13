@@ -1,5 +1,5 @@
 import { ipcMain, app, dialog } from 'electron';
-import { botEngine } from './bot/engine';
+import { getBotEngine } from './bot/engine';
 import { db, initDB } from './database/schema';
 import { BotManager } from './bot/manager';
 import { fetchFeed, validateFeedUrl } from './bot/parser';
@@ -70,7 +70,7 @@ export function setupIpc() {
 
     ipcMain.handle('delete-bot', (_, id) => {
         const botId = assertPositiveInt(id, 'id');
-        botEngine.removeClient(botId);
+        getBotEngine().removeClient(botId);
         return BotManager.deleteBot(botId);
     });
 
@@ -136,7 +136,7 @@ export function setupIpc() {
     // --- ENGINE CONTROL ---
     ipcMain.handle('start-bot', async () => {
         try {
-            await botEngine.start();
+            await getBotEngine().start();
             return { success: true };
         } catch (e) {
             console.error('Failed to start bot engine:', e);
@@ -145,7 +145,7 @@ export function setupIpc() {
     });
 
     ipcMain.handle('stop-bot', async () => {
-        botEngine.stop();
+        getBotEngine().stop();
         return { success: true };
     });
 
@@ -219,7 +219,7 @@ export function setupIpc() {
 
             if (canceled || filePaths.length === 0) return { success: false, error: 'Cancelled' };
 
-            botEngine.stop();
+            getBotEngine().stop();
             db.close();
             const dbPath = join(app.getPath('userData'), 'titan.db');
             await copyFile(filePaths[0], dbPath);
