@@ -3,7 +3,7 @@
 **Data analisi:** 12 Aprile 2026  
 **Analista:** Antigravity Audit Engine  
 **Scope:** Intero codebase (`src/main`, `src/preload`, `src/renderer`, `src/shared`, config files)  
-**Ultimo aggiornamento:** 13 Aprile 2026 — v1.7.15 rilasciata con fix validazione .rtb importati
+**Ultimo aggiornamento:** 13 Aprile 2026 — v1.7.16 rilasciata con fix #13 indici SQL, #14 singleton lazy, #15 dynamic import
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|---|---|
 | 🔴 **Gravissime** | 5 | ✅ 5 (v1.7.8–v1.7.14) | — |
 | 🟠 **Gravi** | 7 | ✅ 4 (+ 1 non-bug) | 🟠 2 |
-| 🟡 **Medie** | 8 | — | 🟡 8 |
+| 🟡 **Medie** | 8 | ✅ 3 (v1.7.16) | 🟡 5 |
 | 🟢 **Lievi** | 6 | ✅ 2 | 🟢 4 |
 | 🔵 **Feature mancanti** | 10 | — | 🔵 10 |
 | 📦 **Build** | 1 | ✅ 1 | — |
@@ -148,9 +148,18 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 
 ## 🟡 Criticità MEDIE (P2 — Da pianificare) — Tutte APERTE
 
-### 13. Nessun indice SQL sulla tabella `history`
-### 14. Singleton mutabile globale per `botEngine`
-### 15. `dynamic import('electron')` dentro un loop
+### ~~13. Nessun indice SQL sulla tabella `history`~~ — ✅ RISOLTO in v1.7.16
+
+> **Fix applicato:** Aggiunti `idx_history_bot_id` e `idx_history_bot_id_sent_at` in `schema.ts`. Coprono `isProcessed()` e tutte le query COUNT stats. Idempotenti (`IF NOT EXISTS`), applicati sia allo schema iniziale (DB v6) che come migration v6 automatica per i DB esistenti.
+
+### ~~14. Singleton mutabile globale per `botEngine`~~ — ✅ RISOLTO in v1.7.16
+
+> **Fix applicato:** `new BotEngine()` non viene più eseguito all'import del modulo. Sostituito con `getBotEngine()` (lazy singleton). `ipc.ts` aggiornato a importare `getBotEngine` e chiamarla in tutti e 4 i call-site. L'istanza viene creata solo al primo handler IPC, dopo che l'app è pronta.
+
+### ~~15. `dynamic import('electron')` dentro un loop~~ — ✅ RISOLTO in v1.7.16
+
+> **Fix applicato:** `Notification` aggiunta all'import statico in cima a `engine.ts`. Rimosso il `import('electron').then(...)` asincrono eseguito ad ogni item inviato nel loop `processPublishQueue`. Guard semplificato in `if (bot.notifications_enabled && Notification.isSupported())`.
+
 ### 16. `db` esportato come variabile globale mutabile
 ### 17. Nessuna gestione del rate-limiting per bot con molti feed
 ### 18. `isActive` booleano vs intero inconsistente
@@ -217,12 +226,12 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 7. ✅ Rimuovere segreto hardcoded e usare `safeStorage` per export (bug #1) — *RISOLTO v1.7.10*
 8. ✅ Abilitare `sandbox: true` nel renderer (bug #2) — *RISOLTO v1.7.12*
 9. ✅ Validare struttura file `.rtb` importati (bug #10) — *RISOLTO v1.7.15*
-10. 📊 Aggiungere indice SQL alla history (bug #13)
-11. 🔧 Normalizzare `isActive` booleano vs intero (bug #18)
-12. 🛡️ Spostare backup dopo le migrazioni (bug #20)
-13. 🔧 Rimuovere `db` globale mutabile (bug #16)
-14. 🔧 Eliminare singleton `botEngine` (bug #14)
-15. ⚡ Eliminare `dynamic import('electron')` in loop (bug #15)
+10. ✅ Aggiungere indice SQL alla history (bug #13) — *RISOLTO v1.7.16*
+11. ✅ Eliminare singleton `botEngine` (bug #14) — *RISOLTO v1.7.16*
+12. ✅ Eliminare `dynamic import('electron')` in loop (bug #15) — *RISOLTO v1.7.16*
+13. 🔧 Normalizzare `isActive` booleano vs intero (bug #18)
+14. 🛡️ Spostare backup dopo le migrazioni (bug #20)
+15. 🔧 Rimuovere `db` globale mutabile (bug #16)
 16. 🚦 Implementare rate-limiting (bug #17)
 17. 🎬 Aggiungere cache/throttle YouTube Innertube (bug #19)
 

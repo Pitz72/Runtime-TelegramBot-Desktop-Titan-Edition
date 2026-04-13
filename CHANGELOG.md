@@ -2,7 +2,7 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.7.x (Corrente)](docs/changelogs/CHANGELOG_v1.7.15.md) — Versione attuale: v1.7.15. Fix sicurezza: validazione strutturale file .rtb importati (anti-SSRF, tipo feed, campi obbligatori) in importSingleBot e importConfig.
+- [v1.7.x (Corrente)](docs/changelogs/CHANGELOG_v1.7.16.md) — Versione attuale: v1.7.16. Fix tecnici: indici SQL su history, singleton botEngine lazy, rimosso import dinamico electron nel loop di publish.
 - [v1.6.x (Archivio)](docs/changelogs/v1.6.1.md) — v1.6.0–v1.6.1: OmniSync `.rtb` (portabilità bot cross-machine) e fix stabilità.
 - [v1.5.x (Archivio)](docs/changelogs/v1.5.4.md) — v1.5.0–v1.5.4: Template messaggi personalizzabili con Smart Chips, editor visivo integrato.
 - [v1.4.x (Archivio)](docs/changelogs/v1.4.x.md) — v1.4.0–v1.4.2: Quiet Hours, notifiche native OS, job queue asincrona.
