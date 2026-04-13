@@ -25,8 +25,14 @@ export default defineConfig({
                 entry: path.join(__dirname, 'src/main/index.ts'),
                 vite: {
                     build: {
-                        ssr: true,
                         outDir: path.join(__dirname, 'dist-electron/main'),
+                        // vite-plugin-electron (index.js:42) imposta build.lib.formats
+                        // a ["es"] quando package.json ha "type":"module", ignorando
+                        // rollupOptions.output.format: 'cjs'. Per forzare CJS dobbiamo
+                        // sovrascrivere formats qui, che viene mergiato sopra il default.
+                        lib: {
+                            formats: ['cjs'],
+                        },
                         rollupOptions: {
                             external: ['better-sqlite3', 'electron'],
                             output: {
@@ -34,13 +40,6 @@ export default defineConfig({
                                 entryFileNames: '[name].cjs',
                             }
                         }
-                    },
-                    // Forza il bundling inline di TUTTE le dipendenze JS
-                    // (tranne better-sqlite3 nativo ed electron, già in rollupOptions.external).
-                    // Senza questo, SSR mode esternalizza tutto e l'intero node_modules
-                    // finisce nell'asar, gonfiando l'installer da ~90MB a 1.5GB.
-                    ssr: {
-                        noExternal: true
                     }
                 }
             },
