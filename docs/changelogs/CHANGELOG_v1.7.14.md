@@ -80,3 +80,29 @@ Evita che URL malformati (`?v=`) vengano generati e inseriti in history con MD5 
 
 ## 📦 Build e Versione
 - Versione aggiornata alla **v1.7.14** in `package.json`.
+
+---
+
+## 🔒 Aggiornamento Dipendenze Critiche (post-release, stesso commit)
+
+Risolto il problema P0 **#5 — Dipendenze criticamente obsolete**. Nessuna modifica al codice sorgente, solo aggiornamento `package.json` e `package-lock.json`. TypeScript typecheck: ✅ zero errori.
+
+| Pacchetto | Da | A | Note |
+|---|---|---|---|
+| `electron` | `28.2.0` | `32.3.3` | Electron 28 era EOL con CVE noti. Electron 32 è LTS supportato. |
+| `electron-builder` | `24.9.1` | `25.1.8` | Compatibilità con Electron 32, build pipeline aggiornata. |
+| `vite` | `4.5.2` | `5.4.21` | Vite 4 aveva vulnerabilità directory traversal note. Vite 5 LTS. |
+| `@vitejs/plugin-react` | `4.2.1` | `4.7.0` | Compatibile con Vite 5. |
+| `vite-plugin-electron` | `0.15.4` | `0.28.8` | Versione Vite 4 → versione Vite 5 compatible. |
+| `vite-plugin-electron-renderer` | `0.14.5` | `0.14.6` | Aggiornamento patch. |
+| `typescript` | `5.3.3` | `5.9.3` | Ultimo TypeScript 5.x disponibile. |
+| `@types/node` | `18.19.0` | `20.19.39` | Allineato a Node.js 20 LTS. |
+| `@types/react` | `18.2.48` | `18.3.28` | Allineato a React 18.3.x. |
+| `@types/react-dom` | `18.2.18` | `18.3.7` | Allineato a React 18.3.x. |
+| `@types/better-sqlite3` | `7.6.9` | `7.6.13` | Aggiornamento patch tipi. |
+| `react` | `18.2.0` | `18.3.1` | Latest React 18.x. |
+| `react-dom` | `18.2.0` | `18.3.1` | Latest React 18.x. |
+
+**Non aggiornato (richiede valutazione dedicata):**
+- `rss-parser@3.13.0` — ultimo aggiornamento 2022, nessuna versione major alternativa attiva
+- Electron 32 → 33+ — possibile in futuro, Electron 32 è comunque LTS supportato
