@@ -5,22 +5,11 @@ import { validateFeedUrl } from './parser';
 import { TitanLogger } from '../logger';
 
 let youtube: any = null;
-let youtubeCreatedAt: number = 0;
-
-// Durata massima della sessione Innertube: 30 minuti
-const SESSION_MAX_AGE_MS = 30 * 60 * 1000;
 
 async function getYouTubeInstance() {
-    const now = Date.now();
-    // Reset della sessione se è troppo vecchia (evita sessioni stale)
-    if (youtube && (now - youtubeCreatedAt) > SESSION_MAX_AGE_MS) {
-        TitanLogger.log('[YouTube] Session expired, creating new instance...');
-        youtube = null;
-    }
     if (!youtube) {
         const { Innertube } = await import('youtubei.js');
         youtube = await Innertube.create();
-        youtubeCreatedAt = now;
         TitanLogger.log('[YouTube] New Innertube instance created');
     }
     return youtube;
@@ -29,7 +18,6 @@ async function getYouTubeInstance() {
 /** Forza il reset della sessione (utile se si ricevono risposte vuote) */
 export function resetYouTubeSession() {
     youtube = null;
-    youtubeCreatedAt = 0;
     TitanLogger.log('[YouTube] Session manually reset');
 }
 
@@ -82,11 +70,13 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
 
         const videosTab = await channel.getVideos();
 
-        // Log diagnostico robusto per debug
-        const videoList = videosTab?.videos || videosTab?.contents || [];
+        // Usiamo SOLO videosTab.videos — il fallback su videosTab.contents restituisce
+        // oggetti non-video (RichItem, sezioni) con v.id non corrispondente al videoId YouTube,
+        // producendo MD5 diversi tra sessioni diverse e bypassing del controllo isProcessed.
+        const videoList = videosTab?.videos || [];
         TitanLogger.log(`[YouTube] Raw videos count: ${videoList.length}`);
 
-        if (!videoList || videoList.length === 0) {
+        if (videoList.length === 0) {
             TitanLogger.log(`[YouTube] WARNING: No videos returned for channel "${targetId}". Possible API issue — resetting session.`);
             // Reset sessione per il prossimo tentativo
             resetYouTubeSession();
@@ -126,7 +116,9 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
                 const amountMatch = rawDateText.match(/(\d+)/);
                 const amount = amountMatch ? parseInt(amountMatch[0]) : 1;
 
-                if (rawDateText.includes('hour') || rawDateText.includes('or')) date.setHours(date.getHours() - amount);
+                // NOTA: NON usare includes('or') — "or" è contenuto in "giorno"/"giorni"
+                // causando il match errato di "giorni" (days) come "ora/ore" (hours).
+                if (rawDateText.includes('hour') || rawDateText.includes('ora') || rawDateText.includes('ore')) date.setHours(date.getHours() - amount);
                 else if (rawDateText.includes('day') || rawDateText.includes('giorn')) date.setDate(date.getDate() - amount);
                 else if (rawDateText.includes('week') || rawDateText.includes('settiman')) date.setDate(date.getDate() - amount * 7);
                 else if (rawDateText.includes('month') || rawDateText.includes('mes')) date.setMonth(date.getMonth() - amount);
@@ -150,6 +142,10 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             }
 
             const videoId = v.id || v.video_id || '';
+            if (!videoId) {
+                TitanLogger.log(`[YouTube] Skipping item with no video ID (type: ${v.type || 'unknown'})`);
+                continue;
+            }
             const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
 
             // Thumbnail: prova diversi path in base alla versione di youtubei.js

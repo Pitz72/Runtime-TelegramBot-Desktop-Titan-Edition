@@ -2,7 +2,7 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.7.x (Corrente)](docs/changelogs/v1.7.7.md) — Versione attuale: v1.7.7. Security patch: cifratura token export `.rtb` (AES-256-CBC), validazione anti-SSRF URL feed, validazione input IPC. Rimozione dipendenze orfane. Build cross-platform: **macOS DMG (Apple Silicon arm64, confermato ✅)** e **Linux AppImage/deb (confermato ✅)** tramite GitHub Actions CI.
+- [v1.7.x (Corrente)](docs/changelogs/CHANGELOG_v1.7.14.md) — Versione attuale: v1.7.14. Fix critico regressione spam YouTube: corretto date parser italiano ( matchava "giorni"), rimosso fallback  con IDs instabili, rimosso session reset automatico Innertube 30 min, aggiunta guardia videoId vuoto.
 - [v1.6.x (Archivio)](docs/changelogs/v1.6.1.md) — v1.6.0–v1.6.1: OmniSync `.rtb` (portabilità bot cross-machine) e fix stabilità.
 - [v1.5.x (Archivio)](docs/changelogs/v1.5.4.md) — v1.5.0–v1.5.4: Template messaggi personalizzabili con Smart Chips, editor visivo integrato.
 - [v1.4.x (Archivio)](docs/changelogs/v1.4.x.md) — v1.4.0–v1.4.2: Quiet Hours, notifiche native OS, job queue asincrona.
@@ -12,6 +12,6 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v1.7.7
+## Versione Attuale: v1.7.14
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/v1.7.7.md](docs/changelogs/v1.7.7.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.7.14.md](docs/changelogs/CHANGELOG_v1.7.14.md).
