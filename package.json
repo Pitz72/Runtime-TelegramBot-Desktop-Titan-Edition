@@ -1,6 +1,6 @@
 {
     "name": "titan-desktop",
-    "version": "1.7.8",
+    "version": "1.7.12",
     "description": "Desktop Application for Runtime Radio Telegram Bot",
     "author": {
         "name": "Runtime Radio",
@@ -67,7 +67,7 @@
         "rss-parser": "^3.13.0",
         "tailwind-merge": "^2.2.1",
         "telegraf": "^4.15.3",
-        "youtubei.js": "^14.0.0"
+        "youtubei.js": "^17.0.1"
     },
     "devDependencies": {
         "@types/better-sqlite3": "^7.6.9",

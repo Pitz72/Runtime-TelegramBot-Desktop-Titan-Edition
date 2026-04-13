@@ -2,15 +2,35 @@
 import crypto from 'crypto';
 import { RssItem } from './types';
 import { validateFeedUrl } from './parser';
+import { TitanLogger } from '../logger';
 
 let youtube: any = null;
+let youtubeCreatedAt: number = 0;
+
+// Durata massima della sessione Innertube: 30 minuti
+const SESSION_MAX_AGE_MS = 30 * 60 * 1000;
 
 async function getYouTubeInstance() {
+    const now = Date.now();
+    // Reset della sessione se è troppo vecchia (evita sessioni stale)
+    if (youtube && (now - youtubeCreatedAt) > SESSION_MAX_AGE_MS) {
+        TitanLogger.log('[YouTube] Session expired, creating new instance...');
+        youtube = null;
+    }
     if (!youtube) {
         const { Innertube } = await import('youtubei.js');
         youtube = await Innertube.create();
+        youtubeCreatedAt = now;
+        TitanLogger.log('[YouTube] New Innertube instance created');
     }
     return youtube;
+}
+
+/** Forza il reset della sessione (utile se si ricevono risposte vuote) */
+export function resetYouTubeSession() {
+    youtube = null;
+    youtubeCreatedAt = 0;
+    TitanLogger.log('[YouTube] Session manually reset');
 }
 
 function generateId(link: string): string {
@@ -41,29 +61,42 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             targetId = parts[parts.length - 1];
         }
 
+        TitanLogger.log(`[YouTube] Resolving channel: ${targetId}`);
+
         let channel;
         try {
             // youtubei.js getChannel works with handles too (e.g. '@RuntimeRadio')
             channel = await yt.getChannel(targetId);
         } catch (e) {
             // Se fallisce, proviamo a cercarlo (spesso utile per handle nuovi o URL strani)
+            TitanLogger.log(`[YouTube] Direct getChannel failed for "${targetId}", trying search...`);
             const search = await yt.search(targetId, { type: 'channel' });
-            if (search.channels.length > 0) {
+            if (search.channels && search.channels.length > 0) {
                 channel = await yt.getChannel(search.channels[0].id);
             } else {
                 throw new Error(`Canale YouTube non trovato: ${targetId}`);
             }
         }
 
-        const videos = await channel.getVideos();
-        const items: RssItem[] = [];
+        TitanLogger.log(`[YouTube] Channel found: ${channel?.metadata?.title || 'unknown'}`);
 
-        if (!videos.videos || videos.videos.length === 0) {
+        const videosTab = await channel.getVideos();
+
+        // Log diagnostico robusto per debug
+        const videoList = videosTab?.videos || videosTab?.contents || [];
+        TitanLogger.log(`[YouTube] Raw videos count: ${videoList.length}`);
+
+        if (!videoList || videoList.length === 0) {
+            TitanLogger.log(`[YouTube] WARNING: No videos returned for channel "${targetId}". Possible API issue — resetting session.`);
+            // Reset sessione per il prossimo tentativo
+            resetYouTubeSession();
             return [];
         }
 
+        const items: RssItem[] = [];
+
         // Prendiamo i primi 15 video
-        const recentVideos = videos.videos.slice(0, 15);
+        const recentVideos = videoList.slice(0, 15);
 
         for (const v of recentVideos) {
             // --- FILTRO ANTI-PREMIERE E PROGRAMMATI ---
@@ -77,7 +110,7 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
                 rawDateText.includes('scheduled');
 
             if (isUpcoming || isPremiere || textIndicatesFuture) {
-                // Salta questo video, non è ancora uscito realmente
+                TitanLogger.log(`[YouTube] Skipping upcoming/premiere: ${v.title?.text || v.id}`);
                 continue;
             }
             // ------------------------------------------
@@ -85,42 +118,63 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             // youtubei.js Video object from getVideos() has 'published' text like '2 hours ago'
             // We'll estimate the date based on the text for the cutoff logic.
 
-            let date = new Date();
-            const dateText = v.published?.text || v.video_info?.text || "";
+            let date: Date | null = null;
 
-            if (dateText.includes('ago')) {
-                const parts = dateText.split(' ');
-                // Sulla base del formato "16 hours ago" o "2 days ago"
-                // Cerchiamo il primo numero
-                const amountMatch = dateText.match(/(\d+)/);
+            // Supporto sia per l'inglese ("ago") che per l'italiano ("fa")
+            if (rawDateText.includes('ago') || rawDateText.includes('fa')) {
+                date = new Date();
+                const amountMatch = rawDateText.match(/(\d+)/);
                 const amount = amountMatch ? parseInt(amountMatch[0]) : 1;
-                const unit = dateText.toLowerCase();
 
-                if (unit.includes('hour')) date.setHours(date.getHours() - amount);
-                else if (unit.includes('day')) date.setDate(date.getDate() - amount);
-                else if (unit.includes('week')) date.setDate(date.getDate() - amount * 7);
-                else if (unit.includes('month')) date.setMonth(date.getMonth() - amount);
-                else if (unit.includes('minute')) date.setMinutes(date.getMinutes() - amount);
-                else if (unit.includes('second')) date.setSeconds(date.getSeconds() - amount);
-                else if (unit.includes('year')) date.setFullYear(date.getFullYear() - amount);
+                if (rawDateText.includes('hour') || rawDateText.includes('or')) date.setHours(date.getHours() - amount);
+                else if (rawDateText.includes('day') || rawDateText.includes('giorn')) date.setDate(date.getDate() - amount);
+                else if (rawDateText.includes('week') || rawDateText.includes('settiman')) date.setDate(date.getDate() - amount * 7);
+                else if (rawDateText.includes('month') || rawDateText.includes('mes')) date.setMonth(date.getMonth() - amount);
+                else if (rawDateText.includes('minute') || rawDateText.includes('minut')) date.setMinutes(date.getMinutes() - amount);
+                else if (rawDateText.includes('second')) date.setSeconds(date.getSeconds() - amount);
+                else if (rawDateText.includes('year') || rawDateText.includes('ann')) date.setFullYear(date.getFullYear() - amount);
+            } else {
+                // Prova il parsing diretto per date fisse (es. "Apr 10, 2026")
+                const parsed = Date.parse(rawDateText);
+                if (!isNaN(parsed)) {
+                    date = new Date(parsed);
+                }
             }
 
-            const videoLink = `https://www.youtube.com/watch?v=${v.id}`;
+            // --- PROTEZIONE ANTI-SPAM (CRITICA) ---
+            // Se non siamo riusciti a determinare la data, NON usiamo "new Date()" (adesso).
+            // Usiamo una data nel passato remoto (1 Gennaio 2000) per assicurarci che 
+            // il video venga ignorato dal filtro cutoffDate invece di causare spam.
+            if (!date) {
+                date = new Date(2000, 0, 1);
+            }
+
+            const videoId = v.id || v.video_id || '';
+            const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+
+            // Thumbnail: prova diversi path in base alla versione di youtubei.js
+            const thumbnail = v.thumbnails?.[0]?.url
+                || v.best_thumbnail?.url
+                || v.thumbnail?.url
+                || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : undefined);
 
             items.push({
-                title: v.title?.text || 'No Title',
+                title: v.title?.text || v.title || 'No Title',
                 link: videoLink,
                 pubDate: date,
-                summary: v.description_snippet?.text || '',
-                image: v.thumbnails?.[0]?.url,
-                feedName: channel.metadata.title,
+                summary: v.description_snippet?.text || v.short_description || '',
+                image: thumbnail,
+                feedName: channel.metadata?.title || channel.title || 'YouTube',
                 id: generateId(videoLink)
             });
         }
 
+        TitanLogger.log(`[YouTube] Parsed ${items.length} valid items from ${channel.metadata?.title || targetId}`);
         return items;
     } catch (error) {
-        console.error('[YouTube] Error fetching videos:', error);
+        TitanLogger.log(`[YouTube] Error fetching videos: ${error}`);
+        // Reset sessione dopo errore
+        resetYouTubeSession();
         throw error;
     }
 }

@@ -4,34 +4,49 @@ import { safeStorage } from 'electron';
 import crypto from 'crypto';
 
 // --- RTB Export Encryption ---
-// Il token viene cifrato con AES-256-CBC + IV casuale prima di essere scritto nel file .rtb.
-// La chiave è derivata da un segreto fisso dell'app: il token non è mai in plaintext nel file.
-const RTB_SECRET = 'titan-rtb-v1-runtime-radio-2026x!'; // 33 chars → sha256 → 32 byte key
+// Il token esportato viene cifrato utilizzando safeStorage (se disponibile).
+// I file .rtb risultano vincolati alla macchina corrente per la massima sicurezza.
 
 function encryptTokenForExport(plaintext: string): string {
-    const iv = crypto.randomBytes(16);
-    const key = crypto.createHash('sha256').update(RTB_SECRET).digest();
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    let encrypted = cipher.update(plaintext, 'utf8', 'base64');
-    encrypted += cipher.final('base64');
-    return JSON.stringify({ e: encrypted, iv: iv.toString('base64') });
+    if (safeStorage.isEncryptionAvailable()) {
+        try {
+            const encrypted = safeStorage.encryptString(plaintext);
+            return JSON.stringify({ ss: encrypted.toString('base64') });
+        } catch (error) {
+            console.error('Errore durante la cifratura safeStorage per export', error);
+        }
+    }
+    // Su macchine senza safeStorage, esportiamo il token vuoto per evitare data leak
+    return '';
 }
 
 function decryptTokenFromExport(data: string): string {
+    if (!data) return '';
     try {
         const parsed = JSON.parse(data);
-        if (parsed.e && parsed.iv) {
-            const key = crypto.createHash('sha256').update(RTB_SECRET).digest();
-            const iv = Buffer.from(parsed.iv, 'base64');
-            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            let decrypted = decipher.update(parsed.e, 'base64', 'utf8');
-            decrypted += decipher.final('utf8');
-            return decrypted;
+        // Nuovo formato sicuro via safeStorage (v1.7.8+)
+        if (parsed.ss && safeStorage.isEncryptionAvailable()) {
+            try {
+                const buffer = Buffer.from(parsed.ss, 'base64');
+                return safeStorage.decryptString(buffer);
+            } catch (error) {
+                console.error('Errore durante la decifratura safeStorage di un export', error);
+                return ''; // Token illeggibile o proveniente da altra macchina
+            }
+        } 
+        // Vecchio formato vulnerabile (v1.7.7) basato su chiave hardcoded
+        else if (parsed.e && parsed.iv) {
+            return ''; // Forziamo il reinserimento del token per i vecchi export per sicurezza
         }
     } catch {
-        // Formato non cifrato: compatibilità con file .rtb precedenti alla v1.7.7
+        // Fallback per file .rtb molto vecchi (pre-v1.7.7) dove il token era in chiaro.
+        // Se il parse fallisce, la stringa potrebbe essere il token raw.
     }
-    return data; // Fallback plaintext per file legacy
+    
+    // Evita di restituire blob JSON non validi come token
+    if (data.startsWith('{')) return '';
+    
+    return data;
 }
 
 export class BotManager {
