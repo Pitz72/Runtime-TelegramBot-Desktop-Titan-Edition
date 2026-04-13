@@ -106,3 +106,5 @@ Risolto il problema P0 **#5 — Dipendenze criticamente obsolete**. Nessuna modi
 **Non aggiornato (richiede valutazione dedicata):**
 - `rss-parser@3.13.0` — ultimo aggiornamento 2022, nessuna versione major alternativa attiva
 - Electron 32 → 33+ — possibile in futuro, Electron 32 è comunque LTS supportato
+
+**Build verificata:** `Runtime Telegram Bot Titan Edition Setup 1.7.14.exe` compilato con successo con Electron 32.3.3 + Vite 5.4.21. TypeScript ✅ zero errori.
