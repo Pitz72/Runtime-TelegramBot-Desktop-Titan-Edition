@@ -2,6 +2,60 @@ import { db } from '../database/schema';
 import { BotConfig, FeedConfig } from '../../shared/types';
 import { safeStorage } from 'electron';
 import crypto from 'crypto';
+import { validateFeedUrl } from './parser';
+
+// --- RTB Import Validation ---
+// Stesso set di regole applicato dagli handler IPC (ipc.ts) per create-bot/add-feed,
+// ma riapplicato qui perché importSingleBot/importConfig bypassano il layer IPC.
+
+const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+function rtbAssertString(value: unknown, field: string): string {
+    if (typeof value !== 'string' || value.trim() === '') {
+        throw new Error(`Campo obbligatorio mancante o non valido nel file .rtb: "${field}"`);
+    }
+    return value.trim();
+}
+
+function rtbAssertCheckInterval(value: unknown): number {
+    if (value === undefined || value === null) return 15;
+    const n = Number(value);
+    if (!Number.isInteger(n) || n < 1 || n > 1440) {
+        throw new Error(`check_interval nel file .rtb deve essere compreso tra 1 e 1440, ricevuto: ${value}`);
+    }
+    return n;
+}
+
+function rtbAssertTimeOrDefault(value: unknown, defaultVal: string): string {
+    if (value === undefined || value === null) return defaultVal;
+    if (typeof value !== 'string' || !TIME_REGEX.test(value)) return defaultVal;
+    return value;
+}
+
+function rtbAssertFeedType(value: unknown): 'podcast' | 'news' | 'youtube' {
+    if (value !== 'podcast' && value !== 'news' && value !== 'youtube') {
+        throw new Error(`Tipo feed non valido nel file .rtb: "${value}". Valori consentiti: podcast, news, youtube`);
+    }
+    return value;
+}
+
+function validateRtbBot(bot: any): void {
+    rtbAssertString(bot.name, 'bot.name');
+    rtbAssertString(bot.channelId ?? bot.channel_id, 'bot.channelId');
+    rtbAssertCheckInterval(bot.checkInterval ?? bot.check_interval);
+    rtbAssertTimeOrDefault(bot.sendFrom ?? bot.send_from, '00:00');
+    rtbAssertTimeOrDefault(bot.sendUntil ?? bot.send_until, '23:59');
+}
+
+function validateRtbFeed(feed: any): void {
+    rtbAssertString(feed.name, 'feed.name');
+    const type = rtbAssertFeedType(feed.type);
+    const url = rtbAssertString(feed.url, 'feed.url');
+    // Validazione anti-SSRF: stessa regola di add-feed in ipc.ts
+    if (type !== 'youtube') {
+        validateFeedUrl(url);
+    }
+}
 
 // --- RTB Export Encryption ---
 // Il token esportato viene cifrato utilizzando safeStorage (se disponibile).
@@ -179,6 +233,15 @@ export class BotManager {
         const data = JSON.parse(jsonData);
         if (!Array.isArray(data)) throw new Error("Invalid config format");
 
+        // Validazione strutturale di tutti i bot e feed prima di toccare il DB
+        for (const bot of data) {
+            if (!bot || typeof bot !== 'object') throw new Error('Elemento non valido nel file .rtb multi-bot');
+            validateRtbBot({ ...bot, channelId: bot.channel_id, checkInterval: bot.check_interval, sendFrom: bot.send_from, sendUntil: bot.send_until });
+            if (Array.isArray(bot.feeds)) {
+                for (const f of bot.feeds) validateRtbFeed(f);
+            }
+        }
+
         const applyImport = db.transaction(() => {
             for (const bot of data) {
                 const botId = BotManager.createBot(
@@ -276,6 +339,10 @@ export class BotManager {
             if (!data.bot || !data.feeds || !Array.isArray(data.feeds)) {
                 throw new Error('Formato .rtb non valido');
             }
+
+            // Validazione strutturale: stesse regole degli handler IPC (ipc.ts)
+            validateRtbBot(data.bot);
+            for (const feed of data.feeds) validateRtbFeed(feed);
 
             const newBotId = db.transaction(() => {
                 // Instanzio il bot e questo ne incapsula il token in sicirezza
