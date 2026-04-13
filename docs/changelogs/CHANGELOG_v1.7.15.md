@@ -47,3 +47,73 @@ dal file `.rtb`.
 
 ## 📦 Versione
 - Versione aggiornata alla **v1.7.15** in `package.json`.
+
+---
+
+## 🔧 Fix Build: SyntaxError "Cannot use import statement outside a module"
+
+### Problema
+
+L'app installata crashava immediatamente all'avvio con:
+
+```
+SyntaxError: Cannot use import statement outside a module
+  at C:\...\app.asar\dist-electron\main\index.cjs:8
+  import require$$0$3, { app, BrowserWindow, safeStorage, ... } from "electron";
+```
+
+Il file `index.cjs` conteneva `import` ESM nonostante l'estensione `.cjs`.
+
+### Diagnosi
+
+Due tentativi falliti prima di identificare la causa radice:
+
+**Tentativo 1 — `format: 'cjs'` in `rollupOptions.output`**
+Aggiungere `format: 'cjs'` agli output di Rollup non ha prodotto effetto.
+Causa: con `build.ssr: true` (Vite 5), il formato SSR di default è ESM
+e sovrascrive `rollupOptions.output.format`.
+
+**Tentativo 2 — Rimozione di `build.ssr: true`**
+Senza SSR mode, Rollup avrebbe dovuto rispettare `format: 'cjs'`.
+Causa: `vite-plugin-electron/dist/index.js` (riga 42) imposta internamente:
+```js
+formats: esmodule ? ["es"] : ["cjs"]
+```
+Siccome `package.json` ha `"type": "module"`, `esmodule = true` →
+il plugin forzava `build.lib.formats: ["es"]`, che ha priorità maggiore
+rispetto a `rollupOptions.output.format` in Vite. Il risultato era ancora ESM.
+
+**Causa radice identificata:**
+`vite.mergeConfig()` applica il config utente sopra il default del plugin.
+L'unico modo per sovrascrivere `build.lib.formats` è impostarlo esplicitamente
+nel config utente, non in `rollupOptions.output.format`.
+
+### Fix applicato
+
+**File:** `vite.config.ts`
+
+```typescript
+// main process vite config
+build: {
+    outDir: '...',
+    lib: {
+        formats: ['cjs'],   // ← override del default ["es"] del plugin
+    },
+    rollupOptions: {
+        external: ['better-sqlite3', 'electron'],
+        output: {
+            format: 'cjs',
+            entryFileNames: '[name].cjs',
+        }
+    }
+}
+```
+
+Rimosso anche `build.ssr: true` e `ssr.noExternal: true` (non necessari:
+in lib mode non-SSR, Rollup bundla tutti i deps tranne quelli in `external`).
+
+### Risultato
+
+Output bundle main process: `index.cjs` + `node-8pVU8xir.cjs`
+Entrambi iniziano con `"use strict";var` — CJS puro, nessun `import` ESM.
+Dimensione installer invariata: **85 MB**.
