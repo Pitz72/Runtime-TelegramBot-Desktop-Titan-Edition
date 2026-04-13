@@ -30,6 +30,7 @@ export default defineConfig({
                         rollupOptions: {
                             external: ['better-sqlite3', 'electron'],
                             output: {
+                                format: 'cjs',
                                 entryFileNames: '[name].cjs',
                             }
                         }
