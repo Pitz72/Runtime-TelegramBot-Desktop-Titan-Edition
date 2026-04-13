@@ -42,4 +42,40 @@ L'interfaccia "Titan Glass" può risultare pesante su risoluzioni elevate (4K) o
 - **Soluzione applicata**: `ssr.noExternal: true` in `vite.config.ts` + pattern `files` espliciti in `package.json`. Installer ridotto a **80.9 MB**.
 
 ---
+
+## 🗺️ Roadmap verso v2.0.0 (annotazione 13 Aprile 2026)
+
+Tutti i punti aperti nel documento di analisi Gemini verranno risolti prima del rilascio della **v2.0.0**.
+L'ordine di priorità previsto è:
+
+### Blocco A — Fix tecnici (P2, medie)
+- **#13** Aggiungere indici SQL sulla tabella `history`
+- **#18** Normalizzare `isActive` booleano vs intero
+- **#20** Spostare il backup **dopo** le migrazioni
+- **#16** Rimuovere `db` come variabile globale mutabile
+- **#14** Rimuovere singleton mutabile globale `botEngine`
+- **#15** Eliminare `dynamic import('electron')` dentro loop
+- **#17** Implementare rate-limiting per bot con molti feed
+- **#19** Aggiungere cache/throttle a YouTube Innertube
+
+### Blocco B — Lievi e UI
+- **#22** Sostituire `key={i}` (indice) con ID stabili nei log
+- **#23** Introdurre logging strutturato
+- **#24** Rimuovere/spostare i file di build log dalla root
+- **#26** Rimuovere il file LICENSE duplicato dalla root
+- **F1-F10** Feature consigliate (validatore template, retry queue, dashboard multi-bot, ecc.)
+
+### Blocco C — Feature grandi
+- Tutte le feature F1-F10 del documento Gemini
+
+### 🔴 Ultimo punto prima del rilascio v2.0.0
+> **#11 — `autoUpdater` nativo (electron-updater + GitHub Releases)**
+>
+> Questo sarà il **LAST** intervento prima del rilascio ufficiale della **v2.0.0**.
+> Verrà implementato solo dopo che tutti i punti precedenti (fix, ottimizzazioni e feature)
+> saranno completati e verificati. L'obiettivo è garantire che la prima versione major
+> disponga già di un sistema di aggiornamento automatico nativo e firmato.
+
+---
 *Note registrate il 01/04/2026, aggiornate il 12/04/2026 con le risoluzioni della v1.7.8*
+*Roadmap v2.0.0 annotata il 13/04/2026*
