@@ -81,13 +81,16 @@ export class BotEngine {
         TitanLogger.log("🛑 Engine Stopped");
     }
 
-    /** Remove cached client when a bot is deleted */
+    /** Remove cached client and pending jobs when a bot is deleted */
     removeClient(botId: number) {
         const client = this.clients.get(botId);
         if (client) {
             client.abort();
             this.clients.delete(botId);
         }
+        
+        // Svuota immediatamente la coda di invio da eventuali job riferiti al bot eliminato
+        this.publishQueue = this.publishQueue.filter(job => job.bot.id !== botId);
     }
 
     private getClient(bot: BotConfig): TelegramClient {
@@ -178,6 +181,14 @@ export class BotEngine {
             } else {
                 items = await fetchFeed(feed.name, feed.url);
             }
+
+            // SAFETY CHECK: Validazione post-fetch. Poiché il fetch è asincrono (può durare svariati secondi),
+            // il bot potrebbe essere stato eliminato (CASCADE) in quel frangente dall'utente tramite la Dashboard.
+            if (!BotManager.getBots().some((b: any) => b.id === bot.id)) {
+                TitanLogger.log(`  ⚠️ ${tag} Elaborazione interrotta: il bot è stato eliminato durante il fetch.`);
+                return;
+            }
+
             TitanLogger.log(`  📋 ${tag} ${items.length} items da ${feed.name}`);
 
             let newCount = 0;
@@ -233,6 +244,14 @@ export class BotEngine {
             if (!job) continue;
 
             const { bot, feed, item } = job;
+            
+            // SAFETY CHECK: Validazione pre-publish. Evita che BotManager.markProcessed vada in crash (Foreign Key fail)
+            // se il bot originario della coda è stato eliminato prima del compimento dell'invio Telegram.
+            if (!BotManager.getBots().some((b: any) => b.id === bot.id)) {
+                TitanLogger.log(`  ⚠️ [${bot.name}] Job scartato dalla coda: il bot originario è stato eliminato.`);
+                continue;
+            }
+
             const tag = `[${bot.name}]`;
             const client = this.getClient(bot);
 
