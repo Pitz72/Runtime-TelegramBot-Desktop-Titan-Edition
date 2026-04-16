@@ -34,10 +34,17 @@ export default defineConfig({
                             formats: ['cjs'],
                         },
                         rollupOptions: {
+                            // In watch mode il watcher rileva i propri output e lancia
+                            // una seconda build che ignora lib.formats:['cjs'] → ESM in .cjs.
+                            // Escludendo le cartelle di output si rompe il loop.
+                            watch: {
+                                exclude: ['dist-electron/**', 'dist/**', 'node_modules/**'],
+                            },
                             external: ['better-sqlite3', 'electron'],
                             output: {
                                 format: 'cjs',
                                 entryFileNames: '[name].cjs',
+                                chunkFileNames: '[name]-[hash].cjs',
                             }
                         }
                     }
