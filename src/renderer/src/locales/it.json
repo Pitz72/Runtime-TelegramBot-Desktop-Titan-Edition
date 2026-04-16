@@ -139,7 +139,8 @@
         "insertVar": "Inserisci variabile:",
         "htmlHint": "Supporta HTML base Telegram (<b>grassetto</b>, <i>corsivo</i>, <a>link</a>). La versione di Titan verrà sempre aggiunta in automatico alla fine del messaggio di avvio.",
         "tabGeneral": "Generale",
-        "tabTemplates": "Template"
+        "tabTemplates": "Template",
+        "validOk": "Template valido — nessun problema rilevato"
     },
     "systemSettings": {
         "title": "Impostazioni di Sistema",

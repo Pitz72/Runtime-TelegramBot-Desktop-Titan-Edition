@@ -130,6 +130,18 @@
         "successUpdate": "来源更新成功",
         "successDelete": "来源已移除"
     },
+    "templateEditor": {
+        "templateSection": "消息模板",
+        "templateNews": "新闻模板",
+        "templatePodcast": "播客模板",
+        "templateYoutube": "YouTube 模板",
+        "templateStartup": "启动消息模板",
+        "insertVar": "插入变量：",
+        "htmlHint": "支持基本 Telegram HTML（<b>粗体</b>、<i>斜体</i>、<a>链接</a>）。Titan 版本将始终自动附加到启动消息末尾。",
+        "tabGeneral": "常规",
+        "tabTemplates": "模板",
+        "validOk": "模板有效 — 未检测到问题"
+    },
     "systemSettings": {
         "title": "系统设置",
         "subtitle": "数据和数据库管理",

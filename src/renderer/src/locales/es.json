@@ -130,6 +130,18 @@
         "successUpdate": "Fuente actualizada con éxito",
         "successDelete": "Fuente eliminada"
     },
+    "templateEditor": {
+        "templateSection": "Plantillas de Mensajes",
+        "templateNews": "Plantilla News",
+        "templatePodcast": "Plantilla Podcast",
+        "templateYoutube": "Plantilla YouTube",
+        "templateStartup": "Plantilla de Mensaje de Inicio",
+        "insertVar": "Insertar variable:",
+        "htmlHint": "Compatible con HTML básico de Telegram (<b>negrita</b>, <i>cursiva</i>, <a>enlace</a>). La versión de Titan se añade automáticamente al mensaje de inicio.",
+        "tabGeneral": "General",
+        "tabTemplates": "Plantillas",
+        "validOk": "Plantilla válida — no se detectaron problemas"
+    },
     "systemSettings": {
         "title": "Ajustes del Sistema",
         "subtitle": "Gestión de datos",

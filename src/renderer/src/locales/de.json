@@ -130,6 +130,18 @@
         "successUpdate": "Quelle erfolgreich aktualisiert",
         "successDelete": "Quelle entfernt"
     },
+    "templateEditor": {
+        "templateSection": "Nachrichtenvorlagen",
+        "templateNews": "News-Vorlage",
+        "templatePodcast": "Podcast-Vorlage",
+        "templateYoutube": "YouTube-Vorlage",
+        "templateStartup": "Startmeldungsvorlage",
+        "insertVar": "Variable einfügen:",
+        "htmlHint": "Unterstützt Telegram-HTML (<b>fett</b>, <i>kursiv</i>, <a>Link</a>). Die Titan-Version wird automatisch an die Startnachricht angehängt.",
+        "tabGeneral": "Allgemein",
+        "tabTemplates": "Vorlagen",
+        "validOk": "Vorlage gültig — keine Probleme erkannt"
+    },
     "systemSettings": {
         "title": "Systemeinstellungen",
         "subtitle": "Daten- und Datenbankmanagement",
