@@ -1,4 +1,5 @@
-import { db } from '../database/schema';
+import { getDB } from '../database/schema';
+const db = () => getDB(); // lazy accessor — fix #16
 import { BotConfig, FeedConfig } from '../../shared/types';
 import { safeStorage } from 'electron';
 import crypto from 'crypto';
@@ -106,7 +107,7 @@ function decryptTokenFromExport(data: string): string {
 export class BotManager {
     // --- BOTS ---
     static getBots(): BotConfig[] {
-        const bots = db.prepare('SELECT * FROM bots ORDER BY created_at DESC').all() as BotConfig[];
+        const bots = db().prepare('SELECT * FROM bots ORDER BY created_at DESC').all() as BotConfig[];
         return bots.map(bot => {
             let token = bot.token;
             if (safeStorage.isEncryptionAvailable()) {
@@ -117,10 +118,16 @@ export class BotManager {
                     // Se fallisce, il token è probabilmente in chiaro (vecchia versione).
                     // Lo migriamo crittografandolo e aggiornando il DB in background.
                     const encrypted = safeStorage.encryptString(token).toString('base64');
-                    db.prepare('UPDATE bots SET token = ? WHERE id = ?').run(encrypted, bot.id);
+                    db().prepare('UPDATE bots SET token = ? WHERE id = ?').run(encrypted, bot.id);
                 }
             }
-            return { ...bot, token };
+            // Normalizza i booleani SQLite (0/1) in boolean TypeScript — fix #18
+            return {
+                ...bot,
+                token,
+                is_active: bot.is_active === 1,
+                notifications_enabled: bot.notifications_enabled === 1,
+            };
         });
     }
 
@@ -131,68 +138,70 @@ export class BotManager {
         const sFrom = sendFrom || '00:00';
         const sUntil = sendUntil || '23:59';
         const secureToken = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(token).toString('base64') : token;
-        const stmt = db.prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         const info = stmt.run(name, secureToken, channelId, date, interval, notif, sFrom, sUntil, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null);
         return info.lastInsertRowid;
     }
 
     static updateBot(id: number, name: string, token: string, channelId: string, isActive: boolean, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string) {
         const secureToken = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(token).toString('base64') : token;
-        const stmt = db.prepare(
+        const stmt = db().prepare(
             'UPDATE bots SET name = ?, token = ?, channel_id = ?, is_active = ?, start_date = COALESCE(?, start_date), check_interval = COALESCE(?, check_interval), notifications_enabled = COALESCE(?, notifications_enabled), send_from = COALESCE(?, send_from), send_until = COALESCE(?, send_until), template_podcast = ?, template_news = ?, template_youtube = ?, template_startup = ? WHERE id = ?'
         );
         stmt.run(name, secureToken, channelId, isActive ? 1 : 0, startDate || null, checkInterval || null, notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : null, sendFrom || null, sendUntil || null, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null, id);
     }
 
     static deleteBot(id: number) {
-        db.prepare('DELETE FROM bots WHERE id = ?').run(id);
+        db().prepare('DELETE FROM bots WHERE id = ?').run(id);
     }
 
     // --- FEEDS ---
     static getFeeds(botId: number): FeedConfig[] {
-        return db.prepare('SELECT * FROM feeds WHERE bot_id = ? ORDER BY created_at DESC').all(botId) as FeedConfig[];
+        const rows = db().prepare('SELECT * FROM feeds WHERE bot_id = ? ORDER BY created_at DESC').all(botId) as any[];
+        // Normalizza is_active SQLite (0/1) in boolean TypeScript — fix #18
+        return rows.map(f => ({ ...f, is_active: f.is_active === 1 })) as FeedConfig[];
     }
 
     static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube') {
-        const stmt = db.prepare('INSERT INTO feeds (bot_id, name, url, type, is_active) VALUES (?, ?, ?, ?, 1)');
+        const stmt = db().prepare('INSERT INTO feeds (bot_id, name, url, type, is_active) VALUES (?, ?, ?, ?, 1)');
         stmt.run(bot_id, name, url, type);
     }
 
     static updateFeed(id: number, name: string, url: string, type: string) {
-        const stmt = db.prepare('UPDATE feeds SET name = ?, url = ?, type = ? WHERE id = ?');
+        const stmt = db().prepare('UPDATE feeds SET name = ?, url = ?, type = ? WHERE id = ?');
         stmt.run(name, url, type, id);
     }
 
     static deleteFeed(id: number) {
-        db.prepare('DELETE FROM feeds WHERE id = ?').run(id);
+        db().prepare('DELETE FROM feeds WHERE id = ?').run(id);
     }
 
     static toggleFeed(id: number, isActive: boolean) {
-        db.prepare('UPDATE feeds SET is_active = ? WHERE id = ?').run(isActive ? 1 : 0, id);
+        db().prepare('UPDATE feeds SET is_active = ? WHERE id = ?').run(isActive ? 1 : 0, id);
     }
 
     // --- HISTORY ---
     static isProcessed(botId: number, itemId: string): boolean {
-        const row = db.prepare('SELECT id FROM history WHERE bot_id = ? AND id = ?').get(botId, itemId);
+        const row = db().prepare('SELECT id FROM history WHERE bot_id = ? AND id = ?').get(botId, itemId);
         return !!row;
     }
 
     static markProcessed(botId: number, feedId: number, itemId: string, title: string) {
-        const stmt = db.prepare('INSERT OR IGNORE INTO history (id, bot_id, feed_id, title) VALUES (?, ?, ?, ?)');
+        const stmt = db().prepare('INSERT OR IGNORE INTO history (id, bot_id, feed_id, title) VALUES (?, ?, ?, ?)');
         stmt.run(itemId, botId, feedId, title);
     }
 
     static clearHistory(botId: number) {
-        db.prepare('DELETE FROM history WHERE bot_id = ?').run(botId);
+        db().prepare('DELETE FROM history WHERE bot_id = ?').run(botId);
     }
 
     // --- STATS ---
     static getStats(botId: number): { total: number; today: number; week: number } {
-        const total = (db.prepare('SELECT COUNT(*) as count FROM history WHERE bot_id = ?').get(botId) as any)?.count || 0;
-        const today = (db.prepare(
+        const total = (db().prepare('SELECT COUNT(*) as count FROM history WHERE bot_id = ?').get(botId) as any)?.count || 0;
+        const today = (db().prepare(
             "SELECT COUNT(*) as count FROM history WHERE bot_id = ? AND sent_at >= date('now', 'start of day')"
         ).get(botId) as any)?.count || 0;
-        const week = (db.prepare(
+        const week = (db().prepare(
             "SELECT COUNT(*) as count FROM history WHERE bot_id = ? AND sent_at >= date('now', '-7 days')"
         ).get(botId) as any)?.count || 0;
 
@@ -242,7 +251,7 @@ export class BotManager {
             }
         }
 
-        const applyImport = db.transaction(() => {
+        const applyImport = db().transaction(() => {
             for (const bot of data) {
                 const botId = BotManager.createBot(
                     bot.name,
@@ -260,16 +269,16 @@ export class BotManager {
                 );
 
                 if (bot.is_active === 0 || bot.is_active === false) {
-                    db.prepare('UPDATE bots SET is_active = 0 WHERE id = ?').run(botId);
+                    db().prepare('UPDATE bots SET is_active = 0 WHERE id = ?').run(botId);
                 }
 
                 if (Array.isArray(bot.feeds)) {
                     for (const f of bot.feeds) {
                         BotManager.addFeed(Number(botId), f.name, f.url, f.type);
                         if (f.is_active === 0 || f.is_active === false) {
-                            const lastFeed = db.prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(botId) as any;
+                            const lastFeed = db().prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(botId) as any;
                             if (lastFeed) {
-                                db.prepare('UPDATE feeds SET is_active = 0 WHERE id = ?').run(lastFeed.id);
+                                db().prepare('UPDATE feeds SET is_active = 0 WHERE id = ?').run(lastFeed.id);
                             }
                         }
                     }
@@ -283,7 +292,7 @@ export class BotManager {
     // --- IMPORT/EXPORT SINGOLO BOT (.rtb) ---
     static exportSingleBot(botId: number): string {
         try {
-            const botRecord = db.prepare('SELECT * FROM bots WHERE id = ?').get(botId) as any;
+            const botRecord = db().prepare('SELECT * FROM bots WHERE id = ?').get(botId) as any;
             if (!botRecord) {
                 throw new Error('Bot non trovato');
             }
@@ -300,7 +309,7 @@ export class BotManager {
             }
 
             // Recupera fields
-            const feeds = db.prepare('SELECT * FROM feeds WHERE bot_id = ?').all(botId) as any[];
+            const feeds = db().prepare('SELECT * FROM feeds WHERE bot_id = ?').all(botId) as any[];
 
             // Costruisci oggetto pulito
             const exportData = {
@@ -344,7 +353,7 @@ export class BotManager {
             validateRtbBot(data.bot);
             for (const feed of data.feeds) validateRtbFeed(feed);
 
-            const newBotId = db.transaction(() => {
+            const newBotId = db().transaction(() => {
                 // Instanzio il bot e questo ne incapsula il token in sicirezza
                 const createdBotId = BotManager.createBot(
                     data.bot.name,
@@ -362,7 +371,7 @@ export class BotManager {
                 ) as number;
 
                 // Aggiorna is_active (che createBot() omette partendo da acceso)
-                db.prepare(`
+                db().prepare(`
                     UPDATE bots 
                     SET is_active = ?
                     WHERE id = ?
@@ -380,9 +389,9 @@ export class BotManager {
                     );
 
                     if (feed.isActive === false) {
-                        const lastFeed = db.prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(createdBotId) as any;
+                        const lastFeed = db().prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(createdBotId) as any;
                         if (lastFeed) {
-                            db.prepare('UPDATE feeds SET is_active = 0 WHERE id = ?').run(lastFeed.id);
+                            db().prepare('UPDATE feeds SET is_active = 0 WHERE id = ?').run(lastFeed.id);
                         }
                     }
                 }

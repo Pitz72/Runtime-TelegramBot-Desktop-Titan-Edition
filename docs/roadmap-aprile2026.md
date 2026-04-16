@@ -51,10 +51,10 @@ Tutti i punti aperti nel documento di analisi Gemini verranno risolti prima del 
 L'ordine di priorità previsto è:
 
 ### Blocco A — Fix tecnici (P2, medie)
-- **#13** Aggiungere indici SQL sulla tabella `history`
-- **#18** Normalizzare `isActive` booleano vs intero
-- **#20** Spostare il backup **dopo** le migrazioni
-- **#16** Rimuovere `db` come variabile globale mutabile
+- ~~**#13** Aggiungere indici SQL sulla tabella `history`~~ ✅ FATTO v1.7.16
+- ~~**#18** Normalizzare `isActive` booleano vs intero~~ ✅ FATTO v1.8.1
+- ~~**#20** Spostare il backup **dopo** le migrazioni~~ ✅ FATTO v1.8.1
+- ~~**#16** Rimuovere `db` come variabile globale mutabile~~ ✅ FATTO v1.8.1
 - ~~**#14** Rimuovere singleton mutabile globale `botEngine`~~ ✅ FATTO v1.7.16
 - ~~**#15** Eliminare `dynamic import('electron')` dentro loop~~ ✅ FATTO v1.7.16
 - **#17** Implementare rate-limiting per bot con molti feed
@@ -83,3 +83,4 @@ L'ordine di priorità previsto è:
 *Note registrate il 01/04/2026, aggiornate il 12/04/2026 con le risoluzioni della v1.7.8*
 *Roadmap v2.0.0 annotata il 13/04/2026*
 *Aggiornata il 16/04/2026 — v1.8.0: F1 Validatore Template implementato. #13/#14/#15 risolti in v1.7.16.*
+*Aggiornata il 16/04/2026 — v1.8.1: #16 lazy DB init, #18 boolean normalization, #20 backup condizionale risolti. Blocco A quasi completo: rimangono solo #17 e #19.*
