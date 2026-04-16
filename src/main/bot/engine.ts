@@ -10,7 +10,11 @@ interface PublishJob {
     bot: BotConfig;
     feed: FeedConfig;
     item: any;
+    /** Numero di tentativi già effettuati (0 = primo invio) — F2 Retry Queue */
+    retryCount: number;
 }
+
+const MAX_RETRIES = 3;
 
 export class BotEngine {
     private isRunning: boolean = false;
@@ -232,7 +236,7 @@ export class BotEngine {
                 }
 
                 TitanLogger.log(`  🆕 ${tag} Added to queue: ${item.title}`);
-                this.publishQueue.push({ bot, feed, item });
+                this.publishQueue.push({ bot, feed, item, retryCount: 0 });
                 newCount++;
             }
 
@@ -301,7 +305,13 @@ export class BotEngine {
 
                 await new Promise(resolve => setTimeout(resolve, 3000));
             } else {
-                TitanLogger.log(`  ❌ ${tag} Send failed: ${item.title}`);
+                if (job.retryCount < MAX_RETRIES) {
+                    TitanLogger.log(`  ⚠️ ${tag} Send failed (tentativo ${job.retryCount + 1}/${MAX_RETRIES}): ${item.title} — riaccodato`);
+                    this.publishQueue.push({ ...job, retryCount: job.retryCount + 1 });
+                } else {
+                    TitanLogger.log(`  ❌ ${tag} Send definitivamente fallito dopo ${MAX_RETRIES} tentativi: ${item.title} — marcato come processato`);
+                    BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
+                }
             }
         }
 
