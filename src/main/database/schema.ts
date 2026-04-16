@@ -305,6 +305,29 @@ export function initDB() {
         console.log("Database version set to 8");
     }
 
+    // Safety check post-migration: verifica fisicamente l'esistenza delle colonne critiche.
+    // Difende da stati corrotti dove user_version è avanzato ma ALTER TABLE è fallito silenziosamente.
+    try {
+        const histCols = db.pragma('table_info(history)') as any[];
+        if (!histCols.some((c: any) => c.name === 'title_hash')) {
+            console.warn('Safety fix: title_hash mancante dalla tabella history — aggiunto retroattivamente.');
+            db.exec(`ALTER TABLE history ADD COLUMN title_hash TEXT`);
+            db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, feed_id, title_hash)`);
+        }
+    } catch (e) {
+        console.error('Safety check title_hash fallito:', e);
+    }
+
+    try {
+        const feedCols = db.pragma('table_info(feeds)') as any[];
+        if (!feedCols.some((c: any) => c.name === 'keyword_filter')) {
+            console.warn('Safety fix: keyword_filter mancante dalla tabella feeds — aggiunto retroattivamente.');
+            db.exec(`ALTER TABLE feeds ADD COLUMN keyword_filter TEXT DEFAULT NULL`);
+        }
+    } catch (e) {
+        console.error('Safety check keyword_filter fallito:', e);
+    }
+
     console.log('Database initialized at:', dbPath);
     return db;
 }
