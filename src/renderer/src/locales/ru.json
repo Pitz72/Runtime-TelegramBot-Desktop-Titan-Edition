@@ -130,6 +130,18 @@
         "successUpdate": "Источник успешно обновлен",
         "successDelete": "Источник удален"
     },
+    "templateEditor": {
+        "templateSection": "Шаблоны Сообщений",
+        "templateNews": "Шаблон Новостей",
+        "templatePodcast": "Шаблон Подкаста",
+        "templateYoutube": "Шаблон YouTube",
+        "templateStartup": "Шаблон Стартового Сообщения",
+        "insertVar": "Вставить переменную:",
+        "htmlHint": "Поддерживает базовый HTML Telegram (<b>жирный</b>, <i>курсив</i>, <a>ссылка</a>). Версия Titan всегда добавляется в конец стартового сообщения.",
+        "tabGeneral": "Общие",
+        "tabTemplates": "Шаблоны",
+        "validOk": "Шаблон корректен — проблем не обнаружено"
+    },
     "systemSettings": {
         "title": "Системные Настройки",
         "subtitle": "Управление данными",

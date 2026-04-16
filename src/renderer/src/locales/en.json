@@ -139,7 +139,8 @@
         "insertVar": "Insert variable:",
         "htmlHint": "Supports basic Telegram HTML (<b>bold</b>, <i>italic</i>, <a>link</a>). Titan version will always be appended automatically to the startup message.",
         "tabGeneral": "General",
-        "tabTemplates": "Templates"
+        "tabTemplates": "Templates",
+        "validOk": "Template valid — no issues detected"
     },
     "systemSettings": {
         "title": "System Settings",

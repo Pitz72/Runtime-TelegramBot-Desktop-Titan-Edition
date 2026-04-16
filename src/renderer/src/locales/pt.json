@@ -130,6 +130,18 @@
         "successUpdate": "Fonte atualizada com sucesso",
         "successDelete": "Fonte removida"
     },
+    "templateEditor": {
+        "templateSection": "Modelos de Mensagem",
+        "templateNews": "Modelo News",
+        "templatePodcast": "Modelo Podcast",
+        "templateYoutube": "Modelo YouTube",
+        "templateStartup": "Modelo de Mensagem de Inicialização",
+        "insertVar": "Inserir variável:",
+        "htmlHint": "Suporta HTML básico do Telegram (<b>negrito</b>, <i>itálico</i>, <a>link</a>). A versão do Titan é sempre adicionada automaticamente ao final da mensagem de inicialização.",
+        "tabGeneral": "Geral",
+        "tabTemplates": "Modelos",
+        "validOk": "Modelo válido — nenhum problema detectado"
+    },
     "systemSettings": {
         "title": "Configurações do Sistema",
         "subtitle": "Gerenciamento de dados",

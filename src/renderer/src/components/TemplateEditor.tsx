@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useTranslation } from '../locales/I18nContext';
+import { validateTemplate } from '../utils/templateValidator';
 
 interface Props {
     label: string;
@@ -12,6 +13,14 @@ interface Props {
 export function TemplateEditor({ label, value, onChange, defaultTemplate, hideChips = false }: Props) {
     const { t } = useTranslation();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const issues = useMemo(
+        () => validateTemplate(value, hideChips),
+        [value, hideChips]
+    );
+
+    const hasErrors = issues.some(i => i.severity === 'error');
+    const hasWarnings = issues.some(i => i.severity === 'warning');
 
     const insertText = (textToInsert: string) => {
         const textarea = textareaRef.current;
@@ -74,8 +83,44 @@ export function TemplateEditor({ label, value, onChange, defaultTemplate, hideCh
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={defaultTemplate}
-                className="w-full h-32 bg-dark-950 border border-titan-500/10 rounded-lg p-3 text-white focus:outline-none focus:border-titan-500/40 focus:ring-1 focus:ring-titan-500/40 transition-colors font-mono text-xs resize-y custom-scrollbar"
+                className={`w-full h-32 bg-dark-950 border rounded-lg p-3 text-white focus:outline-none focus:ring-1 transition-colors font-mono text-xs resize-y custom-scrollbar ${
+                    hasErrors
+                        ? 'border-red-500/40 focus:border-red-500/60 focus:ring-red-500/20'
+                        : hasWarnings
+                        ? 'border-yellow-500/30 focus:border-yellow-500/50 focus:ring-yellow-500/20'
+                        : 'border-titan-500/10 focus:border-titan-500/40 focus:ring-titan-500/40'
+                }`}
             />
+
+            {/* Validation panel */}
+            {value.trim() !== '' && (
+                <div className="space-y-1">
+                    {issues.length === 0 ? (
+                        <div className="flex items-center gap-1.5 text-[10px] text-green-400/70">
+                            <span>✓</span>
+                            <span>{t('templateEditor.validOk')}</span>
+                        </div>
+                    ) : (
+                        issues.map((issue, i) => (
+                            <div
+                                key={i}
+                                className={`flex items-start gap-1.5 text-[10px] leading-relaxed ${
+                                    issue.severity === 'error'
+                                        ? 'text-red-400'
+                                        : issue.severity === 'warning'
+                                        ? 'text-yellow-400'
+                                        : 'text-blue-400/70'
+                                }`}
+                            >
+                                <span className="shrink-0 mt-0.5 font-bold">
+                                    {issue.severity === 'error' ? '✗' : issue.severity === 'warning' ? '⚠' : 'ℹ'}
+                                </span>
+                                <span>{issue.message}</span>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
 
             <p className="text-[10px] text-neutral-500 mt-1">
                 {t('templateEditor.htmlHint')}
