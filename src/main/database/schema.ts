@@ -2,6 +2,7 @@ import Database from 'better-sqlite3';
 import { join, dirname } from 'path';
 import { app } from 'electron';
 import fs from 'fs';
+import crypto from 'crypto';
 
 const dbPath = join(app.getPath('userData'), 'titan.db');
 const dbDir = dirname(dbPath);
@@ -149,6 +150,7 @@ export function initDB() {
             bot_id INTEGER NOT NULL,
             feed_id INTEGER,
             title TEXT,
+            title_hash TEXT,
             sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id, bot_id),
             FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE
@@ -159,14 +161,15 @@ export function initDB() {
     db.exec(`
         CREATE INDEX IF NOT EXISTS idx_history_bot_id ON history(bot_id);
         CREATE INDEX IF NOT EXISTS idx_history_bot_id_sent_at ON history(bot_id, sent_at);
+        CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, feed_id, title_hash);
     `);
 
     // 3. Sistema di Versionamento Deterministic
     if (isNewInstall) {
         // È un'installazione pulita. Lo schema è già alla versione massima.
         // Saltiamo tutte le migrazioni e settiamo subito la versione a 6.
-        db.pragma('user_version = 6');
-        console.log("Nuova installazione rilevata. Database inizializzato alla v6.");
+        db.pragma('user_version = 7');
+        console.log("Nuova installazione rilevata. Database inizializzato alla v7.");
         console.log('Database initialized at:', dbPath);
         return db;
     }
@@ -177,7 +180,7 @@ export function initDB() {
     // 4. Backup automatico SOLO se servono migrazioni — fix #20
     // Cattura lo stato pre-migrazione per consentire il ripristino in caso di errore.
     // Su DB già alla versione corrente (nessuna migrazione), nessun backup viene creato.
-    if (currentVersion < 6) {
+    if (currentVersion < 7) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
@@ -258,6 +261,40 @@ export function initDB() {
         db.pragma('user_version = 6');
         currentVersion = 6;
         console.log("Database version set to 6");
+    }
+
+    if (currentVersion < 7) {
+        console.log("Migration v7: Adding title_hash column for anti-spam deduplication...");
+        // 1. Aggiungi la colonna (idempotente con try/catch)
+        try { db.exec(`ALTER TABLE history ADD COLUMN title_hash TEXT`); } catch (e) { }
+
+        // 2. Backfill: calcola MD5(lower(trim(title))) per tutte le righe esistenti in JS
+        //    (SQLite non ha MD5 nativo)
+        try {
+            const rows = db.prepare('SELECT rowid, title FROM history WHERE title_hash IS NULL AND title IS NOT NULL').all() as any[];
+            const updateStmt = db.prepare('UPDATE history SET title_hash = ? WHERE rowid = ?');
+            const backfill = db.transaction(() => {
+                for (const row of rows) {
+                    if (row.title && row.title.trim()) {
+                        const hash = crypto.createHash('md5').update(row.title.toLowerCase().trim()).digest('hex');
+                        updateStmt.run(hash, row.rowid);
+                    }
+                }
+            });
+            backfill();
+            console.log(`Migration v7: Backfilled title_hash for ${rows.length} history rows.`);
+        } catch (e) {
+            console.error("Migration v7: Errore nel backfill title_hash:", e);
+        }
+
+        // 3. Indice composito per il doppio-check anti-spam
+        try {
+            db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, feed_id, title_hash)`);
+        } catch (e) { }
+
+        db.pragma('user_version = 7');
+        currentVersion = 7;
+        console.log("Database version set to 7");
     }
 
     console.log('Database initialized at:', dbPath);

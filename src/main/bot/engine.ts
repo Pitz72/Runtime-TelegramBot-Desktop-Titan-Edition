@@ -226,7 +226,7 @@ export class BotEngine {
                     continue;
                 }
 
-                if (BotManager.isProcessed(bot.id, item.id)) {
+                if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
                     continue;
                 }
 

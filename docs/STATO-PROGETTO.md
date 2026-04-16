@@ -1,7 +1,7 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.8.5  
-**Ultimo aggiornamento:** 16 Aprile 2026  
+**Versione corrente:** v1.8.6  
+**Ultimo aggiornamento:** 17 Aprile 2026  
 **Repository:** https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
 
@@ -49,6 +49,7 @@
 - ✅ **F1** Validatore Intelligente dei Template — `templateValidator.ts` con 9 check: tag non supportati, tag non bilanciati, `<a>` senza `href`, chip sconosciuti, chip pericolosi in `href`, template vuoto, chip nel messaggio di avvio. Feedback real-time in `TemplateEditor.tsx` (bordo colorato + pannello messaggi). Localizzazione completa per 9 lingue. *(v1.8.0)*
 - ✅ **F2** Retry Queue per invii falliti — `PublishJob.retryCount`, `MAX_RETRIES = 3`. Su `success = false`: re-accoda con `retryCount + 1` (log `⚠️`); a esaurimento: `markProcessed()` per spezzare loop infinito (log `❌`). *(v1.8.4)*
 - ✅ **F3** Dashboard multi-bot — Dot stato `is_active` per ogni bot nella sidebar (verde/grigio, nome attenuato se disabilitato). Toggle `ALL BOTS / THIS BOT` nel header del log: filtra client-side per `[NomeBot]`, reset automatico al cambio bot, i18n 8 lingue. *(v1.8.5)*
+- ✅ **#27** Bug critico anti-spam — doppio check `isProcessed()`: MD5 link (primario) + MD5 titolo normalizzato per stesso feed (safety net). Schema v7 con `title_hash TEXT`, backfill automatico, indice `idx_history_title_dedup`. Zero spam su cambio URL publisher. *(v1.8.6)*
 
 ---
 

@@ -181,14 +181,39 @@ export class BotManager {
     }
 
     // --- HISTORY ---
-    static isProcessed(botId: number, itemId: string): boolean {
-        const row = db().prepare('SELECT id FROM history WHERE bot_id = ? AND id = ?').get(botId, itemId);
-        return !!row;
+
+    /**
+     * Controlla se un item è già stato pubblicato.
+     * Doppio controllo anti-spam — fix #27 (v1.8.6):
+     *   1. Match diretto su (bot_id, id): percorso veloce, comportamento invariato.
+     *   2. Match su title_hash: safety net per URL cambiate lato publisher.
+     *      Stesso titolo + stesso feed + stesso bot → già pubblicato, anche se il link è diverso.
+     */
+    static isProcessed(botId: number, itemId: string, feedId?: number, title?: string): boolean {
+        // Check 1: match esatto sull'ID (MD5 del link)
+        const byId = db().prepare('SELECT id FROM history WHERE bot_id = ? AND id = ?').get(botId, itemId);
+        if (byId) return true;
+
+        // Check 2: match per titolo normalizzato nello stesso feed (anti-spam URL change)
+        if (feedId !== undefined && title && title.trim()) {
+            const titleHash = crypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex');
+            const byTitle = db().prepare(
+                'SELECT id FROM history WHERE bot_id = ? AND feed_id = ? AND title_hash = ?'
+            ).get(botId, feedId, titleHash);
+            if (byTitle) return true;
+        }
+
+        return false;
     }
 
     static markProcessed(botId: number, feedId: number, itemId: string, title: string) {
-        const stmt = db().prepare('INSERT OR IGNORE INTO history (id, bot_id, feed_id, title) VALUES (?, ?, ?, ?)');
-        stmt.run(itemId, botId, feedId, title);
+        const titleHash = title && title.trim()
+            ? crypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex')
+            : null;
+        const stmt = db().prepare(
+            'INSERT OR IGNORE INTO history (id, bot_id, feed_id, title, title_hash) VALUES (?, ?, ?, ?, ?)'
+        );
+        stmt.run(itemId, botId, feedId, title, titleHash);
     }
 
     static clearHistory(botId: number) {
