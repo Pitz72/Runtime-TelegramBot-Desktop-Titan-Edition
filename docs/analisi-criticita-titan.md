@@ -3,7 +3,7 @@
 **Data analisi:** 12 Aprile 2026  
 **Analista:** Antigravity Audit Engine  
 **Scope:** Intero codebase (`src/main`, `src/preload`, `src/renderer`, `src/shared`, config files)  
-**Ultimo aggiornamento:** 13 Aprile 2026 — v1.7.16 rilasciata con fix #13 indici SQL, #14 singleton lazy, #15 dynamic import
+**Ultimo aggiornamento:** 16 Aprile 2026 — v1.8.0 rilasciata con F1 Validatore Intelligente dei Template
 
 ---
 
@@ -15,7 +15,7 @@
 | 🟠 **Gravi** | 7 | ✅ 4 (+ 1 non-bug) | 🟠 2 |
 | 🟡 **Medie** | 8 | ✅ 3 (v1.7.16) | 🟡 5 |
 | 🟢 **Lievi** | 6 | ✅ 2 | 🟢 4 |
-| 🔵 **Feature mancanti** | 10 | — | 🔵 10 |
+| 🔵 **Feature mancanti** | 10 | ✅ 1 (v1.8.0) | 🔵 9 |
 | 📦 **Build** | 1 | ✅ 1 | — |
 
 ---
@@ -206,9 +206,13 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 
 ---
 
-## 🔵 Funzionalità consigliate NON ancora previste — Tutte APERTE
+## 🔵 Funzionalità consigliate — 1 COMPLETATA, 9 APERTE
 
-*(F1–F10 invariate — vedere documento originale Gemini per i dettagli)*
+### ~~F1 — Validatore Intelligente dei Template~~ ✅ IMPLEMENTATO in v1.8.0
+
+> **Implementato il 16/04/2026:** Nuovo file `src/renderer/src/utils/templateValidator.ts` con funzione `validateTemplate()`. Integrato in `TemplateEditor.tsx` con feedback visivo real-time (bordo colorato + pannello messaggi). 9 tipi di check: tag HTML non supportati da Telegram, tag non bilanciati, `<a>` senza `href`, chip sconosciuti, chip pericolosi in `href`, template vuoto, chip nel messaggio di avvio. Localizzazione completata per tutte e 9 le lingue (de/es/fr/pt/ru/zh avevano la sezione `templateEditor` mancante, ora aggiunta).
+
+*(F2–F10 invariate — vedere documento originale Gemini per i dettagli)*
 
 ---
 
@@ -235,7 +239,9 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 16. 🚦 Implementare rate-limiting (bug #17)
 17. 🎬 Aggiungere cache/throttle YouTube Innertube (bug #19)
 
-### Funzionalità (F1–F10) e lievi (#22–#26)
+### ~~F1 — Validatore Intelligente dei Template~~ ✅ FATTO v1.8.0
+
+### Funzionalità (F2–F10) e lievi (#22–#26)
 *(Da pianificare nel percorso verso v2.0.0)*
 
 ### 🔴 Ultimo punto prima di v2.0.0

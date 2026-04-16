@@ -17,11 +17,13 @@ Durante l'assistenza odierna sono state identificate delle criticità nel motore
 
 ## 🚀 Nuove Funzionalità Proposte
 
-### Sistema di Verifica Intelligente dei Template
-Implementare un validatore in tempo reale (nel componente `TemplateEditor.tsx` o `BotSettingsModal.tsx`) che:
-- Verifichi che tutti i tag HTML siano chiusi correttamente (es. evitare errori come `<\a>`).
-- Verifichi l'uso di soli tag supportati da Telegram (b, i, u, code, pre, a).
-- Avvisi l'utente se i segnaposto (Smart Chips) sono inseriti in posizioni che potrebbero rompere la sintassi (es. dentro un attributo senza escape).
+### ~~Sistema di Verifica Intelligente dei Template~~ ✅ IMPLEMENTATO in v1.8.0
+~~Implementare un validatore in tempo reale (nel componente `TemplateEditor.tsx` o `BotSettingsModal.tsx`) che:~~
+~~- Verifichi che tutti i tag HTML siano chiusi correttamente (es. evitare errori come `<\a>`).~~
+~~- Verifichi l'uso di soli tag supportati da Telegram (b, i, u, code, pre, a).~~
+~~- Avvisi l'utente se i segnaposto (Smart Chips) sono inseriti in posizioni che potrebbero rompere la sintassi (es. dentro un attributo senza escape).~~
+
+> **Implementato in v1.8.0 (16 Aprile 2026):** Validatore sincrono `templateValidator.ts` integrato nel `TemplateEditor.tsx` con feedback real-time. 9 tipi di check: tag non supportati, tag non bilanciati, `<a>` senza `href`, chip sconosciuti, chip pericolosi in `href`, template vuoto, chip nel messaggio di avvio. Bordo textarea colorato in base allo stato. Localizzazione completa (9 lingue). Vedere `docs/changelogs/CHANGELOG_v1.8.0.md`.
 
 ---
 
@@ -53,8 +55,8 @@ L'ordine di priorità previsto è:
 - **#18** Normalizzare `isActive` booleano vs intero
 - **#20** Spostare il backup **dopo** le migrazioni
 - **#16** Rimuovere `db` come variabile globale mutabile
-- **#14** Rimuovere singleton mutabile globale `botEngine`
-- **#15** Eliminare `dynamic import('electron')` dentro loop
+- ~~**#14** Rimuovere singleton mutabile globale `botEngine`~~ ✅ FATTO v1.7.16
+- ~~**#15** Eliminare `dynamic import('electron')` dentro loop~~ ✅ FATTO v1.7.16
 - **#17** Implementare rate-limiting per bot con molti feed
 - **#19** Aggiungere cache/throttle a YouTube Innertube
 
@@ -63,10 +65,11 @@ L'ordine di priorità previsto è:
 - **#23** Introdurre logging strutturato
 - **#24** Rimuovere/spostare i file di build log dalla root
 - **#26** Rimuovere il file LICENSE duplicato dalla root
-- **F1-F10** Feature consigliate (validatore template, retry queue, dashboard multi-bot, ecc.)
+- ~~**F1 — Validatore Intelligente dei Template**~~ ✅ FATTO v1.8.0
+- **F2–F10** Feature rimanenti (retry queue, dashboard multi-bot, filtro keyword, scheduler per-feed, ecc.)
 
 ### Blocco C — Feature grandi
-- Tutte le feature F1-F10 del documento Gemini
+- Feature F2–F10 del documento Gemini (validatore template già fatto)
 
 ### 🔴 Ultimo punto prima del rilascio v2.0.0
 > **#11 — `autoUpdater` nativo (electron-updater + GitHub Releases)**
@@ -79,3 +82,4 @@ L'ordine di priorità previsto è:
 ---
 *Note registrate il 01/04/2026, aggiornate il 12/04/2026 con le risoluzioni della v1.7.8*
 *Roadmap v2.0.0 annotata il 13/04/2026*
+*Aggiornata il 16/04/2026 — v1.8.0: F1 Validatore Template implementato. #13/#14/#15 risolti in v1.7.16.*
