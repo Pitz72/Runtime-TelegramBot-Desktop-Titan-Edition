@@ -158,11 +158,11 @@ export function initDB() {
         );
     `);
 
-    // Indici su history (idempotenti — sicuri da rieseguire anche su DB esistenti)
+    // Indici base su history (senza title_hash — quella colonna potrebbe non esistere ancora su DB vecchi)
+    // idx_history_title_dedup viene creato nella migration v7 e nel safety check post-migration.
     db.exec(`
         CREATE INDEX IF NOT EXISTS idx_history_bot_id ON history(bot_id);
         CREATE INDEX IF NOT EXISTS idx_history_bot_id_sent_at ON history(bot_id, sent_at);
-        CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, feed_id, title_hash);
     `);
 
     // 3. Sistema di Versionamento Deterministic
