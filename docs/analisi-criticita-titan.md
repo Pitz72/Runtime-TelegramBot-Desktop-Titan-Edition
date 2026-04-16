@@ -3,7 +3,7 @@
 **Data analisi:** 12 Aprile 2026  
 **Analista:** Antigravity Audit Engine  
 **Scope:** Intero codebase (`src/main`, `src/preload`, `src/renderer`, `src/shared`, config files)  
-**Ultimo aggiornamento:** 16 Aprile 2026 — v1.8.2 rilasciata con fix #17 rate-limiting feed e #19 cache YouTube Innertube
+**Ultimo aggiornamento:** 16 Aprile 2026 — v1.8.3 rilasciata con fix #22/#23 logging strutturato (LogEntry), #24/#26 pulizia root
 
 ---
 
@@ -14,7 +14,7 @@
 | 🔴 **Gravissime** | 5 | ✅ 5 (v1.7.8–v1.7.14) | — |
 | 🟠 **Gravi** | 7 | ✅ 4 (+ 1 non-bug) | 🟠 2 |
 | 🟡 **Medie** | 8 | ✅ 8 (v1.7.16–v1.8.2) | — |
-| 🟢 **Lievi** | 6 | ✅ 2 | 🟢 4 |
+| 🟢 **Lievi** | 6 | ✅ 6 (v1.7.8–v1.8.3) | — |
 | 🔵 **Feature mancanti** | 10 | ✅ 1 (v1.8.0) | 🔵 9 |
 | 📦 **Build** | 1 | ✅ 1 | — |
 
@@ -192,9 +192,17 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 
 ---
 
-### 22. Uso di `key={i}` (indice) per i log — 🟢 APERTO
-### 23. Nessun logging strutturato — 🟢 APERTO
-### 24. File di build log nella root del progetto — 🟢 APERTO
+### ~~22. Uso di `key={i}` (indice) per i log~~ — ✅ RISOLTO in v1.8.3
+
+> **Fix applicato:** `LogEntry.id` (contatore monotono assegnato da `TitanLogger`) usato come `key={log.id}`. ID stabile per l'intera vita dell'entry — nessun re-mount su aggiunta di nuovi log in testa.
+
+### ~~23. Nessun logging strutturato~~ — ✅ RISOLTO in v1.8.3
+
+> **Fix applicato:** Introdotto tipo `LogEntry { id, level, message }` in `shared/types.ts`. `TitanLogger` invia ora `LogEntry[]` via IPC invece di `string[]`. Il livello semantico (`info|warn|error|success`) viene rilevato dalla funzione `detectLevel()` basata su emoji/keyword. Dashboard aggiornata: colorazione da `log.level` invece di string-sniffing fragile.
+
+### ~~24. File di build log nella root del progetto~~ — ✅ RISOLTO in v1.8.3
+
+> **Fix applicato:** Rimossi `build_log.txt`, `build_log_2.txt`, `build_log_3.txt` dalla root (erano non tracciati da git, rimasti da sessioni di debug).
 
 ### 25. ~~Doppia dichiarazione `build` in `package.json`~~ — ✅ RISOLTO in v1.7.8
 
@@ -202,7 +210,9 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 
 ---
 
-### 26. Due file LICENSE nella root — 🟢 APERTO
+### ~~26. Due file LICENSE nella root~~ — ✅ RISOLTO in v1.8.3
+
+> **Fix applicato:** Rimosso `LICENSE.txt` (duplicato). Mantenuto `LICENSE` (senza estensione, riconosciuto automaticamente da GitHub).
 
 ---
 
@@ -255,7 +265,9 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 
 ### ~~F1 — Validatore Intelligente dei Template~~ ✅ FATTO v1.8.0
 
-### Funzionalità (F2–F10) e lievi (#22–#26)
+### ~~Lievi #22–#26~~ — ✅ TUTTI RISOLTI in v1.7.8–v1.8.3
+
+### Funzionalità (F2–F10)
 *(Da pianificare nel percorso verso v2.0.0)*
 
 ### 🔴 Ultimo punto prima di v2.0.0

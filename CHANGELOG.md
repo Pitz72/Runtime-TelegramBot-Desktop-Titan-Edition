@@ -2,7 +2,7 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.8.x (Corrente)](docs/changelogs/CHANGELOG_v1.8.2.md) — Versione attuale: v1.8.2. Fix #17 rate-limiting inter-feed 1s + queue warning, #19 cache YouTube Innertube 5min TTL. v1.8.1: fix #16/#18/#20. v1.8.0: Validatore Template.
+- [v1.8.x (Corrente)](docs/changelogs/CHANGELOG_v1.8.3.md) — Versione attuale: v1.8.3. Fix #22/#23 logging strutturato (LogEntry con id+level), #24/#26 pulizia root. v1.8.2: rate-limiting/#19 cache YouTube. v1.8.1: #16/#18/#20. v1.8.0: Validatore Template.
 - [v1.7.x (Archivio)](docs/changelogs/CHANGELOG_v1.7.16.md) — v1.7.14–v1.7.16. Fix tecnici: indici SQL su history, singleton botEngine lazy, rimosso import dinamico electron nel loop di publish.
 - [v1.6.x (Archivio)](docs/changelogs/v1.6.1.md) — v1.6.0–v1.6.1: OmniSync `.rtb` (portabilità bot cross-machine) e fix stabilità.
 - [v1.5.x (Archivio)](docs/changelogs/v1.5.4.md) — v1.5.0–v1.5.4: Template messaggi personalizzabili con Smart Chips, editor visivo integrato.
@@ -13,6 +13,6 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v1.8.2
+## Versione Attuale: v1.8.3
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.8.2.md](docs/changelogs/CHANGELOG_v1.8.2.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.8.3.md](docs/changelogs/CHANGELOG_v1.8.3.md).

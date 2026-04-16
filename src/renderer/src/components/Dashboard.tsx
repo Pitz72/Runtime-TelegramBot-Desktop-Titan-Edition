@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Play, Square, Settings, Download, BarChart3, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { BotConfig } from '../../../shared/types';
+import { BotConfig, LogEntry } from '../../../shared/types';
 import { BotSelector } from './BotSelector';
 import { FeedManager } from './FeedManager';
 import logo from '../assets/logo.png';
@@ -15,7 +15,7 @@ export function Dashboard() {
     const { error, toast } = useToast();
     const [selectedBot, setSelectedBot] = useState<BotConfig | null>(null);
     const [isRunning, setIsRunning] = useState(false);
-    const [logs, setLogs] = useState<string[]>([]);
+    const [logs, setLogs] = useState<LogEntry[]>([]);
     const [version, setVersion] = useState('1.1.0');
     const [showSettings, setShowSettings] = useState(false);
     const [showSystemSettings, setShowSystemSettings] = useState(false);
@@ -32,7 +32,7 @@ export function Dashboard() {
             }
         });
 
-        window.api.onLogsBatch((newLogs: string[]) => {
+        window.api.onLogsBatch((newLogs: LogEntry[]) => {
             setLogs(prev => [...newLogs.reverse(), ...prev].slice(0, 300));
         });
         window.api.onYouTubeApiError(() => {
@@ -78,12 +78,22 @@ export function Dashboard() {
 
     const addLocalLog = (message: string) => {
         const timestamp = new Date().toLocaleTimeString();
-        setLogs(prev => [`[${timestamp}] ${message}`, ...prev].slice(0, 300));
+        // Rileva livello dagli emoji — coerente con TitanLogger.detectLevel — fix #22/#23
+        const level: LogEntry['level'] =
+            message.includes('❌') ? 'error'
+            : message.includes('⚠️') ? 'warn'
+            : (message.includes('✅') || message.includes('🚀')) ? 'success'
+            : 'info';
+        setLogs(prev => [{
+            id: Date.now(), // unico per log locali (renderer-side)
+            level,
+            message: `[${timestamp}] ${message}`,
+        }, ...prev].slice(0, 300));
     };
 
     const handleExportLog = async () => {
         if (logs.length === 0) return;
-        const result = await window.api.exportLogs(logs);
+        const result = await window.api.exportLogs(logs.map(l => l.message));
         if (result.success) {
             addLocalLog(`📋 Log esportato: ${result.path}`);
         } else if (result.error !== 'Cancelled') {
@@ -268,17 +278,14 @@ export function Dashboard() {
                                 </div>
                             </div>
                             <div className="flex-1 overflow-y-auto space-y-1 p-4 relative z-10">
-                                {logs.map((log, i) => (
-                                    <div key={i} className="break-words font-medium opacity-80 hover:opacity-100 transition-opacity">
+                                {logs.map((log) => (
+                                    <div key={log.id} className="break-words font-medium opacity-80 hover:opacity-100 transition-opacity">
                                         <span className={
-                                            log.includes("Error") || log.includes("❌") || log.includes("Fallito")
-                                                ? "text-red-400"
-                                                : log.includes("Found New Item") || log.includes("🆕") || log.includes("✅")
-                                                    ? "text-green-400"
-                                                    : log.includes("SKIP") || log.includes("⚠️") || log.includes("⏳")
-                                                        ? "text-yellow-500"
-                                                        : "text-blue-100"
-                                        }>{log}</span>
+                                            log.level === 'error' ? "text-red-400"
+                                            : log.level === 'success' ? "text-green-400"
+                                            : log.level === 'warn' ? "text-yellow-500"
+                                            : "text-blue-100"
+                                        }>{log.message}</span>
                                     </div>
                                 ))}
                                 {logs.length === 0 && (

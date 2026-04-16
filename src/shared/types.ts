@@ -1,3 +1,18 @@
+/**
+ * Livello semantico di un messaggio di log — fix #23 (logging strutturato).
+ * Usato anche come chiave stabile per React — fix #22 (key={log.id}).
+ */
+export type LogLevel = 'info' | 'warn' | 'error' | 'success';
+
+export interface LogEntry {
+    /** ID monotono crescente assegnato dal TitanLogger — stabile per React key */
+    id: number;
+    /** Livello semantico rilevato dagli emoji/keyword nel messaggio */
+    level: LogLevel;
+    /** Messaggio formattato con timestamp: "[HH:MM:SS] testo" */
+    message: string;
+}
+
 export interface BotConfig {
     id: number;
     name: string;

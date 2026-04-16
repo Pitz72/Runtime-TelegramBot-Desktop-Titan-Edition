@@ -1,9 +1,24 @@
 import fs from 'fs';
 import path from 'path';
 import { app, BrowserWindow } from 'electron';
+import { LogEntry, LogLevel } from '../shared/types';
+
+// Counter monotono per ID stabili — fix #22/#23
+let _logId = 0;
+
+/**
+ * Rileva il livello semantico di un messaggio dagli emoji/keyword — fix #23.
+ * Ordine: error > warn > success > info.
+ */
+function detectLevel(message: string): LogLevel {
+    if (message.includes('❌') || message.includes('Error') || message.includes('Fallito') || message.includes('error')) return 'error';
+    if (message.includes('⚠️') || message.includes('SKIP') || message.includes('⏳')) return 'warn';
+    if (message.includes('✅') || message.includes('🆕') || message.includes('🚀') || message.includes('Found New Item')) return 'success';
+    return 'info';
+}
 
 class Logger {
-    private ipcBuffer: string[] = [];
+    private ipcBuffer: LogEntry[] = [];
     private logDir: string;
     private logFilePath: string;
 
@@ -74,8 +89,13 @@ class Logger {
             console.error('[Logger] Failed to write to log file:', error);
         }
 
-        // 3. IPC Buffer (with timestamp)
-        this.ipcBuffer.push(formattedMessage);
+        // 3. IPC Buffer — strutturato con id + level (fix #22/#23)
+        const entry: LogEntry = {
+            id: ++_logId,
+            level: detectLevel(message),
+            message: formattedMessage,
+        };
+        this.ipcBuffer.push(entry);
     }
 }
 

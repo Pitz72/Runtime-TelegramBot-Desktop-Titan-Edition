@@ -60,11 +60,11 @@ L'ordine di priorità previsto è:
 - ~~**#17** Implementare rate-limiting per bot con molti feed~~ ✅ FATTO v1.8.2
 - ~~**#19** Aggiungere cache/throttle a YouTube Innertube~~ ✅ FATTO v1.8.2
 
-### Blocco B — Lievi e UI
-- **#22** Sostituire `key={i}` (indice) con ID stabili nei log
-- **#23** Introdurre logging strutturato
-- **#24** Rimuovere/spostare i file di build log dalla root
-- **#26** Rimuovere il file LICENSE duplicato dalla root
+### Blocco B — Lievi e UI — ✅ COMPLETATO
+- ~~**#22** Sostituire `key={i}` (indice) con ID stabili nei log~~ ✅ FATTO v1.8.3
+- ~~**#23** Introdurre logging strutturato~~ ✅ FATTO v1.8.3
+- ~~**#24** Rimuovere/spostare i file di build log dalla root~~ ✅ FATTO v1.8.3
+- ~~**#26** Rimuovere il file LICENSE duplicato dalla root~~ ✅ FATTO v1.8.3
 - ~~**F1 — Validatore Intelligente dei Template**~~ ✅ FATTO v1.8.0
 - **F2–F10** Feature rimanenti (retry queue, dashboard multi-bot, filtro keyword, scheduler per-feed, ecc.)
 
@@ -85,3 +85,4 @@ L'ordine di priorità previsto è:
 *Aggiornata il 16/04/2026 — v1.8.0: F1 Validatore Template implementato. #13/#14/#15 risolti in v1.7.16.*
 *Aggiornata il 16/04/2026 — v1.8.1: #16 lazy DB init, #18 boolean normalization, #20 backup condizionale risolti. Blocco A quasi completo: rimangono solo #17 e #19.*
 *Aggiornata il 16/04/2026 — v1.8.2: #17 rate-limiting inter-feed e #19 cache YouTube Innertube. Blocco A completato al 100%.*
+*Aggiornata il 16/04/2026 — v1.8.3: #22/#23 logging strutturato (LogEntry), #24/#26 pulizia root. Blocco B completato al 100% (escluso F2-F10).*

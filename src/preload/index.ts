@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { LogEntry } from '../shared/types'
 
 // Custom APIs for renderer
 const api = {
@@ -44,7 +45,7 @@ const api = {
         ipcRenderer.removeAllListeners('bot-log');
         ipcRenderer.on('bot-log', (_, message) => callback(message));
     },
-    onLogsBatch: (callback: (messages: string[]) => void) => {
+    onLogsBatch: (callback: (messages: LogEntry[]) => void) => {
         ipcRenderer.removeAllListeners('bot-logs-batch');
         ipcRenderer.on('bot-logs-batch', (_, messages) => callback(messages));
     },

@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import { BotConfig, FeedConfig } from '../../shared/types'
+import { BotConfig, FeedConfig, LogEntry } from '../../shared/types'
 
 export interface TitanAPI {
     // Bot Management
@@ -37,7 +37,7 @@ export interface TitanAPI {
     startBot: () => Promise<{ success: boolean; error?: string }>
     stopBot: () => Promise<{ success: boolean }>
     onLog: (callback: (message: string) => void) => void
-    onLogsBatch: (callback: (messages: string[]) => void) => void
+    onLogsBatch: (callback: (messages: LogEntry[]) => void) => void
     onYouTubeApiError: (callback: () => void) => void
 
     // Stats
