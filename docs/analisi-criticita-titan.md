@@ -3,7 +3,7 @@
 **Data analisi:** 12 Aprile 2026  
 **Analista:** Antigravity Audit Engine  
 **Scope:** Intero codebase (`src/main`, `src/preload`, `src/renderer`, `src/shared`, config files)  
-**Ultimo aggiornamento:** 16 Aprile 2026 — v1.8.1 rilasciata con fix #16 lazy DB init, #18 boolean normalization, #20 backup condizionale
+**Ultimo aggiornamento:** 16 Aprile 2026 — v1.8.2 rilasciata con fix #17 rate-limiting feed e #19 cache YouTube Innertube
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|---|---|
 | 🔴 **Gravissime** | 5 | ✅ 5 (v1.7.8–v1.7.14) | — |
 | 🟠 **Gravi** | 7 | ✅ 4 (+ 1 non-bug) | 🟠 2 |
-| 🟡 **Medie** | 8 | ✅ 6 (v1.7.16–v1.8.1) | 🟡 2 |
+| 🟡 **Medie** | 8 | ✅ 8 (v1.7.16–v1.8.2) | — |
 | 🟢 **Lievi** | 6 | ✅ 2 | 🟢 4 |
 | 🔵 **Feature mancanti** | 10 | ✅ 1 (v1.8.0) | 🔵 9 |
 | 📦 **Build** | 1 | ✅ 1 | — |
@@ -164,13 +164,17 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 
 > **Fix applicato:** Rimossa la variabile globale `db` istanziata a livello di modulo. Introdotto lazy singleton via `export function getDB()` e `let _db: Database.Database | null = null`. L'istanza viene creata solo dentro `initDB()`, dopo che `app.getPath('userData')` è disponibile. `manager.ts` e `ipc.ts` aggiornati a usare `getDB()`.
 
-### 17. Nessuna gestione del rate-limiting per bot con molti feed — 🟡 APERTO
+### ~~17. Nessuna gestione del rate-limiting per bot con molti feed~~ — ✅ RISOLTO in v1.8.2
+
+> **Fix applicato:** Aggiunto delay di 1 secondo tra il fetch di feed consecutivi in `checkLoop()` (salta l'ultimo). I feed disabilitati vengono ora filtrati prima del loop con log aggregato. Aggiunto warning log se la `publishQueue` supera 50 item. Il delay Telegram di 3s tra messaggi inviati era già presente.
 
 ### ~~18. `isActive` booleano vs intero inconsistente~~ — ✅ RISOLTO in v1.8.1
 
 > **Fix applicato:** `getBots()` normalizza esplicitamente `is_active === 1` e `notifications_enabled === 1` in `boolean` prima di restituire i dati. `getFeeds()` applica lo stesso mapping su `is_active`. Il tipo TypeScript `BotConfig` è ora allineato con i valori reali restituiti.
 
-### 19. YouTube Innertube: nessun cache/throttle — 🟡 APERTO
+### ~~19. YouTube Innertube: nessun cache/throttle~~ — ✅ RISOLTO in v1.8.2
+
+> **Fix applicato:** Introdotta cache in-memory con TTL di 5 minuti in `youtube.ts`, chiave = channel ID/handle normalizzato. Quando più bot monitorano lo stesso canale, il fetch viene eseguito una sola volta per ciclo. Invalida automaticamente su `resetYouTubeSession()` e `BotEngine.stop()`. Esportata `clearYouTubeCache()` per usi futuri.
 
 ### ~~20. Backup creato **prima** delle migrazioni~~ — ✅ RISOLTO in v1.8.1
 
@@ -246,8 +250,8 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 13. ✅ Normalizzare `isActive` booleano vs intero (bug #18) — *RISOLTO v1.8.1*
 14. ✅ Spostare backup dopo le migrazioni (bug #20) — *RISOLTO v1.8.1*
 15. ✅ Rimuovere `db` globale mutabile (bug #16) — *RISOLTO v1.8.1*
-16. 🚦 Implementare rate-limiting (bug #17)
-17. 🎬 Aggiungere cache/throttle YouTube Innertube (bug #19)
+16. ✅ Implementare rate-limiting (bug #17) — *RISOLTO v1.8.2*
+17. ✅ Aggiungere cache/throttle YouTube Innertube (bug #19) — *RISOLTO v1.8.2*
 
 ### ~~F1 — Validatore Intelligente dei Template~~ ✅ FATTO v1.8.0
 

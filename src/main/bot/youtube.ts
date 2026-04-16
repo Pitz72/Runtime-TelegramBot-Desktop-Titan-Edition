@@ -6,6 +6,42 @@ import { TitanLogger } from '../logger';
 
 let youtube: any = null;
 
+// --- Cache YouTube Innertube — fix #19 ---
+// Evita fetch ripetuti dello stesso canale nello stesso ciclo o con intervalli molto brevi.
+// TTL: 5 minuti. Chiave: channel ID/handle normalizzato.
+const YOUTUBE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minuti
+
+interface YouTubeCacheEntry {
+    items: RssItem[];
+    fetchedAt: number;
+}
+
+const youtubeCache = new Map<string, YouTubeCacheEntry>();
+
+/**
+ * Normalizza l'identificatore del canale per usarlo come chiave di cache.
+ * Equivalente alla pulizia input già fatta in fetchYouTubeVideos.
+ */
+function normalizeChannelKey(channelIdOrHandle: string): string {
+    let key = channelIdOrHandle.trim();
+    if (key.includes('youtube.com/')) {
+        const parts = key.split('/');
+        key = parts[parts.length - 1];
+        if (key.includes('?')) key = key.split('?')[0];
+    } else if (key.includes('youtu.be/')) {
+        const parts = key.split('/');
+        key = parts[parts.length - 1];
+    }
+    return key.toLowerCase();
+}
+
+/** Svuota la cache dei canali YouTube (usato anche da resetYouTubeSession) */
+export function clearYouTubeCache() {
+    youtubeCache.clear();
+    TitanLogger.log('[YouTube] Cache cleared');
+}
+// -----------------------------------------
+
 async function getYouTubeInstance() {
     if (!youtube) {
         const { Innertube } = await import('youtubei.js');
@@ -18,6 +54,7 @@ async function getYouTubeInstance() {
 /** Forza il reset della sessione (utile se si ricevono risposte vuote) */
 export function resetYouTubeSession() {
     youtube = null;
+    clearYouTubeCache();
     TitanLogger.log('[YouTube] Session manually reset');
 }
 
@@ -30,6 +67,19 @@ function generateId(link: string): string {
  * Supporta ID canale (UC...), handle (@...) o URL completi.
  */
 export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<RssItem[]> {
+    // --- Controllo cache — fix #19 ---
+    const cacheKey = normalizeChannelKey(channelIdOrHandle);
+    const cached = youtubeCache.get(cacheKey);
+    if (cached) {
+        const ageMs = Date.now() - cached.fetchedAt;
+        if (ageMs < YOUTUBE_CACHE_TTL_MS) {
+            TitanLogger.log(`[YouTube] Cache HIT per "${cacheKey}" (età: ${Math.round(ageMs / 1000)}s, TTL: ${YOUTUBE_CACHE_TTL_MS / 1000}s)`);
+            return cached.items;
+        }
+        TitanLogger.log(`[YouTube] Cache EXPIRED per "${cacheKey}" (età: ${Math.round(ageMs / 1000)}s) — fetch fresco`);
+    }
+    // ----------------------------------
+
     try {
         const yt = await getYouTubeInstance();
         let targetId = channelIdOrHandle;
@@ -166,10 +216,15 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
         }
 
         TitanLogger.log(`[YouTube] Parsed ${items.length} valid items from ${channel.metadata?.title || targetId}`);
+
+        // Salva in cache — fix #19
+        youtubeCache.set(cacheKey, { items, fetchedAt: Date.now() });
+        TitanLogger.log(`[YouTube] Cache MISS → salvato in cache per "${cacheKey}" (TTL: ${YOUTUBE_CACHE_TTL_MS / 1000}s)`);
+
         return items;
     } catch (error) {
         TitanLogger.log(`[YouTube] Error fetching videos: ${error}`);
-        // Reset sessione dopo errore
+        // Reset sessione dopo errore (clearYouTubeCache è chiamato dentro resetYouTubeSession)
         resetYouTubeSession();
         throw error;
     }

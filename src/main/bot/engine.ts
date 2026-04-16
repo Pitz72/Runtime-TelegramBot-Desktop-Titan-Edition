@@ -1,5 +1,5 @@
 import { fetchFeed } from './parser';
-import { fetchYouTubeVideos } from './youtube';
+import { fetchYouTubeVideos, clearYouTubeCache } from './youtube';
 import { TelegramClient } from './telegram';
 import { BotManager } from './manager';
 import { BotConfig, FeedConfig } from '../../shared/types';
@@ -78,6 +78,10 @@ export class BotEngine {
         // Abort all in-progress Telegram send operations
         this.clients.forEach(client => client.abort());
         this.clients.clear();
+
+        // Invalida la cache YouTube alla fermata — fix #19
+        clearYouTubeCache();
+
         TitanLogger.log("🛑 Engine Stopped");
     }
 
@@ -143,18 +147,33 @@ export class BotEngine {
                 const client = this.getClient(bot);
                 TitanLogger.log(`🤖 Bot [${bot.name}]: Checking ${feeds.length} feeds...`);
 
-                for (const feed of feeds) {
+                const activeFeeds = feeds.filter(f => f.is_active);
+                const skippedFeeds = feeds.length - activeFeeds.length;
+                if (skippedFeeds > 0) {
+                    TitanLogger.log(`   ⏸️ Bot [${bot.name}]: ${skippedFeeds} feed disabilitati, saltati.`);
+                }
+
+                for (let i = 0; i < activeFeeds.length; i++) {
                     if (!this.isRunning) break;
-                    if (!feed.is_active) {
-                        TitanLogger.log(`   ⏸️ Feed [${feed.name}] is disabled. Skipped.`);
-                        continue;
-                    }
+                    const feed = activeFeeds[i];
 
                     try {
                         await this.processFeed(bot, client, feed);
                     } catch (feedError) {
                         TitanLogger.log(`  ❌ [${feed.name}] Critical error: ${feedError}`);
                     }
+
+                    // Rate-limiting inter-feed: pausa tra un fetch e il successivo — fix #17
+                    // Evita di inondare i server RSS/YouTube in loop stretti con molti feed.
+                    // Salta la pausa sull'ultimo feed del ciclo per non ritardare inutilmente.
+                    if (i < activeFeeds.length - 1 && this.isRunning) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+
+                // Warning: coda troppo grande segnala un accumulo anomalo — fix #17
+                if (this.publishQueue.length > 50) {
+                    TitanLogger.log(`  ⚠️ [${bot.name}] Coda di invio grande: ${this.publishQueue.length} item in attesa.`);
                 }
 
             } catch (e) {

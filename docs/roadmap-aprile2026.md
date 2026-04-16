@@ -57,8 +57,8 @@ L'ordine di priorità previsto è:
 - ~~**#16** Rimuovere `db` come variabile globale mutabile~~ ✅ FATTO v1.8.1
 - ~~**#14** Rimuovere singleton mutabile globale `botEngine`~~ ✅ FATTO v1.7.16
 - ~~**#15** Eliminare `dynamic import('electron')` dentro loop~~ ✅ FATTO v1.7.16
-- **#17** Implementare rate-limiting per bot con molti feed
-- **#19** Aggiungere cache/throttle a YouTube Innertube
+- ~~**#17** Implementare rate-limiting per bot con molti feed~~ ✅ FATTO v1.8.2
+- ~~**#19** Aggiungere cache/throttle a YouTube Innertube~~ ✅ FATTO v1.8.2
 
 ### Blocco B — Lievi e UI
 - **#22** Sostituire `key={i}` (indice) con ID stabili nei log
@@ -84,3 +84,4 @@ L'ordine di priorità previsto è:
 *Roadmap v2.0.0 annotata il 13/04/2026*
 *Aggiornata il 16/04/2026 — v1.8.0: F1 Validatore Template implementato. #13/#14/#15 risolti in v1.7.16.*
 *Aggiornata il 16/04/2026 — v1.8.1: #16 lazy DB init, #18 boolean normalization, #20 backup condizionale risolti. Blocco A quasi completo: rimangono solo #17 e #19.*
+*Aggiornata il 16/04/2026 — v1.8.2: #17 rate-limiting inter-feed e #19 cache YouTube Innertube. Blocco A completato al 100%.*
