@@ -16,3 +16,7 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 ## Versione Attuale: v1.8.3
 
 Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.8.3.md](docs/changelogs/CHANGELOG_v1.8.3.md).
+
+## Stato progetto e roadmap verso v2.0.0
+
+Consulta [docs/STATO-PROGETTO.md](docs/STATO-PROGETTO.md) per il quadro completo: tutto il completato, le feature aperte F2-F10, la Performance Mode e #11 autoUpdater (ultimo step prima di v2.0.0).
