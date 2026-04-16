@@ -107,7 +107,7 @@ function decryptTokenFromExport(data: string): string {
 export class BotManager {
     // --- BOTS ---
     static getBots(): BotConfig[] {
-        const bots = db().prepare('SELECT * FROM bots ORDER BY created_at DESC').all() as BotConfig[];
+        const bots = db().prepare('SELECT * FROM bots ORDER BY created_at DESC').all() as any[];
         return bots.map(bot => {
             let token = bot.token;
             if (safeStorage.isEncryptionAvailable()) {
@@ -125,9 +125,9 @@ export class BotManager {
             return {
                 ...bot,
                 token,
-                is_active: bot.is_active === 1,
-                notifications_enabled: bot.notifications_enabled === 1,
-            };
+                is_active: (bot.is_active as number) === 1,
+                notifications_enabled: (bot.notifications_enabled as number) === 1,
+            } as BotConfig;
         });
     }
 
