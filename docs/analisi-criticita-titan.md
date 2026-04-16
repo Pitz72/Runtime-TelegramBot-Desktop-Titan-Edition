@@ -3,7 +3,7 @@
 **Data analisi:** 12 Aprile 2026  
 **Analista:** Antigravity Audit Engine  
 **Scope:** Intero codebase (`src/main`, `src/preload`, `src/renderer`, `src/shared`, config files)  
-**Ultimo aggiornamento:** 16 Aprile 2026 — v1.8.0 rilasciata con F1 Validatore Intelligente dei Template
+**Ultimo aggiornamento:** 16 Aprile 2026 — v1.8.1 rilasciata con fix #16 lazy DB init, #18 boolean normalization, #20 backup condizionale
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|---|---|
 | 🔴 **Gravissime** | 5 | ✅ 5 (v1.7.8–v1.7.14) | — |
 | 🟠 **Gravi** | 7 | ✅ 4 (+ 1 non-bug) | 🟠 2 |
-| 🟡 **Medie** | 8 | ✅ 3 (v1.7.16) | 🟡 5 |
+| 🟡 **Medie** | 8 | ✅ 6 (v1.7.16–v1.8.1) | 🟡 2 |
 | 🟢 **Lievi** | 6 | ✅ 2 | 🟢 4 |
 | 🔵 **Feature mancanti** | 10 | ✅ 1 (v1.8.0) | 🔵 9 |
 | 📦 **Build** | 1 | ✅ 1 | — |
@@ -160,11 +160,21 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 
 > **Fix applicato:** `Notification` aggiunta all'import statico in cima a `engine.ts`. Rimosso il `import('electron').then(...)` asincrono eseguito ad ogni item inviato nel loop `processPublishQueue`. Guard semplificato in `if (bot.notifications_enabled && Notification.isSupported())`.
 
-### 16. `db` esportato come variabile globale mutabile
-### 17. Nessuna gestione del rate-limiting per bot con molti feed
-### 18. `isActive` booleano vs intero inconsistente
-### 19. YouTube Innertube: nessun cache/throttle
-### 20. Backup creato **prima** delle migrazioni
+### ~~16. `db` esportato come variabile globale mutabile~~ — ✅ RISOLTO in v1.8.1
+
+> **Fix applicato:** Rimossa la variabile globale `db` istanziata a livello di modulo. Introdotto lazy singleton via `export function getDB()` e `let _db: Database.Database | null = null`. L'istanza viene creata solo dentro `initDB()`, dopo che `app.getPath('userData')` è disponibile. `manager.ts` e `ipc.ts` aggiornati a usare `getDB()`.
+
+### 17. Nessuna gestione del rate-limiting per bot con molti feed — 🟡 APERTO
+
+### ~~18. `isActive` booleano vs intero inconsistente~~ — ✅ RISOLTO in v1.8.1
+
+> **Fix applicato:** `getBots()` normalizza esplicitamente `is_active === 1` e `notifications_enabled === 1` in `boolean` prima di restituire i dati. `getFeeds()` applica lo stesso mapping su `is_active`. Il tipo TypeScript `BotConfig` è ora allineato con i valori reali restituiti.
+
+### 19. YouTube Innertube: nessun cache/throttle — 🟡 APERTO
+
+### ~~20. Backup creato **prima** delle migrazioni~~ — ✅ RISOLTO in v1.8.1
+
+> **Fix applicato:** Il blocco di backup è ora condizionale (`if (currentVersion < 6)`). Viene eseguito solo quando ci sono migrazioni da applicare, e rimane posizionato prima delle migrazioni (semantica corretta per il ripristino). Su database già aggiornati (v6), nessun backup viene creato.
 
 *(Dettagli completi: vedere documento originale Gemini)*
 
@@ -233,9 +243,9 @@ Il server di aggiornamento coincide con la repo pubblica — zero infrastruttura
 10. ✅ Aggiungere indice SQL alla history (bug #13) — *RISOLTO v1.7.16*
 11. ✅ Eliminare singleton `botEngine` (bug #14) — *RISOLTO v1.7.16*
 12. ✅ Eliminare `dynamic import('electron')` in loop (bug #15) — *RISOLTO v1.7.16*
-13. 🔧 Normalizzare `isActive` booleano vs intero (bug #18)
-14. 🛡️ Spostare backup dopo le migrazioni (bug #20)
-15. 🔧 Rimuovere `db` globale mutabile (bug #16)
+13. ✅ Normalizzare `isActive` booleano vs intero (bug #18) — *RISOLTO v1.8.1*
+14. ✅ Spostare backup dopo le migrazioni (bug #20) — *RISOLTO v1.8.1*
+15. ✅ Rimuovere `db` globale mutabile (bug #16) — *RISOLTO v1.8.1*
 16. 🚦 Implementare rate-limiting (bug #17)
 17. 🎬 Aggiungere cache/throttle YouTube Innertube (bug #19)
 

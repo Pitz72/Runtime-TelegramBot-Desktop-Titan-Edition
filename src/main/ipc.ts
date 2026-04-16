@@ -1,6 +1,6 @@
 import { ipcMain, app, dialog } from 'electron';
 import { getBotEngine } from './bot/engine';
-import { db, initDB } from './database/schema';
+import { getDB, initDB } from './database/schema';
 import { BotManager } from './bot/manager';
 import { fetchFeed, validateFeedUrl } from './bot/parser';
 import { fetchYouTubeVideos } from './bot/youtube';
@@ -187,7 +187,7 @@ export function setupIpc() {
 
             if (canceled || !filePath) return { success: false, error: 'Cancelled' };
 
-            await db.backup(filePath);
+            await getDB().backup(filePath);
             return { success: true, path: filePath };
         } catch (e: any) {
             return { success: false, error: e.message || String(e) };
@@ -220,7 +220,7 @@ export function setupIpc() {
             if (canceled || filePaths.length === 0) return { success: false, error: 'Cancelled' };
 
             getBotEngine().stop();
-            db.close();
+            getDB().close();
             const dbPath = join(app.getPath('userData'), 'titan.db');
             await copyFile(filePaths[0], dbPath);
 
