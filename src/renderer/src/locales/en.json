@@ -44,7 +44,9 @@
         "title": "System Logs // All Channels",
         "export": "Export",
         "exportTitle": "Export logs to .txt file",
-        "clear": "Clear"
+        "clear": "Clear",
+        "filterAll": "All Bots",
+        "filterBot": "This Bot"
     },
     "botSelector": {
         "title": "Active Bots",

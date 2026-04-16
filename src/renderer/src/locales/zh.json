@@ -44,7 +44,9 @@
         "title": "系统日志",
         "export": "导出",
         "exportTitle": "将日志导出为 .txt 文件",
-        "clear": "清除"
+        "clear": "清除",
+        "filterAll": "全部",
+        "filterBot": "本机器人"
     },
     "botSelector": {
         "title": "活跃机器人",

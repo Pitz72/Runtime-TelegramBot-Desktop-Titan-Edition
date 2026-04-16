@@ -44,7 +44,9 @@
         "title": "System Logs // All Channels",
         "export": "Esporta",
         "exportTitle": "Esporta log in file .txt",
-        "clear": "Pulisci"
+        "clear": "Pulisci",
+        "filterAll": "Tutti",
+        "filterBot": "Solo questo"
     },
     "botSelector": {
         "title": "Bot Attivi",

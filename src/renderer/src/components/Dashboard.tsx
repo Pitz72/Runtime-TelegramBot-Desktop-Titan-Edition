@@ -21,6 +21,7 @@ export function Dashboard() {
     const [showSystemSettings, setShowSystemSettings] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
     const [stats, setStats] = useState<{ total: number; today: number; week: number } | null>(null);
+    const [filterBySelectedBot, setFilterBySelectedBot] = useState(false);
 
     useEffect(() => {
         window.api.getVersion().then(setVersion);
@@ -103,7 +104,13 @@ export function Dashboard() {
 
     useEffect(() => {
         setShowSettings(false);
+        setFilterBySelectedBot(false);
     }, [selectedBot]);
+
+    // Log filtrati per bot selezionato (o tutti) — F3 Dashboard multi-bot
+    const displayedLogs = filterBySelectedBot && selectedBot
+        ? logs.filter(l => l.message.includes(`[${selectedBot.name}]`))
+        : logs;
 
     const handleBotUpdate = useCallback((updatedBot: BotConfig) => {
         setSelectedBot(updatedBot);
@@ -254,7 +261,27 @@ export function Dashboard() {
                         {/* LOG PANEL */}
                         < div className="flex-1 bg-dark-950/90 rounded-xl panel-border p-0 font-mono text-xs overflow-hidden flex flex-col shadow-inner relative scanline-bg" >
                             <div className="flex justify-between items-center px-4 py-2 border-b border-titan-500/10 bg-dark-900/50 relative z-10">
-                                <span className="text-titan-500/50 font-bold tracking-widest text-[10px] uppercase">{t('logs.title')}</span>
+                                {/* Left: titolo + toggle filtro bot — F3 */}
+                                <div className="flex items-center gap-2">
+                                    <span className="text-titan-500/50 font-bold tracking-widest text-[10px] uppercase">{t('logs.title')}</span>
+                                    <div className="flex items-center bg-dark-950/80 rounded border border-titan-500/10 overflow-hidden">
+                                        <button
+                                            onClick={() => setFilterBySelectedBot(false)}
+                                            className={cn(
+                                                "px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
+                                                !filterBySelectedBot ? "bg-titan-500/20 text-titan-400" : "text-neutral-700 hover:text-neutral-500"
+                                            )}
+                                        >{t('logs.filterAll')}</button>
+                                        <button
+                                            onClick={() => setFilterBySelectedBot(true)}
+                                            disabled={!selectedBot}
+                                            className={cn(
+                                                "px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-colors disabled:opacity-30",
+                                                filterBySelectedBot ? "bg-titan-500/20 text-titan-400" : "text-neutral-700 hover:text-neutral-500"
+                                            )}
+                                        >{t('logs.filterBot')}</button>
+                                    </div>
+                                </div>
                                 <div className="flex items-center gap-2">
                                     {logs.length > 0 && (
                                         <>
@@ -278,7 +305,7 @@ export function Dashboard() {
                                 </div>
                             </div>
                             <div className="flex-1 overflow-y-auto space-y-1 p-4 relative z-10">
-                                {logs.map((log) => (
+                                {displayedLogs.map((log) => (
                                     <div key={log.id} className="break-words font-medium opacity-80 hover:opacity-100 transition-opacity">
                                         <span className={
                                             log.level === 'error' ? "text-red-400"
@@ -288,9 +315,11 @@ export function Dashboard() {
                                         }>{log.message}</span>
                                     </div>
                                 ))}
-                                {logs.length === 0 && (
+                                {displayedLogs.length === 0 && (
                                     <div className="h-full flex flex-col items-center justify-center text-titan-500/20 gap-2">
-                                        <span className="text-sm tracking-widest uppercase">{t('status.awaiting')}</span>
+                                        <span className="text-sm tracking-widest uppercase">
+                                            {filterBySelectedBot ? `— ${selectedBot?.name} —` : t('status.awaiting')}
+                                        </span>
                                     </div>
                                 )}
                             </div>

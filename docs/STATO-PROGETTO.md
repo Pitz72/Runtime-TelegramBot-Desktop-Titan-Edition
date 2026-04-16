@@ -1,13 +1,13 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.8.4  
+**Versione corrente:** v1.8.5  
 **Ultimo aggiornamento:** 16 Aprile 2026  
 **Repository:** https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
 
 ---
 
-## ✅ Completato — tutto il lavoro fatto fino a v1.8.4
+## ✅ Completato — tutto il lavoro fatto fino a v1.8.5
 
 ### Sicurezza (P0 — Gravissime)
 - ✅ **#1** Segreto crittografico hardcoded rimosso — `safeStorage` Electron per cifratura token `.rtb`, vincolati alla macchina *(v1.7.10)*
@@ -48,16 +48,13 @@
 ### Feature
 - ✅ **F1** Validatore Intelligente dei Template — `templateValidator.ts` con 9 check: tag non supportati, tag non bilanciati, `<a>` senza `href`, chip sconosciuti, chip pericolosi in `href`, template vuoto, chip nel messaggio di avvio. Feedback real-time in `TemplateEditor.tsx` (bordo colorato + pannello messaggi). Localizzazione completa per 9 lingue. *(v1.8.0)*
 - ✅ **F2** Retry Queue per invii falliti — `PublishJob.retryCount`, `MAX_RETRIES = 3`. Su `success = false`: re-accoda con `retryCount + 1` (log `⚠️`); a esaurimento: `markProcessed()` per spezzare loop infinito (log `❌`). *(v1.8.4)*
+- ✅ **F3** Dashboard multi-bot — Dot stato `is_active` per ogni bot nella sidebar (verde/grigio, nome attenuato se disabilitato). Toggle `ALL BOTS / THIS BOT` nel header del log: filtra client-side per `[NomeBot]`, reset automatico al cambio bot, i18n 8 lingue. *(v1.8.5)*
 
 ---
 
-## 🔵 Aperto — Feature F3-F10
+## 🔵 Aperto — Feature F4-F10
 
-> **Nota:** I dettagli di F3-F10 provengono dall'analisi originale Gemini. Le descrizioni di F6-F10 non sono presenti nei documenti del repo e vanno definite prima di procedere.
-
-### F3 — Dashboard multi-bot (vista aggregata)
-Attualmente la Dashboard mostra log e stats di un solo bot alla volta (quello selezionato). Con più bot attivi, non è possibile monitorare lo stato globale dell'engine.  
-**Soluzione proposta:** vista aggregata nella console che mostri log di tutti i bot attivi con prefisso `[NomeBot]` (già presente nei log di `TitanLogger`), e indicatori di stato per ciascun bot nella sidebar.
+> **Nota:** I dettagli di F4-F10 provengono dall'analisi originale Gemini. Le descrizioni di F6-F10 non sono presenti nei documenti del repo e vanno definite prima di procedere.
 
 ### F4 — Filtro keyword sui feed
 Possibilità di configurare per ogni feed una lista di parole chiave (includi/escludi). Un item viene accodato solo se il titolo o il summary soddisfa il filtro.  
@@ -107,9 +104,9 @@ Viene implementato solo dopo che tutti i punti precedenti (F3-F10 + Performance 
 [FATTO] Blocco B — Fix P3 (lievi):      #21 #22 #23 #24 #25 #26          ✅
 [FATTO] Feature F1 — Validatore Template                                   ✅
 [FATTO] Feature F2 — Retry Queue (MAX_RETRIES=3, markProcessed)            ✅
+[FATTO] Feature F3 — Dashboard multi-bot (dot sidebar, toggle log ALL/BOT) ✅
 ──────────────────────────────────────────────────────────────────────────
-[TODO]  Blocco C — Feature:             F3 Dashboard multi-bot
-                                        F4 Filtro keyword
+[TODO]  Blocco C — Feature:             F4 Filtro keyword
                                         F5 Scheduler per-feed
                                         F6-F10 (da definire)
 [TODO]  Performance Mode (UI 4K/GPU)

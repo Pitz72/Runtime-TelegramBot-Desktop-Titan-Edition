@@ -194,9 +194,20 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                     >
                         <div className="flex justify-between items-start">
                             <div className="flex-1 min-w-0">
-                                <h3 className={`font-medium text-sm truncate ${currentBotId === bot.id ? 'text-titan-300' : 'text-neutral-400'}`}>{bot.name}</h3>
-                                <div className="flex flex-col gap-0.5 mt-1">
-                                    <p className="text-[10px] text-neutral-700 font-mono flex items-center gap-1 truncate">
+                                {/* Nome + status dot — F3 indicatori sidebar */}
+                                <div className="flex items-center gap-1.5">
+                                    <div
+                                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-px ${bot.is_active ? 'bg-green-500' : 'bg-neutral-700'}`}
+                                        title={bot.is_active ? 'Attivo' : 'Disabilitato'}
+                                    />
+                                    <h3 className={`font-medium text-sm truncate ${
+                                        currentBotId === bot.id ? 'text-titan-300'
+                                        : bot.is_active ? 'text-neutral-400'
+                                        : 'text-neutral-700'
+                                    }`}>{bot.name}</h3>
+                                </div>
+                                <div className="flex flex-col gap-0.5 mt-1 pl-3">
+                                    <p className={`text-[10px] font-mono flex items-center gap-1 truncate ${bot.is_active ? 'text-neutral-700' : 'text-neutral-800'}`}>
                                         <Hash size={9} />
                                         {bot.channel_id}
                                     </p>

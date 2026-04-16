@@ -44,7 +44,9 @@
         "title": "Registros del Sistema",
         "export": "Exportar",
         "exportTitle": "Exportar registros a archivo .txt",
-        "clear": "Limpiar"
+        "clear": "Limpiar",
+        "filterAll": "Todos",
+        "filterBot": "Este Bot"
     },
     "botSelector": {
         "title": "Bots Activos",

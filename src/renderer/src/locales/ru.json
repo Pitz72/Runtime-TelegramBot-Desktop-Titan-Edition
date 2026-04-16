@@ -44,7 +44,9 @@
         "title": "Системные Журналы",
         "export": "Экспорт",
         "exportTitle": "Экспорт журналов в файл .txt",
-        "clear": "Очистить"
+        "clear": "Очистить",
+        "filterAll": "Все",
+        "filterBot": "Этот Бот"
     },
     "botSelector": {
         "title": "Активные Боты",

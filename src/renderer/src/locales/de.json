@@ -44,7 +44,9 @@
         "title": "Systemprotokolle",
         "export": "Exportieren",
         "exportTitle": "Protokolle in .txt-Datei exportieren",
-        "clear": "Leeren"
+        "clear": "Leeren",
+        "filterAll": "Alle",
+        "filterBot": "Dieser Bot"
     },
     "botSelector": {
         "title": "Aktive Bots",

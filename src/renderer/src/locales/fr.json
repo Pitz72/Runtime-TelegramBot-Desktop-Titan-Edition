@@ -44,7 +44,9 @@
         "title": "Journaux Système",
         "export": "Exporter",
         "exportTitle": "Exporter les journaux au format .txt",
-        "clear": "Effacer"
+        "clear": "Effacer",
+        "filterAll": "Tous",
+        "filterBot": "Ce Bot"
     },
     "botSelector": {
         "title": "Bots Actifs",
