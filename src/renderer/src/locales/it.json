@@ -130,7 +130,12 @@
         "deleteConfirm": "Rimuovi",
         "successAdd": "Sorgente aggiunta",
         "successUpdate": "Sorgente aggiornata",
-        "successDelete": "Sorgente rimossa"
+        "successDelete": "Sorgente rimossa",
+        "filterLabel": "Filtro Keyword",
+        "filterInclude": "Includi (almeno una parola)",
+        "filterExclude": "Escludi (se contiene)",
+        "filterPlaceholder": "es. sport, calcio",
+        "filterActive": "filtro attivo"
     },
     "templateEditor": {
         "templateSection": "Template Messaggi",

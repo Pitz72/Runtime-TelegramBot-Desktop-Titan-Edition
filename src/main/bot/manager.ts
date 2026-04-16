@@ -162,14 +162,14 @@ export class BotManager {
         return rows.map(f => ({ ...f, is_active: f.is_active === 1 })) as FeedConfig[];
     }
 
-    static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube') {
-        const stmt = db().prepare('INSERT INTO feeds (bot_id, name, url, type, is_active) VALUES (?, ?, ?, ?, 1)');
-        stmt.run(bot_id, name, url, type);
+    static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube', keywordFilter?: string | null) {
+        const stmt = db().prepare('INSERT INTO feeds (bot_id, name, url, type, is_active, keyword_filter) VALUES (?, ?, ?, ?, 1, ?)');
+        stmt.run(bot_id, name, url, type, keywordFilter ?? null);
     }
 
-    static updateFeed(id: number, name: string, url: string, type: string) {
-        const stmt = db().prepare('UPDATE feeds SET name = ?, url = ?, type = ? WHERE id = ?');
-        stmt.run(name, url, type, id);
+    static updateFeed(id: number, name: string, url: string, type: string, keywordFilter?: string | null) {
+        const stmt = db().prepare('UPDATE feeds SET name = ?, url = ?, type = ?, keyword_filter = ? WHERE id = ?');
+        stmt.run(name, url, type, keywordFilter ?? null, id);
     }
 
     static deleteFeed(id: number) {
@@ -256,7 +256,8 @@ export class BotManager {
                     name: f.name,
                     url: f.url,
                     type: f.type,
-                    is_active: f.is_active
+                    is_active: f.is_active,
+                    keyword_filter: f.keyword_filter ?? null
                 }))
             };
         });
@@ -299,7 +300,7 @@ export class BotManager {
 
                 if (Array.isArray(bot.feeds)) {
                     for (const f of bot.feeds) {
-                        BotManager.addFeed(Number(botId), f.name, f.url, f.type);
+                        BotManager.addFeed(Number(botId), f.name, f.url, f.type, f.keyword_filter ?? null);
                         if (f.is_active === 0 || f.is_active === false) {
                             const lastFeed = db().prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(botId) as any;
                             if (lastFeed) {
@@ -355,7 +356,8 @@ export class BotManager {
                     name: f.name,
                     url: f.url,
                     type: f.type,
-                    isActive: f.is_active === 1
+                    isActive: f.is_active === 1,
+                    keyword_filter: f.keyword_filter ?? null
                 }))
             };
 
@@ -410,7 +412,8 @@ export class BotManager {
                         createdBotId,
                         feed.name,
                         feed.url,
-                        feed.type
+                        feed.type,
+                        feed.keyword_filter ?? null
                     );
 
                     if (feed.isActive === false) {

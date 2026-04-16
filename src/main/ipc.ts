@@ -88,20 +88,22 @@ export function setupIpc() {
     // --- FEED MANAGEMENT ---
     ipcMain.handle('get-feeds', (_, botId) => BotManager.getFeeds(botId));
 
-    ipcMain.handle('add-feed', (_, { botId, name, url, type }) => {
+    ipcMain.handle('add-feed', (_, { botId, name, url, type, keywordFilter }) => {
         const validBotId = assertPositiveInt(botId, 'botId');
         const validName = assertString(name, 'name');
         const validType = assertFeedType(type);
         if (validType !== 'youtube') validateFeedUrl(assertString(url, 'url'));
-        return BotManager.addFeed(validBotId, validName, assertString(url, 'url'), validType);
+        const validFilter = (typeof keywordFilter === 'string' && keywordFilter.trim()) ? keywordFilter.trim() : null;
+        return BotManager.addFeed(validBotId, validName, assertString(url, 'url'), validType, validFilter);
     });
 
-    ipcMain.handle('update-feed', (_, { id, name, url, type }) => {
+    ipcMain.handle('update-feed', (_, { id, name, url, type, keywordFilter }) => {
         const validId = assertPositiveInt(id, 'id');
         const validName = assertString(name, 'name');
         const validType = assertFeedType(type);
         if (validType !== 'youtube') validateFeedUrl(assertString(url, 'url'));
-        return BotManager.updateFeed(validId, validName, assertString(url, 'url'), validType);
+        const validFilter = (typeof keywordFilter === 'string' && keywordFilter.trim()) ? keywordFilter.trim() : null;
+        return BotManager.updateFeed(validId, validName, assertString(url, 'url'), validType, validFilter);
     });
 
     ipcMain.handle('delete-feed', (_, id) => BotManager.deleteFeed(assertPositiveInt(id, 'id')));

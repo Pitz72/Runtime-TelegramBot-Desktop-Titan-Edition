@@ -37,6 +37,8 @@ export interface FeedConfig {
     url: string;
     type: 'podcast' | 'news' | 'youtube';
     is_active: boolean;
+    /** JSON string: { include: string[], exclude: string[] } — null = nessun filtro (F4) */
+    keyword_filter: string | null;
 }
 
 export interface RssItem {

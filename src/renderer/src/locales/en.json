@@ -130,7 +130,12 @@
         "deleteConfirm": "Remove",
         "successAdd": "New source added",
         "successUpdate": "Source successfully updated",
-        "successDelete": "Source removed"
+        "successDelete": "Source removed",
+        "filterLabel": "Keyword Filter",
+        "filterInclude": "Include (at least one)",
+        "filterExclude": "Exclude (if contains)",
+        "filterPlaceholder": "e.g. sport, football",
+        "filterActive": "filter active"
     },
     "templateEditor": {
         "templateSection": "Message Templates",

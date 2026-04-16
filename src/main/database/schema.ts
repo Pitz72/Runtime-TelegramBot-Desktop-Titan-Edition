@@ -141,6 +141,7 @@ export function initDB() {
             url TEXT NOT NULL,
             type TEXT CHECK(type IN ('podcast', 'news', 'youtube')) NOT NULL DEFAULT 'podcast',
             is_active BOOLEAN DEFAULT 1,
+            keyword_filter TEXT DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE
         );
@@ -167,9 +168,8 @@ export function initDB() {
     // 3. Sistema di Versionamento Deterministic
     if (isNewInstall) {
         // È un'installazione pulita. Lo schema è già alla versione massima.
-        // Saltiamo tutte le migrazioni e settiamo subito la versione a 6.
-        db.pragma('user_version = 7');
-        console.log("Nuova installazione rilevata. Database inizializzato alla v7.");
+        db.pragma('user_version = 8');
+        console.log("Nuova installazione rilevata. Database inizializzato alla v8.");
         console.log('Database initialized at:', dbPath);
         return db;
     }
@@ -180,7 +180,7 @@ export function initDB() {
     // 4. Backup automatico SOLO se servono migrazioni — fix #20
     // Cattura lo stato pre-migrazione per consentire il ripristino in caso di errore.
     // Su DB già alla versione corrente (nessuna migrazione), nessun backup viene creato.
-    if (currentVersion < 7) {
+    if (currentVersion < 8) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
@@ -295,6 +295,14 @@ export function initDB() {
         db.pragma('user_version = 7');
         currentVersion = 7;
         console.log("Database version set to 7");
+    }
+
+    if (currentVersion < 8) {
+        console.log("Migration v8: Adding keyword_filter column to feeds table (F4)...");
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN keyword_filter TEXT DEFAULT NULL`); } catch (e) { }
+        db.pragma('user_version = 8');
+        currentVersion = 8;
+        console.log("Database version set to 8");
     }
 
     console.log('Database initialized at:', dbPath);

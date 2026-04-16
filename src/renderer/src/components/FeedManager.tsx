@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Rss, FileText, Globe, Play, Edit2, Zap, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Rss, FileText, Globe, Play, Edit2, Zap, Loader2, Filter } from 'lucide-react';
 import { FeedConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -15,9 +15,24 @@ export function FeedManager({ botId }: Props) {
     const [loading, setLoading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [editingFeed, setEditingFeed] = useState<FeedConfig | null>(null);
-    const [newFeed, setNewFeed] = useState({ name: '', url: '', type: 'podcast' as 'podcast' | 'news' | 'youtube' });
+    const [newFeed, setNewFeed] = useState({ name: '', url: '', type: 'podcast' as 'podcast' | 'news' | 'youtube', filterInclude: '', filterExclude: '' });
     const [testing, setTesting] = useState<number | 'new' | null>(null);
     const [testResult, setTestResult] = useState<{ success: boolean; count?: number; error?: string } | null>(null);
+
+    const buildKeywordFilter = (include: string, exclude: string): string | null => {
+        const inc = include.split(',').map(s => s.trim()).filter(Boolean);
+        const exc = exclude.split(',').map(s => s.trim()).filter(Boolean);
+        if (inc.length === 0 && exc.length === 0) return null;
+        return JSON.stringify({ include: inc, exclude: exc });
+    };
+
+    const parseKeywordFilter = (kf: string | null): { filterInclude: string; filterExclude: string } => {
+        if (!kf) return { filterInclude: '', filterExclude: '' };
+        try {
+            const { include = [], exclude = [] } = JSON.parse(kf);
+            return { filterInclude: include.join(', '), filterExclude: exclude.join(', ') };
+        } catch { return { filterInclude: '', filterExclude: '' }; }
+    };
 
     const { toast } = useToast();
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -36,9 +51,10 @@ export function FeedManager({ botId }: Props) {
 
     const handleAdd = async () => {
         if (!newFeed.name || !newFeed.url) return;
-        await window.api.addFeed({ ...newFeed, botId });
+        const keywordFilter = buildKeywordFilter(newFeed.filterInclude, newFeed.filterExclude);
+        await window.api.addFeed({ botId, name: newFeed.name, url: newFeed.url, type: newFeed.type, keywordFilter });
         setIsAdding(false);
-        setNewFeed({ name: '', url: '', type: 'podcast' });
+        setNewFeed({ name: '', url: '', type: 'podcast', filterInclude: '', filterExclude: '' });
         setTestResult(null);
         toast(t('feedManager.successAdd') as string, 'success');
         loadFeeds();
@@ -46,11 +62,13 @@ export function FeedManager({ botId }: Props) {
 
     const handleUpdate = async () => {
         if (!editingFeed || !editingFeed.name || !editingFeed.url) return;
+        const keywordFilter = buildKeywordFilter(editingFeed.filterInclude ?? '', editingFeed.filterExclude ?? '');
         await window.api.updateFeed({
             id: editingFeed.id,
             name: editingFeed.name,
             url: editingFeed.url,
-            type: editingFeed.type
+            type: editingFeed.type,
+            keywordFilter
         });
         setEditingFeed(null);
         setTestResult(null);
@@ -59,7 +77,8 @@ export function FeedManager({ botId }: Props) {
     };
 
     const startEdit = (feed: FeedConfig) => {
-        setEditingFeed({ ...feed });
+        const { filterInclude, filterExclude } = parseKeywordFilter(feed.keyword_filter);
+        setEditingFeed({ ...feed, filterInclude, filterExclude } as any);
         setIsAdding(false);
         setTestResult(null);
     };
@@ -197,6 +216,38 @@ export function FeedManager({ botId }: Props) {
                                 </div>
                             )}
                         </div>
+                        <div className="mb-3 border border-titan-500/10 rounded-lg p-3 bg-dark-900/50">
+                            <div className="flex items-center gap-1.5 mb-2">
+                                <Filter size={11} className="text-titan-500/50" />
+                                <span className="text-[10px] text-titan-500/40 uppercase tracking-wider font-bold">{t('feedManager.filterLabel')}</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-[9px] text-neutral-600 mb-1">{t('feedManager.filterInclude')}</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-dark-900 border border-green-500/10 rounded-lg p-2 text-white text-xs focus:border-green-500/30 outline-none"
+                                        placeholder={t('feedManager.filterPlaceholder') as string}
+                                        value={editingFeed ? ((editingFeed as any).filterInclude ?? '') : newFeed.filterInclude}
+                                        onChange={e => editingFeed
+                                            ? setEditingFeed({ ...editingFeed, filterInclude: e.target.value } as any)
+                                            : setNewFeed({ ...newFeed, filterInclude: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] text-neutral-600 mb-1">{t('feedManager.filterExclude')}</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-dark-900 border border-red-500/10 rounded-lg p-2 text-white text-xs focus:border-red-500/30 outline-none"
+                                        placeholder={t('feedManager.filterPlaceholder') as string}
+                                        value={editingFeed ? ((editingFeed as any).filterExclude ?? '') : newFeed.filterExclude}
+                                        onChange={e => editingFeed
+                                            ? setEditingFeed({ ...editingFeed, filterExclude: e.target.value } as any)
+                                            : setNewFeed({ ...newFeed, filterExclude: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                         <div className="flex justify-end gap-2">
                             <button onClick={() => { setIsAdding(false); setEditingFeed(null); setTestResult(null); }} className="text-neutral-500 text-xs hover:text-white px-3 py-1.5 transition-colors">{t('botModal.cancel')}</button>
                             <button
@@ -226,6 +277,12 @@ export function FeedManager({ botId }: Props) {
                                         <span className={`text-[9px] px-1.5 py-0.5 rounded border ${cfg.border} ${cfg.color} flex-shrink-0`}>
                                             {feed.type.toUpperCase()}
                                         </span>
+                                        {feed.keyword_filter && (
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded border border-amber-500/20 text-amber-500/70 flex-shrink-0 flex items-center gap-0.5">
+                                                <Filter size={8} />
+                                                {t('feedManager.filterActive')}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-[10px] text-neutral-600 mt-0.5 truncate font-mono">
                                         <Globe size={9} />

@@ -130,7 +130,12 @@
         "deleteConfirm": "Quitar",
         "successAdd": "Nueva fuente añadida",
         "successUpdate": "Fuente actualizada con éxito",
-        "successDelete": "Fuente eliminada"
+        "successDelete": "Fuente eliminada",
+        "filterLabel": "Filtro de palabras clave",
+        "filterInclude": "Incluir (al menos una)",
+        "filterExclude": "Excluir (si contiene)",
+        "filterPlaceholder": "ej. deporte, fútbol",
+        "filterActive": "filtro activo"
     },
     "templateEditor": {
         "templateSection": "Plantillas de Mensajes",

@@ -1,6 +1,6 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.8.6  
+**Versione corrente:** v1.8.7  
 **Ultimo aggiornamento:** 17 Aprile 2026  
 **Repository:** https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
@@ -50,23 +50,37 @@
 - ✅ **F2** Retry Queue per invii falliti — `PublishJob.retryCount`, `MAX_RETRIES = 3`. Su `success = false`: re-accoda con `retryCount + 1` (log `⚠️`); a esaurimento: `markProcessed()` per spezzare loop infinito (log `❌`). *(v1.8.4)*
 - ✅ **F3** Dashboard multi-bot — Dot stato `is_active` per ogni bot nella sidebar (verde/grigio, nome attenuato se disabilitato). Toggle `ALL BOTS / THIS BOT` nel header del log: filtra client-side per `[NomeBot]`, reset automatico al cambio bot, i18n 8 lingue. *(v1.8.5)*
 - ✅ **#27** Bug critico anti-spam — doppio check `isProcessed()`: MD5 link (primario) + MD5 titolo normalizzato per stesso feed (safety net). Schema v7 con `title_hash TEXT`, backfill automatico, indice `idx_history_title_dedup`. Zero spam su cambio URL publisher. *(v1.8.6)*
+- ✅ **F4** Filtro Keyword per feed — include/exclude keyword (virgola-separato, case-insensitive). Applicato in `processFeed()` prima del quiet hours check. Schema v8 con `keyword_filter TEXT`. UI in FeedManager con badge ambra sui feed filtrati. i18n 8 lingue. *(v1.8.7)*
 
 ---
 
-## 🔵 Aperto — Feature F4-F10
+## 🔵 Aperto — Feature F4-F9
 
-> **Nota:** I dettagli di F4-F10 provengono dall'analisi originale Gemini. Le descrizioni di F6-F10 non sono presenti nei documenti del repo e vanno definite prima di procedere.
+> **Nota:** F4-F5 provengono dall'analisi originale Gemini. F6-F9 sono state recuperate da `docs/analisi-tecnica.md` (27/03/2026) dopo che il "documento Gemini originale" è risultato mai committato nel repo. Non esiste una F10 documentata — il Blocco C si ferma a F9.
 
-### F4 — Filtro keyword sui feed
-Possibilità di configurare per ogni feed una lista di parole chiave (includi/escludi). Un item viene accodato solo se il titolo o il summary soddisfa il filtro.  
-**Soluzione proposta:** campo `keyword_filter TEXT` nella tabella `feeds` (JSON array), valutato in `processFeed()` prima dell'aggiunta alla `publishQueue`.
+### ~~F4 — Filtro keyword sui feed~~ ✅ IMPLEMENTATO in v1.8.7
+~~Possibilità di configurare per ogni feed una lista di parole chiave (includi/escludi). Un item viene accodato solo se il titolo o il summary soddisfa il filtro.~~
+> **Implementato:** include/exclude (virgola-separato, case-insensitive su titolo+sommario). `passesKeywordFilter()` in `engine.ts`, schema v8 con `keyword_filter TEXT`, UI con badge ambra, i18n 8 lingue.
 
 ### F5 — Scheduler per-feed (intervallo individuale)
 Attualmente il `check_interval` è a livello di bot e si applica a tutti i feed del bot. Feed con contenuto raro (es. YouTube mensile) vengono fetchati con la stessa frequenza di feed quotidiani.  
 **Soluzione proposta:** colonna `check_interval INTEGER` nella tabella `feeds`, con fallback al valore del bot se `NULL`. `checkLoop()` skippa i feed il cui ultimo fetch è più recente del loro intervallo individuale.
 
-### F6-F10 — Da definire
-Le feature F6-F10 dell'analisi originale Gemini non sono documentate nel repo. **Vanno recuperate e aggiunte qui prima di procedere con il Blocco C.**
+### F6 — Anteprima messaggio prima dell'invio
+Bottone "Preview" nel FeedManager che mostra il messaggio Telegram renderizzato con il template attivo, prima dell'invio reale. Permette all'utente di verificare la formattazione HTML e i chip interpolati senza dover pubblicare sul canale.  
+**Soluzione proposta:** Handler IPC `preview-message` che esegue `sendFormattedMessage` in dry-run (senza chiamata Telegram), restituisce l'HTML interpolato. Modal di anteprima nel renderer con rendering HTML del messaggio.
+
+### F7 — Statistiche avanzate e grafici
+La tabella `history` ha già `sent_at`. Un `GROUP BY` per ora/giorno permette grafici di attività (post/giorno, per feed, per bot).  
+**Soluzione proposta:** Tab "Stats" nella Dashboard con grafici Recharts (già nel progetto). Query aggregata `SELECT DATE(sent_at), COUNT(*) FROM history WHERE bot_id = ? GROUP BY DATE(sent_at)`. Selezione per bot, per feed, range temporale.
+
+### F8 — Notifiche Telegram di sistema al proprietario
+Invio al bot owner di messaggi automatici quando il motore si avvia, si ferma o rileva errori critici. Estensione del `template_startup` già implementato.  
+**Soluzione proposta:** Campo `owner_chat_id TEXT` nelle impostazioni bot. `BotEngine` invia messaggi di sistema via `TelegramClient` agli eventi: `start`, `stop`, errore critico (FloodWait, token scaduto). Template configurabile separato dal `template_startup` dei feed.
+
+### F9 — Web UI per controllo remoto su VPS headless
+Server HTTP minimale nel main process per start/stop/status tramite browser, per chi esegue Titan su VPS Linux senza display.  
+**Soluzione proposta:** Server Fastify nel main process, attivabile da impostazioni (porta configurabile). Endpoint REST: `GET /status`, `POST /bot/:id/start`, `POST /bot/:id/stop`. Autenticazione con token locale generato all'avvio.
 
 ---
 
@@ -86,7 +100,7 @@ L'interfaccia "Titan Glass" può risultare pesante su risoluzioni 4K o macchine 
 ## 🟠 Aperto — #11 autoUpdater nativo (ULTIMO step prima di v2.0.0)
 
 **Questo è l'ultimo intervento prima del rilascio ufficiale della v2.0.0.**  
-Viene implementato solo dopo che tutti i punti precedenti (F3-F10 + Performance Mode) sono completati e verificati.
+Viene implementato solo dopo che tutti i punti precedenti (F4-F9 + Performance Mode) sono completati e verificati.
 
 **Problema attuale:** l'auto-updater è un semplice fetch di un JSON con comparazione di stringhe di versione. Non c'è download automatico, nessuna verifica firma, nessuna progress bar. L'utente deve scaricare manualmente l'installer.
 
@@ -107,9 +121,13 @@ Viene implementato solo dopo che tutti i punti precedenti (F3-F10 + Performance 
 [FATTO] Feature F2 — Retry Queue (MAX_RETRIES=3, markProcessed)            ✅
 [FATTO] Feature F3 — Dashboard multi-bot (dot sidebar, toggle log ALL/BOT) ✅
 ──────────────────────────────────────────────────────────────────────────
-[TODO]  Blocco C — Feature:             F4 Filtro keyword
-                                        F5 Scheduler per-feed
-                                        F6-F10 (da definire)
+[FATTO] Feature F4 — Filtro keyword (include/exclude, schema v8, UI badge)   ✅
+──────────────────────────────────────────────────────────────────────────
+[TODO]  Blocco C — Feature:             F5 Scheduler per-feed
+                                        F6 Anteprima messaggio
+                                        F7 Statistiche e grafici
+                                        F8 Notifiche Telegram al proprietario
+                                        F9 Web UI VPS headless
 [TODO]  Performance Mode (UI 4K/GPU)
 ──────────────────────────────────────────────────────────────────────────
 [LAST]  #11 autoUpdater nativo (electron-updater + GitHub Releases)  →  v2.0.0

@@ -130,7 +130,12 @@
         "deleteConfirm": "Entfernen",
         "successAdd": "Neue Quelle hinzugefügt",
         "successUpdate": "Quelle erfolgreich aktualisiert",
-        "successDelete": "Quelle entfernt"
+        "successDelete": "Quelle entfernt",
+        "filterLabel": "Schlüsselwortfilter",
+        "filterInclude": "Einschließen (mindestens eines)",
+        "filterExclude": "Ausschließen (wenn enthält)",
+        "filterPlaceholder": "z.B. Sport, Fußball",
+        "filterActive": "Filter aktiv"
     },
     "templateEditor": {
         "templateSection": "Nachrichtenvorlagen",
