@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Save, Trash2, AlertTriangle, Clock, X, Database, Settings, LayoutTemplate, Download, Eye, EyeOff } from 'lucide-react';
+import {
+    FloppyDisk, Trash, Warning, Clock, X, Database,
+    Gear, SquaresFour, DownloadSimple, Eye, EyeSlash
+} from '@phosphor-icons/react';
 import { BotConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -32,12 +35,8 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
     const [clearing, setClearing] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [showToken, setShowToken] = useState(false);
-
     const [activeTab, setActiveTab] = useState<'general' | 'templates'>('general');
-
     const { toast, success, error } = useToast();
-
-    // Dialog States
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 
@@ -46,36 +45,15 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
         setSaving(true);
         try {
             await window.api.updateBot({
-                id: bot.id,
-                name: name.trim(),
-                token,
-                channelId,
-                isActive,
-                startDate,
-                checkInterval,
-                notificationsEnabled,
-                sendFrom,
-                sendUntil,
-                templatePodcast,
-                templateNews,
-                templateYoutube,
-                templateStartup
+                id: bot.id, name: name.trim(), token, channelId, isActive, startDate,
+                checkInterval, notificationsEnabled, sendFrom, sendUntil,
+                templatePodcast, templateNews, templateYoutube, templateStartup
             });
             onUpdate({
-                ...bot,
-                name: name.trim(),
-                token,
-                channel_id: channelId,
-                is_active: isActive,
-                start_date: startDate,
-                check_interval: checkInterval,
-                notifications_enabled: notificationsEnabled,
-                send_from: sendFrom,
-                send_until: sendUntil,
-                template_podcast: templatePodcast,
-                template_news: templateNews,
-                template_youtube: templateYoutube,
-                template_startup: templateStartup
+                ...bot, name: name.trim(), token, channel_id: channelId, is_active: isActive,
+                start_date: startDate, check_interval: checkInterval, notifications_enabled: notificationsEnabled,
+                send_from: sendFrom, send_until: sendUntil, template_podcast: templatePodcast,
+                template_news: templateNews, template_youtube: templateYoutube, template_startup: templateStartup
             });
             onClose();
         } catch (e) {
@@ -83,10 +61,6 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
         } finally {
             setSaving(false);
         }
-    };
-
-    const handleDelete = async () => {
-        setDeleteConfirmOpen(true);
     };
 
     const confirmDelete = async () => {
@@ -100,10 +74,6 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
         }
     };
 
-    const handleClearHistory = async () => {
-        setClearConfirmOpen(true);
-    };
-
     const confirmClearHistory = async () => {
         setClearing(true);
         setClearConfirmOpen(false);
@@ -111,7 +81,6 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
             await window.api.clearHistory(bot.id);
             success(t('botModal.successClear') as string, "Fatto");
         } catch (e) {
-            console.error("Errore pulizia history:", e);
             error(t('botModal.errorClear') as string);
         } finally {
             setClearing(false);
@@ -134,223 +103,211 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
         }
     };
 
+    // Shared input class
+    const inputCls = "w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-3 text-on-surface focus:outline-none focus:border-primary/50 focus:shadow-[0_0_0_1px_rgba(173,198,255,0.15)] transition-all text-sm";
+    const labelCls = "text-micro text-outline-variant/60 mb-1.5 flex items-center gap-1.5 block";
+
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-dark-900 border border-titan-500/15 rounded-2xl w-full max-w-4xl shadow-2xl shadow-titan-500/5 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="glass-panel w-full max-w-4xl rounded-xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+
                 {/* Header */}
-                <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-titan-500/10 bg-dark-800/50 flex-shrink-0">
+                <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-outline-variant/15 bg-surface-container-high/50 flex-shrink-0">
                     <div>
-                        <h2 className="text-xl font-bold text-white">{t('botModal.editTitle')}</h2>
-                        <p className="text-xs text-titan-500/40 mt-0.5">Edit: <span className="text-titan-400">{bot.name}</span></p>
+                        <h2 className="font-headline text-xl font-bold text-on-surface">{t('botModal.editTitle')}</h2>
+                        <p className="text-nano text-outline-variant/50 mt-0.5">
+                            BOT_ID: 0x{bot.id.toString(16).toUpperCase().padStart(4, '0')} · <span className="text-primary/60">{bot.name}</span>
+                        </p>
                     </div>
-                    <button onClick={onClose} className="text-neutral-600 hover:text-white transition-colors p-1">
-                        <X size={20} />
+                    <button onClick={onClose} className="p-1 text-outline-variant hover:text-on-surface hover:bg-surface-container-highest/50 rounded transition-colors">
+                        <X size={18} weight="bold" />
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-titan-500/10 px-6 bg-dark-800/30">
-                    <button
-                        onClick={() => setActiveTab('general')}
-                        className={`flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 ${activeTab === 'general' ? 'border-titan-500 text-titan-400' : 'border-transparent text-titan-500/50 hover:text-titan-500/80'}`}
-                    >
-                        <Settings size={14} />
-                        {t('templateEditor.tabGeneral') || 'Generale'}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('templates')}
-                        className={`flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 ${activeTab === 'templates' ? 'border-titan-500 text-titan-400' : 'border-transparent text-titan-500/50 hover:text-titan-500/80'}`}
-                    >
-                        <LayoutTemplate size={14} />
-                        {t('templateEditor.tabTemplates') || 'Template'}
-                    </button>
+                <div className="flex border-b border-outline-variant/15 px-6 bg-surface-container-low/40">
+                    {[
+                        { key: 'general', icon: Gear, label: t('templateEditor.tabGeneral') || 'Generale' },
+                        { key: 'templates', icon: SquaresFour, label: t('templateEditor.tabTemplates') || 'Template' },
+                    ].map(({ key, icon: Icon, label }) => (
+                        <button
+                            key={key}
+                            onClick={() => setActiveTab(key as any)}
+                            className={`flex items-center gap-2 px-4 py-3 text-micro transition-colors border-b-2 ${
+                                activeTab === key
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-outline-variant/50 hover:text-on-surface-variant'
+                            }`}
+                        >
+                            <Icon size={14} weight={activeTab === key ? 'duotone' : 'regular'} />
+                            {label}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Fields - Scrollable area */}
-                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                {/* Fields */}
+                <div className="p-6 overflow-y-auto flex-1">
                     {activeTab === 'general' ? (
                         <div className="grid grid-cols-2 gap-8 items-start">
-                            {/* Left Column (Main Data) */}
+                            {/* Left Column */}
                             <div className="space-y-5">
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider">{t('botModal.nameLabel')}</label>
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3 text-white focus:outline-none focus:border-titan-500/40 transition-colors"
-                                        placeholder={t('botModal.namePlaceholder') as string}
-                                    />
+                                <div>
+                                    <label className={labelCls}>{t('botModal.nameLabel')}</label>
+                                    <input type="text" value={name} onChange={e => setName(e.target.value)}
+                                        className={inputCls} placeholder={t('botModal.namePlaceholder') as string} />
                                 </div>
 
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider">{t('botModal.tokenLabel')}</label>
+                                <div>
+                                    <label className={labelCls}>{t('botModal.tokenLabel')}</label>
                                     <div className="relative">
                                         <input
                                             type={showToken ? 'text' : 'password'}
-                                            value={token}
-                                            onChange={(e) => setToken(e.target.value)}
-                                            className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3 pr-10 text-white focus:outline-none focus:border-titan-500/40 transition-colors font-mono text-xs"
+                                            value={token} onChange={e => setToken(e.target.value)}
+                                            className={inputCls + " pr-10 font-mono text-xs"}
                                             placeholder={t('botModal.tokenPlaceholder') as string}
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowToken(!showToken)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-titan-400 transition-colors"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant hover:text-primary transition-colors"
                                             tabIndex={-1}
                                         >
-                                            {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
+                                            {showToken
+                                                ? <EyeSlash size={14} weight="duotone" />
+                                                : <Eye size={14} weight="duotone" />
+                                            }
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider">{t('botModal.channelLabel')}</label>
-                                    <input
-                                        type="text"
-                                        value={channelId}
-                                        onChange={(e) => setChannelId(e.target.value)}
-                                        className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3 text-white focus:outline-none focus:border-titan-500/40 transition-colors font-mono text-xs"
-                                        placeholder={t('botModal.channelPlaceholder') as string}
-                                    />
+                                <div>
+                                    <label className={labelCls}>{t('botModal.channelLabel')}</label>
+                                    <input type="text" value={channelId} onChange={e => setChannelId(e.target.value)}
+                                        className={inputCls + " font-mono text-xs"}
+                                        placeholder={t('botModal.channelPlaceholder') as string} />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider">{t('botModal.startDateLabel')}</label>
-                                        <input
-                                            type="date"
-                                            value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
-                                            className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3 text-white focus:outline-none focus:border-titan-500/40 transition-colors [color-scheme:dark]"
-                                        />
+                                    <div>
+                                        <label className={labelCls}>{t('botModal.startDateLabel')}</label>
+                                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                                            className={inputCls + " [color-scheme:dark]"} />
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider">{t('botModal.activeLabel')}</label>
+                                    <div>
+                                        <label className={labelCls}>{t('botModal.activeLabel')}</label>
                                         <div
                                             onClick={() => setIsActive(!isActive)}
-                                            className={`w-full h-[46px] rounded-lg border flex items-center px-4 cursor-pointer transition-all ${isActive ? 'bg-titan-500/10 border-titan-500/20 text-titan-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}
+                                            className={`w-full h-[46px] rounded-lg border flex items-center px-4 cursor-pointer transition-all text-sm font-medium ${
+                                                isActive
+                                                    ? 'bg-secondary/10 border-secondary/25 text-secondary'
+                                                    : 'bg-error/10 border-error/20 text-error'
+                                            }`}
                                         >
-                                            <div className={`w-2 h-2 rounded-full mr-2 ${isActive ? 'bg-titan-400 status-dot-active' : 'bg-red-500 status-dot-stopped'}`}></div>
+                                            <div className={`w-1.5 h-1.5 rounded-full mr-2 ${isActive ? 'bg-secondary status-dot-active' : 'bg-error status-dot-stopped'}`} />
                                             {isActive ? t('botModal.statusActive') : t('botModal.statusDisabled')}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-1.5 mt-4">
-                                    <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider">{t('botModal.notificationsLabel')}</label>
+                                <div>
+                                    <label className={labelCls}>{t('botModal.notificationsLabel')}</label>
                                     <div
                                         onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                                        className={`w-full h-[46px] rounded-lg border flex items-center px-4 cursor-pointer transition-all ${notificationsEnabled ? 'bg-titan-500/10 border-titan-500/20 text-titan-400' : 'bg-dark-950 border-titan-500/10 text-neutral-500'}`}
+                                        className={`w-full h-[46px] rounded-lg border flex items-center px-4 cursor-pointer transition-all text-sm font-medium ${
+                                            notificationsEnabled
+                                                ? 'bg-primary/10 border-primary/20 text-primary'
+                                                : 'bg-surface-container-lowest border-outline-variant/15 text-on-surface-variant/50'
+                                        }`}
                                     >
-                                        <div className={`w-2 h-2 rounded-full mr-2 ${notificationsEnabled ? 'bg-titan-400 status-dot-active' : 'bg-neutral-600 status-dot-stopped'}`}></div>
+                                        <div className={`w-1.5 h-1.5 rounded-full mr-2 ${notificationsEnabled ? 'bg-primary status-dot-active' : 'bg-outline-variant/40'}`} />
                                         {notificationsEnabled ? t('botModal.statusEnabled') : t('botModal.statusDisabled')}
                                     </div>
-                                    <p className="text-[9px] text-neutral-700">{t('botModal.notificationsHint')}</p>
+                                    <p className="text-nano text-outline-variant/30 mt-1">{t('botModal.notificationsHint')}</p>
                                 </div>
                             </div>
 
-                            {/* Right Column (Secondary / Danger) */}
+                            {/* Right Column */}
                             <div className="space-y-8 flex flex-col h-full">
-                                {/* Check Interval */}
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider flex items-center gap-1.5">
-                                        <Clock size={11} />
+                                {/* Interval */}
+                                <div>
+                                    <label className={labelCls}>
+                                        <Clock size={11} weight="duotone" />
                                         {t('botModal.intervalLabel')}
                                     </label>
                                     <div className="flex items-center gap-3">
                                         <input
-                                            type="range"
-                                            min="1"
-                                            max="120"
-                                            value={checkInterval}
-                                            onChange={(e) => setCheckInterval(Number(e.target.value))}
-                                            className="flex-1 h-1.5 bg-dark-950 rounded-full appearance-none cursor-pointer accent-titan-500"
+                                            type="range" min="1" max="120" value={checkInterval}
+                                            onChange={e => setCheckInterval(Number(e.target.value))}
+                                            className="flex-1 h-1 bg-surface-container-highest rounded-full appearance-none cursor-pointer accent-primary"
                                         />
-                                        <div className="bg-dark-950 border border-titan-500/10 rounded-lg px-3 py-2 text-titan-400 font-mono text-sm min-w-[80px] text-center">
+                                        <div className="ghost-border bg-surface-container-lowest rounded-lg px-3 py-2 text-primary font-mono text-sm min-w-[80px] text-center">
                                             {checkInterval} min
                                         </div>
                                     </div>
-                                    <p className="text-[9px] text-neutral-700">{t('botModal.intervalHint')}</p>
+                                    <p className="text-nano text-outline-variant/30 mt-1">{t('botModal.intervalHint')}</p>
                                 </div>
 
                                 {/* Quiet Hours */}
-                                <div className="space-y-3 pt-2">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-bold text-titan-500/50 uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                                            <Clock size={11} className="text-titan-500" />
-                                            {t('botModal.quietHoursLabel')}
-                                        </label>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="flex flex-col gap-1.5">
-                                                <label className="text-[9px] text-neutral-500 uppercase">{t('botModal.timeFrom')}</label>
-                                                <input
-                                                    type="time"
-                                                    value={sendFrom}
-                                                    onChange={(e) => setSendFrom(e.target.value)}
-                                                    className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-2 text-white focus:outline-none focus:border-titan-500/40 transition-colors [color-scheme:dark] text-sm"
-                                                />
-                                            </div>
-                                            <div className="flex flex-col gap-1.5">
-                                                <label className="text-[9px] text-neutral-500 uppercase">{t('botModal.timeUntil')}</label>
-                                                <input
-                                                    type="time"
-                                                    value={sendUntil}
-                                                    onChange={(e) => setSendUntil(e.target.value)}
-                                                    className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-2 text-white focus:outline-none focus:border-titan-500/40 transition-colors [color-scheme:dark] text-sm"
-                                                />
-                                            </div>
+                                <div>
+                                    <label className={labelCls}>
+                                        <Clock size={11} weight="duotone" />
+                                        {t('botModal.quietHoursLabel')}
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-nano text-outline-variant/40 mb-1 block">{t('botModal.timeFrom')}</label>
+                                            <input type="time" value={sendFrom} onChange={e => setSendFrom(e.target.value)}
+                                                className={inputCls + " [color-scheme:dark]"} />
                                         </div>
-                                        <p className="text-[9px] text-neutral-700 leading-tight mt-1.5">{t('botModal.quietHoursHint')}</p>
+                                        <div>
+                                            <label className="text-nano text-outline-variant/40 mb-1 block">{t('botModal.timeUntil')}</label>
+                                            <input type="time" value={sendUntil} onChange={e => setSendUntil(e.target.value)}
+                                                className={inputCls + " [color-scheme:dark]"} />
+                                        </div>
                                     </div>
+                                    <p className="text-nano text-outline-variant/30 mt-1.5 leading-tight">{t('botModal.quietHoursHint')}</p>
                                 </div>
 
                                 {/* Danger Zone */}
-                                <div className="flex-1 flex flex-col justify-end mt-4">
-                                    <div className="pt-6 border-t border-red-500/10 space-y-4">
-                                        <div className="flex items-center gap-2 text-red-500/60 text-[10px] font-bold uppercase tracking-widest">
-                                            <AlertTriangle size={14} />
+                                <div className="flex-1 flex flex-col justify-end">
+                                    <div className="pt-5 border-t border-error/10 space-y-4">
+                                        <div className="flex items-center gap-2 text-micro text-error/50">
+                                            <Warning size={14} weight="duotone" />
                                             {t('botModal.dangerZone')}
                                         </div>
-
-                                        <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-4 flex items-center justify-between gap-4">
+                                        <div className="bg-error/5 border border-error/10 rounded-xl p-4 flex items-center justify-between gap-4">
                                             <div>
-                                                <h4 className="text-sm font-bold text-red-400/80">{t('botModal.clearHistoryTitle')}</h4>
-                                                <p className="text-[10px] text-red-400/40 leading-relaxed mt-1 whitespace-pre-line">
-                                                    {t('botModal.clearHistoryDesc')}
-                                                </p>
+                                                <h4 className="text-sm font-semibold text-error/70">{t('botModal.clearHistoryTitle')}</h4>
+                                                <p className="text-nano text-error/40 mt-1 leading-relaxed whitespace-pre-line">{t('botModal.clearHistoryDesc')}</p>
                                             </div>
                                             <button
-                                                onClick={handleClearHistory}
+                                                onClick={() => setClearConfirmOpen(true)}
                                                 disabled={clearing}
-                                                className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-xs font-bold transition-all border border-red-500/20"
+                                                className="flex items-center gap-2 bg-error/10 hover:bg-error/20 text-error px-4 py-2 rounded-lg text-xs font-bold transition-all border border-error/20 flex-shrink-0"
                                             >
-                                                <Database size={14} />
+                                                <Database size={13} weight="duotone" />
                                                 {clearing ? '...' : t('botModal.clearHistoryBtn')}
                                             </button>
                                         </div>
                                     </div>
 
-                                    {/* Zona Export */}
-                                    <div className="pt-6 border-t border-titan-500/10 space-y-4">
-                                        <div className="flex items-center gap-2 text-titan-500/60 text-[10px] font-bold uppercase tracking-widest">
-                                            <Download size={14} />
+                                    {/* Export zone */}
+                                    <div className="pt-5 border-t border-outline-variant/10 space-y-4 mt-4">
+                                        <div className="flex items-center gap-2 text-micro text-outline-variant/50">
+                                            <DownloadSimple size={14} weight="bold" />
                                             {t('botModal.shareZone')}
                                         </div>
-
-                                        <div className="bg-titan-500/5 border border-titan-500/20 rounded-xl p-4 flex items-center justify-between gap-4">
+                                        <div className="ghost-border bg-primary/5 rounded-xl p-4 flex items-center justify-between gap-4">
                                             <div>
-                                                <h4 className="text-sm font-bold text-titan-400">{t('botModal.exportTitle')}</h4>
-                                                <p className="text-[10px] text-titan-400/50 leading-relaxed mt-1 whitespace-pre-line">
-                                                    {t('botModal.exportDesc')}
-                                                </p>
+                                                <h4 className="text-sm font-semibold text-primary/80">{t('botModal.exportTitle')}</h4>
+                                                <p className="text-nano text-primary/40 mt-1 leading-relaxed whitespace-pre-line">{t('botModal.exportDesc')}</p>
                                             </div>
                                             <button
                                                 onClick={handleExport}
                                                 disabled={isExporting}
-                                                className="flex items-center gap-2 bg-titan-500/10 hover:bg-titan-500/20 text-titan-400 px-4 py-2 rounded-lg text-xs font-bold transition-all border border-titan-500/20"
+                                                className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg text-xs font-bold transition-all border border-primary/20 flex-shrink-0"
                                             >
-                                                <Download size={14} />
+                                                <DownloadSimple size={13} weight="bold" />
                                                 {isExporting ? '...' : t('botModal.exportBtn')}
                                             </button>
                                         </div>
@@ -360,84 +317,42 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            <TemplateEditor
-                                label={t('templateEditor.templateStartup') as string}
-                                value={templateStartup}
-                                onChange={setTemplateStartup}
-                                defaultTemplate="🟢 <b>Bot Avviato</b>"
-                                hideChips={true}
-                            />
-
-                            <TemplateEditor
-                                label={t('templateEditor.templateNews') as string}
-                                value={templateNews}
-                                onChange={setTemplateNews}
-                                defaultTemplate="📰 <b>{{feedName}}</b>&#10;&#10;<b>{{title}}</b>&#10;&#10;🔗 <a href='{{link}}'>Leggi l'articolo completo</a>"
-                            />
-
-                            <TemplateEditor
-                                label={t('templateEditor.templatePodcast') as string}
-                                value={templatePodcast}
-                                onChange={setTemplatePodcast}
-                                defaultTemplate="🎙 <b>{{feedName}}</b>&#10;&#10;<i>{{title}}</i>&#10;&#10;{{summary}}&#10;&#10;🎧 <a href='{{link}}'>Ascolta l'episodio</a>"
-                            />
-
-                            <TemplateEditor
-                                label={t('templateEditor.templateYoutube') as string}
-                                value={templateYoutube}
-                                onChange={setTemplateYoutube}
-                                defaultTemplate="🎬 <b>{{feedName}}</b>&#10;&#10;<b>{{title}}</b>&#10;&#10;▶️ <a href='{{link}}'>Guarda il video</a>"
-                            />
+                            <TemplateEditor label={t('templateEditor.templateStartup') as string} value={templateStartup} onChange={setTemplateStartup} defaultTemplate="🟢 <b>Bot Avviato</b>" hideChips={true} />
+                            <TemplateEditor label={t('templateEditor.templateNews') as string} value={templateNews} onChange={setTemplateNews} defaultTemplate="📰 <b>{{feedName}}</b>&#10;&#10;<b>{{title}}</b>&#10;&#10;🔗 <a href='{{link}}'>Leggi l'articolo completo</a>" />
+                            <TemplateEditor label={t('templateEditor.templatePodcast') as string} value={templatePodcast} onChange={setTemplatePodcast} defaultTemplate="🎙 <b>{{feedName}}</b>&#10;&#10;<i>{{title}}</i>&#10;&#10;{{summary}}&#10;&#10;🎧 <a href='{{link}}'>Ascolta l'episodio</a>" />
+                            <TemplateEditor label={t('templateEditor.templateYoutube') as string} value={templateYoutube} onChange={setTemplateYoutube} defaultTemplate="🎬 <b>{{feedName}}</b>&#10;&#10;<b>{{title}}</b>&#10;&#10;▶️ <a href='{{link}}'>Guarda il video</a>" />
                         </div>
                     )}
                 </div>
 
-                {/* Actions */}
-                <div className="p-6 border-t border-titan-500/10 bg-dark-800/30 flex justify-between items-center flex-shrink-0">
+                {/* Footer Actions */}
+                <div className="p-6 border-t border-outline-variant/15 bg-surface-container-low/40 flex justify-between items-center flex-shrink-0">
                     <button
-                        onClick={handleDelete}
-                        className="flex items-center gap-2 text-red-400/70 hover:text-red-400 transition-colors text-sm px-4 py-2 hover:bg-red-500/10 rounded-lg"
+                        onClick={() => setDeleteConfirmOpen(true)}
+                        className="flex items-center gap-2 text-error/50 hover:text-error transition-colors text-sm px-4 py-2 hover:bg-error/10 rounded-lg"
                     >
-                        <Trash2 size={14} />
+                        <Trash size={14} weight="duotone" />
                         {t('botModal.delete')}
                     </button>
 
                     <div className="flex gap-3">
-                        <button
-                            onClick={onClose}
-                            className="px-5 py-2 rounded-lg text-sm text-neutral-500 hover:text-white transition-colors"
-                        >
+                        <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm text-on-surface-variant hover:text-on-surface transition-colors">
                             {t('botModal.cancel')}
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={saving || !name.trim()}
-                            className="flex items-center gap-2 bg-titan-600 hover:bg-titan-500 disabled:bg-neutral-800 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-titan-500/10 transition-all hover:scale-105 active:scale-95"
+                            className="flex items-center gap-2 ignition-btn px-6 py-2 rounded-lg text-sm font-headline font-bold text-on-primary-fixed disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
                         >
-                            <Save size={14} />
+                            <FloppyDisk size={14} weight="bold" />
                             {saving ? '...' : t('botModal.save')}
                         </button>
                     </div>
                 </div>
             </div>
 
-            <ConfirmDialog
-                isOpen={deleteConfirmOpen}
-                title={t('botModal.deleteTitle') as string}
-                message={t('botModal.deletePrompt') as string}
-                confirmText={t('botModal.confirmDelete') as string}
-                onConfirm={confirmDelete}
-                onCancel={() => setDeleteConfirmOpen(false)}
-            />
-
-            <ConfirmDialog
-                isOpen={clearConfirmOpen}
-                title={t('botModal.confirmClearHistoryTitle') as string}
-                message={t('botModal.confirmClearHistoryPrompt') as string}
-                confirmText={t('botModal.confirmClearHistoryBtn') as string}
-                onConfirm={confirmClearHistory}
-                onCancel={() => setClearConfirmOpen(false)}
-            />
+            <ConfirmDialog isOpen={deleteConfirmOpen} title={t('botModal.deleteTitle') as string} message={t('botModal.deletePrompt') as string} confirmText={t('botModal.confirmDelete') as string} onConfirm={confirmDelete} onCancel={() => setDeleteConfirmOpen(false)} />
+            <ConfirmDialog isOpen={clearConfirmOpen} title={t('botModal.confirmClearHistoryTitle') as string} message={t('botModal.confirmClearHistoryPrompt') as string} confirmText={t('botModal.confirmClearHistoryBtn') as string} onConfirm={confirmClearHistory} onCancel={() => setClearConfirmOpen(false)} />
         </div>
     );
 }

@@ -58,6 +58,7 @@
     "dependencies": {
         "@electron-toolkit/preload": "^2.0.0",
         "@electron-toolkit/utils": "^2.0.0",
+        "@phosphor-icons/react": "^2.1.10",
         "better-sqlite3": "^11.8.1",
         "clsx": "^2.1.0",
         "framer-motion": "^11.0.3",

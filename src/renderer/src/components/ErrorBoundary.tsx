@@ -1,8 +1,6 @@
-
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Warning, ArrowsClockwise } from '@phosphor-icons/react';
 
-// Dizionario locale di emergenza — non dipende dal Context React (che potrebbe essere crashato)
 const errorStrings: Record<string, { title: string; subtitle: string; body: string; reload: string; footer: string }> = {
     it: { title: 'Errore Critico di Sistema', subtitle: 'Arresto Interfaccia Rilevato', body: "L'interfaccia ha riscontrato un errore fatale. I processi in background (Bot) potrebbero essere ancora attivi, ma l'interfaccia deve essere ricaricata.", reload: 'Ricarica Interfaccia', footer: 'Protocollo di Sicurezza Titan Desktop Attivo' },
     en: { title: 'Critical System Error', subtitle: 'Interface Termination Detected', body: 'The interface module encountered a fatal error. Background processes (Bots) might still be operational, but the UI needs to be reloaded.', reload: 'Reload Interface', footer: 'Titan Desktop Safety Protocol Active' },
@@ -23,14 +21,8 @@ function getErrorStrings() {
     }
 }
 
-interface Props {
-    children: ReactNode;
-}
-
-interface State {
-    hasError: boolean;
-    error: Error | null;
-}
+interface Props { children: ReactNode; }
+interface State { hasError: boolean; error: Error | null; }
 
 export class ErrorBoundary extends Component<Props, State> {
     constructor(props: Props) {
@@ -39,72 +31,75 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     static getDerivedStateFromError(error: Error): State {
-        // Aggiorna lo stato in modo che il prossimo rendering mostri la UI di fallback.
         return { hasError: true, error };
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        // È possibile loggare l'errore in un servizio esterno qui
         console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
 
-    handleReset = () => {
-        window.location.reload();
-    };
+    handleReset = () => { window.location.reload(); };
 
     render() {
         if (this.state.hasError) {
             const s = getErrorStrings();
             return (
-                <div className="h-screen w-screen bg-dark-950 grid-dots flex items-center justify-center p-6 font-titan overflow-hidden">
-                    <div className="max-w-2xl w-full bg-dark-900/80 backdrop-blur-xl border border-red-500/30 rounded-2xl p-8 shadow-2xl shadow-red-500/10 animate-in fade-in zoom-in duration-300">
+                <div className="h-screen w-screen bg-background grid-dots flex items-center justify-center p-6 font-body overflow-hidden">
+                    {/* Ambient halo */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-[700px] h-[700px] rounded-full bg-error/5 blur-[120px]" />
+                    </div>
+
+                    <div className="max-w-2xl w-full glass-panel rounded-xl overflow-hidden animate-in fade-in zoom-in duration-300 relative"
+                        style={{ boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(255,180,171,0.08)' }}
+                    >
+                        {/* Top accent stripe */}
+                        <div className="h-0.5 w-full bg-gradient-to-r from-error via-error/60 to-transparent" />
+
                         {/* Header */}
-                        <div className="flex items-center gap-4 mb-8 border-b border-red-500/20 pb-6">
-                            <div className="w-14 h-14 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/30">
-                                <AlertTriangle size={32} />
+                        <div className="flex items-center gap-4 p-8 border-b border-outline-variant/15">
+                            <div className="w-14 h-14 rounded-xl bg-error-container/20 flex items-center justify-center text-error border border-error/20 drop-glow-error flex-shrink-0">
+                                <Warning size={28} weight="duotone" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-black text-white uppercase tracking-tighter">
+                                <h1 className="font-headline text-2xl font-black text-on-surface uppercase tracking-tight">
                                     {s.title}
                                 </h1>
-                                <p className="text-red-500/60 text-xs font-bold uppercase tracking-widest mt-1">
-                                    {s.subtitle}
-                                </p>
+                                <p className="text-micro text-error/60 mt-1">{s.subtitle}</p>
                             </div>
                         </div>
 
-                        {/* Error Content */}
-                        <div className="mb-8">
-                            <p className="text-titan-400/80 text-sm mb-3">
-                                {s.body}
-                            </p>
+                        {/* Body */}
+                        <div className="p-8 space-y-4">
+                            <p className="text-sm text-on-surface-variant leading-relaxed">{s.body}</p>
 
-                            <div className="bg-black/40 rounded-lg p-4 border border-red-500/10 overflow-auto max-h-40 custom-scrollbar">
-                                <code className="text-red-400 font-mono text-xs break-all leading-relaxed">
+                            <div className="bg-surface-container-lowest rounded-lg p-4 border border-error/10 overflow-auto max-h-40 scanline-bg">
+                                <code className="text-error font-mono text-xs break-all leading-relaxed relative z-10 block">
                                     {this.state.error?.name}: {this.state.error?.message}
                                 </code>
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex flex-col gap-3">
+                        {/* Actions */}
+                        <div className="px-8 pb-8 flex flex-col gap-3">
                             <button
                                 onClick={this.handleReset}
-                                className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/40 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                className="w-full bg-error/15 hover:bg-error/25 text-error border border-error/30 py-3 rounded-lg font-headline font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] drop-glow-error"
                             >
-                                <RefreshCw size={18} />
+                                <ArrowsClockwise size={18} weight="bold" />
                                 {s.reload}
                             </button>
+                            <p className="text-center text-nano text-outline-variant/30 mt-1">{s.footer}</p>
+                        </div>
 
-                            <p className="text-center text-[10px] text-titan-500/40 uppercase tracking-widest font-bold mt-2">
-                                {s.footer}
-                            </p>
+                        {/* Micro-copy decorativo */}
+                        <div className="absolute bottom-3 left-5 text-nano text-outline-variant/25 pointer-events-none">
+                            ERR_CODE: 0xDEAD_BEEF · TITAN_SAFE
                         </div>
                     </div>
                 </div>
             );
         }
-
         return this.props.children;
     }
 }

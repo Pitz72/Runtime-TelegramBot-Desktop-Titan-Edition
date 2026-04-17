@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { ArrowRight, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, Check } from '@phosphor-icons/react';
 import logo from '../assets/logo.png';
 import { useTranslation } from '../locales/I18nContext';
 
@@ -34,97 +34,122 @@ export function SetupWizard({ onComplete, onSkip }: Props) {
 
     const totalSteps = 4;
 
+    const inputCls = "w-full bg-surface-container-lowest border border-outline-variant/15 rounded-lg p-3.5 text-on-surface focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all text-sm font-body placeholder:text-outline-variant/30";
+
     return (
-        <div className="h-screen flex items-center justify-center bg-dark-950 text-white p-8 font-titan overflow-hidden relative">
+        <div className="h-screen flex items-center justify-center bg-background text-on-surface p-8 font-body overflow-hidden relative">
             {/* Background */}
-            <div className="absolute top-1/2 left-1/2 w-[500px] h-[500px] bg-titan-500/5 blur-[150px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-            <div className="absolute inset-0 grid-dots pointer-events-none opacity-30"></div>
+            <div className="absolute inset-0 grid-dots pointer-events-none opacity-40" />
+            <div className="absolute top-1/2 left-1/2 w-[500px] h-[500px] bg-primary/6 blur-[150px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 w-[250px] h-[250px] bg-secondary/4 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
             <div className="max-w-md w-full space-y-8 animate-in fade-in slide-in-from-bottom-10 duration-700 relative z-10">
+                {/* Header */}
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold text-white tracking-tighter uppercase">
-                        {t('app.title')} <span className="text-titan-400">{t('app.edition')}</span>
+                    <img src={logo} alt="Titan Logo" className="w-16 h-16 mx-auto mb-4" style={{ filter: 'drop-shadow(0 0 16px rgba(173,198,255,0.2))' }} />
+                    <h1 className="font-headline text-3xl font-black text-on-surface tracking-tighter uppercase">
+                        {t('app.title')} <span className="text-primary drop-glow-primary">{t('app.edition')}</span>
                     </h1>
-                    <p className="text-neutral-500 text-sm font-light">{t('setup.subtitle')}</p>
-                    <div className="flex flex-col items-center justify-center gap-1 opacity-40">
-                        <p className="text-[10px] text-neutral-600 font-medium">{t('app.copyright')}</p>
-                    </div>
+                    <p className="text-outline-variant/50 text-sm">{t('setup.subtitle')}</p>
+                    <p className="text-nano text-outline-variant/25">{t('app.copyright')}</p>
                 </div>
 
-                <div className="bg-dark-900/80 backdrop-blur-xl border border-titan-500/10 p-8 rounded-2xl shadow-2xl shadow-titan-500/5 relative overflow-hidden">
-                    {/* Progress Bar */}
-                    <div className="absolute top-0 left-0 h-1 bg-dark-950 w-full">
-                        <div className="h-full bg-gradient-to-r from-titan-500 to-titan-400 transition-all duration-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
+                {/* Wizard panel */}
+                <div className="glass-panel rounded-2xl overflow-hidden relative">
+                    {/* Progress stripe */}
+                    <div className="h-0.5 bg-surface-container-lowest w-full">
+                        <div
+                            className="h-full transition-all duration-500"
+                            style={{
+                                width: `${(step / totalSteps) * 100}%`,
+                                background: 'linear-gradient(90deg, #4d8eff, #03b5d3)',
+                                boxShadow: '0 0 8px rgba(77,142,255,0.5)'
+                            }}
+                        />
                     </div>
 
-                    {step === 1 && (
-                        <div className="space-y-5 mt-4">
-                            <label className="block text-[10px] font-bold text-titan-500/50 uppercase tracking-[0.15em]">{t('setup.step1Label')}</label>
-                            <div className="relative">
+                    <div className="p-8">
+                        {/* Step counter */}
+                        <div className="flex items-center justify-between mb-6">
+                            <span className="text-nano text-outline-variant/40">SETUP_WIZARD</span>
+                            <span className="text-nano text-primary/60">{step}/{totalSteps}</span>
+                        </div>
+
+                        {step === 1 && (
+                            <div className="space-y-4">
+                                <label className="block text-micro text-primary/60">{t('setup.step1Label')}</label>
                                 <input
                                     type="text"
                                     value={botName}
                                     onChange={(e) => setBotName(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && botName && handleNext()}
                                     placeholder={t('setup.step1Placeholder') as string}
-                                    className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3.5 text-white focus:outline-none focus:border-titan-500/30 transition-all text-sm placeholder:text-neutral-700"
+                                    className={inputCls}
+                                    autoFocus
                                 />
+                                <p className="text-nano text-outline-variant/40">{t('setup.step1Desc')}</p>
                             </div>
-                            <p className="text-[10px] text-neutral-600">{t('setup.step1Desc')}</p>
-                        </div>
-                    )}
+                        )}
 
-                    {step === 2 && (
-                        <div className="space-y-5 mt-4">
-                            <label className="block text-[10px] font-bold text-titan-500/50 uppercase tracking-[0.15em]">{t('setup.step2Label')}</label>
-                            <input
-                                type="text"
-                                value={token}
-                                onChange={(e) => setToken(e.target.value)}
-                                placeholder="123456:ABC-DefGhiJklm..."
-                                className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3.5 text-white focus:outline-none focus:border-titan-500/30 transition-all font-mono text-sm placeholder:text-neutral-700"
-                            />
-                            <p className="text-[10px] text-neutral-600">
-                                {t('setup.step2Desc')}
-                            </p>
-                        </div>
-                    )}
+                        {step === 2 && (
+                            <div className="space-y-4">
+                                <label className="block text-micro text-primary/60">{t('setup.step2Label')}</label>
+                                <input
+                                    type="text"
+                                    value={token}
+                                    onChange={(e) => setToken(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && token && handleNext()}
+                                    placeholder="123456:ABC-DefGhiJklm..."
+                                    className={`${inputCls} font-mono`}
+                                    autoFocus
+                                />
+                                <p className="text-nano text-outline-variant/40">{t('setup.step2Desc')}</p>
+                            </div>
+                        )}
 
-                    {step === 3 && (
-                        <div className="space-y-5 mt-4">
-                            <label className="block text-[10px] font-bold text-titan-500/50 uppercase tracking-[0.15em]">{t('setup.step3Label')}</label>
-                            <input
-                                type="text"
-                                value={channel}
-                                onChange={(e) => setChannel(e.target.value)}
-                                placeholder={t('setup.step3Placeholder') as string}
-                                className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3.5 text-white focus:outline-none focus:border-titan-500/30 transition-all font-mono text-sm placeholder:text-neutral-700"
-                            />
-                            <p className="text-[10px] text-neutral-600">{t('setup.step3Desc')}</p>
-                        </div>
-                    )}
+                        {step === 3 && (
+                            <div className="space-y-4">
+                                <label className="block text-micro text-primary/60">{t('setup.step3Label')}</label>
+                                <input
+                                    type="text"
+                                    value={channel}
+                                    onChange={(e) => setChannel(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && channel && handleNext()}
+                                    placeholder={t('setup.step3Placeholder') as string}
+                                    className={`${inputCls} font-mono`}
+                                    autoFocus
+                                />
+                                <p className="text-nano text-outline-variant/40">{t('setup.step3Desc')}</p>
+                            </div>
+                        )}
 
-                    {step === 4 && (
-                        <div className="space-y-5 mt-4">
-                            <label className="block text-[10px] font-bold text-titan-500/50 uppercase tracking-[0.15em]">{t('setup.step4Label')}</label>
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="w-full bg-dark-950 border border-titan-500/10 rounded-lg p-3.5 text-white focus:outline-none focus:border-titan-500/30 transition-all font-mono text-sm [color-scheme:dark]"
-                            />
-                            <p className="text-[10px] text-neutral-600">{t('setup.step4Desc')}</p>
-                            {dateError && <p className="text-xs text-red-400">{dateError}</p>}
-                        </div>
-                    )}
+                        {step === 4 && (
+                            <div className="space-y-4">
+                                <label className="block text-micro text-primary/60">{t('setup.step4Label')}</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => { setStartDate(e.target.value); setDateError(''); }}
+                                    className={`${inputCls} font-mono [color-scheme:dark]`}
+                                    autoFocus
+                                />
+                                <p className="text-nano text-outline-variant/40">{t('setup.step4Desc')}</p>
+                                {dateError && <p className="text-nano text-error">{dateError}</p>}
+                            </div>
+                        )}
 
-                    <button
-                        onClick={handleNext}
-                        disabled={step === 1 ? !botName : step === 2 ? !token : step === 3 ? !channel : !startDate}
-                        className="mt-10 w-full bg-gradient-to-r from-titan-600 to-titan-500 hover:from-titan-500 hover:to-titan-400 disabled:from-neutral-900 disabled:to-neutral-900 disabled:text-neutral-700 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-titan-500/20 transform active:scale-[0.98]"
-                    >
-                        {step < totalSteps ? t('setup.btnNext') : t('setup.btnLaunch')}
-                        {step < totalSteps ? <ArrowRight size={20} /> : <Check size={20} />}
-                    </button>
+                        <button
+                            onClick={handleNext}
+                            disabled={step === 1 ? !botName : step === 2 ? !token : step === 3 ? !channel : !startDate}
+                            className="mt-8 w-full ignition-btn disabled:opacity-30 disabled:cursor-not-allowed text-on-primary-fixed font-headline font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                        >
+                            {step < totalSteps ? t('setup.btnNext') : t('setup.btnLaunch')}
+                            {step < totalSteps
+                                ? <ArrowRight size={18} weight="bold" />
+                                : <Check size={18} weight="bold" />
+                            }
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
