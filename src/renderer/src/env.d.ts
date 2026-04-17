@@ -47,6 +47,10 @@ export interface TitanAPI {
     // OPML
     importOpml: (botId: number) => Promise<{ success: boolean; count: number; error?: string }>
 
+    // Performance Settings
+    getPerformanceMode: () => Promise<boolean>
+    setPerformanceMode: (enabled: boolean) => Promise<{ success: boolean }>
+
     // System
     getVersion: () => Promise<string>
     checkForUpdates: () => Promise<{ hasUpdate: boolean; latestVersion?: string; downloadUrl?: string; error?: string }>

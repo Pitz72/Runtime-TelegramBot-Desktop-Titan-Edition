@@ -175,6 +175,9 @@
         "title": "Paramètres Système",
         "subtitle": "Gestion des données et de la base de données",
         "close": "Fermer",
+        "tabGeneral": "Général",
+        "tabBackup": "Données & Backup",
+        "tabPerformance": "Performance",
         "dbSection": {
             "title": "Gestion de Base de Données",
             "desc": "Exporter ou importer l'intégralité de l'archive du bot.",
@@ -194,6 +197,17 @@
         "langSection": {
             "title": "Langue de l'Interface",
             "desc": "Changer la langue de l'application"
+        },
+        "perfSection": {
+            "title": "Mode Performance",
+            "desc": "Désactive les effets visuels lourds en GPU (scanlines, flou, lueurs, animations) pour améliorer la fluidité sur les écrans 4K ou le matériel avec GPU ancien.",
+            "toggleLabel": "Activer le Mode Performance",
+            "toggleHint": "Effectif immédiatement — aucun redémarrage requis",
+            "disabledList": "Effets désactivés :",
+            "item_scanline": "Superposition de scanlines phosphorescentes",
+            "item_blur": "Effet verre (backdrop-blur)",
+            "item_glow": "Effets glow, box-shadow et text-shadow",
+            "item_anim": "Animations ignition-pulse et ignition-ring"
         },
         "toasts": {
             "dbExportSuccessTitle": "Exportation Terminée",

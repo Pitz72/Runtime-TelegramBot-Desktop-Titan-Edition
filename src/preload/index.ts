@@ -61,6 +61,10 @@ const api = {
     // OPML
     importOpml: (botId: number) => ipcRenderer.invoke('import-opml', botId),
 
+    // Performance Settings
+    getPerformanceMode: () => ipcRenderer.invoke('get-performance-mode') as Promise<boolean>,
+    setPerformanceMode: (enabled: boolean) => ipcRenderer.invoke('set-performance-mode', enabled),
+
     // System
     getVersion: () => ipcRenderer.invoke('get-version'),
     checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),

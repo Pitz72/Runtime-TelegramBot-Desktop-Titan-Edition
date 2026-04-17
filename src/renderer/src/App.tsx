@@ -12,6 +12,9 @@ function App(): JSX.Element {
         window.api.getBots().then((bots) => {
             setHasBots(bots.length > 0);
         });
+        window.api.getPerformanceMode().then((enabled) => {
+            document.body.classList.toggle('performance-mode', enabled);
+        });
     }, []);
 
     const handleSetupComplete = async (name: string, token: string, channelId: string, startDate: string) => {
