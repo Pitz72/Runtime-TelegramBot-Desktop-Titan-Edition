@@ -7,6 +7,7 @@ import { FeedManager } from './FeedManager';
 import logo from '../assets/logo.png';
 import { BotSettingsModal } from './BotSettingsModal';
 import { SystemSettingsModal } from './SystemSettingsModal';
+import { StatsModal } from './StatsModal';
 import { useTranslation } from '../locales/I18nContext';
 import { useToast } from './ui/Toast';
 
@@ -22,6 +23,7 @@ export function Dashboard() {
     const [refreshKey, setRefreshKey] = useState(0);
     const [stats, setStats] = useState<{ total: number; today: number; week: number } | null>(null);
     const [filterBySelectedBot, setFilterBySelectedBot] = useState(false);
+    const [showStatsModal, setShowStatsModal] = useState(false);
 
     useEffect(() => {
         window.api.getVersion().then(setVersion);
@@ -249,10 +251,14 @@ export function Dashboard() {
                                             <p className="text-[8px] text-titan-500/40 uppercase tracking-widest font-bold mt-1">{t('stats.total')}</p>
                                         </div>
                                         <div className="w-px h-8 bg-titan-500/10"></div>
-                                        <div className="flex items-center gap-1 text-titan-500/30">
+                                        <button
+                                            onClick={() => setShowStatsModal(true)}
+                                            className="flex items-center gap-1 text-titan-500/30 hover:text-titan-400 transition-colors cursor-pointer"
+                                            title={t('stats.detailsTitle') as string}
+                                        >
                                             <BarChart3 size={12} />
                                             <span className="text-[8px] uppercase tracking-widest font-bold">{t('stats.statsLabel')}</span>
-                                        </div>
+                                        </button>
                                     </div>
                                 )
                             }
@@ -341,11 +347,17 @@ export function Dashboard() {
                 />
             )}
 
-            {
-                showSystemSettings && (
-                    <SystemSettingsModal onClose={() => setShowSystemSettings(false)} />
-                )
-            }
+            {showSystemSettings && (
+                <SystemSettingsModal onClose={() => setShowSystemSettings(false)} />
+            )}
+
+            {showStatsModal && selectedBot && (
+                <StatsModal
+                    botId={selectedBot.id}
+                    botName={selectedBot.name}
+                    onClose={() => setShowStatsModal(false)}
+                />
+            )}
 
         </div >
     );

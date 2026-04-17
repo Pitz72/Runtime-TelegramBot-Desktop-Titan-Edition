@@ -207,6 +207,13 @@ export class BotEngine {
                     TitanLogger.log(`  ⚠️ [${bot.name}] Coda di invio grande: ${this.publishQueue.length} item in attesa.`);
                 }
 
+                // F9 Digest: invia i digest in scadenza per questo bot
+                try {
+                    await this.processDigests(bot, client);
+                } catch (e) {
+                    TitanLogger.log(`  ❌ [${bot.name}] Errore digest: ${e}`);
+                }
+
             } catch (e) {
                 TitanLogger.log(`❌ Error processing bot ${bot.name}: ${e}`);
             }
@@ -262,6 +269,15 @@ export class BotEngine {
 
                 if (!passesKeywordFilter(item, feed)) {
                     TitanLogger.log(`  🔍 ${tag} Filtrato da keyword: ${item.title}`);
+                    continue;
+                }
+
+                // F9 Digest Mode: se il feed ha un digest_interval, accoda nel buffer invece di pubblicare subito
+                if (feed.digest_interval) {
+                    BotManager.addToDigestQueue(bot.id, feed.id, item);
+                    BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
+                    TitanLogger.log(`  📋 ${tag} Buffered for digest: ${item.title}`);
+                    newCount++;
                     continue;
                 }
 
@@ -353,11 +369,45 @@ export class BotEngine {
         this.isPublishing = false;
     }
 
+    /** F9 Digest: invia i digest scaduti per il bot dato. */
+    private async processDigests(bot: BotConfig, client: TelegramClient) {
+        const feeds = BotManager.getFeeds(bot.id).filter(f => f.is_active && f.digest_interval);
+        for (const feed of feeds) {
+            if (!this.isRunning) break;
+            const interval = feed.digest_interval!;
+            const lastSent = feed.digest_last_sent ? new Date(feed.digest_last_sent).getTime() : 0;
+            if (Date.now() - lastSent < interval * 60 * 1000) continue;
+
+            const items = BotManager.getDigestQueue(bot.id, feed.id);
+            BotManager.updateFeedDigestLastSent(feed.id);
+
+            if (items.length === 0) continue;
+
+            const capped = items.slice(0, 20);
+            const header = `📋 <b>${this.escapeHTML(feed.name)}</b> — ${capped.length} ${capped.length === 1 ? 'contenuto' : 'contenuti'}\n\n`;
+            const body = capped.map((it, i) =>
+                `${i + 1}. <b>${this.escapeHTML(it.item_title || '')}</b>\n🔗 <a href="${this.escapeUrl(it.item_link || '')}">Leggi</a>`
+            ).join('\n\n');
+
+            const success = await client.sendMessage(header + body);
+            if (success) {
+                BotManager.clearDigestQueue(bot.id, feed.id);
+                TitanLogger.log(`  📋 [${bot.name}] Digest inviato per "${feed.name}": ${capped.length} item`);
+            } else {
+                TitanLogger.log(`  ⚠️ [${bot.name}] Digest fallito per "${feed.name}"`);
+            }
+        }
+    }
+
     private escapeHTML(text: string): string {
         return text
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
+    }
+
+    private escapeUrl(url: string): string {
+        return url.replace(/&(?!amp;)/g, '&amp;');
     }
 }
 

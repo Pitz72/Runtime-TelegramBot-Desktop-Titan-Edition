@@ -63,6 +63,32 @@ function assertKeywordFilter(value: unknown): string | null {
     return value;
 }
 
+function assertDigestInterval(value: unknown): number | null {
+    if (value === undefined || value === null) return null;
+    const n = Number(value);
+    if (!Number.isInteger(n) || n < 1 || n > 10080) {
+        throw new Error(`digest_interval deve essere tra 1 e 10080 minuti, ricevuto: ${value}`);
+    }
+    return n;
+}
+
+/** Parser OPML minimale — estrae xmlUrl e name dagli outline senza dipendenze esterne. */
+function parseOpml(content: string): Array<{ name: string; url: string }> {
+    const results: Array<{ name: string; url: string }> = [];
+    const re = /<outline([^>]+)>/gi;
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(content)) !== null) {
+        const attrs = match[1];
+        const xmlUrl = /xmlUrl\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1];
+        const text = /\btext\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1]
+            || /\btitle\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1];
+        if (xmlUrl && text && (xmlUrl.startsWith('http://') || xmlUrl.startsWith('https://'))) {
+            results.push({ name: text.trim(), url: xmlUrl.trim() });
+        }
+    }
+    return results;
+}
+
 export function setupIpc() {
     // Initialize Database
     initDB();
@@ -103,24 +129,26 @@ export function setupIpc() {
     // --- FEED MANAGEMENT ---
     ipcMain.handle('get-feeds', (_, botId) => BotManager.getFeeds(botId));
 
-    ipcMain.handle('add-feed', (_, { botId, name, url, type, keywordFilter, checkInterval }) => {
+    ipcMain.handle('add-feed', (_, { botId, name, url, type, keywordFilter, checkInterval, digestInterval }) => {
         const validBotId = assertPositiveInt(botId, 'botId');
         const validName = assertString(name, 'name');
         const validType = assertFeedType(type);
         if (validType !== 'youtube') validateFeedUrl(assertString(url, 'url'));
         const validKeywordFilter = assertKeywordFilter(keywordFilter);
         const validCheckInterval = assertFeedCheckInterval(checkInterval);
-        return BotManager.addFeed(validBotId, validName, assertString(url, 'url'), validType, validKeywordFilter, validCheckInterval);
+        const validDigestInterval = assertDigestInterval(digestInterval);
+        return BotManager.addFeed(validBotId, validName, assertString(url, 'url'), validType, validKeywordFilter, validCheckInterval, validDigestInterval);
     });
 
-    ipcMain.handle('update-feed', (_, { id, name, url, type, keywordFilter, checkInterval }) => {
+    ipcMain.handle('update-feed', (_, { id, name, url, type, keywordFilter, checkInterval, digestInterval }) => {
         const validId = assertPositiveInt(id, 'id');
         const validName = assertString(name, 'name');
         const validType = assertFeedType(type);
         if (validType !== 'youtube') validateFeedUrl(assertString(url, 'url'));
         const validKeywordFilter = assertKeywordFilter(keywordFilter);
         const validCheckInterval = assertFeedCheckInterval(checkInterval);
-        return BotManager.updateFeed(validId, validName, assertString(url, 'url'), validType, validKeywordFilter, validCheckInterval);
+        const validDigestInterval = assertDigestInterval(digestInterval);
+        return BotManager.updateFeed(validId, validName, assertString(url, 'url'), validType, validKeywordFilter, validCheckInterval, validDigestInterval);
     });
 
     ipcMain.handle('delete-feed', (_, id) => BotManager.deleteFeed(assertPositiveInt(id, 'id')));
@@ -150,6 +178,42 @@ export function setupIpc() {
     // --- STATS ---
     ipcMain.handle('get-stats', (_, botId) => {
         return BotManager.getStats(assertPositiveInt(botId, 'botId'));
+    });
+
+    ipcMain.handle('get-detailed-stats', (_, botId) => {
+        return BotManager.getDetailedStats(assertPositiveInt(botId, 'botId'));
+    });
+
+    // --- OPML IMPORT ---
+    ipcMain.handle('import-opml', async (_, botId) => {
+        try {
+            const validBotId = assertPositiveInt(botId, 'botId');
+            const { filePaths, canceled } = await dialog.showOpenDialog({
+                title: 'Importa Feed da OPML',
+                properties: ['openFile'],
+                filters: [
+                    { name: 'OPML Files', extensions: ['opml', 'xml'] },
+                    { name: 'All Files', extensions: ['*'] }
+                ]
+            });
+            if (canceled || filePaths.length === 0) return { success: false, count: 0 };
+
+            const content = await readFile(filePaths[0], 'utf-8');
+            const found = parseOpml(content);
+            if (found.length === 0) return { success: true, count: 0 };
+
+            let imported = 0;
+            for (const f of found) {
+                try {
+                    validateFeedUrl(f.url);
+                    BotManager.addFeed(validBotId, f.name, f.url, 'news');
+                    imported++;
+                } catch { /* skip feed non valido */ }
+            }
+            return { success: true, count: imported };
+        } catch (e: any) {
+            return { success: false, count: 0, error: e.message || String(e) };
+        }
     });
 
     // --- ENGINE CONTROL ---

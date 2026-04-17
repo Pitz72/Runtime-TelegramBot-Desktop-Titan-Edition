@@ -162,14 +162,14 @@ export class BotManager {
         return rows.map(f => ({ ...f, is_active: f.is_active === 1 })) as FeedConfig[];
     }
 
-    static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube', keywordFilter?: string | null, checkInterval?: number | null) {
-        const stmt = db().prepare('INSERT INTO feeds (bot_id, name, url, type, is_active, keyword_filter, check_interval) VALUES (?, ?, ?, ?, 1, ?, ?)');
-        stmt.run(bot_id, name, url, type, keywordFilter ?? null, checkInterval ?? null);
+    static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube', keywordFilter?: string | null, checkInterval?: number | null, digestInterval?: number | null) {
+        const stmt = db().prepare('INSERT INTO feeds (bot_id, name, url, type, is_active, keyword_filter, check_interval, digest_interval) VALUES (?, ?, ?, ?, 1, ?, ?, ?)');
+        stmt.run(bot_id, name, url, type, keywordFilter ?? null, checkInterval ?? null, digestInterval ?? null);
     }
 
-    static updateFeed(id: number, name: string, url: string, type: string, keywordFilter?: string | null, checkInterval?: number | null) {
-        const stmt = db().prepare('UPDATE feeds SET name = ?, url = ?, type = ?, keyword_filter = ?, check_interval = ? WHERE id = ?');
-        stmt.run(name, url, type, keywordFilter ?? null, checkInterval ?? null, id);
+    static updateFeed(id: number, name: string, url: string, type: string, keywordFilter?: string | null, checkInterval?: number | null, digestInterval?: number | null) {
+        const stmt = db().prepare('UPDATE feeds SET name = ?, url = ?, type = ?, keyword_filter = ?, check_interval = ?, digest_interval = ? WHERE id = ?');
+        stmt.run(name, url, type, keywordFilter ?? null, checkInterval ?? null, digestInterval ?? null, id);
     }
 
     static updateFeedLastFetch(id: number) {
@@ -224,6 +224,27 @@ export class BotManager {
         db().prepare('DELETE FROM history WHERE bot_id = ?').run(botId);
     }
 
+    // --- DIGEST QUEUE ---
+    static addToDigestQueue(botId: number, feedId: number, item: { id: string; title: string; link: string; summary: string; image?: string }) {
+        db().prepare(
+            'INSERT OR IGNORE INTO digest_queue (bot_id, feed_id, item_id, item_title, item_link, item_summary, item_image) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        ).run(botId, feedId, item.id, item.title, item.link, item.summary || null, item.image || null);
+    }
+
+    static getDigestQueue(botId: number, feedId: number): Array<{ item_id: string; item_title: string; item_link: string; item_summary: string; item_image: string | null }> {
+        return db().prepare(
+            'SELECT item_id, item_title, item_link, item_summary, item_image FROM digest_queue WHERE bot_id = ? AND feed_id = ? ORDER BY added_at ASC'
+        ).all(botId, feedId) as any[];
+    }
+
+    static clearDigestQueue(botId: number, feedId: number) {
+        db().prepare('DELETE FROM digest_queue WHERE bot_id = ? AND feed_id = ?').run(botId, feedId);
+    }
+
+    static updateFeedDigestLastSent(feedId: number) {
+        db().prepare("UPDATE feeds SET digest_last_sent = datetime('now') WHERE id = ?").run(feedId);
+    }
+
     // --- STATS ---
     static getStats(botId: number): { total: number; today: number; week: number } {
         const total = (db().prepare('SELECT COUNT(*) as count FROM history WHERE bot_id = ?').get(botId) as any)?.count || 0;
@@ -235,6 +256,21 @@ export class BotManager {
         ).get(botId) as any)?.count || 0;
 
         return { total, today, week };
+    }
+
+    static getDetailedStats(botId: number): { total: number; today: number; week: number; byFeed: Array<{ feedId: number; feedName: string; total: number; today: number }> } {
+        const base = BotManager.getStats(botId);
+        const rows = db().prepare(`
+            SELECT h.feed_id as feedId, COALESCE(f.name, 'Feed rimosso') as feedName,
+                COUNT(*) as total,
+                SUM(CASE WHEN h.sent_at >= date('now', 'start of day') THEN 1 ELSE 0 END) as today
+            FROM history h
+            LEFT JOIN feeds f ON f.id = h.feed_id
+            WHERE h.bot_id = ?
+            GROUP BY h.feed_id
+            ORDER BY total DESC
+        `).all(botId) as any[];
+        return { ...base, byFeed: rows.map(r => ({ feedId: r.feedId, feedName: r.feedName, total: r.total, today: r.today })) };
     }
 
     // --- IMPORT/EXPORT CONFIG ---
@@ -263,6 +299,7 @@ export class BotManager {
                     is_active: f.is_active,
                     keyword_filter: f.keyword_filter ?? null,
                     check_interval: f.check_interval ?? null,
+                    digest_interval: f.digest_interval ?? null,
                 }))
             };
         });
@@ -305,7 +342,7 @@ export class BotManager {
 
                 if (Array.isArray(bot.feeds)) {
                     for (const f of bot.feeds) {
-                        BotManager.addFeed(Number(botId), f.name, f.url, f.type, f.keyword_filter ?? null, f.check_interval ?? null);
+                        BotManager.addFeed(Number(botId), f.name, f.url, f.type, f.keyword_filter ?? null, f.check_interval ?? null, f.digest_interval ?? null);
                         if (f.is_active === 0 || f.is_active === false) {
                             const lastFeed = db().prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(botId) as any;
                             if (lastFeed) {
@@ -364,6 +401,7 @@ export class BotManager {
                     isActive: f.is_active === 1,
                     keyword_filter: f.keyword_filter ?? null,
                     check_interval: f.check_interval ?? null,
+                    digest_interval: f.digest_interval ?? null,
                 }))
             };
 
@@ -420,7 +458,8 @@ export class BotManager {
                         feed.url,
                         feed.type,
                         feed.keyword_filter ?? null,
-                        feed.check_interval ?? null
+                        feed.check_interval ?? null,
+                        feed.digest_interval ?? null
                     );
 
                     if (feed.isActive === false) {

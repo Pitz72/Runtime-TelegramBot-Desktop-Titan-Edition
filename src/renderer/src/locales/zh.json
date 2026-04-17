@@ -35,7 +35,11 @@
         "today": "今天",
         "week": "7 天",
         "total": "总计",
-        "statsLabel": "统计"
+        "statsLabel": "统计",
+        "detailsTitle": "详细统计",
+        "feedBreakdown": "按Feed发布情况",
+        "noData": "暂无数据",
+        "loading": "加载中..."
     },
     "dashboard": {
         "systemSettingsTitle": "系统和数据库设置"
@@ -137,7 +141,19 @@
         "filterPlaceholder": "例如：AI，技术",
         "filterActive": "过滤器已启用",
         "intervalLabel": "检查间隔",
-        "intervalDefault": "机器人默认"
+        "intervalDefault": "机器人默认",
+        "importOpml": "从OPML导入Feed",
+        "opmlSuccess": "已从OPML导入 %d 个Feed",
+        "opmlEmpty": "OPML文件中未找到Feed",
+        "opmlError": "OPML读取错误:",
+        "digestLabel": "摘要模式",
+        "digestDefault": "每篇文章（默认）",
+        "digestBadge": "摘要",
+        "digest60": "每小时",
+        "digest360": "每6小时",
+        "digest720": "每12小时",
+        "digest1440": "每天",
+        "digest10080": "每周"
     },
     "templateEditor": {
         "templateSection": "消息模板",
@@ -149,7 +165,11 @@
         "htmlHint": "支持基本 Telegram HTML（<b>粗体</b>、<i>斜体</i>、<a>链接</a>）。Titan 版本将始终自动附加到启动消息末尾。",
         "tabGeneral": "常规",
         "tabTemplates": "模板",
-        "validOk": "模板有效 — 未检测到问题"
+        "validOk": "模板有效 — 未检测到问题",
+        "previewBtn": "预览",
+        "sampleTitle": "示例文章标题",
+        "sampleFeed": "Feed名称",
+        "sampleSummary": "示例文章的简短描述。"
     },
     "systemSettings": {
         "title": "系统设置",

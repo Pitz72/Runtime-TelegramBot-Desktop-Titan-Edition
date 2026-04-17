@@ -35,7 +35,11 @@
         "today": "Aujourd'hui",
         "week": "7 Jours",
         "total": "Total",
-        "statsLabel": "Statistiques"
+        "statsLabel": "Statistiques",
+        "detailsTitle": "Statistiques Détaillées",
+        "feedBreakdown": "Publications par Feed",
+        "noData": "Aucune donnée disponible",
+        "loading": "Chargement..."
     },
     "dashboard": {
         "systemSettingsTitle": "Paramètres du système et de la base de données"
@@ -137,7 +141,19 @@
         "filterPlaceholder": "ex. IA, technologie",
         "filterActive": "filtre actif",
         "intervalLabel": "Intervalle de vérification",
-        "intervalDefault": "Défaut du bot"
+        "intervalDefault": "Défaut du bot",
+        "importOpml": "Importer des feeds depuis OPML",
+        "opmlSuccess": "%d feeds importés depuis OPML",
+        "opmlEmpty": "Aucun feed trouvé dans le fichier OPML",
+        "opmlError": "Erreur de lecture OPML:",
+        "digestLabel": "Mode Digest",
+        "digestDefault": "Chaque article (défaut)",
+        "digestBadge": "digest",
+        "digest60": "Toutes les heures",
+        "digest360": "Toutes les 6 heures",
+        "digest720": "Toutes les 12 heures",
+        "digest1440": "Quotidien",
+        "digest10080": "Hebdomadaire"
     },
     "templateEditor": {
         "templateSection": "Modèles de Messages",
@@ -149,7 +165,11 @@
         "htmlHint": "Prend en charge le HTML Telegram de base (<b>gras</b>, <i>italique</i>, <a>lien</a>). La version de Titan sera toujours ajoutée automatiquement au message de démarrage.",
         "tabGeneral": "Général",
         "tabTemplates": "Modèles",
-        "validOk": "Modèle valide — aucun problème détecté"
+        "validOk": "Modèle valide — aucun problème détecté",
+        "previewBtn": "Aperçu",
+        "sampleTitle": "Titre d'article exemple",
+        "sampleFeed": "Nom du Feed",
+        "sampleSummary": "Brève description de l'article exemple."
     },
     "systemSettings": {
         "title": "Paramètres Système",

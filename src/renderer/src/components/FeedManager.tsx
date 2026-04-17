@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Rss, FileText, Globe, Play, Edit2, Zap, Loader2, Filter, Clock } from 'lucide-react';
+import { Plus, Trash2, Rss, FileText, Globe, Play, Edit2, Zap, Loader2, Filter, Clock, Upload, BookOpen } from 'lucide-react';
 import { FeedConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -52,6 +52,11 @@ export function FeedManager({ botId }: Props) {
     const [newCheckInterval, setNewCheckInterval] = useState<number | null>(null);
     const [editCheckInterval, setEditCheckInterval] = useState<number | null>(null);
 
+    // F9 Digest state
+    const [newDigestInterval, setNewDigestInterval] = useState<number | null>(null);
+    const [editDigestInterval, setEditDigestInterval] = useState<number | null>(null);
+    const [importingOpml, setImportingOpml] = useState(false);
+
     const { toast } = useToast();
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [feedToDelete, setFeedToDelete] = useState<number | null>(null);
@@ -70,15 +75,35 @@ export function FeedManager({ botId }: Props) {
     const handleAdd = async () => {
         if (!newFeed.name || !newFeed.url) return;
         const keywordFilter = buildKeywordFilter(newFilterInclude, newFilterExclude);
-        await window.api.addFeed({ ...newFeed, botId, keywordFilter, checkInterval: newCheckInterval });
+        await window.api.addFeed({ ...newFeed, botId, keywordFilter, checkInterval: newCheckInterval, digestInterval: newDigestInterval });
         setIsAdding(false);
         setNewFeed({ name: '', url: '', type: 'podcast' });
         setNewFilterInclude('');
         setNewFilterExclude('');
         setNewCheckInterval(null);
+        setNewDigestInterval(null);
         setTestResult(null);
         toast(t('feedManager.successAdd') as string, 'success');
         loadFeeds();
+    };
+
+    const handleImportOpml = async () => {
+        setImportingOpml(true);
+        try {
+            const res = await window.api.importOpml(botId);
+            if (res.success && res.count > 0) {
+                toast((t('feedManager.opmlSuccess') as string).replace('%d', String(res.count)), 'success');
+                loadFeeds();
+            } else if (res.success && res.count === 0) {
+                toast(t('feedManager.opmlEmpty') as string, 'info');
+            } else if (res.error) {
+                toast(`${t('feedManager.opmlError') as string} ${res.error}`, 'error');
+            }
+        } catch {
+            toast(t('feedManager.opmlError') as string, 'error');
+        } finally {
+            setImportingOpml(false);
+        }
     };
 
     const handleUpdate = async () => {
@@ -91,11 +116,13 @@ export function FeedManager({ botId }: Props) {
             type: editingFeed.type,
             keywordFilter,
             checkInterval: editCheckInterval,
+            digestInterval: editDigestInterval,
         });
         setEditingFeed(null);
         setEditFilterInclude('');
         setEditFilterExclude('');
         setEditCheckInterval(null);
+        setEditDigestInterval(null);
         setTestResult(null);
         toast(t('feedManager.successUpdate') as string, 'success');
         loadFeeds();
@@ -107,6 +134,7 @@ export function FeedManager({ botId }: Props) {
         setEditFilterInclude(parsed.include);
         setEditFilterExclude(parsed.exclude);
         setEditCheckInterval(feed.check_interval ?? null);
+        setEditDigestInterval(feed.digest_interval ?? null);
         setIsAdding(false);
         setTestResult(null);
     };
@@ -168,13 +196,24 @@ export function FeedManager({ botId }: Props) {
                     <h2 className="text-sm font-bold text-white uppercase tracking-wide">{t('feedManager.title')}</h2>
                     <p className="text-[10px] text-titan-500/30 tracking-wider">{t('feedManager.subtitle')}</p>
                 </div>
-                <button
-                    onClick={() => { setIsAdding(true); setEditingFeed(null); setTestResult(null); }}
-                    className="bg-titan-500/15 hover:bg-titan-500/25 text-titan-400 px-3 py-1.5 rounded-lg font-bold text-[11px] flex items-center gap-1.5 transition-all border border-titan-500/20 hover:border-titan-500/40"
-                >
-                    <Plus size={14} />
-                    {t('feedManager.addSource')}
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleImportOpml}
+                        disabled={importingOpml}
+                        className="bg-dark-950 hover:bg-titan-500/10 text-neutral-500 hover:text-titan-400 px-3 py-1.5 rounded-lg font-bold text-[11px] flex items-center gap-1.5 transition-all border border-titan-500/10 hover:border-titan-500/20 disabled:opacity-50"
+                        title={t('feedManager.importOpml') as string}
+                    >
+                        {importingOpml ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                        OPML
+                    </button>
+                    <button
+                        onClick={() => { setIsAdding(true); setEditingFeed(null); setTestResult(null); }}
+                        className="bg-titan-500/15 hover:bg-titan-500/25 text-titan-400 px-3 py-1.5 rounded-lg font-bold text-[11px] flex items-center gap-1.5 transition-all border border-titan-500/20 hover:border-titan-500/40"
+                    >
+                        <Plus size={14} />
+                        {t('feedManager.addSource')}
+                    </button>
+                </div>
             </div>
 
             {/* Scrollable Feed List */}
@@ -306,6 +345,29 @@ export function FeedManager({ botId }: Props) {
                             </div>
                         </div>
 
+                        {/* F9: Digest Mode */}
+                        <div className="mb-4">
+                            <label className="block text-[10px] text-titan-500/40 mb-1 uppercase tracking-wider font-bold flex items-center gap-1.5">
+                                <BookOpen size={10} />
+                                {t('feedManager.digestLabel')}
+                            </label>
+                            <select
+                                className="w-full bg-dark-900 border border-titan-500/10 rounded-lg p-2 text-white text-sm focus:border-titan-500/40 outline-none appearance-none"
+                                value={editingFeed ? (editDigestInterval ?? '') : (newDigestInterval ?? '')}
+                                onChange={e => {
+                                    const val = e.target.value === '' ? null : Number(e.target.value);
+                                    editingFeed ? setEditDigestInterval(val) : setNewDigestInterval(val);
+                                }}
+                            >
+                                <option value="">{t('feedManager.digestDefault') as string}</option>
+                                <option value="60">{t('feedManager.digest60') as string}</option>
+                                <option value="360">{t('feedManager.digest360') as string}</option>
+                                <option value="720">{t('feedManager.digest720') as string}</option>
+                                <option value="1440">{t('feedManager.digest1440') as string}</option>
+                                <option value="10080">{t('feedManager.digest10080') as string}</option>
+                            </select>
+                        </div>
+
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => {
@@ -318,6 +380,8 @@ export function FeedManager({ botId }: Props) {
                                     setEditFilterExclude('');
                                     setNewCheckInterval(null);
                                     setEditCheckInterval(null);
+                                    setNewDigestInterval(null);
+                                    setEditDigestInterval(null);
                                 }}
                                 className="text-neutral-500 text-xs hover:text-white px-3 py-1.5 transition-colors"
                             >
@@ -340,6 +404,7 @@ export function FeedManager({ botId }: Props) {
                         const isEditing = editingFeed?.id === feed.id;
                         const hasFilter = !!feed.keyword_filter;
                         const hasCustomInterval = feed.check_interval !== null && feed.check_interval !== undefined;
+                        const hasDigest = feed.digest_interval !== null && feed.digest_interval !== undefined;
                         return (
                             <div key={feed.id} className={`group bg-white/[0.01] border ${isEditing ? 'border-titan-500/40 bg-titan-500/5' : 'border-titan-500/5'} rounded-xl p-3 flex items-center gap-3 hover:border-titan-500/15 transition-all`}>
                                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${cfg.bg} ${cfg.color} flex-shrink-0`}>
@@ -362,6 +427,12 @@ export function FeedManager({ botId }: Props) {
                                             <span className="text-[9px] px-1.5 py-0.5 rounded border border-cyan-500/30 text-cyan-400 flex-shrink-0 flex items-center gap-0.5">
                                                 <Clock size={8} />
                                                 {intervalLabel(feed.check_interval)}
+                                            </span>
+                                        )}
+                                        {hasDigest && (
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded border border-violet-500/30 text-violet-400 flex-shrink-0 flex items-center gap-0.5">
+                                                <BookOpen size={8} />
+                                                {t('feedManager.digestBadge')}
                                             </span>
                                         )}
                                     </div>

@@ -35,7 +35,11 @@
         "today": "Hoje",
         "week": "7 Dias",
         "total": "Total",
-        "statsLabel": "Estatísticas"
+        "statsLabel": "Estatísticas",
+        "detailsTitle": "Estatísticas Detalhadas",
+        "feedBreakdown": "Publicações por Feed",
+        "noData": "Sem dados disponíveis",
+        "loading": "Carregando..."
     },
     "dashboard": {
         "systemSettingsTitle": "Configurações de Sistema e Banco de Dados"
@@ -137,7 +141,19 @@
         "filterPlaceholder": "ex. IA, tecnologia",
         "filterActive": "filtro ativo",
         "intervalLabel": "Intervalo de Verificação",
-        "intervalDefault": "Padrão do bot"
+        "intervalDefault": "Padrão do bot",
+        "importOpml": "Importar feeds de OPML",
+        "opmlSuccess": "%d feeds importados do OPML",
+        "opmlEmpty": "Nenhum feed encontrado no arquivo OPML",
+        "opmlError": "Erro de leitura OPML:",
+        "digestLabel": "Modo Digest",
+        "digestDefault": "Cada artigo (padrão)",
+        "digestBadge": "digest",
+        "digest60": "A cada hora",
+        "digest360": "A cada 6 horas",
+        "digest720": "A cada 12 horas",
+        "digest1440": "Diário",
+        "digest10080": "Semanal"
     },
     "templateEditor": {
         "templateSection": "Modelos de Mensagem",
@@ -149,7 +165,11 @@
         "htmlHint": "Suporta HTML básico do Telegram (<b>negrito</b>, <i>itálico</i>, <a>link</a>). A versão do Titan é sempre adicionada automaticamente ao final da mensagem de inicialização.",
         "tabGeneral": "Geral",
         "tabTemplates": "Modelos",
-        "validOk": "Modelo válido — nenhum problema detectado"
+        "validOk": "Modelo válido — nenhum problema detectado",
+        "previewBtn": "Pré-visualização",
+        "sampleTitle": "Título de artigo de exemplo",
+        "sampleFeed": "Nome do Feed",
+        "sampleSummary": "Breve descrição do artigo de exemplo."
     },
     "systemSettings": {
         "title": "Configurações do Sistema",

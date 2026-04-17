@@ -1,6 +1,20 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
+import { Eye } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
 import { validateTemplate } from '../utils/templateValidator';
+
+function renderPreview(template: string, t: (key: string) => any): string {
+    const title = t('templateEditor.sampleTitle') as string;
+    const feedName = t('templateEditor.sampleFeed') as string;
+    const summary = t('templateEditor.sampleSummary') as string;
+    const link = 'https://example.com/articolo';
+    return template
+        .replace(/&#10;/g, '\n')
+        .replace(/\{\{title\}\}/g, title)
+        .replace(/\{\{feedName\}\}/g, feedName)
+        .replace(/\{\{link\}\}/g, link)
+        .replace(/\{\{summary\}\}/g, summary);
+}
 
 interface Props {
     label: string;
@@ -13,6 +27,7 @@ interface Props {
 export function TemplateEditor({ label, value, onChange, defaultTemplate, hideChips = false }: Props) {
     const { t } = useTranslation();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [showPreview, setShowPreview] = useState(false);
 
     const issues = useMemo(
         () => validateTemplate(value, hideChips),
@@ -46,7 +61,19 @@ export function TemplateEditor({ label, value, onChange, defaultTemplate, hideCh
     return (
         <div className="flex flex-col gap-2 p-4 bg-dark-900 border border-titan-500/20 rounded-xl">
             <div className="flex justify-between items-center mb-1">
-                <label className="text-sm font-bold text-titan-400">{label}</label>
+                <div className="flex items-center gap-3">
+                    <label className="text-sm font-bold text-titan-400">{label}</label>
+                    {!hideChips && value.trim() !== '' && (
+                        <button
+                            onClick={() => setShowPreview(p => !p)}
+                            className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border transition-colors ${showPreview ? 'bg-titan-500/20 border-titan-500/30 text-titan-400' : 'bg-dark-950 border-titan-500/10 text-neutral-600 hover:text-titan-400'}`}
+                            title={t('templateEditor.previewBtn') as string}
+                        >
+                            <Eye size={10} />
+                            {t('templateEditor.previewBtn') as string}
+                        </button>
+                    )}
+                </div>
                 {!hideChips && (
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">{t('templateEditor.insertVar')}</span>
@@ -77,6 +104,13 @@ export function TemplateEditor({ label, value, onChange, defaultTemplate, hideCh
                     </div>
                 )}
             </div>
+
+            {showPreview && value.trim() !== '' && (
+                <div className="bg-dark-950 border border-titan-500/10 rounded-lg p-3 text-xs text-white leading-relaxed font-sans"
+                    style={{ whiteSpace: 'pre-wrap' }}
+                    dangerouslySetInnerHTML={{ __html: renderPreview(value, t) }}
+                />
+            )}
 
             <textarea
                 ref={textareaRef}
