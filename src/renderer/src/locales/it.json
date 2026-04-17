@@ -177,6 +177,7 @@
         "close": "Chiudi",
         "tabGeneral": "Generale",
         "tabBackup": "Dati e Backup",
+        "tabPerformance": "Performance",
         "dbSection": {
             "title": "Gestione Database",
             "desc": "Esporta o importa l'intero archivio titan.db",
@@ -196,6 +197,17 @@
         "langSection": {
             "title": "Lingua Interfaccia",
             "desc": "Cambia la lingua dell'applicazione"
+        },
+        "perfSection": {
+            "title": "Modalità Performance",
+            "desc": "Disabilita gli effetti grafici pesanti (scanline, blur, glow, animazioni GPU) per migliorare la fluidità su risoluzioni 4K o hardware con GPU legacy.",
+            "toggleLabel": "Abilita Performance Mode",
+            "toggleHint": "Effettivo immediatamente — nessun riavvio richiesto",
+            "disabledList": "Effetti disabilitati:",
+            "item_scanline": "Overlay scanline fosforescente",
+            "item_blur": "Effetto vetro con backdrop-blur",
+            "item_glow": "Glow, box-shadow e text-shadow luminosi",
+            "item_anim": "Animazioni ignition-pulse e ignition-ring"
         },
         "toasts": {
             "dbExportSuccessTitle": "Export Completato",

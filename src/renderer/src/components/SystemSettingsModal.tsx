@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Database, DownloadSimple, FileJs, Globe, ShieldCheck, UploadSimple, X } from '@phosphor-icons/react';
+import React, { useState, useEffect } from 'react';
+import { Database, DownloadSimple, FileJs, Globe, Lightning, ShieldCheck, UploadSimple, X } from '@phosphor-icons/react';
 import { useTranslation } from '../locales/I18nContext';
 import { flagsList } from './IntroScreen';
 import { useToast } from './ui/Toast';
@@ -9,9 +9,20 @@ interface Props { onClose: () => void; }
 export function SystemSettingsModal({ onClose }: Props) {
     const { toast, success, error } = useToast();
     const { locale, setLocale, t } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'general' | 'backup'>('general');
+    const [activeTab, setActiveTab] = useState<'general' | 'backup' | 'performance'>('general');
     const [isExporting, setIsExporting] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
+    const [performanceMode, setPerformanceMode] = useState(false);
+
+    useEffect(() => {
+        window.api.getPerformanceMode().then(setPerformanceMode);
+    }, []);
+
+    const handleTogglePerformanceMode = async (enabled: boolean) => {
+        setPerformanceMode(enabled);
+        document.body.classList.toggle('performance-mode', enabled);
+        await window.api.setPerformanceMode(enabled);
+    };
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -84,8 +95,9 @@ export function SystemSettingsModal({ onClose }: Props) {
                 {/* Tabs */}
                 <div className="flex bg-surface-container-lowest border-b border-outline-variant/15 px-6 pt-2">
                     {[
-                        { key: 'general', label: t('systemSettings.tabGeneral') || 'Generale' },
-                        { key: 'backup',  label: t('systemSettings.tabBackup')  || 'Backup'   },
+                        { key: 'general',     label: t('systemSettings.tabGeneral')     || 'Generale'   },
+                        { key: 'backup',      label: t('systemSettings.tabBackup')      || 'Backup'     },
+                        { key: 'performance', label: t('systemSettings.tabPerformance') || 'Performance' },
                     ].map(({ key, label }) => (
                         <button key={key} onClick={() => setActiveTab(key as any)}
                             className={`px-5 py-3 text-micro border-b-2 transition-all ${
@@ -179,6 +191,53 @@ export function SystemSettingsModal({ onClose }: Props) {
                                         <span className="text-nano text-secondary/40 text-center mt-1">{t('systemSettings.jsonSection.importHint')}</span>
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'performance' && (
+                        <div className="max-w-lg space-y-6">
+                            <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
+                                <Lightning size={13} weight="duotone" />
+                                {t('systemSettings.perfSection.title')}
+                            </div>
+                            <p className="text-xs text-on-surface-variant leading-relaxed">
+                                {t('systemSettings.perfSection.desc')}
+                            </p>
+
+                            {/* Toggle */}
+                            <label className="flex items-center justify-between p-4 rounded-xl ghost-border bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors">
+                                <div className="space-y-1">
+                                    <p className="text-sm font-bold text-on-surface font-headline">
+                                        {t('systemSettings.perfSection.toggleLabel')}
+                                    </p>
+                                    <p className="text-nano text-outline-variant/50">
+                                        {t('systemSettings.perfSection.toggleHint')}
+                                    </p>
+                                </div>
+                                <div
+                                    onClick={() => handleTogglePerformanceMode(!performanceMode)}
+                                    className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0 ${
+                                        performanceMode ? 'bg-success/80' : 'bg-surface-container-highest'
+                                    }`}
+                                >
+                                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform ${
+                                        performanceMode
+                                            ? 'translate-x-5 bg-on-primary-fixed'
+                                            : 'translate-x-0 bg-outline-variant'
+                                    }`} />
+                                </div>
+                            </label>
+
+                            {/* What gets disabled */}
+                            <div className="space-y-2 text-xs text-outline-variant/60">
+                                <p className="text-micro text-outline-variant/40 pb-1">{t('systemSettings.perfSection.disabledList')}</p>
+                                {['scanline', 'blur', 'glow', 'anim'].map((k) => (
+                                    <div key={k} className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-outline-variant/30 flex-shrink-0" />
+                                        {t(`systemSettings.perfSection.item_${k}`)}
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}

@@ -175,6 +175,9 @@
         "title": "Ajustes del Sistema",
         "subtitle": "Gestión de datos",
         "close": "Cerrar",
+        "tabGeneral": "General",
+        "tabBackup": "Datos y Backup",
+        "tabPerformance": "Rendimiento",
         "dbSection": {
             "title": "Gestión de Base de Datos",
             "desc": "Exporta o importa todo el archivo del bot.",
@@ -194,6 +197,17 @@
         "langSection": {
             "title": "Idioma de la Interfaz",
             "desc": "Cambiar el idioma de la aplicación"
+        },
+        "perfSection": {
+            "title": "Modo Rendimiento",
+            "desc": "Desactiva los efectos visuales pesados en GPU (scanlines, desenfoque, brillos, animaciones) para mejorar la fluidez en pantallas 4K o hardware con GPU antigua.",
+            "toggleLabel": "Activar Modo Rendimiento",
+            "toggleHint": "Efectivo inmediatamente — no se requiere reinicio",
+            "disabledList": "Efectos desactivados:",
+            "item_scanline": "Superposición de scanlines fosforescentes",
+            "item_blur": "Efecto de vidrio (backdrop-blur)",
+            "item_glow": "Glow, box-shadow y efectos text-shadow",
+            "item_anim": "Animaciones ignition-pulse e ignition-ring"
         },
         "toasts": {
             "dbExportSuccessTitle": "Exportación Completada",

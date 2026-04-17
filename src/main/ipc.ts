@@ -7,6 +7,27 @@ import { fetchYouTubeVideos } from './bot/youtube';
 import { writeFile, copyFile, readFile } from 'fs/promises';
 import { join } from 'path';
 
+// --- Settings File (titan-settings.json in userData) ---
+interface TitanSettings { performanceMode: boolean; }
+const DEFAULT_SETTINGS: TitanSettings = { performanceMode: false };
+
+function getSettingsPath(): string {
+    return join(app.getPath('userData'), 'titan-settings.json');
+}
+
+async function readSettings(): Promise<TitanSettings> {
+    try {
+        const raw = await readFile(getSettingsPath(), 'utf-8');
+        return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    } catch {
+        return { ...DEFAULT_SETTINGS };
+    }
+}
+
+async function writeSettings(settings: TitanSettings): Promise<void> {
+    await writeFile(getSettingsPath(), JSON.stringify(settings, null, 2), 'utf-8');
+}
+
 // --- Input Validation Helpers ---
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
@@ -404,6 +425,19 @@ export function setupIpc() {
         } catch (error: any) {
             return { success: false, error: error.message };
         }
+    });
+
+    // --- PERFORMANCE SETTINGS ---
+    ipcMain.handle('get-performance-mode', async () => {
+        const s = await readSettings();
+        return s.performanceMode;
+    });
+
+    ipcMain.handle('set-performance-mode', async (_, enabled: boolean) => {
+        const s = await readSettings();
+        s.performanceMode = !!enabled;
+        await writeSettings(s);
+        return { success: true };
     });
 
     ipcMain.handle('check-for-updates', async () => {

@@ -175,6 +175,9 @@
         "title": "Configurações do Sistema",
         "subtitle": "Gerenciamento de dados",
         "close": "Fechar",
+        "tabGeneral": "Geral",
+        "tabBackup": "Dados & Backup",
+        "tabPerformance": "Desempenho",
         "dbSection": {
             "title": "Gestão de Banco de Dados",
             "desc": "Exporte ou importe o arquivo do bot.",
@@ -194,6 +197,17 @@
         "langSection": {
             "title": "Idioma da Interface",
             "desc": "Alterar idioma"
+        },
+        "perfSection": {
+            "title": "Modo Desempenho",
+            "desc": "Desativa efeitos visuais pesados na GPU (scanlines, desfoque, brilhos, animações) para melhorar a fluidez em monitores 4K ou hardware com GPU antiga.",
+            "toggleLabel": "Ativar Modo Desempenho",
+            "toggleHint": "Efectivo imediatamente — sem necessidade de reiniciar",
+            "disabledList": "Efeitos desativados:",
+            "item_scanline": "Sobreposição de scanlines fosforescentes",
+            "item_blur": "Efeito vidro (backdrop-blur)",
+            "item_glow": "Efeitos glow, box-shadow e text-shadow",
+            "item_anim": "Animações ignition-pulse e ignition-ring"
         },
         "toasts": {
             "dbExportSuccessTitle": "Exportação Concluída",

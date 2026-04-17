@@ -177,6 +177,7 @@
         "close": "Close",
         "tabGeneral": "General",
         "tabBackup": "Data & Backup",
+        "tabPerformance": "Performance",
         "dbSection": {
             "title": "Database Management",
             "desc": "Export or import the whole bot archive.",
@@ -196,6 +197,17 @@
         "langSection": {
             "title": "Interface Language",
             "desc": "Change the application language"
+        },
+        "perfSection": {
+            "title": "Performance Mode",
+            "desc": "Disable GPU-heavy visual effects (scanlines, blur, glow, animations) to improve smoothness on 4K displays or legacy GPU hardware.",
+            "toggleLabel": "Enable Performance Mode",
+            "toggleHint": "Takes effect immediately — no restart required",
+            "disabledList": "Disabled effects:",
+            "item_scanline": "Phosphorescent scanline overlay",
+            "item_blur": "Glass effect (backdrop-blur)",
+            "item_glow": "Glow, box-shadow and text-shadow effects",
+            "item_anim": "Ignition-pulse and ignition-ring animations"
         },
         "toasts": {
             "dbExportSuccessTitle": "Export Completed",

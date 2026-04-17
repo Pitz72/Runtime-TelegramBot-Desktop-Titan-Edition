@@ -175,6 +175,9 @@
         "title": "Systemeinstellungen",
         "subtitle": "Daten- und Datenbankmanagement",
         "close": "Schließen",
+        "tabGeneral": "Allgemein",
+        "tabBackup": "Daten & Backup",
+        "tabPerformance": "Performance",
         "dbSection": {
             "title": "Datenbankmanagement",
             "desc": "Exportieren oder importieren Sie das gesamte Bot-Archiv.",
@@ -194,6 +197,17 @@
         "langSection": {
             "title": "Oberflächensprache",
             "desc": "Ändern Sie die Sprache der Anwendung"
+        },
+        "perfSection": {
+            "title": "Performance-Modus",
+            "desc": "Deaktiviert GPU-intensive Effekte (Scanlines, Blur, Glow, Animationen) für bessere Darstellung auf 4K-Displays oder Legacy-GPU-Hardware.",
+            "toggleLabel": "Performance-Modus aktivieren",
+            "toggleHint": "Wirkt sofort — kein Neustart erforderlich",
+            "disabledList": "Deaktivierte Effekte:",
+            "item_scanline": "Phosphoreszierende Scanline-Überlagerung",
+            "item_blur": "Glaseffekt (backdrop-blur)",
+            "item_glow": "Glow, box-shadow und text-shadow Effekte",
+            "item_anim": "Animationen ignition-pulse und ignition-ring"
         },
         "toasts": {
             "dbExportSuccessTitle": "Export Abgeschlossen",

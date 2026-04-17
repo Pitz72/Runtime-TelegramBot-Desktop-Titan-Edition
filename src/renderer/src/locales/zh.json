@@ -175,6 +175,9 @@
         "title": "系统设置",
         "subtitle": "数据和数据库管理",
         "close": "关闭",
+        "tabGeneral": "常规",
+        "tabBackup": "数据与备份",
+        "tabPerformance": "性能",
         "dbSection": {
             "title": "数据库管理",
             "desc": "导出或导入整个机器人存档。",
@@ -194,6 +197,17 @@
         "langSection": {
             "title": "界面语言",
             "desc": "更改应用程序语言"
+        },
+        "perfSection": {
+            "title": "性能模式",
+            "desc": "禁用GPU密集型视觉效果（扫描线、模糊、发光、动画）以改善4K显示器或老旧GPU硬件上的流畅度。",
+            "toggleLabel": "启用性能模式",
+            "toggleHint": "立即生效 — 无需重启",
+            "disabledList": "已禁用的效果：",
+            "item_scanline": "磷光扫描线叠加",
+            "item_blur": "玻璃效果（backdrop-blur）",
+            "item_glow": "发光、box-shadow 和 text-shadow 效果",
+            "item_anim": "ignition-pulse 和 ignition-ring 动画"
         },
         "toasts": {
             "dbExportSuccessTitle": "导出完成",
