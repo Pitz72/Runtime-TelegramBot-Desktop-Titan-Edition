@@ -178,13 +178,13 @@ export function Dashboard() {
                                 <div className={cn(
                                     "px-3 py-1 rounded text-micro font-bold border flex items-center gap-2",
                                     isRunning
-                                        ? "bg-secondary/10 border-secondary/20 text-secondary"
+                                        ? "bg-success/10 border-success/25 text-success"
                                         : "bg-error/10 border-error/20 text-error"
                                 )}>
                                     <div className={cn(
                                         "w-1.5 h-1.5 rounded-full",
                                         isRunning
-                                            ? "bg-secondary status-dot-active animate-pulse"
+                                            ? "bg-success status-dot-active animate-pulse"
                                             : "bg-error status-dot-stopped"
                                     )} />
                                     {isRunning ? t('status.online') : t('status.offline')}

@@ -192,13 +192,13 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                                     <div className={cn(
                                         "w-1.5 h-1.5 rounded-full flex-shrink-0 mt-px transition-all",
                                         bot.is_active
-                                            ? "bg-secondary status-dot-active"
+                                            ? "bg-success status-dot-active"
                                             : "bg-outline-variant/40"
                                     )} />
                                     <h3 className={cn(
                                         "font-body font-semibold text-sm truncate transition-colors",
                                         currentBotId === bot.id
-                                            ? "text-secondary"
+                                            ? "text-success"
                                             : bot.is_active
                                             ? "text-on-surface-variant"
                                             : "text-outline-variant/50"
@@ -218,7 +218,7 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                                 </div>
                             </div>
                             {currentBotId === bot.id && (
-                                <Check size={14} weight="bold" className="text-secondary flex-shrink-0 drop-glow-secondary" />
+                                <Check size={14} weight="bold" className="text-success flex-shrink-0 drop-glow-success" />
                             )}
                             <button
                                 onClick={(e) => handleDelete(e, bot.id)}

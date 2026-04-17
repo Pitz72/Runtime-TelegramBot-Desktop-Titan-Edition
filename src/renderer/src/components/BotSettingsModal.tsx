@@ -105,11 +105,11 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
 
     // Shared input class
     const inputCls = "w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-3 text-on-surface focus:outline-none focus:border-primary/50 focus:shadow-[0_0_0_1px_rgba(173,198,255,0.15)] transition-all text-sm";
-    const labelCls = "text-micro text-outline-variant/60 mb-1.5 flex items-center gap-1.5 block";
+    const labelCls = "text-micro text-outline-variant mb-1.5 flex items-center gap-1.5 block";
 
     return (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="glass-panel w-full max-w-4xl rounded-xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="glass-panel w-full max-w-6xl rounded-xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
 
                 {/* Header */}
                 <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-outline-variant/15 bg-surface-container-high/50 flex-shrink-0">
@@ -199,11 +199,11 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                             onClick={() => setIsActive(!isActive)}
                                             className={`w-full h-[46px] rounded-lg border flex items-center px-4 cursor-pointer transition-all text-sm font-medium ${
                                                 isActive
-                                                    ? 'bg-secondary/10 border-secondary/25 text-secondary'
+                                                    ? 'bg-success/10 border-success/30 text-success'
                                                     : 'bg-error/10 border-error/20 text-error'
                                             }`}
                                         >
-                                            <div className={`w-1.5 h-1.5 rounded-full mr-2 ${isActive ? 'bg-secondary status-dot-active' : 'bg-error status-dot-stopped'}`} />
+                                            <div className={`w-1.5 h-1.5 rounded-full mr-2 ${isActive ? 'bg-success status-dot-active' : 'bg-error status-dot-stopped'}`} />
                                             {isActive ? t('botModal.statusActive') : t('botModal.statusDisabled')}
                                         </div>
                                     </div>
@@ -215,14 +215,14 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                         onClick={() => setNotificationsEnabled(!notificationsEnabled)}
                                         className={`w-full h-[46px] rounded-lg border flex items-center px-4 cursor-pointer transition-all text-sm font-medium ${
                                             notificationsEnabled
-                                                ? 'bg-primary/10 border-primary/20 text-primary'
+                                                ? 'bg-success/10 border-success/30 text-success'
                                                 : 'bg-surface-container-lowest border-outline-variant/15 text-on-surface-variant/50'
                                         }`}
                                     >
-                                        <div className={`w-1.5 h-1.5 rounded-full mr-2 ${notificationsEnabled ? 'bg-primary status-dot-active' : 'bg-outline-variant/40'}`} />
+                                        <div className={`w-1.5 h-1.5 rounded-full mr-2 ${notificationsEnabled ? 'bg-success status-dot-active' : 'bg-outline-variant/40'}`} />
                                         {notificationsEnabled ? t('botModal.statusEnabled') : t('botModal.statusDisabled')}
                                     </div>
-                                    <p className="text-nano text-outline-variant/30 mt-1">{t('botModal.notificationsHint')}</p>
+                                    <p className="text-nano text-outline-variant/50 mt-1">{t('botModal.notificationsHint')}</p>
                                 </div>
                             </div>
 
@@ -244,7 +244,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                             {checkInterval} min
                                         </div>
                                     </div>
-                                    <p className="text-nano text-outline-variant/30 mt-1">{t('botModal.intervalHint')}</p>
+                                    <p className="text-nano text-outline-variant/50 mt-1">{t('botModal.intervalHint')}</p>
                                 </div>
 
                                 {/* Quiet Hours */}
@@ -265,20 +265,20 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                                 className={inputCls + " [color-scheme:dark]"} />
                                         </div>
                                     </div>
-                                    <p className="text-nano text-outline-variant/30 mt-1.5 leading-tight">{t('botModal.quietHoursHint')}</p>
+                                    <p className="text-nano text-outline-variant/50 mt-1.5 leading-tight">{t('botModal.quietHoursHint')}</p>
                                 </div>
 
                                 {/* Danger Zone */}
                                 <div className="flex-1 flex flex-col justify-end">
                                     <div className="pt-5 border-t border-error/10 space-y-4">
-                                        <div className="flex items-center gap-2 text-micro text-error/50">
+                                        <div className="flex items-center gap-2 text-micro text-error/80">
                                             <Warning size={14} weight="duotone" />
                                             {t('botModal.dangerZone')}
                                         </div>
-                                        <div className="bg-error/5 border border-error/10 rounded-xl p-4 flex items-center justify-between gap-4">
+                                        <div className="bg-error/5 border border-error/15 rounded-xl p-4 flex items-center justify-between gap-4">
                                             <div>
-                                                <h4 className="text-sm font-semibold text-error/70">{t('botModal.clearHistoryTitle')}</h4>
-                                                <p className="text-nano text-error/40 mt-1 leading-relaxed whitespace-pre-line">{t('botModal.clearHistoryDesc')}</p>
+                                                <h4 className="text-sm font-semibold text-error">{t('botModal.clearHistoryTitle')}</h4>
+                                                <p className="text-nano text-error/60 mt-1 leading-relaxed whitespace-pre-line">{t('botModal.clearHistoryDesc')}</p>
                                             </div>
                                             <button
                                                 onClick={() => setClearConfirmOpen(true)}
@@ -329,7 +329,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                 <div className="p-6 border-t border-outline-variant/15 bg-surface-container-low/40 flex justify-between items-center flex-shrink-0">
                     <button
                         onClick={() => setDeleteConfirmOpen(true)}
-                        className="flex items-center gap-2 text-error/50 hover:text-error transition-colors text-sm px-4 py-2 hover:bg-error/10 rounded-lg"
+                        className="flex items-center gap-2 text-error/70 hover:text-error transition-colors text-sm px-4 py-2 hover:bg-error/10 rounded-lg border border-transparent hover:border-error/20"
                     >
                         <Trash size={14} weight="duotone" />
                         {t('botModal.delete')}

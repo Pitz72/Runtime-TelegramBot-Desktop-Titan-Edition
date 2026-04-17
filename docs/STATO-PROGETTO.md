@@ -1,6 +1,6 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.9.0  
+**Versione corrente:** v1.10.0  
 **Ultimo aggiornamento:** 17 Aprile 2026  
 **Repository:** https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
@@ -56,6 +56,8 @@
 - ✅ **F7** Preview Template — Bottone "Anteprima" in ogni `TemplateEditor` (solo se template non vuoto). Renderizza inline con dati campione sostituiti (titolo, feedName, link, summary). Client-side, nessun IPC aggiuntivo. 8 lingue. *(v1.9.0)*
 - ✅ **F8** Import OPML — Bottone OPML in `FeedManager`. IPC `import-opml(botId)`: dialog file → parser regex OPML → `addFeed` per ogni `<outline xmlUrl>` valido (tipo=news, validazione anti-SSRF). Nessuna dipendenza esterna. 8 lingue. *(v1.9.0)*
 - ✅ **F9** Digest Mode — `digest_interval INTEGER` e `digest_last_sent DATETIME` su feeds. Tabella `digest_queue` (UNIQUE bot+feed+item). In `processFeed`: se feed ha digest_interval, item va in digest_queue + `markProcessed` invece di publish_queue. `processDigests()` in engine: invia digest scaduti (header + lista numerata, max 20 item), aggiorna `digest_last_sent`, svuota coda. Schema v10, migration e safety check. UI: select preset (1h/6h/12h/24h/7gg) + badge viola. Export/import .rtb. 8 lingue. *(v1.9.0)*
+- ✅ **UI v1.9.1** Obsidian Pulse V2 overhaul — Phosphor Icons (zero Lucide), Space Grotesk + Fira Code, palette semantica MD3, glass-panel/ghost-border/ignition-btn utilities, micro-copy decorativo, ambient halos. *(v1.9.1)*
+- ✅ **UI v1.10.0** Fix contrasto e colori semantici — token `success` verde (#4ade80), stato ONLINE/Attivo/Attivato in verde, DANGER ZONE in rosso pieno, label contrasto aumentato, BotSettingsModal allargato a max-w-6xl. *(v1.10.0)*
 
 ---
 

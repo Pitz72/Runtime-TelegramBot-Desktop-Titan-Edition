@@ -68,6 +68,11 @@ module.exports = {
         'on-error':         '#690005',
         'on-error-container':'#ffdad6',
 
+        // ── Success (Green) ──
+        success:             '#4ade80',
+        'success-container': '#166534',
+        'on-success':        '#052e16',
+
         // ── Legacy (retrocompatibilità) ──
         titan: {
           50:  '#eff6ff',
