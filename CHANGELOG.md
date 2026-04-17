@@ -2,7 +2,7 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.8.x (Corrente)](docs/changelogs/CHANGELOG_v1.8.6.md) — Versione attuale: v1.8.6. Bug fix critico #27: anti-spam title_hash deduplication — schema v7, doppio check isProcessed, zero spam su cambio URL publisher. v1.8.5: F3 Dashboard multi-bot. v1.8.4: F2 Retry Queue. v1.8.3: logging strutturato.
+- [v1.8.x (Corrente)](docs/changelogs/CHANGELOG_v1.8.8.md) — Versione attuale: v1.8.8. F4: Filtro keyword per feed (include/exclude, badge ambra, 8 lingue). F5: Scheduler per-feed con intervallo individuale (select preset, badge cyan, updateFeedLastFetch). Schema v8+v9. v1.8.6: Bug fix critico #27 anti-spam.
 - [v1.7.x (Archivio)](docs/changelogs/CHANGELOG_v1.7.16.md) — v1.7.14–v1.7.16. Fix tecnici: indici SQL su history, singleton botEngine lazy, rimosso import dinamico electron nel loop di publish.
 - [v1.6.x (Archivio)](docs/changelogs/v1.6.1.md) — v1.6.0–v1.6.1: OmniSync `.rtb` (portabilità bot cross-machine) e fix stabilità.
 - [v1.5.x (Archivio)](docs/changelogs/v1.5.4.md) — v1.5.0–v1.5.4: Template messaggi personalizzabili con Smart Chips, editor visivo integrato.
@@ -13,9 +13,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v1.8.6
+## Versione Attuale: v1.8.8
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.8.6.md](docs/changelogs/CHANGELOG_v1.8.6.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.8.8.md](docs/changelogs/CHANGELOG_v1.8.8.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 

@@ -130,7 +130,14 @@
         "deleteConfirm": "Удалить",
         "successAdd": "Новый источник добавлен",
         "successUpdate": "Источник успешно обновлен",
-        "successDelete": "Источник удален"
+        "successDelete": "Источник удален",
+        "filterLabel": "Фильтр по ключевым словам",
+        "filterInclude": "Включить",
+        "filterExclude": "Исключить",
+        "filterPlaceholder": "напр. ИИ, технологии",
+        "filterActive": "фильтр активен",
+        "intervalLabel": "Интервал проверки",
+        "intervalDefault": "По умолчанию бота"
     },
     "templateEditor": {
         "templateSection": "Шаблоны Сообщений",

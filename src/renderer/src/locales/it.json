@@ -130,7 +130,14 @@
         "deleteConfirm": "Rimuovi",
         "successAdd": "Sorgente aggiunta",
         "successUpdate": "Sorgente aggiornata",
-        "successDelete": "Sorgente rimossa"
+        "successDelete": "Sorgente rimossa",
+        "filterLabel": "Filtro Keyword",
+        "filterInclude": "Includi",
+        "filterExclude": "Escludi",
+        "filterPlaceholder": "es. AI, tecnologia",
+        "filterActive": "filtro attivo",
+        "intervalLabel": "Intervallo Check",
+        "intervalDefault": "Default bot"
     },
     "templateEditor": {
         "templateSection": "Template Messaggi",

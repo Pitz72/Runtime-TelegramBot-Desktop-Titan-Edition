@@ -6,6 +6,28 @@ import { BotConfig, FeedConfig } from '../../shared/types';
 import { TitanLogger } from '../logger';
 import { app, BrowserWindow, Notification } from 'electron';
 
+/** Filtra item RSS/YouTube in base al campo keyword_filter del feed (F4). */
+function passesKeywordFilter(item: { title: string; summary: string }, feed: FeedConfig): boolean {
+    if (!feed.keyword_filter) return true;
+    try {
+        const { include = [], exclude = [] } = JSON.parse(feed.keyword_filter) as { include?: string[]; exclude?: string[] };
+        const text = `${item.title} ${item.summary}`.toLowerCase();
+        if (include.length > 0 && !include.some(kw => text.includes(kw.toLowerCase()))) return false;
+        if (exclude.some(kw => text.includes(kw.toLowerCase()))) return false;
+        return true;
+    } catch {
+        return true;
+    }
+}
+
+/** Controlla se il feed ha superato il proprio intervallo di check (F5). */
+function isFeedDue(feed: FeedConfig, bot: BotConfig): boolean {
+    const interval = feed.check_interval ?? bot.check_interval ?? 15;
+    if (!feed.last_fetch_at) return true;
+    const elapsed = Date.now() - new Date(feed.last_fetch_at).getTime();
+    return elapsed >= interval * 60 * 1000;
+}
+
 interface PublishJob {
     bot: BotConfig;
     feed: FeedConfig;
@@ -161,6 +183,11 @@ export class BotEngine {
                     if (!this.isRunning) break;
                     const feed = activeFeeds[i];
 
+                    if (!isFeedDue(feed, bot)) {
+                        TitanLogger.log(`  ⏱️ [${feed.name}] Intervallo non scaduto, saltato.`);
+                        continue;
+                    }
+
                     try {
                         await this.processFeed(bot, client, feed);
                     } catch (feedError) {
@@ -214,6 +241,9 @@ export class BotEngine {
 
             TitanLogger.log(`  📋 ${tag} ${items.length} items da ${feed.name}`);
 
+            // Aggiorna il timestamp dell'ultimo fetch (F5) — anche se non ci sono nuovi item
+            BotManager.updateFeedLastFetch(feed.id);
+
             let newCount = 0;
             let skipCount = 0;
 
@@ -227,6 +257,11 @@ export class BotEngine {
                 }
 
                 if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
+                    continue;
+                }
+
+                if (!passesKeywordFilter(item, feed)) {
+                    TitanLogger.log(`  🔍 ${tag} Filtrato da keyword: ${item.title}`);
                     continue;
                 }
 

@@ -48,6 +48,21 @@ function assertFeedType(value: unknown): 'podcast' | 'news' | 'youtube' {
     return value;
 }
 
+function assertFeedCheckInterval(value: unknown): number | null {
+    if (value === undefined || value === null) return null;
+    const n = Number(value);
+    if (!Number.isInteger(n) || n < 1 || n > 1440) {
+        throw new Error(`check_interval del feed deve essere compreso tra 1 e 1440 minuti, ricevuto: ${value}`);
+    }
+    return n;
+}
+
+function assertKeywordFilter(value: unknown): string | null {
+    if (value === undefined || value === null) return null;
+    if (typeof value !== 'string') throw new Error('keyword_filter deve essere una stringa JSON o null');
+    return value;
+}
+
 export function setupIpc() {
     // Initialize Database
     initDB();
@@ -88,20 +103,24 @@ export function setupIpc() {
     // --- FEED MANAGEMENT ---
     ipcMain.handle('get-feeds', (_, botId) => BotManager.getFeeds(botId));
 
-    ipcMain.handle('add-feed', (_, { botId, name, url, type }) => {
+    ipcMain.handle('add-feed', (_, { botId, name, url, type, keywordFilter, checkInterval }) => {
         const validBotId = assertPositiveInt(botId, 'botId');
         const validName = assertString(name, 'name');
         const validType = assertFeedType(type);
         if (validType !== 'youtube') validateFeedUrl(assertString(url, 'url'));
-        return BotManager.addFeed(validBotId, validName, assertString(url, 'url'), validType);
+        const validKeywordFilter = assertKeywordFilter(keywordFilter);
+        const validCheckInterval = assertFeedCheckInterval(checkInterval);
+        return BotManager.addFeed(validBotId, validName, assertString(url, 'url'), validType, validKeywordFilter, validCheckInterval);
     });
 
-    ipcMain.handle('update-feed', (_, { id, name, url, type }) => {
+    ipcMain.handle('update-feed', (_, { id, name, url, type, keywordFilter, checkInterval }) => {
         const validId = assertPositiveInt(id, 'id');
         const validName = assertString(name, 'name');
         const validType = assertFeedType(type);
         if (validType !== 'youtube') validateFeedUrl(assertString(url, 'url'));
-        return BotManager.updateFeed(validId, validName, assertString(url, 'url'), validType);
+        const validKeywordFilter = assertKeywordFilter(keywordFilter);
+        const validCheckInterval = assertFeedCheckInterval(checkInterval);
+        return BotManager.updateFeed(validId, validName, assertString(url, 'url'), validType, validKeywordFilter, validCheckInterval);
     });
 
     ipcMain.handle('delete-feed', (_, id) => BotManager.deleteFeed(assertPositiveInt(id, 'id')));

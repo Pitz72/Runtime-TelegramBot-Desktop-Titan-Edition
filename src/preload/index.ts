@@ -28,9 +28,9 @@ const api = {
 
     // Feed Management
     getFeeds: (botId: number) => ipcRenderer.invoke('get-feeds', botId),
-    addFeed: (feed: { botId: number; name: string; url: string; type: string }) =>
+    addFeed: (feed: { botId: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null }) =>
         ipcRenderer.invoke('add-feed', feed),
-    updateFeed: (feed: { id: number; name: string; url: string; type: string }) =>
+    updateFeed: (feed: { id: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null }) =>
         ipcRenderer.invoke('update-feed', feed),
     deleteFeed: (id: number) => ipcRenderer.invoke('delete-feed', id),
     toggleFeed: (id: number, isActive: boolean) =>

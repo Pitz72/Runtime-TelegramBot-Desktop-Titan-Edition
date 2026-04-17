@@ -130,7 +130,14 @@
         "deleteConfirm": "Remover",
         "successAdd": "Nova fonte adicionada",
         "successUpdate": "Fonte atualizada com sucesso",
-        "successDelete": "Fonte removida"
+        "successDelete": "Fonte removida",
+        "filterLabel": "Filtro de Palavras-Chave",
+        "filterInclude": "Incluir",
+        "filterExclude": "Excluir",
+        "filterPlaceholder": "ex. IA, tecnologia",
+        "filterActive": "filtro ativo",
+        "intervalLabel": "Intervalo de Verificação",
+        "intervalDefault": "Padrão do bot"
     },
     "templateEditor": {
         "templateSection": "Modelos de Mensagem",

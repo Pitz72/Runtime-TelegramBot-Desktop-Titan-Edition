@@ -1,6 +1,6 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.8.6  
+**Versione corrente:** v1.8.8  
 **Ultimo aggiornamento:** 17 Aprile 2026  
 **Repository:** https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
@@ -50,23 +50,15 @@
 - ✅ **F2** Retry Queue per invii falliti — `PublishJob.retryCount`, `MAX_RETRIES = 3`. Su `success = false`: re-accoda con `retryCount + 1` (log `⚠️`); a esaurimento: `markProcessed()` per spezzare loop infinito (log `❌`). *(v1.8.4)*
 - ✅ **F3** Dashboard multi-bot — Dot stato `is_active` per ogni bot nella sidebar (verde/grigio, nome attenuato se disabilitato). Toggle `ALL BOTS / THIS BOT` nel header del log: filtra client-side per `[NomeBot]`, reset automatico al cambio bot, i18n 8 lingue. *(v1.8.5)*
 - ✅ **#27** Bug critico anti-spam — doppio check `isProcessed()`: MD5 link (primario) + MD5 titolo normalizzato per stesso feed (safety net). Schema v7 con `title_hash TEXT`, backfill automatico, indice `idx_history_title_dedup`. Zero spam su cambio URL publisher. *(v1.8.6)*
+- ✅ **F4** Filtro keyword sui feed — `keyword_filter TEXT` (JSON) nella tabella `feeds`. `passesKeywordFilter()` in `engine.ts`: filtra per include/exclude case-insensitive su titolo+summary prima dell'accodamento. UI in FeedManager con bordi colorati (verde=include, rosso=exclude) e badge ambra `filtro attivo`. Schema v8, migration automatica, export/import .rtb incluso. 8 lingue. *(v1.8.8)*
+- ✅ **F5** Scheduler per-feed — `check_interval INTEGER` e `last_fetch_at DATETIME` nella tabella `feeds`. `isFeedDue()` in `engine.ts` skippa i feed il cui ultimo fetch è più recente dell'intervallo individuale. `BotManager.updateFeedLastFetch()` aggiornato dopo ogni fetch. UI in FeedManager con select preset (null/5/15/30/60/120/240/480/1440 min) e badge cyan con intervallo custom. Schema v9, migration automatica, export/import .rtb incluso. 8 lingue. *(v1.8.8)*
 
 ---
 
-## 🔵 Aperto — Feature F4-F10
-
-> **Nota:** I dettagli di F4-F10 provengono dall'analisi originale Gemini. Le descrizioni di F6-F10 non sono presenti nei documenti del repo e vanno definite prima di procedere.
-
-### F4 — Filtro keyword sui feed
-Possibilità di configurare per ogni feed una lista di parole chiave (includi/escludi). Un item viene accodato solo se il titolo o il summary soddisfa il filtro.  
-**Soluzione proposta:** campo `keyword_filter TEXT` nella tabella `feeds` (JSON array), valutato in `processFeed()` prima dell'aggiunta alla `publishQueue`.
-
-### F5 — Scheduler per-feed (intervallo individuale)
-Attualmente il `check_interval` è a livello di bot e si applica a tutti i feed del bot. Feed con contenuto raro (es. YouTube mensile) vengono fetchati con la stessa frequenza di feed quotidiani.  
-**Soluzione proposta:** colonna `check_interval INTEGER` nella tabella `feeds`, con fallback al valore del bot se `NULL`. `checkLoop()` skippa i feed il cui ultimo fetch è più recente del loro intervallo individuale.
+## 🔵 Aperto — Feature F6-F10
 
 ### F6-F10 — Da definire
-Le feature F6-F10 dell'analisi originale Gemini non sono documentate nel repo. **Vanno recuperate e aggiunte qui prima di procedere con il Blocco C.**
+Le feature F6-F10 dell'analisi originale Gemini non sono documentate nel repo. Vanno recuperate prima di procedere.
 
 ---
 
@@ -107,9 +99,10 @@ Viene implementato solo dopo che tutti i punti precedenti (F3-F10 + Performance 
 [FATTO] Feature F2 — Retry Queue (MAX_RETRIES=3, markProcessed)            ✅
 [FATTO] Feature F3 — Dashboard multi-bot (dot sidebar, toggle log ALL/BOT) ✅
 ──────────────────────────────────────────────────────────────────────────
-[TODO]  Blocco C — Feature:             F4 Filtro keyword
-                                        F5 Scheduler per-feed
-                                        F6-F10 (da definire)
+[FATTO] Feature F4 — Filtro keyword sui feed                                ✅
+[FATTO] Feature F5 — Scheduler per-feed (intervallo individuale)            ✅
+──────────────────────────────────────────────────────────────────────────
+[TODO]  Blocco C — Feature:             F6-F10 (da definire)
 [TODO]  Performance Mode (UI 4K/GPU)
 ──────────────────────────────────────────────────────────────────────────
 [LAST]  #11 autoUpdater nativo (electron-updater + GitHub Releases)  →  v2.0.0
