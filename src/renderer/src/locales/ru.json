@@ -35,7 +35,11 @@
         "today": "Сегодня",
         "week": "7 Дней",
         "total": "Всего",
-        "statsLabel": "Статистика"
+        "statsLabel": "Статистика",
+        "detailsTitle": "Подробная Статистика",
+        "feedBreakdown": "Публикации по Фидам",
+        "noData": "Нет доступных данных",
+        "loading": "Загрузка..."
     },
     "dashboard": {
         "systemSettingsTitle": "Настройки Системы и Базы Данных"
@@ -137,7 +141,19 @@
         "filterPlaceholder": "напр. ИИ, технологии",
         "filterActive": "фильтр активен",
         "intervalLabel": "Интервал проверки",
-        "intervalDefault": "По умолчанию бота"
+        "intervalDefault": "По умолчанию бота",
+        "importOpml": "Импортировать фиды из OPML",
+        "opmlSuccess": "Импортировано %d фидов из OPML",
+        "opmlEmpty": "В файле OPML не найдено фидов",
+        "opmlError": "Ошибка чтения OPML:",
+        "digestLabel": "Режим Дайджест",
+        "digestDefault": "Каждая статья (по умолчанию)",
+        "digestBadge": "дайджест",
+        "digest60": "Каждый час",
+        "digest360": "Каждые 6 часов",
+        "digest720": "Каждые 12 часов",
+        "digest1440": "Ежедневно",
+        "digest10080": "Еженедельно"
     },
     "templateEditor": {
         "templateSection": "Шаблоны Сообщений",
@@ -149,7 +165,11 @@
         "htmlHint": "Поддерживает базовый HTML Telegram (<b>жирный</b>, <i>курсив</i>, <a>ссылка</a>). Версия Titan всегда добавляется в конец стартового сообщения.",
         "tabGeneral": "Общие",
         "tabTemplates": "Шаблоны",
-        "validOk": "Шаблон корректен — проблем не обнаружено"
+        "validOk": "Шаблон корректен — проблем не обнаружено",
+        "previewBtn": "Предпросмотр",
+        "sampleTitle": "Пример заголовка статьи",
+        "sampleFeed": "Название Фида",
+        "sampleSummary": "Краткое описание примерной статьи."
     },
     "systemSettings": {
         "title": "Системные Настройки",

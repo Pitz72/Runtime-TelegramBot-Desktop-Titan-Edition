@@ -28,9 +28,9 @@ const api = {
 
     // Feed Management
     getFeeds: (botId: number) => ipcRenderer.invoke('get-feeds', botId),
-    addFeed: (feed: { botId: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null }) =>
+    addFeed: (feed: { botId: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null; digestInterval?: number | null }) =>
         ipcRenderer.invoke('add-feed', feed),
-    updateFeed: (feed: { id: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null }) =>
+    updateFeed: (feed: { id: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null; digestInterval?: number | null }) =>
         ipcRenderer.invoke('update-feed', feed),
     deleteFeed: (id: number) => ipcRenderer.invoke('delete-feed', id),
     toggleFeed: (id: number, isActive: boolean) =>
@@ -56,6 +56,10 @@ const api = {
 
     // Stats
     getStats: (botId: number) => ipcRenderer.invoke('get-stats', botId),
+    getDetailedStats: (botId: number) => ipcRenderer.invoke('get-detailed-stats', botId),
+
+    // OPML
+    importOpml: (botId: number) => ipcRenderer.invoke('import-opml', botId),
 
     // System
     getVersion: () => ipcRenderer.invoke('get-version'),

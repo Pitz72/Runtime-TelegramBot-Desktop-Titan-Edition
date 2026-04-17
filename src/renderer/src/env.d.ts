@@ -26,8 +26,8 @@ export interface TitanAPI {
 
     // Feed Management
     getFeeds: (botId: number) => Promise<FeedConfig[]>
-    addFeed: (feed: { botId: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null }) => Promise<void>
-    updateFeed: (feed: { id: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null }) => Promise<void>
+    addFeed: (feed: { botId: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null; digestInterval?: number | null }) => Promise<void>
+    updateFeed: (feed: { id: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null; digestInterval?: number | null }) => Promise<void>
     deleteFeed: (id: number) => Promise<void>
     toggleFeed: (id: number, isActive: boolean) => Promise<void>
     testFeed: (data: { url: string; type: string }) => Promise<{ success: boolean; count?: number; error?: string }>
@@ -42,6 +42,10 @@ export interface TitanAPI {
 
     // Stats
     getStats: (botId: number) => Promise<{ total: number; today: number; week: number }>
+    getDetailedStats: (botId: number) => Promise<{ total: number; today: number; week: number; byFeed: Array<{ feedId: number; feedName: string; total: number; today: number }> }>
+
+    // OPML
+    importOpml: (botId: number) => Promise<{ success: boolean; count: number; error?: string }>
 
     // System
     getVersion: () => Promise<string>

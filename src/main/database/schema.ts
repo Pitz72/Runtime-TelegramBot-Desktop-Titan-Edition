@@ -144,8 +144,25 @@ export function initDB() {
             keyword_filter TEXT DEFAULT NULL,
             check_interval INTEGER DEFAULT NULL,
             last_fetch_at DATETIME DEFAULT NULL,
+            digest_interval INTEGER DEFAULT NULL,
+            digest_last_sent DATETIME DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS digest_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bot_id INTEGER NOT NULL,
+            feed_id INTEGER NOT NULL,
+            item_id TEXT NOT NULL,
+            item_title TEXT,
+            item_link TEXT,
+            item_summary TEXT,
+            item_image TEXT,
+            added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(bot_id, feed_id, item_id),
+            FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE,
+            FOREIGN KEY(feed_id) REFERENCES feeds(id) ON DELETE CASCADE
         );
 
         CREATE TABLE IF NOT EXISTS history (
@@ -170,7 +187,7 @@ export function initDB() {
     // 3. Sistema di Versionamento Deterministic
     if (isNewInstall) {
         // È un'installazione pulita. Lo schema è già alla versione massima.
-        db.pragma('user_version = 9');
+        db.pragma('user_version = 10');
         console.log("Nuova installazione rilevata. Database inizializzato alla v9.");
         console.log('Database initialized at:', dbPath);
         return db;
@@ -182,7 +199,7 @@ export function initDB() {
     // 4. Backup automatico SOLO se servono migrazioni — fix #20
     // Cattura lo stato pre-migrazione per consentire il ripristino in caso di errore.
     // Su DB già alla versione corrente (nessuna migrazione), nessun backup viene creato.
-    if (currentVersion < 9) {
+    if (currentVersion < 10) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
@@ -314,6 +331,31 @@ export function initDB() {
         console.log("Database version set to 9");
     }
 
+    if (currentVersion < 10) {
+        console.log("Migration v10: Adding digest support to feeds table (F9)...");
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN digest_interval INTEGER DEFAULT NULL`); } catch (e) { }
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN digest_last_sent DATETIME DEFAULT NULL`); } catch (e) { }
+        try {
+            db.exec(`CREATE TABLE IF NOT EXISTS digest_queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                bot_id INTEGER NOT NULL,
+                feed_id INTEGER NOT NULL,
+                item_id TEXT NOT NULL,
+                item_title TEXT,
+                item_link TEXT,
+                item_summary TEXT,
+                item_image TEXT,
+                added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(bot_id, feed_id, item_id),
+                FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE,
+                FOREIGN KEY(feed_id) REFERENCES feeds(id) ON DELETE CASCADE
+            )`);
+        } catch (e) { }
+        db.pragma('user_version = 10');
+        currentVersion = 10;
+        console.log("Database version set to 10");
+    }
+
     // Safety check post-migration: verifica fisicamente l'esistenza delle colonne critiche.
     // Difende da stati corrotti dove user_version è avanzato ma ALTER TABLE è fallito silenziosamente.
     try {
@@ -341,8 +383,35 @@ export function initDB() {
             console.warn('Safety fix: last_fetch_at mancante dalla tabella feeds — aggiunto retroattivamente.');
             db.exec(`ALTER TABLE feeds ADD COLUMN last_fetch_at DATETIME DEFAULT NULL`);
         }
+        if (!feedCols.some((c: any) => c.name === 'digest_interval')) {
+            console.warn('Safety fix: digest_interval mancante dalla tabella feeds — aggiunto retroattivamente.');
+            db.exec(`ALTER TABLE feeds ADD COLUMN digest_interval INTEGER DEFAULT NULL`);
+        }
+        if (!feedCols.some((c: any) => c.name === 'digest_last_sent')) {
+            console.warn('Safety fix: digest_last_sent mancante dalla tabella feeds — aggiunto retroattivamente.');
+            db.exec(`ALTER TABLE feeds ADD COLUMN digest_last_sent DATETIME DEFAULT NULL`);
+        }
     } catch (e) {
         console.error('Safety check feeds columns fallito:', e);
+    }
+
+    try {
+        db.exec(`CREATE TABLE IF NOT EXISTS digest_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bot_id INTEGER NOT NULL,
+            feed_id INTEGER NOT NULL,
+            item_id TEXT NOT NULL,
+            item_title TEXT,
+            item_link TEXT,
+            item_summary TEXT,
+            item_image TEXT,
+            added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(bot_id, feed_id, item_id),
+            FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE,
+            FOREIGN KEY(feed_id) REFERENCES feeds(id) ON DELETE CASCADE
+        )`);
+    } catch (e) {
+        console.error('Safety check digest_queue fallito:', e);
     }
 
     console.log('Database initialized at:', dbPath);

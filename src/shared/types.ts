@@ -43,6 +43,10 @@ export interface FeedConfig {
     check_interval: number | null;
     /** Timestamp ISO dell'ultimo fetch completato — null = mai fetchato (F5) */
     last_fetch_at: string | null;
+    /** Minuti tra un invio digest e il successivo — null = modalità normale (F9) */
+    digest_interval: number | null;
+    /** Timestamp ISO dell'ultimo digest inviato — null = mai inviato (F9) */
+    digest_last_sent: string | null;
 }
 
 export interface RssItem {

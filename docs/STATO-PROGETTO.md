@@ -1,6 +1,6 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.8.8  
+**Versione corrente:** v1.9.0  
 **Ultimo aggiornamento:** 17 Aprile 2026  
 **Repository:** https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
@@ -52,13 +52,16 @@
 - ✅ **#27** Bug critico anti-spam — doppio check `isProcessed()`: MD5 link (primario) + MD5 titolo normalizzato per stesso feed (safety net). Schema v7 con `title_hash TEXT`, backfill automatico, indice `idx_history_title_dedup`. Zero spam su cambio URL publisher. *(v1.8.6)*
 - ✅ **F4** Filtro keyword sui feed — `keyword_filter TEXT` (JSON) nella tabella `feeds`. `passesKeywordFilter()` in `engine.ts`: filtra per include/exclude case-insensitive su titolo+summary prima dell'accodamento. UI in FeedManager con bordi colorati (verde=include, rosso=exclude) e badge ambra `filtro attivo`. Schema v8, migration automatica, export/import .rtb incluso. 8 lingue. *(v1.8.8)*
 - ✅ **F5** Scheduler per-feed — `check_interval INTEGER` e `last_fetch_at DATETIME` nella tabella `feeds`. `isFeedDue()` in `engine.ts` skippa i feed il cui ultimo fetch è più recente dell'intervallo individuale. `BotManager.updateFeedLastFetch()` aggiornato dopo ogni fetch. UI in FeedManager con select preset (null/5/15/30/60/120/240/480/1440 min) e badge cyan con intervallo custom. Schema v9, migration automatica, export/import .rtb incluso. 8 lingue. *(v1.8.8)*
+- ✅ **F6** Statistiche/Analytics dettagliate — `BotManager.getDetailedStats()` con breakdown per feed. IPC `get-detailed-stats`. `StatsModal.tsx`: 3 contatori (oggi/7gg/totale) + barre per feed ordinate per volume. Accessibile dal click sull'icona BarChart3 nella dashboard. 8 lingue. *(v1.9.0)*
+- ✅ **F7** Preview Template — Bottone "Anteprima" in ogni `TemplateEditor` (solo se template non vuoto). Renderizza inline con dati campione sostituiti (titolo, feedName, link, summary). Client-side, nessun IPC aggiuntivo. 8 lingue. *(v1.9.0)*
+- ✅ **F8** Import OPML — Bottone OPML in `FeedManager`. IPC `import-opml(botId)`: dialog file → parser regex OPML → `addFeed` per ogni `<outline xmlUrl>` valido (tipo=news, validazione anti-SSRF). Nessuna dipendenza esterna. 8 lingue. *(v1.9.0)*
+- ✅ **F9** Digest Mode — `digest_interval INTEGER` e `digest_last_sent DATETIME` su feeds. Tabella `digest_queue` (UNIQUE bot+feed+item). In `processFeed`: se feed ha digest_interval, item va in digest_queue + `markProcessed` invece di publish_queue. `processDigests()` in engine: invia digest scaduti (header + lista numerata, max 20 item), aggiorna `digest_last_sent`, svuota coda. Schema v10, migration e safety check. UI: select preset (1h/6h/12h/24h/7gg) + badge viola. Export/import .rtb. 8 lingue. *(v1.9.0)*
 
 ---
 
-## 🔵 Aperto — Feature F6-F10
+## 🔵 Aperto — Feature F10
 
-### F6-F10 — Da definire
-Le feature F6-F10 dell'analisi originale Gemini non sono documentate nel repo. Vanno recuperate prima di procedere.
+### F10 — Da definire (eventuale feature residua)
 
 ---
 
@@ -102,7 +105,11 @@ Viene implementato solo dopo che tutti i punti precedenti (F4-F9 + Performance M
 [FATTO] Feature F4 — Filtro keyword sui feed                                ✅
 [FATTO] Feature F5 — Scheduler per-feed (intervallo individuale)            ✅
 ──────────────────────────────────────────────────────────────────────────
-[TODO]  Blocco C — Feature:             F6-F10 (da definire)
+[FATTO] Feature F6 — Statistiche/Analytics dettagliate per feed             ✅
+[FATTO] Feature F7 — Preview Template inline con dati campione              ✅
+[FATTO] Feature F8 — Import OPML (bulk import feed da file standard)        ✅
+[FATTO] Feature F9 — Digest Mode (accumula item, invia un messaggio)        ✅
+──────────────────────────────────────────────────────────────────────────
 [TODO]  Performance Mode (UI 4K/GPU)
 ──────────────────────────────────────────────────────────────────────────
 [LAST]  #11 autoUpdater nativo (electron-updater + GitHub Releases)  →  v2.0.0
