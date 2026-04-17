@@ -142,6 +142,8 @@ export function initDB() {
             type TEXT CHECK(type IN ('podcast', 'news', 'youtube')) NOT NULL DEFAULT 'podcast',
             is_active BOOLEAN DEFAULT 1,
             keyword_filter TEXT DEFAULT NULL,
+            check_interval INTEGER DEFAULT NULL,
+            last_fetch_at DATETIME DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE
         );
@@ -168,8 +170,8 @@ export function initDB() {
     // 3. Sistema di Versionamento Deterministic
     if (isNewInstall) {
         // È un'installazione pulita. Lo schema è già alla versione massima.
-        db.pragma('user_version = 8');
-        console.log("Nuova installazione rilevata. Database inizializzato alla v8.");
+        db.pragma('user_version = 9');
+        console.log("Nuova installazione rilevata. Database inizializzato alla v9.");
         console.log('Database initialized at:', dbPath);
         return db;
     }
@@ -180,7 +182,7 @@ export function initDB() {
     // 4. Backup automatico SOLO se servono migrazioni — fix #20
     // Cattura lo stato pre-migrazione per consentire il ripristino in caso di errore.
     // Su DB già alla versione corrente (nessuna migrazione), nessun backup viene creato.
-    if (currentVersion < 8) {
+    if (currentVersion < 9) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
@@ -207,11 +209,11 @@ export function initDB() {
 
     // 5. Migrazioni sequenziali
     if (currentVersion === 0) {
-            runLegacyMigrations(db);
-            db.pragma('user_version = 1');
-            currentVersion = 1;
-            console.log("Database version set to 1");
-        }
+        runLegacyMigrations(db);
+        db.pragma('user_version = 1');
+        currentVersion = 1;
+        console.log("Database version set to 1");
+    }
 
     if (currentVersion < 2) {
         console.log("Migration: Adding notifications_enabled column...");
@@ -265,11 +267,10 @@ export function initDB() {
 
     if (currentVersion < 7) {
         console.log("Migration v7: Adding title_hash column for anti-spam deduplication...");
-        // 1. Aggiungi la colonna (idempotente con try/catch)
         try { db.exec(`ALTER TABLE history ADD COLUMN title_hash TEXT`); } catch (e) { }
 
-        // 2. Backfill: calcola MD5(lower(trim(title))) per tutte le righe esistenti in JS
-        //    (SQLite non ha MD5 nativo)
+        // Backfill: calcola MD5(lower(trim(title))) per tutte le righe esistenti in JS
+        // (SQLite non ha MD5 nativo)
         try {
             const rows = db.prepare('SELECT rowid, title FROM history WHERE title_hash IS NULL AND title IS NOT NULL').all() as any[];
             const updateStmt = db.prepare('UPDATE history SET title_hash = ? WHERE rowid = ?');
@@ -287,7 +288,6 @@ export function initDB() {
             console.error("Migration v7: Errore nel backfill title_hash:", e);
         }
 
-        // 3. Indice composito per il doppio-check anti-spam
         try {
             db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, feed_id, title_hash)`);
         } catch (e) { }
@@ -303,6 +303,15 @@ export function initDB() {
         db.pragma('user_version = 8');
         currentVersion = 8;
         console.log("Database version set to 8");
+    }
+
+    if (currentVersion < 9) {
+        console.log("Migration v9: Adding check_interval and last_fetch_at to feeds table (F5)...");
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN check_interval INTEGER DEFAULT NULL`); } catch (e) { }
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN last_fetch_at DATETIME DEFAULT NULL`); } catch (e) { }
+        db.pragma('user_version = 9');
+        currentVersion = 9;
+        console.log("Database version set to 9");
     }
 
     // Safety check post-migration: verifica fisicamente l'esistenza delle colonne critiche.
@@ -324,8 +333,16 @@ export function initDB() {
             console.warn('Safety fix: keyword_filter mancante dalla tabella feeds — aggiunto retroattivamente.');
             db.exec(`ALTER TABLE feeds ADD COLUMN keyword_filter TEXT DEFAULT NULL`);
         }
+        if (!feedCols.some((c: any) => c.name === 'check_interval')) {
+            console.warn('Safety fix: check_interval mancante dalla tabella feeds — aggiunto retroattivamente.');
+            db.exec(`ALTER TABLE feeds ADD COLUMN check_interval INTEGER DEFAULT NULL`);
+        }
+        if (!feedCols.some((c: any) => c.name === 'last_fetch_at')) {
+            console.warn('Safety fix: last_fetch_at mancante dalla tabella feeds — aggiunto retroattivamente.');
+            db.exec(`ALTER TABLE feeds ADD COLUMN last_fetch_at DATETIME DEFAULT NULL`);
+        }
     } catch (e) {
-        console.error('Safety check keyword_filter fallito:', e);
+        console.error('Safety check feeds columns fallito:', e);
     }
 
     console.log('Database initialized at:', dbPath);

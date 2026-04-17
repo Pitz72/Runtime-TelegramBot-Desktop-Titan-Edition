@@ -39,6 +39,10 @@ export interface FeedConfig {
     is_active: boolean;
     /** JSON string: { include: string[], exclude: string[] } — null = nessun filtro (F4) */
     keyword_filter: string | null;
+    /** Intervallo individuale in minuti — null = usa il check_interval del bot (F5) */
+    check_interval: number | null;
+    /** Timestamp ISO dell'ultimo fetch completato — null = mai fetchato (F5) */
+    last_fetch_at: string | null;
 }
 
 export interface RssItem {

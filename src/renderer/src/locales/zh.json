@@ -132,10 +132,12 @@
         "successUpdate": "来源更新成功",
         "successDelete": "来源已移除",
         "filterLabel": "关键词过滤",
-        "filterInclude": "包含（至少一个）",
-        "filterExclude": "排除（如果包含）",
-        "filterPlaceholder": "例如：体育、足球",
-        "filterActive": "过滤器已启用"
+        "filterInclude": "包含",
+        "filterExclude": "排除",
+        "filterPlaceholder": "例如：AI，技术",
+        "filterActive": "过滤器已启用",
+        "intervalLabel": "检查间隔",
+        "intervalDefault": "机器人默认"
     },
     "templateEditor": {
         "templateSection": "消息模板",

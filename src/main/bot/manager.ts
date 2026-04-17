@@ -162,14 +162,18 @@ export class BotManager {
         return rows.map(f => ({ ...f, is_active: f.is_active === 1 })) as FeedConfig[];
     }
 
-    static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube', keywordFilter?: string | null) {
-        const stmt = db().prepare('INSERT INTO feeds (bot_id, name, url, type, is_active, keyword_filter) VALUES (?, ?, ?, ?, 1, ?)');
-        stmt.run(bot_id, name, url, type, keywordFilter ?? null);
+    static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube', keywordFilter?: string | null, checkInterval?: number | null) {
+        const stmt = db().prepare('INSERT INTO feeds (bot_id, name, url, type, is_active, keyword_filter, check_interval) VALUES (?, ?, ?, ?, 1, ?, ?)');
+        stmt.run(bot_id, name, url, type, keywordFilter ?? null, checkInterval ?? null);
     }
 
-    static updateFeed(id: number, name: string, url: string, type: string, keywordFilter?: string | null) {
-        const stmt = db().prepare('UPDATE feeds SET name = ?, url = ?, type = ?, keyword_filter = ? WHERE id = ?');
-        stmt.run(name, url, type, keywordFilter ?? null, id);
+    static updateFeed(id: number, name: string, url: string, type: string, keywordFilter?: string | null, checkInterval?: number | null) {
+        const stmt = db().prepare('UPDATE feeds SET name = ?, url = ?, type = ?, keyword_filter = ?, check_interval = ? WHERE id = ?');
+        stmt.run(name, url, type, keywordFilter ?? null, checkInterval ?? null, id);
+    }
+
+    static updateFeedLastFetch(id: number) {
+        db().prepare("UPDATE feeds SET last_fetch_at = datetime('now') WHERE id = ?").run(id);
     }
 
     static deleteFeed(id: number) {
@@ -257,7 +261,8 @@ export class BotManager {
                     url: f.url,
                     type: f.type,
                     is_active: f.is_active,
-                    keyword_filter: f.keyword_filter ?? null
+                    keyword_filter: f.keyword_filter ?? null,
+                    check_interval: f.check_interval ?? null,
                 }))
             };
         });
@@ -300,7 +305,7 @@ export class BotManager {
 
                 if (Array.isArray(bot.feeds)) {
                     for (const f of bot.feeds) {
-                        BotManager.addFeed(Number(botId), f.name, f.url, f.type, f.keyword_filter ?? null);
+                        BotManager.addFeed(Number(botId), f.name, f.url, f.type, f.keyword_filter ?? null, f.check_interval ?? null);
                         if (f.is_active === 0 || f.is_active === false) {
                             const lastFeed = db().prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(botId) as any;
                             if (lastFeed) {
@@ -357,7 +362,8 @@ export class BotManager {
                     url: f.url,
                     type: f.type,
                     isActive: f.is_active === 1,
-                    keyword_filter: f.keyword_filter ?? null
+                    keyword_filter: f.keyword_filter ?? null,
+                    check_interval: f.check_interval ?? null,
                 }))
             };
 
@@ -413,7 +419,8 @@ export class BotManager {
                         feed.name,
                         feed.url,
                         feed.type,
-                        feed.keyword_filter ?? null
+                        feed.keyword_filter ?? null,
+                        feed.check_interval ?? null
                     );
 
                     if (feed.isActive === false) {

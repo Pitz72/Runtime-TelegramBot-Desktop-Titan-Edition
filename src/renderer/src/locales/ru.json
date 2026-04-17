@@ -132,10 +132,12 @@
         "successUpdate": "Источник успешно обновлен",
         "successDelete": "Источник удален",
         "filterLabel": "Фильтр по ключевым словам",
-        "filterInclude": "Включить (хотя бы одно)",
-        "filterExclude": "Исключить (если содержит)",
-        "filterPlaceholder": "напр. спорт, футбол",
-        "filterActive": "фильтр активен"
+        "filterInclude": "Включить",
+        "filterExclude": "Исключить",
+        "filterPlaceholder": "напр. ИИ, технологии",
+        "filterActive": "фильтр активен",
+        "intervalLabel": "Интервал проверки",
+        "intervalDefault": "По умолчанию бота"
     },
     "templateEditor": {
         "templateSection": "Шаблоны Сообщений",

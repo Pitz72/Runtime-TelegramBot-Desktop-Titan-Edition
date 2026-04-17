@@ -132,10 +132,12 @@
         "successUpdate": "Source successfully updated",
         "successDelete": "Source removed",
         "filterLabel": "Keyword Filter",
-        "filterInclude": "Include (at least one)",
-        "filterExclude": "Exclude (if contains)",
-        "filterPlaceholder": "e.g. sport, football",
-        "filterActive": "filter active"
+        "filterInclude": "Include",
+        "filterExclude": "Exclude",
+        "filterPlaceholder": "e.g. AI, technology",
+        "filterActive": "filter active",
+        "intervalLabel": "Check Interval",
+        "intervalDefault": "Bot default"
     },
     "templateEditor": {
         "templateSection": "Message Templates",

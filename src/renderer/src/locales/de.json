@@ -131,11 +131,13 @@
         "successAdd": "Neue Quelle hinzugefügt",
         "successUpdate": "Quelle erfolgreich aktualisiert",
         "successDelete": "Quelle entfernt",
-        "filterLabel": "Schlüsselwortfilter",
-        "filterInclude": "Einschließen (mindestens eines)",
-        "filterExclude": "Ausschließen (wenn enthält)",
-        "filterPlaceholder": "z.B. Sport, Fußball",
-        "filterActive": "Filter aktiv"
+        "filterLabel": "Keyword-Filter",
+        "filterInclude": "Einschließen",
+        "filterExclude": "Ausschließen",
+        "filterPlaceholder": "z.B. KI, Technologie",
+        "filterActive": "Filter aktiv",
+        "intervalLabel": "Check-Intervall",
+        "intervalDefault": "Bot-Standard"
     },
     "templateEditor": {
         "templateSection": "Nachrichtenvorlagen",

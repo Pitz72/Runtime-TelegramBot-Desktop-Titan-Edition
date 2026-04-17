@@ -131,11 +131,13 @@
         "successAdd": "Nova fonte adicionada",
         "successUpdate": "Fonte atualizada com sucesso",
         "successDelete": "Fonte removida",
-        "filterLabel": "Filtro de palavras-chave",
-        "filterInclude": "Incluir (pelo menos uma)",
-        "filterExclude": "Excluir (se contiver)",
-        "filterPlaceholder": "ex. esporte, futebol",
-        "filterActive": "filtro ativo"
+        "filterLabel": "Filtro de Palavras-Chave",
+        "filterInclude": "Incluir",
+        "filterExclude": "Excluir",
+        "filterPlaceholder": "ex. IA, tecnologia",
+        "filterActive": "filtro ativo",
+        "intervalLabel": "Intervalo de Verificação",
+        "intervalDefault": "Padrão do bot"
     },
     "templateEditor": {
         "templateSection": "Modelos de Mensagem",

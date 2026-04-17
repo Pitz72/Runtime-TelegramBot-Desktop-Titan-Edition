@@ -26,8 +26,8 @@ export interface TitanAPI {
 
     // Feed Management
     getFeeds: (botId: number) => Promise<FeedConfig[]>
-    addFeed: (feed: { botId: number; name: string; url: string; type: string; keywordFilter?: string | null }) => Promise<void>
-    updateFeed: (feed: { id: number; name: string; url: string; type: string; keywordFilter?: string | null }) => Promise<void>
+    addFeed: (feed: { botId: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null }) => Promise<void>
+    updateFeed: (feed: { id: number; name: string; url: string; type: string; keywordFilter?: string | null; checkInterval?: number | null }) => Promise<void>
     deleteFeed: (id: number) => Promise<void>
     toggleFeed: (id: number, isActive: boolean) => Promise<void>
     testFeed: (data: { url: string; type: string }) => Promise<{ success: boolean; count?: number; error?: string }>
