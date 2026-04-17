@@ -38,7 +38,7 @@ export function FeedManager({ botId }: Props) {
     const [loading, setLoading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [editingFeed, setEditingFeed] = useState<FeedConfig | null>(null);
-    const [newFeed, setNewFeed] = useState({ name: '', url: '', type: 'podcast' as 'podcast' | 'news' | 'youtube', filterInclude: '', filterExclude: '' });
+    const [newFeed, setNewFeed] = useState({ name: '', url: '', type: 'podcast' as 'podcast' | 'news' | 'youtube' });
     const [testing, setTesting] = useState<number | 'new' | null>(null);
     const [testResult, setTestResult] = useState<{ success: boolean; count?: number; error?: string } | null>(null);
 

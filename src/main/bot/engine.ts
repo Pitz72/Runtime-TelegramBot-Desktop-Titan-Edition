@@ -38,19 +38,6 @@ interface PublishJob {
 
 const MAX_RETRIES = 3;
 
-function passesKeywordFilter(item: { title: string; summary: string }, feed: FeedConfig): boolean {
-    if (!feed.keyword_filter) return true;
-    try {
-        const { include = [], exclude = [] } = JSON.parse(feed.keyword_filter) as { include: string[]; exclude: string[] };
-        const text = `${item.title} ${item.summary}`.toLowerCase();
-        if (include.length > 0 && !include.some(kw => text.includes(kw.toLowerCase()))) return false;
-        if (exclude.some(kw => text.includes(kw.toLowerCase()))) return false;
-        return true;
-    } catch {
-        return true;
-    }
-}
-
 export class BotEngine {
     private isRunning: boolean = false;
     private timeoutId: NodeJS.Timeout | null = null;
