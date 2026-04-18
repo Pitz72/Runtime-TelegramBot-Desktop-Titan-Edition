@@ -2,7 +2,7 @@
 
 Centro documentale del progetto. Indice completo di guide, changelog e documentazione tecnica.
 
-**Versione corrente:** v1.10.2 — [Vedi changelog](changelogs/CHANGELOG_v1.10.2.md)  
+**Versione corrente:** v1.10.3 — [Vedi changelog](changelogs/CHANGELOG_v1.10.3.md)  
 **Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition
 
 ---
@@ -25,7 +25,7 @@ Centro documentale del progetto. Indice completo di guide, changelog e documenta
 
 ## Documentazione di Progetto
 
-- **[Stato Progetto e Roadmap v2.0.0](STATO-PROGETTO.md)** — Tutto il completato (F1–F9, fix P0–P3) e l'unico step aperto (#11 autoUpdater).
+- **[Stato Progetto e Roadmap v2.0.0](STATO-PROGETTO.md)** — Tutto il completato (F1–F9, #11 autoUpdater, fix P0–P3). Prossimo step: repo bridge + Gumroad.
 - **[Progetto Porting macOS + Linux](PROGETTO-PORTING.md)** — Strategia e implementazione della compatibilità cross-platform (v1.10.2).
 - **[Progetto Modalità Server](PROGETTO-SERVER.md)** — Analisi della modalità headless/VPS. **Rimandato a tempo indeterminato.**
 - **[Manutenzione Repository](manutenzione-archivio.md)** — Regole per la pulizia cache, cartelle build e archivio legacy.
