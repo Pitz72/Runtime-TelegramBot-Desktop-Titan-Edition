@@ -185,13 +185,32 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
 
             // --- PROTEZIONE ANTI-SPAM (CRITICA) ---
             // Se non siamo riusciti a determinare la data, NON usiamo "new Date()" (adesso).
-            // Usiamo una data nel passato remoto (1 Gennaio 2000) per assicurarci che 
+            // Usiamo una data nel passato remoto (1 Gennaio 2000) per assicurarci che
             // il video venga ignorato dal filtro cutoffDate invece di causare spam.
             if (!date) {
                 date = new Date(2000, 0, 1);
+                if (rawDateText) TitanLogger.log(`[YouTube] WARN: data non parsabile per "${v.title?.text}": "${rawDateText}" → fallback 2000`);
             }
+            TitanLogger.log(`[YouTube] Item: "${v.title?.text}" | dateText: "${rawDateText}" | date: ${date.toISOString().slice(0, 10)}`);
 
-            const videoId = v.id || v.video_id || '';
+            // --- ID EXTRACTION DETERMINISTICO ---
+            // v.id può variare tra sessioni (renderer ID vs video ID puro) quando il canale
+            // viene risolto via search-fallback. Il thumbnail URL è sempre stabile:
+            // https://i.ytimg.com/vi/{VIDEO_ID}/hqdefault.jpg
+            let videoId = '';
+            const thumbUrl = v.thumbnails?.[0]?.url || v.best_thumbnail?.url || '';
+            const thumbMatch = thumbUrl.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
+            if (thumbMatch) {
+                videoId = thumbMatch[1];
+            } else if (v.video_id && /^[a-zA-Z0-9_-]{11}$/.test(v.video_id)) {
+                videoId = v.video_id;
+            } else if (v.id && /^[a-zA-Z0-9_-]{11}$/.test(v.id)) {
+                videoId = v.id;
+            } else {
+                // Fallback grezzo — logghiamo per diagnostica
+                videoId = v.id || v.video_id || '';
+                if (videoId) TitanLogger.log(`[YouTube] WARN: ID non standard per "${v.title?.text}": "${videoId}"`);
+            }
             if (!videoId) {
                 TitanLogger.log(`[YouTube] Skipping item with no video ID (type: ${v.type || 'unknown'})`);
                 continue;

@@ -253,6 +253,7 @@ export class BotEngine {
 
             let newCount = 0;
             let skipCount = 0;
+            let alreadyProcessedCount = 0;
 
             for (const item of items) {
                 if (!this.isRunning) break;
@@ -264,6 +265,7 @@ export class BotEngine {
                 }
 
                 if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
+                    alreadyProcessedCount++;
                     continue;
                 }
 
@@ -294,6 +296,7 @@ export class BotEngine {
             if (newCount === 0) {
                 let msg = `No updates for ${feed.name}`;
                 if (skipCount > 0) msg += ` (${skipCount} skipped due to cutoff date)`;
+                if (alreadyProcessedCount > 0) msg += ` (${alreadyProcessedCount} already processed)`;
                 TitanLogger.log(`  ℹ️ ${tag} ${msg}`);
             }
 
