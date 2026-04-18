@@ -2,8 +2,10 @@
 
 **Versione corrente:** v1.10.2  
 **Ultimo aggiornamento:** 18 Aprile 2026  
-**Repository:** https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition  
+**Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
+
+> **Nota (18 Aprile 2026):** Repository trasferita da `Pitz72` all'organizzazione `Ecosystem-Runtime`. GitHub mantiene redirect automatico dall'URL precedente.
 
 ---
 
