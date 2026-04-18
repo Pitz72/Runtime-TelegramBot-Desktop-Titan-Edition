@@ -81,7 +81,15 @@ L'idea di modalità server/headless è stata separata in [`docs/PROGETTO-SERVER.
 - Funzionalità: check automatico all'avvio, download in background, verifica firma, banner "Riavvia per installare"
 - Dettagli completi: [`docs/changelogs/CHANGELOG_v1.10.3.md`](changelogs/CHANGELOG_v1.10.3.md)
 
-**Prossimo step verso v2.0.0:** creare la repo bridge `runtime-telegrambot-releases` su Ecosystem-Runtime e configurare GitHub Actions per il publish automatico dei Release asset.
+**Repo bridge e Actions:** già configurati e operativi.
+
+---
+
+## 🟠 Issue aperta — build.yml: release bloccata da macOS
+
+Il job `release` in `.github/workflows/build.yml` dichiara `needs: [build-windows, build-linux, build-mac]`. Finché macOS è in sospeso (nessuna firma), questo blocca la pubblicazione anche di Windows e Linux.
+
+**Fix da fare prima del primo release ufficiale:** cambiare il `needs` del job `release` in `needs: [build-windows, build-linux]` e tenere `build-mac` come job standalone opzionale (non bloccante). Quando macOS sarà pronto e firmato, si reintegra nella dipendenza.
 
 ---
 
