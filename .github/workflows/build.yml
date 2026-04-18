@@ -11,32 +11,8 @@ on:
         options: ['true', 'false']
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - name: Cache Electron binary
-        uses: actions/cache@v4
-        with:
-          path: ~/AppData/Local/electron/Cache
-          key: electron-windows-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
-        run: npm ci
-      - name: Build
-        run: npm run build
-      - name: Upload Windows artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-artifacts
-          path: |
-            Builds/*.exe
-            Builds/*.exe.blockmap
-            Builds/latest.yml
-          retention-days: 30
+  # Windows: build locale, non fa parte del CI per ora
+  # Mac: in sospeso — in attesa di firma dal collega
 
   build-linux:
     runs-on: ubuntu-latest
@@ -69,42 +45,8 @@ jobs:
             Builds/latest-linux.yml
           retention-days: 30
 
-  # macOS in sospeso — build standalone non bloccante, non inclusa nel release
-  build-mac:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - name: Cache Electron binary
-        uses: actions/cache@v4
-        with:
-          path: ~/Library/Caches/electron
-          key: electron-mac-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
-        run: npm ci
-      - name: Build (unsigned)
-        run: npm run build
-        env:
-          CSC_LINK: ${{ secrets.MAC_CERT }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-artifacts
-          path: |
-            Builds/*.dmg
-            Builds/latest-mac.yml
-          retention-days: 30
-
-  # Release: dipende solo da Windows + Linux. macOS reintegrato quando firmato.
   release:
-    needs: [build-windows, build-linux]
+    needs: [build-linux]
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.publish_release == 'true' }}
     steps:
@@ -117,7 +59,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: '{windows-artifacts,linux-artifacts}'
+          pattern: 'linux-artifacts'
           merge-multiple: false
 
       - name: Publish release to bridge repo
@@ -134,15 +76,12 @@ jobs:
 
             | Platform | File |
             |----------|------|
-            | **Windows** | `Runtime Telegram Bot Titan Edition Setup *.exe` |
             | **Linux (AppImage)** | `*.AppImage` |
             | **Linux (deb)** | `*.deb` |
 
+            > Windows and macOS builds coming soon.
             > The app updates automatically — existing users will be notified in-app.
           files: |
-            windows-artifacts/*.exe
-            windows-artifacts/*.blockmap
-            windows-artifacts/latest.yml
             linux-artifacts/*.AppImage
             linux-artifacts/*.deb
             linux-artifacts/latest-linux.yml
