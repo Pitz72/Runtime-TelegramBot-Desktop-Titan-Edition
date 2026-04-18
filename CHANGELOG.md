@@ -2,7 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.10.3 (Corrente)](docs/changelogs/CHANGELOG_v1.10.3.md) — #11 Auto-Updater nativo: `electron-updater` con bridge repo pubblico su `Ecosystem-Runtime`, download in background, banner install-ready, 8 lingue.
+- [v1.10.4 (Corrente)](docs/changelogs/CHANGELOG_v1.10.4.md) — Fix YouTube ID non deterministico via search-fallback (regressione intermittente post-500); CI cleanup: rimosso build-release.yml obsoleto.
+- [v1.10.3 (Archivio)](docs/changelogs/CHANGELOG_v1.10.3.md) — #11 Auto-Updater nativo: `electron-updater` con bridge repo pubblico su `Ecosystem-Runtime`, download in background, banner install-ready, 8 lingue.
 - [v1.10.2 (Archivio)](docs/changelogs/CHANGELOG_v1.10.2.md) — Compatibilità cross-platform macOS + Linux: crypto.ts wrapper (safeStorage + AES-256-GCM fallback), config build mac/linux, GitHub Actions CI/CD build automatica per tutti e tre i SO.
 - [v1.10.1 (Archivio)](docs/changelogs/CHANGELOG_v1.10.1.md) — Performance Mode UI: toggle per disabilitare scanline, backdrop-blur, glow e animazioni GPU-heavy. Persistente in `titan-settings.json`. 8 lingue.
 - [v1.10.0 (Archivio)](docs/changelogs/CHANGELOG_v1.10.0.md) — Fix contrasto e colori semantici: token success verde (#4ade80), DANGER ZONE rosso pieno, label contrasto, BotSettingsModal max-w-6xl.
@@ -18,9 +19,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v1.10.3
+## Versione Attuale: v1.10.4
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.3.md](docs/changelogs/CHANGELOG_v1.10.3.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.4.md](docs/changelogs/CHANGELOG_v1.10.4.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 
