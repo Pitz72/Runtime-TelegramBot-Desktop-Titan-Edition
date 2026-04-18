@@ -1,12 +1,18 @@
 # Progetto Server — Runtime TelegramBot Headless Mode
 
-**Stato:** Idea documentata — non pianificata per v2.0.0  
+**Stato:** ⛔ RIMANDATO A TEMPO INDETERMINATO — da rivalutare quando le strategie saranno definite  
 **Origine:** `docs/analisi-tecnica.md` — sezione "Ad alto impatto operativo"  
 **Aggiornamento:** 18 Aprile 2026
 
 ---
 
-## Idea
+## Decisione Ufficiale (18 Aprile 2026)
+
+Tutto il lavoro relativo alla modalità server è **rimandato a tempo indeterminato**. Prima di qualsiasi sviluppo in questa direzione sarà necessario definire le strategie reali: pubblico target, modello di distribuzione, architettura (prodotto separato vs monorepo), e se il desktop porting (Linux/macOS) è prerequisito. Nessuna data né versione assegnata.
+
+---
+
+## Idea originale
 
 Una modalità di esecuzione headless (senza GUI Electron) che permetta di far girare il bot su un **VPS Linux** o qualsiasi server senza display. Il processo sarebbe controllato tramite una **mini Web UI** o **REST API** accessibile via browser locale, in continuità con la `web_control/` del bot Python originale da cui Runtime TelegramBot discende.
 

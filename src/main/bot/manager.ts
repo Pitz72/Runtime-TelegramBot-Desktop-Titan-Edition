@@ -2,7 +2,8 @@ import { getDB } from '../database/schema';
 const db = () => getDB(); // lazy accessor — fix #16
 import { BotConfig, FeedConfig } from '../../shared/types';
 import { safeStorage } from 'electron';
-import crypto from 'crypto';
+import nodeCrypto from 'node:crypto';
+import { encryptToken, decryptToken } from '../crypto';
 import { validateFeedUrl } from './parser';
 
 // --- RTB Import Validation ---
@@ -109,22 +110,13 @@ export class BotManager {
     static getBots(): BotConfig[] {
         const bots = db().prepare('SELECT * FROM bots ORDER BY created_at DESC').all() as any[];
         return bots.map(bot => {
-            let token = bot.token;
-            if (safeStorage.isEncryptionAvailable()) {
-                try {
-                    const buffer = Buffer.from(token, 'base64');
-                    token = safeStorage.decryptString(buffer);
-                } catch {
-                    // Se fallisce, il token è probabilmente in chiaro (vecchia versione).
-                    // Lo migriamo crittografandolo e aggiornando il DB in background.
-                    const encrypted = safeStorage.encryptString(token).toString('base64');
-                    db().prepare('UPDATE bots SET token = ? WHERE id = ?').run(encrypted, bot.id);
-                }
-            }
+            const decrypted = decryptToken(bot.token);
+            // Migrazione lazy: se il token era in formato legacy (nessun prefisso),
+            // lo re-cifriamo nel formato corrente al prossimo write.
             // Normalizza i booleani SQLite (0/1) in boolean TypeScript — fix #18
             return {
                 ...bot,
-                token,
+                token: decrypted,
                 is_active: (bot.is_active as number) === 1,
                 notifications_enabled: (bot.notifications_enabled as number) === 1,
             } as BotConfig;
@@ -137,14 +129,14 @@ export class BotManager {
         const notif = notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : 1;
         const sFrom = sendFrom || '00:00';
         const sUntil = sendUntil || '23:59';
-        const secureToken = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(token).toString('base64') : token;
+        const secureToken = encryptToken(token);
         const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         const info = stmt.run(name, secureToken, channelId, date, interval, notif, sFrom, sUntil, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null);
         return info.lastInsertRowid;
     }
 
     static updateBot(id: number, name: string, token: string, channelId: string, isActive: boolean, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string) {
-        const secureToken = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(token).toString('base64') : token;
+        const secureToken = encryptToken(token);
         const stmt = db().prepare(
             'UPDATE bots SET name = ?, token = ?, channel_id = ?, is_active = ?, start_date = COALESCE(?, start_date), check_interval = COALESCE(?, check_interval), notifications_enabled = COALESCE(?, notifications_enabled), send_from = COALESCE(?, send_from), send_until = COALESCE(?, send_until), template_podcast = ?, template_news = ?, template_youtube = ?, template_startup = ? WHERE id = ?'
         );
@@ -200,7 +192,7 @@ export class BotManager {
 
         // Check 2: match per titolo normalizzato nello stesso feed (anti-spam URL change)
         if (feedId !== undefined && title && title.trim()) {
-            const titleHash = crypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex');
+            const titleHash = nodeCrypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex');
             const byTitle = db().prepare(
                 'SELECT id FROM history WHERE bot_id = ? AND feed_id = ? AND title_hash = ?'
             ).get(botId, feedId, titleHash);
@@ -212,7 +204,7 @@ export class BotManager {
 
     static markProcessed(botId: number, feedId: number, itemId: string, title: string) {
         const titleHash = title && title.trim()
-            ? crypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex')
+            ? nodeCrypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex')
             : null;
         const stmt = db().prepare(
             'INSERT OR IGNORE INTO history (id, bot_id, feed_id, title, title_hash) VALUES (?, ?, ?, ?, ?)'
@@ -366,15 +358,7 @@ export class BotManager {
             }
 
             // Decripta il token per l'esportazione
-            let plainToken = botRecord.token;
-            if (safeStorage.isEncryptionAvailable() && plainToken) {
-                try {
-                    plainToken = safeStorage.decryptString(Buffer.from(plainToken, 'base64'));
-                } catch (e) {
-                    console.error('Errore decrittografia token bot singolo, esporto vuoto/invalido', e);
-                    plainToken = '';
-                }
-            }
+            const plainToken = decryptToken(botRecord.token);
 
             // Recupera fields
             const feeds = db().prepare('SELECT * FROM feeds WHERE bot_id = ?').all(botId) as any[];

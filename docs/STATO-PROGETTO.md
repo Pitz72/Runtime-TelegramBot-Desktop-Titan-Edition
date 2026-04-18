@@ -1,6 +1,6 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.10.1  
+**Versione corrente:** v1.10.2  
 **Ultimo aggiornamento:** 18 Aprile 2026  
 **Repository:** https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
@@ -58,7 +58,8 @@
 - ✅ **F9** Digest Mode — `digest_interval INTEGER` e `digest_last_sent DATETIME` su feeds. Tabella `digest_queue` (UNIQUE bot+feed+item). In `processFeed`: se feed ha digest_interval, item va in digest_queue + `markProcessed` invece di publish_queue. `processDigests()` in engine: invia digest scaduti (header + lista numerata, max 20 item), aggiorna `digest_last_sent`, svuota coda. Schema v10, migration e safety check. UI: select preset (1h/6h/12h/24h/7gg) + badge viola. Export/import .rtb. 8 lingue. *(v1.9.0)*
 - ✅ **UI v1.9.1** Obsidian Pulse V2 overhaul — Phosphor Icons (zero Lucide), Space Grotesk + Fira Code, palette semantica MD3, glass-panel/ghost-border/ignition-btn utilities, micro-copy decorativo, ambient halos. *(v1.9.1)*
 - ✅ **UI v1.10.0** Fix contrasto e colori semantici — token `success` verde (#4ade80), stato ONLINE/Attivo/Attivato in verde, DANGER ZONE in rosso pieno, label contrasto aumentato, BotSettingsModal allargato a max-w-6xl. *(v1.10.0)*
-- ✅ **Performance Mode UI** — Toggle "Performance Mode" nelle Impostazioni di Sistema. Disabilita scanline overlay, backdrop-blur (sostituito con sfondo solido), glow/box-shadow/text-shadow luminosi, animazioni ignition-pulse e ignition-ring. Persistente in `titan-settings.json` in userData. Localizzato in 8 lingue. Effettivo immediatamente senza riavvio. *(v1.10.1)*
+- ✅ **Performance Mode UI** — Toggle "Performance Mode" nelle Impostazioni di Sistema. *(v1.10.1)*
+- ✅ **Compatibilità cross-platform macOS + Linux** — `src/main/crypto.ts`: wrapper encryption con safeStorage (primario) + AES-256-GCM machine-key (fallback per Linux senza libsecret). Retrocompatibile con tutti i formati legacy. Aggiunta config build `mac` + `win` in `package.json`. GitHub Actions CI/CD (`.github/workflows/build.yml`): build automatica per Windows, Linux (AppImage+deb), macOS (dmg) su runner nativi, con GitHub Release automatica su tag `v*`. Disabilita scanline overlay, backdrop-blur (sostituito con sfondo solido), glow/box-shadow/text-shadow luminosi, animazioni ignition-pulse e ignition-ring. Persistente in `titan-settings.json` in userData. Localizzato in 8 lingue. Effettivo immediatamente senza riavvio. *(v1.10.1)*
 
 ---
 
@@ -106,6 +107,7 @@ Viene implementato solo dopo che tutti i punti precedenti (F4-F9 + Performance M
 [FATTO] Feature F9 — Digest Mode (accumula item, invia un messaggio)        ✅
 ──────────────────────────────────────────────────────────────────────────
 [FATTO] Performance Mode UI (toggle Impostazioni Sistema, 8 lingue)         ✅  ← v1.10.1
+[FATTO] Cross-platform macOS+Linux (crypto.ts + GitHub Actions CI/CD)       ✅  ← v1.10.2
 [CANC]  Feature F10 — mai definita, cancellata                              ❌
 ──────────────────────────────────────────────────────────────────────────
 [LAST]  #11 autoUpdater nativo (electron-updater + GitHub Releases)  →  v2.0.0
