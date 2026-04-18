@@ -62,9 +62,10 @@
 
 ---
 
-## 🔵 Aperto — Feature F10
+## ❌ Cancellato — Feature F10
 
-### F10 — Da definire (eventuale feature residua)
+F10 non è mai stata definita concretamente — era un placeholder. **Cancellata.**  
+L'idea di modalità server/headless è stata separata in [`docs/PROGETTO-SERVER.md`](PROGETTO-SERVER.md) come progetto post-v2.0.0.
 
 ---
 
@@ -85,6 +86,10 @@ Viene implementato solo dopo che tutti i punti precedenti (F4-F9 + Performance M
 
 ## Ordine di esecuzione verso v2.0.0
 
+**Documenti di progetto post-v2.0.0:**
+- [`docs/PROGETTO-PORTING.md`](PROGETTO-PORTING.md) — build Linux + macOS via GitHub Actions
+- [`docs/PROGETTO-SERVER.md`](PROGETTO-SERVER.md) — modalità headless/VPS (post-porting)
+
 ```
 [FATTO] Blocco A — Fix P2 (medie):      #13 #14 #15 #16 #17 #18 #19 #20  ✅
 [FATTO] Blocco B — Fix P3 (lievi):      #21 #22 #23 #24 #25 #26          ✅
@@ -101,6 +106,7 @@ Viene implementato solo dopo che tutti i punti precedenti (F4-F9 + Performance M
 [FATTO] Feature F9 — Digest Mode (accumula item, invia un messaggio)        ✅
 ──────────────────────────────────────────────────────────────────────────
 [FATTO] Performance Mode UI (toggle Impostazioni Sistema, 8 lingue)         ✅  ← v1.10.1
+[CANC]  Feature F10 — mai definita, cancellata                              ❌
 ──────────────────────────────────────────────────────────────────────────
 [LAST]  #11 autoUpdater nativo (electron-updater + GitHub Releases)  →  v2.0.0
 ```
