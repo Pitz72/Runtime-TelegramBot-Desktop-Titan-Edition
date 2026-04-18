@@ -1,7 +1,14 @@
-name: Build
+name: Build & Release
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: 'Publish release to bridge repo after build'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
 
 jobs:
   build-windows:
@@ -16,11 +23,14 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Upload installer
+      - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
-          path: Builds/*.exe
+          name: windows-artifacts
+          path: |
+            Builds/*.exe
+            Builds/*.exe.blockmap
+            Builds/latest.yml
           retention-days: 30
 
   build-linux:
@@ -39,13 +49,14 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Upload packages
+      - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-packages
+          name: linux-artifacts
           path: |
             Builds/*.AppImage
             Builds/*.deb
+            Builds/latest-linux.yml
           retention-days: 30
 
   build-mac:
@@ -61,34 +72,60 @@ jobs:
       - name: Build (unsigned)
         run: npm run build
         env:
-          # Firma opzionale — se i secret non sono configurati la build procede non firmata
           CSC_LINK: ${{ secrets.MAC_CERT }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      - name: Upload DMG
+      - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mac-dmg
-          path: Builds/*.dmg
+          name: mac-artifacts
+          path: |
+            Builds/*.dmg
+            Builds/latest-mac.yml
           retention-days: 30
 
   release:
     needs: [build-windows, build-linux, build-mac]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    permissions:
-      contents: write
+    if: ${{ github.event.inputs.publish_release == 'true' }}
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version from package.json
+        id: version
+        run: echo "tag=v$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-      - name: Create Release
+
+      - name: Publish release to bridge repo
         uses: softprops/action-gh-release@v2
         with:
+          repository: Ecosystem-Runtime/runtime-telegrambot-releases
+          token: ${{ secrets.RELEASE_TOKEN }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "Titan Edition ${{ steps.version.outputs.tag }}"
+          body: |
+            ## Runtime TelegramBot — Titan Edition ${{ steps.version.outputs.tag }}
+
+            Download the installer for your platform:
+
+            | Platform | File |
+            |----------|------|
+            | **Windows** | `Runtime Telegram Bot Titan Edition Setup *.exe` |
+            | **Linux (AppImage)** | `*.AppImage` |
+            | **Linux (deb)** | `*.deb` |
+            | **macOS** | `*.dmg` |
+
+            > The app updates automatically — existing users will be notified in-app.
           files: |
-            windows-installer/*.exe
-            linux-packages/*.AppImage
-            linux-packages/*.deb
-            mac-dmg/*.dmg
-          generate_release_notes: true
+            windows-artifacts/*.exe
+            windows-artifacts/*.blockmap
+            windows-artifacts/latest.yml
+            linux-artifacts/*.AppImage
+            linux-artifacts/*.deb
+            linux-artifacts/latest-linux.yml
+            mac-artifacts/*.dmg
+            mac-artifacts/latest-mac.yml
