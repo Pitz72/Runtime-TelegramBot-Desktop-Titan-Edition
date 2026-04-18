@@ -237,6 +237,9 @@
     },
     "updater": {
         "title": "Neue Version verfügbar",
-        "msg": "Titan Edition v{{version}} ist verfügbar! Besuchen Sie das Portal, um das Update herunterzuladen."
+        "msg": "Titan Edition v{{version}} ist verfügbar! Besuchen Sie das Portal, um das Update herunterzuladen.",
+        "downloading": "Update v{{version}} wird heruntergeladen...",
+        "ready": "v{{version}} bereit — Neustart zum Installieren",
+        "install": "Neu starten & installieren"
     }
 }

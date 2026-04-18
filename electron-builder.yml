@@ -43,3 +43,10 @@ linux:
     - deb
   category: Utility
   artifactName: ${productName}-${version}.${ext}
+
+# === Auto-Update (bridge repo pubblico su Ecosystem-Runtime) ===
+publish:
+  provider: github
+  owner: Ecosystem-Runtime
+  repo: runtime-telegrambot-releases
+  private: false

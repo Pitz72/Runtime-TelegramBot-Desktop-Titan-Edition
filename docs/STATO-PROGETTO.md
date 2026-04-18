@@ -1,6 +1,6 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.10.2  
+**Versione corrente:** v1.10.3  
 **Ultimo aggiornamento:** 18 Aprile 2026  
 **Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
@@ -72,18 +72,16 @@ L'idea di modalità server/headless è stata separata in [`docs/PROGETTO-SERVER.
 
 ---
 
-## 🟠 Aperto — #11 autoUpdater nativo (ULTIMO step prima di v2.0.0)
+## ✅ Completato — #11 autoUpdater nativo (v1.10.3)
 
-**Questo è l'ultimo intervento prima del rilascio ufficiale della v2.0.0.**  
-Viene implementato solo dopo che tutti i punti precedenti (F4-F9 + Performance Mode) sono completati e verificati.
+**Implementato in v1.10.3.** L'app usa ora `electron-updater` per aggiornamenti OTA firmati via GitHub Releases.
 
-**Problema attuale:** l'auto-updater è un semplice fetch di un JSON con comparazione di stringhe di versione. Non c'è download automatico, nessuna verifica firma, nessuna progress bar. L'utente deve scaricare manualmente l'installer.
+- Pacchetto: `electron-updater ^6.x`
+- Provider: **GitHub Releases** su bridge repo pubblico `Ecosystem-Runtime/runtime-telegrambot-releases`
+- Funzionalità: check automatico all'avvio, download in background, verifica firma, banner "Riavvia per installare"
+- Dettagli completi: [`docs/changelogs/CHANGELOG_v1.10.3.md`](changelogs/CHANGELOG_v1.10.3.md)
 
-**Soluzione pianificata:**
-- Pacchetto: `electron-updater` (incluso in `electron-builder`)
-- Provider: **GitHub Releases** — zero infrastruttura aggiuntiva, coincide con la repo pubblica
-- Funzionalità: download automatico in background, verifica firma, progress bar, notifica "Riavvia per aggiornare"
-- Il file `electron-builder.yml` va configurato con la sezione `publish`
+**Prossimo step verso v2.0.0:** creare la repo bridge `runtime-telegrambot-releases` su Ecosystem-Runtime e configurare GitHub Actions per il publish automatico dei Release asset.
 
 ---
 
@@ -112,5 +110,7 @@ Viene implementato solo dopo che tutti i punti precedenti (F4-F9 + Performance M
 [FATTO] Cross-platform macOS+Linux (crypto.ts + GitHub Actions CI/CD)       ✅  ← v1.10.2
 [CANC]  Feature F10 — mai definita, cancellata                              ❌
 ──────────────────────────────────────────────────────────────────────────
-[LAST]  #11 autoUpdater nativo (electron-updater + GitHub Releases)  →  v2.0.0
+[FATTO] #11 autoUpdater nativo (electron-updater + bridge repo)             ✅  ← v1.10.3
+──────────────────────────────────────────────────────────────────────────
+[NEXT]  Repo bridge + GitHub Actions publish → v2.0.0
 ```

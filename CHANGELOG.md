@@ -2,7 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.10.2 (Corrente)](docs/changelogs/CHANGELOG_v1.10.2.md) — Compatibilità cross-platform macOS + Linux: crypto.ts wrapper (safeStorage + AES-256-GCM fallback), config build mac/linux, GitHub Actions CI/CD build automatica per tutti e tre i SO.
+- [v1.10.3 (Corrente)](docs/changelogs/CHANGELOG_v1.10.3.md) — #11 Auto-Updater nativo: `electron-updater` con bridge repo pubblico su `Ecosystem-Runtime`, download in background, banner install-ready, 8 lingue.
+- [v1.10.2 (Archivio)](docs/changelogs/CHANGELOG_v1.10.2.md) — Compatibilità cross-platform macOS + Linux: crypto.ts wrapper (safeStorage + AES-256-GCM fallback), config build mac/linux, GitHub Actions CI/CD build automatica per tutti e tre i SO.
 - [v1.10.1 (Archivio)](docs/changelogs/CHANGELOG_v1.10.1.md) — Performance Mode UI: toggle per disabilitare scanline, backdrop-blur, glow e animazioni GPU-heavy. Persistente in `titan-settings.json`. 8 lingue.
 - [v1.10.0 (Archivio)](docs/changelogs/CHANGELOG_v1.10.0.md) — Fix contrasto e colori semantici: token success verde (#4ade80), DANGER ZONE rosso pieno, label contrasto, BotSettingsModal max-w-6xl.
 - [v1.9.x (Archivio)](docs/changelogs/CHANGELOG_v1.9.0.md) — v1.9.0: F6 Stats Analytics + F7 Preview Template + F8 OPML Import + F9 Digest Mode (schema v10). v1.9.1: Obsidian Pulse V2 overhaul (Phosphor Icons, Space Grotesk, palette MD3).
@@ -17,10 +18,10 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v1.10.2
+## Versione Attuale: v1.10.3
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.2.md](docs/changelogs/CHANGELOG_v1.10.2.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.3.md](docs/changelogs/CHANGELOG_v1.10.3.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 
-Consulta [docs/STATO-PROGETTO.md](docs/STATO-PROGETTO.md) per il quadro completo: tutto il completato, le feature aperte F3-F10, la Performance Mode e #11 autoUpdater (ultimo step prima di v2.0.0).
+Consulta [docs/STATO-PROGETTO.md](docs/STATO-PROGETTO.md) per il quadro completo: tutto il completato, le feature F1-F9 + Performance Mode + #11 autoUpdater (completato in v1.10.3).

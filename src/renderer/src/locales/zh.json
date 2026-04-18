@@ -237,6 +237,9 @@
     },
     "updater": {
         "title": "有新版本可用",
-        "msg": "Titan Edition v{{version}} 已发布！请前往门户下载更新。"
+        "msg": "Titan Edition v{{version}} 已发布！请前往门户下载更新。",
+        "downloading": "正在下载更新 v{{version}}...",
+        "ready": "v{{version}} 准备就绪 — 重启以安装",
+        "install": "重启并安装"
     }
 }

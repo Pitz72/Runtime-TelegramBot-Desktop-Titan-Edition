@@ -67,7 +67,16 @@ const api = {
 
     // System
     getVersion: () => ipcRenderer.invoke('get-version'),
-    checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+    checkForUpdates: () => ipcRenderer.invoke('check-for-updates') as Promise<{ success: boolean; error?: string }>,
+    installUpdate: () => ipcRenderer.invoke('install-update'),
+    onUpdateAvailable: (callback: (info: { version: string }) => void) => {
+        ipcRenderer.removeAllListeners('update-available');
+        ipcRenderer.on('update-available', (_, info) => callback(info));
+    },
+    onUpdateDownloaded: (callback: (info: { version: string }) => void) => {
+        ipcRenderer.removeAllListeners('update-downloaded');
+        ipcRenderer.on('update-downloaded', (_, info) => callback(info));
+    },
     exportLogs: (logs: string[]) => ipcRenderer.invoke('export-logs', logs),
     exportDatabase: () => ipcRenderer.invoke('export-database'),
     importDatabase: () => ipcRenderer.invoke('import-database'),

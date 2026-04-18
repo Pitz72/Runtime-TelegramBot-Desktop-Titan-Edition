@@ -1,4 +1,5 @@
 import { ipcMain, app, dialog } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import { getBotEngine } from './bot/engine';
 import { getDB, initDB } from './database/schema';
 import { BotManager } from './bot/manager';
@@ -442,18 +443,14 @@ export function setupIpc() {
 
     ipcMain.handle('check-for-updates', async () => {
         try {
-            const response = await fetch('https://ecosystem.runtimeradio.com/updates/titan-version.json');
-            if (!response.ok) return { hasUpdate: false };
-            const data = await response.json();
-            const currentVersion = app.getVersion();
-            const isNewer = data.version.localeCompare(currentVersion, undefined, { numeric: true, sensitivity: 'base' }) > 0;
-            if (isNewer) {
-                return { hasUpdate: true, latestVersion: data.version, downloadUrl: data.downloadUrl };
-            }
-            return { hasUpdate: false };
+            await autoUpdater.checkForUpdates();
+            return { success: true };
         } catch (error) {
-            // Fail silently se il server è irraggiungibile o il file non esiste
-            return { hasUpdate: false, error: String(error) };
+            return { success: false, error: String(error) };
         }
+    });
+
+    ipcMain.handle('install-update', () => {
+        autoUpdater.quitAndInstall(false, true);
     });
 }

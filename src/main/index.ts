@@ -1,7 +1,10 @@
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
 import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { setupIpc } from './ipc' // Import IPC setup
+import { autoUpdater } from 'electron-updater'
+import { setupIpc } from './ipc'
+
+let mainWindow: BrowserWindow | null = null
 
 // --- GESTORI DI ERRORI GLOBALI FATALI ---
 // Cattura eccezioni non gestite (es. errori di sintassi, chiamate a metodi inesistenti)
@@ -45,7 +48,7 @@ app.disableHardwareAcceleration();
 
 function createWindow(): void {
     // Create the browser window.
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 900,
         height: 670,
         show: false,
@@ -63,8 +66,8 @@ function createWindow(): void {
         if (!isShown) {
             isShown = true;
             if (showTimeout) clearTimeout(showTimeout);
-            mainWindow.maximize()
-            mainWindow.show()
+            mainWindow!.maximize()
+            mainWindow!.show()
         }
     })
 
@@ -117,6 +120,19 @@ app.whenReady().then(() => {
     setupIpc()
 
     createWindow()
+
+    if (!is.dev) {
+        autoUpdater.autoDownload = true
+        autoUpdater.autoInstallOnAppQuit = false
+
+        autoUpdater.on('update-available', (info) => {
+            mainWindow?.webContents.send('update-available', { version: info.version })
+        })
+        autoUpdater.on('update-downloaded', (info) => {
+            mainWindow?.webContents.send('update-downloaded', { version: info.version })
+        })
+        autoUpdater.checkForUpdates().catch(() => {})
+    }
 
     app.on('activate', () => {
         // On macOS it's common to re-create a window in the app when the

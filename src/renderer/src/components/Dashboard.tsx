@@ -27,15 +27,20 @@ export function Dashboard() {
     const [stats, setStats] = useState<{ total: number; today: number; week: number } | null>(null);
     const [filterBySelectedBot, setFilterBySelectedBot] = useState(false);
     const [showStatsModal, setShowStatsModal] = useState(false);
+    const [updateReady, setUpdateReady] = useState<{ version: string } | null>(null);
 
     useEffect(() => {
         window.api.getVersion().then(setVersion);
 
-        window.api.checkForUpdates().then((res) => {
-            if (res.hasUpdate && res.latestVersion) {
-                const msg = t('updater.msg').replace('{{version}}', res.latestVersion);
-                toast(msg, 'info', t('updater.title'));
-            }
+        window.api.checkForUpdates().catch(() => {});
+
+        window.api.onUpdateAvailable((info) => {
+            const msg = t('updater.downloading').replace('{{version}}', info.version);
+            toast(msg, 'info', t('updater.title'));
+        });
+
+        window.api.onUpdateDownloaded((info) => {
+            setUpdateReady(info);
         });
 
         window.api.onLogsBatch((newLogs: LogEntry[]) => {
@@ -125,7 +130,20 @@ export function Dashboard() {
     }, []);
 
     return (
-        <div className="h-screen bg-background text-on-surface flex font-body overflow-hidden" style={{ userSelect: 'none' }}>
+        <div className="h-screen bg-background text-on-surface flex font-body overflow-hidden relative" style={{ userSelect: 'none' }}>
+
+            {/* Update-ready banner */}
+            {updateReady && (
+                <div className="absolute bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-3 px-5 py-2.5 bg-primary/90 text-on-primary text-xs backdrop-blur-sm">
+                    <span>{t('updater.ready').replace('{{version}}', updateReady.version)}</span>
+                    <button
+                        onClick={() => window.api.installUpdate()}
+                        className="px-3 py-1 rounded bg-on-primary/20 hover:bg-on-primary/30 font-semibold transition-colors"
+                    >
+                        {t('updater.install')}
+                    </button>
+                </div>
+            )}
 
             {/* LEFT HALF — Bot Selector + Feed Manager */}
             <div className="w-1/2 flex h-full">
