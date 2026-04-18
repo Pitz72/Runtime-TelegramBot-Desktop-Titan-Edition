@@ -19,6 +19,11 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+      - name: Cache Electron binary
+        uses: actions/cache@v4
+        with:
+          path: ~/AppData/Local/electron/Cache
+          key: electron-windows-${{ hashFiles('package-lock.json') }}
       - name: Install dependencies
         run: npm ci
       - name: Build
@@ -41,6 +46,11 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+      - name: Cache Electron binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/electron
+          key: electron-linux-${{ hashFiles('package-lock.json') }}
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -59,6 +69,7 @@ jobs:
             Builds/latest-linux.yml
           retention-days: 30
 
+  # macOS in sospeso — build standalone non bloccante, non inclusa nel release
   build-mac:
     runs-on: macos-latest
     steps:
@@ -67,6 +78,11 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+      - name: Cache Electron binary
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/electron
+          key: electron-mac-${{ hashFiles('package-lock.json') }}
       - name: Install dependencies
         run: npm ci
       - name: Build (unsigned)
@@ -86,8 +102,9 @@ jobs:
             Builds/latest-mac.yml
           retention-days: 30
 
+  # Release: dipende solo da Windows + Linux. macOS reintegrato quando firmato.
   release:
-    needs: [build-windows, build-linux, build-mac]
+    needs: [build-windows, build-linux]
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.publish_release == 'true' }}
     steps:
@@ -97,8 +114,11 @@ jobs:
         id: version
         run: echo "tag=v$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
+        with:
+          pattern: '{windows-artifacts,linux-artifacts}'
+          merge-multiple: false
 
       - name: Publish release to bridge repo
         uses: softprops/action-gh-release@v2
@@ -117,7 +137,6 @@ jobs:
             | **Windows** | `Runtime Telegram Bot Titan Edition Setup *.exe` |
             | **Linux (AppImage)** | `*.AppImage` |
             | **Linux (deb)** | `*.deb` |
-            | **macOS** | `*.dmg` |
 
             > The app updates automatically — existing users will be notified in-app.
           files: |
@@ -127,5 +146,3 @@ jobs:
             linux-artifacts/*.AppImage
             linux-artifacts/*.deb
             linux-artifacts/latest-linux.yml
-            mac-artifacts/*.dmg
-            mac-artifacts/latest-mac.yml
