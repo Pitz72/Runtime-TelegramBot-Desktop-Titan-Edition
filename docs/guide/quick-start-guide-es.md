@@ -1,51 +1,112 @@
-# ⚡ Titan Desktop: Guía de Inicio Rápido
+# Runtime TelegramBot — Guía de Inicio Rápido
 
-Bienvenido a **Runtime TelegramBot Titan Edition**. Esta guía rápida te permitirá configurar tu primer bot y comenzar a publicar contenido en tu canal de Telegram en menos de 3 minutos.
-
----
-
-## 1. Preparación: Obtén el Token de Telegram
-Antes de iniciar Titan, debes crear un "Bot" en Telegram:
-1. Abre Telegram y busca al usuario **@BotFather** (tiene la marca de verificación azul).
-2. Envía el comando `/newbot` y sigue las instrucciones para darle un nombre a tu bot.
-3. Al final, @BotFather te devolverá un **Token API** (una cadena larga como `123456789:ABCdefGHIjklMNOpqr...`). **Cópialo y guárdalo en un lugar seguro.**
-4. Añade el bot recién creado a tu Canal de Telegram como **Administrador** (debe tener el permiso para "Enviar Mensajes").
-
-## 2. El Primer Inicio (Asistente de Configuración)
-Inicia Titan Desktop. Si es tu primera vez, aparecerá el asistente de 4 pasos:
-*   **Nombre del Bot:** Elige un nombre para reconocerlo (ej., *Canal de Noticias*).
-*   **Bot Token:** Pega el Token proporcionado por @BotFather.
-*   **Channel ID:** Introduce el nombre de tu canal (ej., `@micanal`). Si es un canal privado, introduce el ID numérico (ej., `-100123456789`).
-*   **Fecha de Inicio:** Elige una fecha. El bot **ignorará** todos los artículos y videos publicados antes de esta fecha, evitando inundar tu canal con contenido antiguo.
-
-## 3. Añadir Fuentes (Gestor de Feeds)
-Una vez dentro del Panel de Control:
-1. Asegúrate de que tu bot esté seleccionado en la columna de la izquierda.
-2. En el panel de **Fuentes de Feed**, haz clic en **"+ Añadir Fuente"**.
-3. Introduce el Nombre (ej., *Mi Podcast*) y selecciona el **Tipo** (Podcast, Noticias o YouTube).
-4. Pega la URL:
-   * Para Noticias y Podcasts: pega la URL del feed RSS.
-   * Para YouTube: Puedes pegar directamente la URL del canal o el handler (ej., `@RuntimeRadio`). *¡No se necesitan Claves API!*
-5. Usa el botón **Probar (⚡)** para verificar que el enlace sea válido, luego haz clic en **Guardar**.
-
-## 4. Personalizar Mensajes (Plantillas)
-¿Quieres que tus publicaciones tengan el formato perfecto?
-1. Haz clic en el icono de **Ajustes (⚙️)** en la columna de la izquierda.
-2. Ve a la pestaña de **Plantillas**.
-3. Usa el cómodo panel de botones en la parte superior para insertar variables automáticas como `{{title}}`, `{{link}}` o `{{summary}}`.
-4. Puedes usar etiquetas HTML básicas compatibles con Telegram, por ejemplo: `<b>Negrita</b>`, `<i>Cursiva</i>`, u ocultar un enlace largo detrás de un texto usando `<a href="{{link}}">Haz clic aquí</a>`.
-
-## 5. Encendido (Ignición)
-¿Has introducido el token y añadido los feeds? Ya estás listo.
-*   Haz clic en el gran botón de **Play (▶)** en el centro de la consola.
-*   El anillo comenzará a girar y el bot entrará en funcionamiento.
-*   En el panel de **System Logs** verás en tiempo real al bot leyendo tus fuentes y publicando nuevos contenidos en Telegram.
+Bienvenido a **Runtime TelegramBot** (Titan Edition). Esta guía te permite configurar tu primer bot y empezar a publicar contenido en tu canal de Telegram en pocos minutos.
 
 ---
 
-### 💡 Consejos Útiles y Solución de Problemas
-*   **Horarios de Silencio:** En los ajustes del bot puedes definir el horario de actividad. Si lo configuras de 08:00 a 22:00, las noticias nocturnas no se perderán, ¡sino que se pondrán en cola y se publicarán a las 08:00 de la mañana!
-*   **Errores de YouTube:** Si recibes errores "rojos" en los canales de YouTube, no entres en pánico. Google actualiza a menudo sus servidores. Apaga temporalmente el feed de YouTube desde el botón dedicado en la interfaz y espera nuestra actualización de software.
-*   **Cambio de PC:** ¿Necesitas mover el bot a otra computadora? ¡No copies los archivos! Usa la función **Exportar (.rtb)** en los ajustes. Esto generará un archivo seguro para importar en el nuevo PC, manteniendo tus contraseñas cifradas.
+## 1. Obtener el Token de Telegram
 
-*Para asistencia avanzada, consulta el Manual de Usuario Pro en formato PDF.*
+Antes de iniciar la aplicación, debes crear un bot en Telegram:
+
+1. Abre Telegram y busca **@BotFather** (tiene la marca azul de verificación).
+2. Envía el comando `/newbot` y sigue las instrucciones para asignar un nombre al bot.
+3. @BotFather te devolverá un **Token API** (ej. `123456789:ABCdefGHIjklMNOpqr...`). Cópialo.
+4. Agrega el bot a tu canal de Telegram como **Administrador** con el permiso de enviar mensajes.
+
+---
+
+## 2. Primer Inicio — Configuración del Bot
+
+En el primer inicio, haz clic en **"+ Nuevo Bot"** y completa los campos:
+
+- **Nombre** — un nombre para identificar el bot en la interfaz (ej. *Canal de Noticias*).
+- **Token** — el Token API proporcionado por @BotFather.
+- **Channel ID** — el nombre del canal (ej. `@micanal`) o el ID numérico para canales privados (ej. `-100123456789`).
+- **Fecha de Inicio** — el bot ignorará todos los contenidos publicados antes de esta fecha. Útil para evitar inundar el canal con artículos antiguos.
+
+---
+
+## 3. Agregar Feeds (Feed Manager)
+
+En el panel del bot, haz clic en **"+ Agregar Feed"**:
+
+1. Asigna un **Nombre** descriptivo al feed.
+2. Selecciona el **Tipo**: News, Podcast o YouTube.
+3. Pega la **URL**:
+   - News / Podcast: URL del feed RSS.
+   - YouTube: URL del canal o handle (ej. `@RuntimeRadio`). *No se requiere API Key.*
+4. Usa **Probar (⚡)** para verificar la validez del enlace, luego **Guardar**.
+
+### Opciones avanzadas de feed
+
+- **Filtro de Palabras Clave (F4)** — Filtra artículos por palabras clave a incluir o excluir. Se puede activar en la configuración del feed. Un badge ámbar indica el filtro activo.
+- **Intervalo Personalizado (F5)** — Establece un intervalo de obtención individual para el feed (de 5 minutos a 24 horas), independiente del intervalo global del bot.
+- **Digest Mode (F9)** — En lugar de publicar cada artículo individualmente, acumula contenido durante un intervalo configurable (1h, 6h, 12h, 24h, 7d) y lo envía en un único mensaje resumen. Un badge morado indica el modo activo.
+- **Importar OPML (F8)** — Importa varios feeds a la vez desde un archivo `.opml` estándar mediante el botón OPML en el Feed Manager.
+
+---
+
+## 4. Personalizar los Mensajes (Template)
+
+Ve a la configuración del bot → pestaña **Template**:
+
+- Usa los **Smart Chips** para insertar variables dinámicas: `{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`, etc.
+- Hay 4 plantillas separadas disponibles: Inicio, News, Podcast, YouTube.
+- El **Validador** señala errores en tiempo real (etiquetas no equilibradas, chips desconocidos, enlaces no seguros).
+- El botón **Vista Previa (F7)** muestra cómo aparecerá el mensaje con datos de ejemplo, sin salir del editor.
+
+Etiquetas HTML compatibles con Telegram: `<b>`, `<i>`, `<code>`, `<a href="...">`.
+
+---
+
+## 5. Inicio — Ignition
+
+Cuando el bot está configurado y se han agregado los feeds:
+
+- Haz clic en el botón **Play (▶)** en la consola.
+- El anillo de estado comenzará a girar y el bot entrará en funcionamiento.
+- En el panel **System Logs** verás en tiempo real la obtención de feeds y la publicación en Telegram.
+
+Para monitorear varios bots simultáneamente, usa el toggle **ALL BOTS / THIS BOT** en el log.
+
+---
+
+## 6. Estadísticas (F6)
+
+Haz clic en el icono **Analytics (📊)** en el panel para ver:
+
+- Contadores de artículos publicados: hoy / últimos 7 días / total.
+- Desglose por feed, ordenado por volumen de publicación.
+
+---
+
+## Configuración del Sistema
+
+Accesible desde el icono de engranaje en la esquina superior derecha:
+
+- **General** — intervalo de verificación global, horas de silencio, idioma.
+- **Backup** — exportación y restauración de la base de datos.
+- **Performance Mode** — deshabilita efectos que consumen GPU (scanlines, blur, glow, animaciones). Útil en equipos con hardware limitado. Efectivo inmediatamente sin reinicio.
+
+---
+
+## Portabilidad — Archivo .rtb
+
+Para mover un bot a otro equipo sin perder la configuración:
+
+1. En la configuración del bot → **Exportar (.rtb)**.
+2. Transfiere el archivo al nuevo PC.
+3. En el nuevo PC → **Importar (.rtb)** y vuelve a ingresar el token (los tokens son específicos de la máquina por seguridad).
+
+---
+
+## Solución de Problemas
+
+- **Errores de YouTube** — Google actualiza periódicamente sus servidores. Si aparecen errores rojos en los feeds de YouTube, deshabilita temporalmente el feed y espera una actualización de la app.
+- **Token no válido** — Verifica que el bot haya sido agregado al canal como administrador con el permiso de enviar mensajes.
+- **Linux sin libsecret** — La app funciona normalmente usando el fallback AES-256-GCM. Para el llavero nativo instala: `sudo apt-get install libsecret-1-0`.
+- **macOS — advertencia de Gatekeeper** — En el primer inicio: clic derecho en la app → Abrir → Abrir.
+
+---
+
+*Para la guía completa consulta el Manual de Usuario disponible en formato PDF.*

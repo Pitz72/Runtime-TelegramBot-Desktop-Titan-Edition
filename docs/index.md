@@ -1,91 +1,55 @@
-# 📚 Documentazione TITAN_DESKTOP
+# Documentazione — Runtime TelegramBot Titan Edition
 
-Benvenuto nel centro documentale di **Runtime TelegramBot Titan Edition**. Questo indice organizza in modo logico tutte le informazioni, guide e storici relativi al progetto, risultando ottimizzato sia per la consultazione umana che per l'analisi e il refactoring guidato da AI.
+Centro documentale del progetto. Indice completo di guide, changelog e documentazione tecnica.
 
----
-
-## 🏗️ Architettura & Setup
-
-La panoramica generale dell'architettura e delle scelte tecnologiche si trova principalmente nel README centrale. Le guide di compilazione cross-platform si trovano qui:
-
-- **[Panoramica Progetto](../README.md)** — Architettura, stack, funzionalità core, design system e path database.
-- **[Whitepaper Architetturale](whitepaper_titan_architecture.md)** — Analisi approfondita dell'architettura Titan, Producer-Consumer, OmniSync e sicurezza.
-- **[Compilazione Linux](build-linux.md)** — Istruzioni per pacchettizzare in `.AppImage` e `.deb`, incluse le fix per moduli nativi SQLite.
-- **[Compilazione macOS](build-mac.md)** — Istruzioni per la build di `.dmg` su sistemi Mac (senza Xcode completo).
+**Versione corrente:** v1.10.2 — [Vedi changelog](changelogs/CHANGELOG_v1.10.2.md)  
+**Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition
 
 ---
 
-## 📖 Manuali e Guide
+## Guide Utente
 
-Informazioni per l'utilizzo dell'applicazione da parte dell'utente finale.
-
-- **[Manuale d'Uso Avanzato](manuale.md)** — Guida completa all'installazione, configurazione bot, feed, YouTube scraping e OmniSync.
-- **[Quick Start Guide (IT)](guide/quick-start-guide-it.md)** — Guida rapida in italiano (consultare la cartella `guide/` per le altre 7 lingue supportate).
-
----
-
-## 🧹 Manutenzione e Archiviazione
-
-Norme e best practice per tenere in ordine la repository e ottimizzarne il peso fisico su disco.
-
-- **[Guida alla Pulizia Spazio](manutenzione-archivio.md)** — Regole ufficiali per la rimozione di cache, la pulizia dei folder di build (Electron/Vite) e l'archiviazione di progetti legacy.
+- **[Panoramica Progetto](../README.md)** — Funzionalità, stack, installazione, struttura repository.
+- **[Manuale d'Uso Avanzato](manuale.md)** — Guida completa all'installazione, configurazione bot, feed, YouTube e OmniSync.
+- **[Quick Start Guide (IT)](guide/quick-start-guide-it.md)** — Guida rapida in italiano. Le altre 7 lingue si trovano nella cartella `guide/`.
 
 ---
 
-## 📜 Storico Release (Changelog)
+## Documentazione Tecnica
 
-Per migliorare la consultazione da parte degli LLM, lo storico delle modifiche è stato suddiviso in blocchi cronologici (per Major e Minor Version) piuttosto che in un unico grande file di centinaia di righe:
-
-- **[v1.7.x (Corrente)](changelogs/v1.7.7.md)**
-  Versione attuale: **v1.7.7** — Security Patch + Build Cross-Platform. Cifratura AES-256-CBC dei token nei file `.rtb`, validazione anti-SSRF sugli URL feed, validazione input su tutti gli handler IPC, rimozione dipendenze orfane. **Nuovo:** build automatica tramite GitHub Actions CI per **macOS DMG (Apple Silicon arm64, confermato ✅)** e **Linux AppImage/deb (confermato ✅)**. Vedere anche [v1.7.6](changelogs/v1.7.6.md) per guide in-app, Auto-Updater e distribuzione Windows.
-
-- **[v1.6.x (Archivio)](changelogs/v1.6.1.md)**
-  Dalla v1.6.0 alla v1.6.1: sistema OmniSync con formato `.rtb` per la portabilità sicura dei bot tra macchine diverse, con ri-cifratura automatica tramite `safeStorage`.
-
-- **[v1.5.x (Archivio)](changelogs/v1.5.4.md)**
-  Dalla v1.5.0 alla v1.5.4: template messaggi personalizzabili con editor Smart Chips, variabili dinamiche (`{{title}}`, `{{link}}`, ecc.), gestione escaping HTML per Telegram.
-
-- **[v1.4.x (Archivio)](changelogs/v1.4.x.md)**
-  Dalla v1.4.0 alla v1.4.2: Quiet Hours (fasce orarie di silenzio), notifiche native OS, perfezionamento job queue asincrona.
-
-- **[v1.3.x (Archivio)](changelogs/v1.3.x.md)**
-  Dalla v1.3.0 alla v1.3.5: integrazione YouTube tramite `youtubei.js` (InnerTube, zero-config), sistema di logging ibrido, refactoring Producer-Consumer, backup DB automatico e Error Boundaries React.
-
-- **[v1.2.x (Archivio)](changelogs/v1.2.x.md)**
-  Versione 1.2.x: Internazionalizzazione (i18n a 8 lingue), Import/Export JSON, cifratura token e Custom Toasts.
-
-- **[v1.1.x (Archivio)](changelogs/v1.1.x.md)**
-  Dalla v1.1.0 in poi (intervalli di check configurabili, statistiche out-of-the-box, export log manuale...).
-
-- **[v1.0.x (Release Ufficiali)](changelogs/v1.0.x.md)**
-  Da RTB 1.0.0 (data in cui l'interfaccia ha ricevuto il restyling Titan) alle varie patch 1.0.x che hanno migliorato l'affidabilità del parser RSS.
-
-- **[Legacy (Pre-Release e Alpha)](changelogs/legacy-pre-v1.md)**
-  Include tutte le build primordiali (0.x, alpha, beta) che segnano il passaggio dall'architettura Python a TypeScript/Electron.
-
-> Il file `CHANGELOG.md` globale posizionato nella cartella radice funge da indice di rinvio a questi file storici.
+- **[Whitepaper Architetturale](whitepaper_titan_architecture.md)** — Analisi approfondita dell'architettura, Producer-Consumer, OmniSync e sicurezza.
+- **[Analisi Tecnica v1.7.6](analisi-tecnica.md)** — Report di criticità (P0–P3), dipendenze orfane e aree di miglioramento. Storico.
+- **[Report YouTube](relazione-youtube.md)** — Diagnosi e soluzione al problema dei feed Atom YouTube (v1.0.5 → v1.3.1). Storico.
 
 ---
 
-## 🔍 Analisi Tecnica e Qualità del Codice
+## Documentazione di Progetto
 
-- **[Analisi Tecnica v1.7.6](analisi-tecnica.md)** — Report completo di criticità (gravissime, gravi, medie, lievi), dipendenze orfane, aree di miglioramento e decisione architetturale su Tauri. Redatto il 27/03/2026.
-
----
-
-## 🛠️ Diagnostica e Bug Report
-
-Documentazione relativa a moduli critici, troubleshooting avanzato e indagini tecniche:
-
-- **[Report YouTube — Analisi e Soluzione (v1.0.5 → v1.3.1)](relazione-youtube.md)**
-  Analisi approfondita del problema dei feed Atom YouTube (HTTP 404 su endpoint pubblici) con diagnosi completa delle cause, valutazione delle alternative (YouTube Data API v3 poi scartata) e documentazione della soluzione adottata: scraping InnerTube via `youtubei.js`, implementata in v1.3.1. **Problema risolto definitivamente.**
+- **[Stato Progetto e Roadmap v2.0.0](STATO-PROGETTO.md)** — Tutto il completato (F1–F9, fix P0–P3) e l'unico step aperto (#11 autoUpdater).
+- **[Progetto Porting macOS + Linux](PROGETTO-PORTING.md)** — Strategia e implementazione della compatibilità cross-platform (v1.10.2).
+- **[Progetto Modalità Server](PROGETTO-SERVER.md)** — Analisi della modalità headless/VPS. **Rimandato a tempo indeterminato.**
+- **[Manutenzione Repository](manutenzione-archivio.md)** — Regole per la pulizia cache, cartelle build e archivio legacy.
 
 ---
 
-## 🗺️ Storico Pianificazione
+## Storico Release (Changelog)
 
-- **[Roadmap Marzo 2026 — Completata](roadmap-marzo2026.md)**
-  Piano di sviluppo formale redatto a v1.4.0 per le funzionalità mancanti verso la Gold Release. Tutte le feature pianificate (Quiet Hours, Template Smart Chips) sono state implementate nelle versioni successive. Documento conservato come riferimento storico.
+| Versione | Data | Descrizione |
+| :--- | :--- | :--- |
+| **[v1.10.2](changelogs/CHANGELOG_v1.10.2.md)** | Apr 2026 | Compatibilità cross-platform: `crypto.ts` (safeStorage + AES-256-GCM), build macOS/Linux, GitHub Actions CI/CD |
+| **[v1.10.1](changelogs/CHANGELOG_v1.10.1.md)** | Apr 2026 | Performance Mode UI: disabilita effetti GPU-heavy, persistente in `titan-settings.json`, 8 lingue |
+| **[v1.10.0](changelogs/CHANGELOG_v1.10.0.md)** | Apr 2026 | Fix contrasto semantico: token success verde, DANGER ZONE rosso, BotSettingsModal allargato |
+| **[v1.9.x](changelogs/CHANGELOG_v1.9.0.md)** | Mar 2026 | F6 Stats + F7 Preview + F8 OPML + F9 Digest Mode. v1.9.1: Obsidian Pulse V2 UI overhaul |
+| **[v1.8.x](changelogs/CHANGELOG_v1.8.8.md)** | Mar 2026 | F4 Filtro keyword + F5 Scheduler per-feed. Schema v8+v9. Fix critico #27 anti-spam |
+| **[v1.7.x](changelogs/CHANGELOG_v1.7.16.md)** | Mar 2026 | Fix sicurezza P0–P1 (safeStorage, sandbox, escapeUrl), stabilità, indici SQL, singleton lazy |
+| **[v1.6.x](changelogs/v1.6.1.md)** | — | OmniSync `.rtb` portabilità bot cross-machine |
+| **[v1.5.x](changelogs/v1.5.4.md)** | — | Template Smart Chips, editor visivo |
+| **[v1.4.x](changelogs/v1.4.x.md)** | — | Quiet Hours, notifiche native OS, job queue asincrona |
+| **[v1.3.x](changelogs/v1.3.x.md)** | — | YouTube InnerTube zero-config, logging ibrido, backup DB |
+| **[v1.2.x](changelogs/v1.2.x.md)** | — | i18n 8 lingue, Import/Export JSON, cifratura token |
+| **[v1.1.x](changelogs/v1.1.x.md)** | — | Settings overhaul, poll interval configurabile, statistiche |
+| **[v1.0.x](changelogs/v1.0.x.md)** | — | Release ufficiale v1.0.0 (Titan Glass UI), patch parser |
+| **[Legacy / Pre-Release](changelogs/legacy-pre-v1.md)** | — | Build 0.x, alpha, beta — passaggio da Python a TypeScript/Electron |
 
 ---
 
