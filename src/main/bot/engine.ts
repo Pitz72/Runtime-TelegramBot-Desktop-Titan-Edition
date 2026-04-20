@@ -258,16 +258,29 @@ export class BotEngine {
             for (const item of items) {
                 if (!this.isRunning) break;
 
-                // Confronto millisecondi (più robusto contro errori di fuso orario)
-                if (item.pubDate.getTime() < cutoffDate.getTime()) {
+                // --- TRIPLE-LOCK CUTOFF SECURITY (Fix Anti-Spam Definitivo) ---
+                const itemTime = item.pubDate ? item.pubDate.getTime() : 0;
+                const cutoffTime = cutoffDate.getTime();
+
+                // 1. Se la data dell'item è invalida (0) o è il fallback di sicurezza (Anno 2000), scarta.
+                // L'anno 2000 viene usato in youtube.ts come fallback se lo scraping fallisce.
+                if (itemTime <= 946681200000) { // 946681200000 = 1 Gennaio 2000
                     skipCount++;
                     continue;
                 }
 
+                // 2. Se l'item è precedente alla data di inizio del bot, scarta.
+                if (itemTime < cutoffTime) {
+                    skipCount++;
+                    continue;
+                }
+
+                // 3. Verifica deduplica (Hash Titolo + Hash URL)
                 if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
                     alreadyProcessedCount++;
                     continue;
                 }
+                // --------------------------------------------------------------
 
                 if (!passesKeywordFilter(item, feed)) {
                     TitanLogger.log(`  🔍 ${tag} Filtrato da keyword: ${item.title}`);

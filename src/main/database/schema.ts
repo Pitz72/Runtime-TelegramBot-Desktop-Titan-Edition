@@ -306,7 +306,8 @@ export function initDB() {
         }
 
         try {
-            db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, feed_id, title_hash)`);
+            // Indice ottimizzato: rimosso feed_id per consentire deduplica globale per bot
+            db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, title_hash)`);
         } catch (e) { }
 
         db.pragma('user_version = 7');

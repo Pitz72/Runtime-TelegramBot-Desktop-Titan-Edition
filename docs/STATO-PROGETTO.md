@@ -93,6 +93,23 @@ Il job `release` in `.github/workflows/build.yml` dichiara `needs: [build-window
 
 ---
 
+## ✅ PRODOTTO LIVE SU GUMROAD — v1.10.4
+
+**Data lancio:** 18 Aprile 2026  
+**URL:** https://pizzisimone.gumroad.com/l/telegrambot  
+**Titolo:** "Runtime TelegramBot Titan Edition" (senza numero versione — evergreen)  
+**Prezzo:** €9.99 pagamento unico  
+**Piattaforme:** Windows + Linux (macOS in arrivo)
+
+**Pacchetti distribuiti:**
+- `RuntimeTelegramBot-TitanEdition-1.10.4-Windows.zip` (92.9 MB) — Setup .exe + benvenuto 8 lingue + guides/
+- `RuntimeTelegramBot-TitanEdition-1.10.4-Linux.zip` (189.4 MB) — AppImage + .deb + benvenuto 8 lingue + guides/
+- Sorgenti locali: `gumroad-packages/`
+
+**Per i prossimi release:** quando esce una nuova versione, aggiornare i due ZIP su Gumroad e fare run dell'Action "Build & Release" per aggiornare la bridge repo (electron-updater notifica gli utenti in-app automaticamente).
+
+---
+
 ## Ordine di esecuzione verso v2.0.0
 
 **Documenti di progetto post-v2.0.0:**
@@ -120,5 +137,8 @@ Il job `release` in `.github/workflows/build.yml` dichiara `needs: [build-window
 ──────────────────────────────────────────────────────────────────────────
 [FATTO] #11 autoUpdater nativo (electron-updater + bridge repo)             ✅  ← v1.10.3
 ──────────────────────────────────────────────────────────────────────────
-[NEXT]  Repo bridge + GitHub Actions publish → v2.0.0
+[FATTO] Gumroad launch — Windows + Linux, €9.99, descrizione EN             ✅  ← v1.10.4
+──────────────────────────────────────────────────────────────────────────
+[NEXT]  macOS: firma collega → build-mac in CI → ZIP Gumroad aggiornato
+[NEXT]  Marketing
 ```

@@ -190,12 +190,14 @@ export class BotManager {
         const byId = db().prepare('SELECT id FROM history WHERE bot_id = ? AND id = ?').get(botId, itemId);
         if (byId) return true;
 
-        // Check 2: match per titolo normalizzato nello stesso feed (anti-spam URL change)
-        if (feedId !== undefined && title && title.trim()) {
+        // Check 2: match per titolo normalizzato per lo stesso bot (anti-spam globale per bot)
+        // Rimosso il vincolo del feed_id: se questo bot ha già inviato questo titolo, non deve reinviarlo
+        // anche se proviene da un feed_id diverso o se il link è cambiato.
+        if (title && title.trim()) {
             const titleHash = nodeCrypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex');
             const byTitle = db().prepare(
-                'SELECT id FROM history WHERE bot_id = ? AND feed_id = ? AND title_hash = ?'
-            ).get(botId, feedId, titleHash);
+                'SELECT id FROM history WHERE bot_id = ? AND title_hash = ?'
+            ).get(botId, titleHash);
             if (byTitle) return true;
         }
 
