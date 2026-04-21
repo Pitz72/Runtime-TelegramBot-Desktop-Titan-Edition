@@ -45,8 +45,34 @@ jobs:
             Builds/latest-linux.yml
           retention-days: 30
 
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Cache Electron binary
+        uses: actions/cache@v4
+        with:
+          path: ~/AppData/Local/electron/Cache
+          key: electron-win-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npx tsc && npx vite build && npx electron-builder --windows --publish never
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifacts
+          path: |
+            Builds/*.exe
+            Builds/latest.yml
+          retention-days: 30
+
   release:
-    needs: [build-linux]
+    needs: [build-linux, build-windows]
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.publish_release == 'true' }}
     steps:
@@ -56,11 +82,17 @@ jobs:
         id: version
         run: echo "tag=v$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Download artifacts
+      - name: Download Linux artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: 'linux-artifacts'
-          merge-multiple: false
+          name: linux-artifacts
+          path: artifacts/linux
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-artifacts
+          path: artifacts/windows
 
       - name: Publish release to bridge repo
         uses: softprops/action-gh-release@v2
@@ -76,12 +108,15 @@ jobs:
 
             | Platform | File |
             |----------|------|
+            | **Windows** | `*.exe` |
             | **Linux (AppImage)** | `*.AppImage` |
             | **Linux (deb)** | `*.deb` |
 
-            > Windows and macOS builds coming soon.
+            > macOS builds coming soon.
             > The app updates automatically — existing users will be notified in-app.
           files: |
-            linux-artifacts/*.AppImage
-            linux-artifacts/*.deb
-            linux-artifacts/latest-linux.yml
+            artifacts/linux/*.AppImage
+            artifacts/linux/*.deb
+            artifacts/linux/latest-linux.yml
+            artifacts/windows/*.exe
+            artifacts/windows/latest.yml
