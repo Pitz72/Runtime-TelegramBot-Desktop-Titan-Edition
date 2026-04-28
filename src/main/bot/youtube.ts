@@ -166,6 +166,21 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
                 const amountMatch = rawDateText.match(/(\d+)/);
                 const amount = amountMatch ? parseInt(amountMatch[0]) : 1;
 
+                // Forme abbreviate InnerTube con hl:'en' (es. "3mo ago", "1y ago", "22h ago").
+                // La regex deve testare 'mo' prima di 'm' per evitare match parziali.
+                const abbrev = rawDateText.match(/(\d+)(mo|min|y|w|h|d|m|s)\s*ago/i);
+                if (abbrev) {
+                    const n = parseInt(abbrev[1]);
+                    const u = abbrev[2].toLowerCase();
+                    if (u === 'y') date.setFullYear(date.getFullYear() - n);
+                    else if (u === 'mo') date.setMonth(date.getMonth() - n);
+                    else if (u === 'w') date.setDate(date.getDate() - n * 7);
+                    else if (u === 'd') date.setDate(date.getDate() - n);
+                    else if (u === 'h') date.setHours(date.getHours() - n);
+                    else if (u === 'm' || u === 'min') date.setMinutes(date.getMinutes() - n);
+                    else if (u === 's') date.setSeconds(date.getSeconds() - n);
+                } else {
+                // Forme full-word inglese/italiano (es. "3 months ago", "2 giorni fa")
                 // NOTA: NON usare includes('or') — "or" è contenuto in "giorno"/"giorni"
                 // causando il match errato di "giorni" (days) come "ora/ore" (hours).
                 if (rawDateText.includes('hour') || rawDateText.includes('ora') || rawDateText.includes('ore')) date.setHours(date.getHours() - amount);
@@ -175,6 +190,7 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
                 else if (rawDateText.includes('minute') || rawDateText.includes('minut')) date.setMinutes(date.getMinutes() - amount);
                 else if (rawDateText.includes('second')) date.setSeconds(date.getSeconds() - amount);
                 else if (rawDateText.includes('year') || rawDateText.includes('ann')) date.setFullYear(date.getFullYear() - amount);
+                }
             } else {
                 // Prova il parsing diretto per date fisse (es. "Apr 10, 2026")
                 const parsed = Date.parse(rawDateText);
