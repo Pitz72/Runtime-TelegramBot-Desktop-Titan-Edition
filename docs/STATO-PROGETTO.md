@@ -1,6 +1,6 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.10.10  
+**Versione corrente:** v1.10.11  
 **Ultimo aggiornamento:** 28 Aprile 2026  
 **Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
@@ -160,6 +160,8 @@ Il job `release` in `.github/workflows/build.yml` dichiara ora `needs: [build-li
 [FATTO] v1.10.9 Hotfix — parser date YouTube abbreviate (mo/y/h/d/w)      ✅  ← v1.10.9
 ──────────────────────────────────────────────────────────────────────────
 [FATTO] v1.10.10 "LogVault" — virtual scroll log 5000 entry, updater fix  ✅  ← v1.10.10
+──────────────────────────────────────────────────────────────────────────
+[FATTO] v1.10.11 "CleanTube" — rimosso locale forcing YouTube gl/hl=en    ✅  ← v1.10.11
 ──────────────────────────────────────────────────────────────────────────
 [NEXT]  macOS: firma collega → build-mac in CI → ZIP Gumroad aggiornato
 [NEXT]  Marketing
