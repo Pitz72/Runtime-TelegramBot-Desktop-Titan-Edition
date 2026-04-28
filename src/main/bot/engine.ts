@@ -173,6 +173,13 @@ export class BotEngine {
                 const client = this.getClient(bot);
                 TitanLogger.log(`🤖 Bot [${bot.name}]: Checking ${feeds.length} feeds...`);
 
+                // Drena la coda quiet hours prima di processare i nuovi feed
+                try {
+                    await this.drainPendingQueue(bot, client);
+                } catch (e) {
+                    TitanLogger.log(`  ❌ [${bot.name}] Errore drenaggio coda quiet hours: ${e}`);
+                }
+
                 const activeFeeds = feeds.filter(f => f.is_active);
                 const skippedFeeds = feeds.length - activeFeeds.length;
                 if (skippedFeeds > 0) {
@@ -230,6 +237,9 @@ export class BotEngine {
             const tag = `[${bot.name}]`;
 
             const cutoffDate = new Date(bot.start_date);
+            if (cutoffDate.getTime() > Date.now()) {
+                TitanLogger.log(`  ⚠️ ${tag} ATTENZIONE: la start_date del bot (${bot.start_date}) è nel futuro — nessun item verrà pubblicato finché la data non viene raggiunta.`);
+            }
             TitanLogger.log(`  📡 ${tag} Fetching: ${feed.name}`);
 
             let items;
@@ -254,6 +264,7 @@ export class BotEngine {
             let newCount = 0;
             let skipCount = 0;
             let alreadyProcessedCount = 0;
+            let deferredCount = 0;
 
             for (const item of items) {
                 if (!this.isRunning) break;
@@ -262,9 +273,10 @@ export class BotEngine {
                 const itemTime = item.pubDate ? item.pubDate.getTime() : 0;
                 const cutoffTime = cutoffDate.getTime();
 
-                // 1. Se la data dell'item è invalida (0) o è il fallback di sicurezza (Anno 2000), scarta.
+                // 1. Se la data dell'item è invalida (NaN, 0) o è il fallback di sicurezza (Anno 2000), scarta.
+                // NaN bypasserebbe i confronti < e <= in JS — va escluso esplicitamente.
                 // L'anno 2000 viene usato in youtube.ts come fallback se lo scraping fallisce.
-                if (itemTime <= 946681200000) { // 946681200000 = 1 Gennaio 2000
+                if (isNaN(itemTime) || itemTime <= Date.UTC(2000, 0, 1)) { // 1 Gennaio 2000 00:00:00 UTC
                     skipCount++;
                     continue;
                 }
@@ -297,7 +309,9 @@ export class BotEngine {
                 }
 
                 if (!this.isTimeAllowed(bot.send_from, bot.send_until)) {
-                    TitanLogger.log(`  🌙 ${tag} Quiet hours active. Postponing: ${item.title}`);
+                    BotManager.addToPendingQueue(bot.id, feed.id, item);
+                    TitanLogger.log(`  🌙 ${tag} Quiet hours — salvato in coda persistente: ${item.title}`);
+                    deferredCount++;
                     continue;
                 }
 
@@ -310,6 +324,7 @@ export class BotEngine {
                 let msg = `No updates for ${feed.name}`;
                 if (skipCount > 0) msg += ` (${skipCount} skipped due to cutoff date)`;
                 if (alreadyProcessedCount > 0) msg += ` (${alreadyProcessedCount} already processed)`;
+                if (deferredCount > 0) msg += ` (${deferredCount} deferred to quiet hours queue)`;
                 TitanLogger.log(`  ℹ️ ${tag} ${msg}`);
             }
 
@@ -323,6 +338,58 @@ export class BotEngine {
                     }
                 });
             }
+        }
+    }
+
+    /** Drena la coda quiet hours per un bot: se le ore di silenzio sono terminate,
+     *  sposta gli item persistenti in publishQueue in ordine cronologico. */
+    private async drainPendingQueue(bot: BotConfig, client: TelegramClient) {
+        if (!this.isTimeAllowed(bot.send_from, bot.send_until)) return;
+
+        const pending = BotManager.getPendingQueue(bot.id);
+        if (pending.length === 0) return;
+
+        const feedMap = new Map(BotManager.getFeeds(bot.id).map(f => [f.id, f]));
+        TitanLogger.log(`  🌅 [${bot.name}] Quiet hours terminate — recupero ${pending.length} item dalla coda`);
+
+        for (const p of pending) {
+            if (!this.isRunning) break;
+
+            // Quiet hours rientrate a metà drenaggio (es. finestra corta notturna)
+            if (!this.isTimeAllowed(bot.send_from, bot.send_until)) {
+                TitanLogger.log(`  🌙 [${bot.name}] Quiet hours rientrate durante il drenaggio — item rimanenti restano in coda`);
+                break;
+            }
+
+            // Feed eliminato nel frattempo: rimuovi dalla coda silenziosamente
+            const feed = feedMap.get(p.feed_id);
+            if (!feed) {
+                BotManager.removePendingItem(p.id);
+                continue;
+            }
+
+            // Già processato (es. lo stesso item era ancora nel backlog del feed e inviato regolarmente)
+            if (BotManager.isProcessed(bot.id, p.item_id, p.feed_id, p.item_title ?? undefined)) {
+                BotManager.removePendingItem(p.id);
+                continue;
+            }
+
+            const item = {
+                id: p.item_id,
+                title: p.item_title || '',
+                link: p.item_link,
+                pubDate: new Date(p.item_date),
+                summary: p.item_summary || '',
+                image: p.item_image || undefined,
+                feedName: feed.name
+            };
+
+            // Rimuovi dalla pending_queue e accoda per l'invio.
+            // Se il motore si interrompe tra questi due step, al ciclo successivo
+            // l'item passerà di nuovo isProcessed → false e verrà re-accodato in pending_queue.
+            BotManager.removePendingItem(p.id);
+            this.publishQueue.push({ bot, feed, item, retryCount: 0 });
+            TitanLogger.log(`  🌅 [${bot.name}] Recuperato da quiet hours → coda invio: ${item.title}`);
         }
     }
 
@@ -376,7 +443,7 @@ export class BotEngine {
                     TitanLogger.log(`  ⚠️ ${tag} Send failed (tentativo ${job.retryCount + 1}/${MAX_RETRIES}): ${item.title} — riaccodato`);
                     this.publishQueue.push({ ...job, retryCount: job.retryCount + 1 });
                 } else {
-                    TitanLogger.log(`  ❌ ${tag} Send definitivamente fallito dopo ${MAX_RETRIES} tentativi: ${item.title} — marcato come processato`);
+                    TitanLogger.log(`  ❌ ${tag} Contenuto NON inviato al canale dopo ${MAX_RETRIES} tentativi: "${item.title}" — marcato come processato per evitare loop infinito. Verificare la connessione Telegram.`);
                     BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
                 }
             }
@@ -395,9 +462,12 @@ export class BotEngine {
             if (Date.now() - lastSent < interval * 60 * 1000) continue;
 
             const items = BotManager.getDigestQueue(bot.id, feed.id);
-            BotManager.updateFeedDigestLastSent(feed.id);
 
-            if (items.length === 0) continue;
+            // Coda vuota: avanza il timer per non ri-controllare inutilmente al prossimo ciclo.
+            if (items.length === 0) {
+                BotManager.updateFeedDigestLastSent(feed.id);
+                continue;
+            }
 
             const capped = items.slice(0, 20);
             const header = `📋 <b>${this.escapeHTML(feed.name)}</b> — ${capped.length} ${capped.length === 1 ? 'contenuto' : 'contenuti'}\n\n`;
@@ -407,10 +477,15 @@ export class BotEngine {
 
             const success = await client.sendMessage(header + body);
             if (success) {
+                // Aggiorna il timer SOLO dopo invio confermato, poi svuota la coda.
+                // Ordine critico: se clearDigestQueue fallisse dopo updateFeedDigestLastSent,
+                // gli item verrebbero ri-inviati al ciclo successivo (doppio digest).
+                // Con questo ordine, in caso di failure il timer non avanza e si riprova.
+                BotManager.updateFeedDigestLastSent(feed.id);
                 BotManager.clearDigestQueue(bot.id, feed.id);
                 TitanLogger.log(`  📋 [${bot.name}] Digest inviato per "${feed.name}": ${capped.length} item`);
             } else {
-                TitanLogger.log(`  ⚠️ [${bot.name}] Digest fallito per "${feed.name}"`);
+                TitanLogger.log(`  ⚠️ [${bot.name}] Digest fallito per "${feed.name}" — verrà riprovato al prossimo ciclo`);
             }
         }
     }

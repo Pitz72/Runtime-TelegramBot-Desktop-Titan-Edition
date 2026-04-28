@@ -45,7 +45,7 @@ export function clearYouTubeCache() {
 async function getYouTubeInstance() {
     if (!youtube) {
         const { Innertube } = await import('youtubei.js');
-        youtube = await Innertube.create();
+        youtube = await Innertube.create({ gl: 'US', hl: 'en' } as any);
         TitanLogger.log('[YouTube] New Innertube instance created');
     }
     return youtube;
@@ -188,7 +188,7 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             // Usiamo una data nel passato remoto (1 Gennaio 2000) per assicurarci che
             // il video venga ignorato dal filtro cutoffDate invece di causare spam.
             if (!date) {
-                date = new Date(2000, 0, 1);
+                date = new Date(Date.UTC(2000, 0, 1)); // UTC puro — coerente con il threshold in engine.ts
                 if (rawDateText) TitanLogger.log(`[YouTube] WARN: data non parsabile per "${v.title?.text}": "${rawDateText}" → fallback 2000`);
             }
             TitanLogger.log(`[YouTube] Item: "${v.title?.text}" | dateText: "${rawDateText}" | date: ${date.toISOString().slice(0, 10)}`);

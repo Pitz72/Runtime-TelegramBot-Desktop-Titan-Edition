@@ -239,6 +239,23 @@ export class BotManager {
         db().prepare("UPDATE feeds SET digest_last_sent = datetime('now') WHERE id = ?").run(feedId);
     }
 
+    // --- PENDING QUEUE (Quiet Hours) ---
+    static addToPendingQueue(botId: number, feedId: number, item: { id: string; title: string; link: string; summary: string; image?: string; pubDate: Date }) {
+        db().prepare(
+            'INSERT OR IGNORE INTO pending_queue (bot_id, feed_id, item_id, item_title, item_link, item_summary, item_image, item_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        ).run(botId, feedId, item.id, item.title, item.link, item.summary || null, item.image || null, item.pubDate.toISOString());
+    }
+
+    static getPendingQueue(botId: number): Array<{ id: number; feed_id: number; item_id: string; item_title: string | null; item_link: string; item_summary: string | null; item_image: string | null; item_date: string }> {
+        return db().prepare(
+            'SELECT id, feed_id, item_id, item_title, item_link, item_summary, item_image, item_date FROM pending_queue WHERE bot_id = ? ORDER BY item_date ASC'
+        ).all(botId) as any[];
+    }
+
+    static removePendingItem(id: number) {
+        db().prepare('DELETE FROM pending_queue WHERE id = ?').run(id);
+    }
+
     // --- STATS ---
     static getStats(botId: number): { total: number; today: number; week: number } {
         const total = (db().prepare('SELECT COUNT(*) as count FROM history WHERE bot_id = ?').get(botId) as any)?.count || 0;
@@ -274,7 +291,7 @@ export class BotManager {
             const feeds = BotManager.getFeeds(bot.id);
             return {
                 name: bot.name,
-                token: encryptTokenForExport(bot.token), // AES-256-CBC cifrato per il file .rtb
+                token: encryptTokenForExport(bot.token), // safeStorage cifrato per il file .rtb
                 channel_id: bot.channel_id,
                 start_date: bot.start_date,
                 check_interval: bot.check_interval,
@@ -369,7 +386,7 @@ export class BotManager {
             const exportData = {
                 bot: {
                     name: botRecord.name,
-                    token: encryptTokenForExport(plainToken), // AES-256-CBC cifrato per il file .rtb
+                    token: encryptTokenForExport(plainToken), // safeStorage cifrato per il file .rtb
                     channelId: botRecord.channel_id,
                     isActive: botRecord.is_active === 1,
                     startDate: botRecord.start_date,

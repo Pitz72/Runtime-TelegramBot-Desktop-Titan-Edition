@@ -2,7 +2,7 @@
 
 Centro documentale del progetto. Indice completo di guide, changelog e documentazione tecnica.
 
-**Versione corrente:** v1.10.3 — [Vedi changelog](changelogs/CHANGELOG_v1.10.3.md)  
+**Versione corrente:** v1.10.8 — [Vedi changelog](changelogs/CHANGELOG_v1.10.8.md)  
 **Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition
 
 ---
@@ -36,6 +36,12 @@ Centro documentale del progetto. Indice completo di guide, changelog e documenta
 
 | Versione | Data | Descrizione |
 | :--- | :--- | :--- |
+| **[v1.10.8](changelogs/CHANGELOG_v1.10.8.md)** | Apr 2026 | "Alignment": YouTube locale forcing (Innertube gl/hl='en'), audit e sincronizzazione documentazione completa |
+| **[v1.10.7](changelogs/CHANGELOG_v1.10.7.md)** | Apr 2026 | "SilentGuard": `pending_queue` persistente per quiet hours — item non persi su feed con backlog corto. Schema DB v11 |
+| **[v1.10.6](changelogs/CHANGELOG_v1.10.6.md)** | Apr 2026 | "SteelCore" Quality Patch: bugfix digest, NaN bypass cutoff, UTC threshold, warning start_date futura, electron-builder.yml consolidato |
+| **[v1.10.5](changelogs/CHANGELOG_v1.10.5.md)** | Apr 2026 | "IronShield" Security Patch: filtro cutoff iper-pessimista, deduplica globale title_hash, ottimizzazione indici DB. Hotfix definitivo spamming YouTube |
+| **[v1.10.4](changelogs/CHANGELOG_v1.10.4.md)** | Apr 2026 | Fix YouTube ID non deterministico via search-fallback post-500; CI cleanup: rimosso `build-release.yml` obsoleto |
+| **[v1.10.3](changelogs/CHANGELOG_v1.10.3.md)** | Apr 2026 | #11 Auto-Updater nativo: `electron-updater` con bridge repo pubblico, download in background, banner install-ready, 8 lingue |
 | **[v1.10.2](changelogs/CHANGELOG_v1.10.2.md)** | Apr 2026 | Compatibilità cross-platform: `crypto.ts` (safeStorage + AES-256-GCM), build macOS/Linux, GitHub Actions CI/CD |
 | **[v1.10.1](changelogs/CHANGELOG_v1.10.1.md)** | Apr 2026 | Performance Mode UI: disabilita effetti GPU-heavy, persistente in `titan-settings.json`, 8 lingue |
 | **[v1.10.0](changelogs/CHANGELOG_v1.10.0.md)** | Apr 2026 | Fix contrasto semantico: token success verde, DANGER ZONE rosso, BotSettingsModal allargato |

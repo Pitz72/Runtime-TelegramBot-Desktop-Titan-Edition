@@ -2,7 +2,11 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.10.4 (Corrente)](docs/changelogs/CHANGELOG_v1.10.4.md) — Fix YouTube ID non deterministico via search-fallback (regressione intermittente post-500); CI cleanup: rimosso build-release.yml obsoleto.
+- [v1.10.8 (Corrente)](docs/changelogs/CHANGELOG_v1.10.8.md) — "Alignment": YouTube locale forcing (gl/hl='en'), audit documentazione completo, sincronizzazione docs/index.md e STATO-PROGETTO.md.
+- [v1.10.7 (Archivio)](docs/changelogs/CHANGELOG_v1.10.7.md) — "SilentGuard": pending_queue persistente per quiet hours — item non persi più su feed con backlog corto. Schema DB v11.
+- [v1.10.6 (Archivio)](docs/changelogs/CHANGELOG_v1.10.6.md) — "SteelCore" Quality Patch: bugfix digest (ordine operazioni), bugfix NaN bypass cutoff, fix UTC threshold anti-spam, warning start_date futura, consolidamento electron-builder.yml.
+- [v1.10.5 (Archivio)](docs/changelogs/CHANGELOG_v1.10.5.md) — "IronShield" Security Patch: filtro cutoff iper-pessimista, deduplica globale title_hash per bot, ottimizzazione indici DB. Hotfix definitivo bug spamming YouTube.
+- [v1.10.4 (Archivio)](docs/changelogs/CHANGELOG_v1.10.4.md) — Fix YouTube ID non deterministico via search-fallback (regressione intermittente post-500); CI cleanup: rimosso build-release.yml obsoleto.
 - [v1.10.3 (Archivio)](docs/changelogs/CHANGELOG_v1.10.3.md) — #11 Auto-Updater nativo: `electron-updater` con bridge repo pubblico su `Ecosystem-Runtime`, download in background, banner install-ready, 8 lingue.
 - [v1.10.2 (Archivio)](docs/changelogs/CHANGELOG_v1.10.2.md) — Compatibilità cross-platform macOS + Linux: crypto.ts wrapper (safeStorage + AES-256-GCM fallback), config build mac/linux, GitHub Actions CI/CD build automatica per tutti e tre i SO.
 - [v1.10.1 (Archivio)](docs/changelogs/CHANGELOG_v1.10.1.md) — Performance Mode UI: toggle per disabilitare scanline, backdrop-blur, glow e animazioni GPU-heavy. Persistente in `titan-settings.json`. 8 lingue.
@@ -19,9 +23,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v1.10.4
+## Versione Attuale: v1.10.8
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.4.md](docs/changelogs/CHANGELOG_v1.10.4.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.8.md](docs/changelogs/CHANGELOG_v1.10.8.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 

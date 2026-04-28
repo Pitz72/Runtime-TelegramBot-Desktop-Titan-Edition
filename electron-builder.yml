@@ -20,9 +20,16 @@ asarUnpack:
   # I moduli nativi (.node) non possono essere caricati dall'interno di un archivio asar
   - node_modules/better-sqlite3/build/**/*
 
+fileAssociations:
+  - ext: rtb
+    name: Titan Bot Profile
+    description: Runtime Telegram Bot Configuration File
+    role: Editor
+
 # === Windows ===
 win:
   executableName: TitanDesktop
+  icon: resources/icon.png
   target: nsis
 nsis:
   artifactName: ${productName}-Setup-${version}.${ext}
@@ -33,11 +40,18 @@ nsis:
 # === macOS ===
 mac:
   target: dmg
+  icon: resources/icon.png
   category: public.app-category.utilities
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
   artifactName: ${productName}-${version}.${ext}
 
 # === Linux ===
 linux:
+  maintainer: Runtime Radio <info@runtimeradio.it>
+  icon: resources/icon.png
   target:
     - AppImage
     - deb

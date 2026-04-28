@@ -175,6 +175,22 @@ export function initDB() {
             PRIMARY KEY (id, bot_id),
             FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS pending_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bot_id INTEGER NOT NULL,
+            feed_id INTEGER NOT NULL,
+            item_id TEXT NOT NULL,
+            item_title TEXT,
+            item_link TEXT NOT NULL,
+            item_summary TEXT,
+            item_image TEXT,
+            item_date DATETIME NOT NULL,
+            added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(bot_id, item_id),
+            FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE,
+            FOREIGN KEY(feed_id) REFERENCES feeds(id) ON DELETE CASCADE
+        );
     `);
 
     // Indici base su history (senza title_hash — quella colonna potrebbe non esistere ancora su DB vecchi)
@@ -187,8 +203,8 @@ export function initDB() {
     // 3. Sistema di Versionamento Deterministic
     if (isNewInstall) {
         // È un'installazione pulita. Lo schema è già alla versione massima.
-        db.pragma('user_version = 10');
-        console.log("Nuova installazione rilevata. Database inizializzato alla v9.");
+        db.pragma('user_version = 11');
+        console.log("Nuova installazione rilevata. Database inizializzato alla v11.");
         console.log('Database initialized at:', dbPath);
         return db;
     }
@@ -199,7 +215,7 @@ export function initDB() {
     // 4. Backup automatico SOLO se servono migrazioni — fix #20
     // Cattura lo stato pre-migrazione per consentire il ripristino in caso di errore.
     // Su DB già alla versione corrente (nessuna migrazione), nessun backup viene creato.
-    if (currentVersion < 10) {
+    if (currentVersion < 11) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
@@ -357,6 +373,30 @@ export function initDB() {
         console.log("Database version set to 10");
     }
 
+    if (currentVersion < 11) {
+        console.log("Migration v11: Aggiunta tabella pending_queue per coda quiet hours...");
+        try {
+            db.exec(`CREATE TABLE IF NOT EXISTS pending_queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                bot_id INTEGER NOT NULL,
+                feed_id INTEGER NOT NULL,
+                item_id TEXT NOT NULL,
+                item_title TEXT,
+                item_link TEXT NOT NULL,
+                item_summary TEXT,
+                item_image TEXT,
+                item_date DATETIME NOT NULL,
+                added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(bot_id, item_id),
+                FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE,
+                FOREIGN KEY(feed_id) REFERENCES feeds(id) ON DELETE CASCADE
+            )`);
+        } catch (e) { }
+        db.pragma('user_version = 11');
+        currentVersion = 11;
+        console.log("Database version set to 11");
+    }
+
     // Safety check post-migration: verifica fisicamente l'esistenza delle colonne critiche.
     // Difende da stati corrotti dove user_version è avanzato ma ALTER TABLE è fallito silenziosamente.
     try {
@@ -364,7 +404,7 @@ export function initDB() {
         if (!histCols.some((c: any) => c.name === 'title_hash')) {
             console.warn('Safety fix: title_hash mancante dalla tabella history — aggiunto retroattivamente.');
             db.exec(`ALTER TABLE history ADD COLUMN title_hash TEXT`);
-            db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, feed_id, title_hash)`);
+            db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, title_hash)`);
         }
     } catch (e) {
         console.error('Safety check title_hash fallito:', e);
@@ -413,6 +453,26 @@ export function initDB() {
         )`);
     } catch (e) {
         console.error('Safety check digest_queue fallito:', e);
+    }
+
+    try {
+        db.exec(`CREATE TABLE IF NOT EXISTS pending_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bot_id INTEGER NOT NULL,
+            feed_id INTEGER NOT NULL,
+            item_id TEXT NOT NULL,
+            item_title TEXT,
+            item_link TEXT NOT NULL,
+            item_summary TEXT,
+            item_image TEXT,
+            item_date DATETIME NOT NULL,
+            added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(bot_id, item_id),
+            FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE,
+            FOREIGN KEY(feed_id) REFERENCES feeds(id) ON DELETE CASCADE
+        )`);
+    } catch (e) {
+        console.error('Safety check pending_queue fallito:', e);
     }
 
     console.log('Database initialized at:', dbPath);

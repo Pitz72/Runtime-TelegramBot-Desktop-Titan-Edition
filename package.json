@@ -1,6 +1,6 @@
 {
     "name": "titan-desktop",
-    "version": "1.10.5",
+    "version": "1.10.8",
     "description": "Desktop Application for Runtime Radio Telegram Bot",
     "author": {
         "name": "Runtime Radio",
@@ -17,61 +17,6 @@
         "typecheck": "tsc --noEmit",
         "rebuild": "electron-builder install-app-deps",
         "postinstall": "electron-builder install-app-deps"
-    },
-    "build": {
-        "appId": "com.runtimeradio.titandesktop",
-        "productName": "Runtime Telegram Bot Titan Edition",
-        "directories": {
-            "output": "Builds"
-        },
-        "files": [
-            "dist-electron/**/*",
-            "dist/**/*",
-            "resources/**/*",
-            "package.json",
-            "!node_modules/**/*",
-            "node_modules/better-sqlite3/**/*",
-            "node_modules/bindings/**/*",
-            "node_modules/file-uri-to-path/**/*"
-        ],
-        "asarUnpack": [
-            "resources/**",
-            "node_modules/better-sqlite3/build/**/*"
-        ],
-        "fileAssociations": [
-            {
-                "ext": "rtb",
-                "name": "Titan Bot Profile",
-                "description": "Runtime Telegram Bot Configuration File",
-                "role": "Editor"
-            }
-        ],
-        "win": {
-            "target": [
-                "nsis"
-            ],
-            "icon": "resources/icon.png"
-        },
-        "mac": {
-            "target": [
-                "dmg"
-            ],
-            "icon": "resources/icon.png",
-            "category": "public.app-category.utilities",
-            "hardenedRuntime": true,
-            "gatekeeperAssess": false,
-            "entitlements": "build/entitlements.mac.plist",
-            "entitlementsInherit": "build/entitlements.mac.plist"
-        },
-        "linux": {
-            "maintainer": "Runtime Radio <info@runtimeradio.it>",
-            "target": [
-                "AppImage",
-                "deb"
-            ],
-            "icon": "resources/icon.png",
-            "category": "Utility"
-        }
     },
     "dependencies": {
         "@electron-toolkit/preload": "^2.0.0",

@@ -1,8 +1,11 @@
 # Progetto Porting — Runtime TelegramBot macOS e Linux
 
-**Stato:** Pianificato post-v2.0.0  
-**Dipendenza:** Completare #11 autoUpdater → v2.0.0 prima  
-**Aggiornamento:** 18 Aprile 2026
+> **⚠️ Documento storico — completato in v1.10.2**  
+> Tutto il lavoro descritto qui è stato realizzato. Questo file conserva l'analisi tecnica originale come riferimento. Per lo stato attuale vedi [STATO-PROGETTO.md](STATO-PROGETTO.md).
+
+**Stato:** ✅ Completato in v1.10.2 (Aprile 2026)  
+**Documento originale redatto:** pre-v1.10.2  
+**Aggiornamento stato:** 20 Aprile 2026
 
 ---
 
@@ -183,13 +186,14 @@ La build GitHub Actions è configurata in modo che macOS possa essere abilitato/
 
 ---
 
-## Roadmap
+## Roadmap (storico — tutto completato)
 
 ```
-[v2.0.0]  #11 autoUpdater nativo → rilascio ufficiale Windows   ← PROSSIMO STEP
-[v2.1.0]  GitHub Actions CI/CD + build Linux (AppImage + deb)
-[v2.2.0?] Build macOS (se firma disponibile)
-[v3.0.0?] Runtime TelegramBot Server Mode (vedi PROGETTO-SERVER.md)
+[✅ v1.10.2]  GitHub Actions CI/CD + build Linux (AppImage + deb) + crypto.ts cross-platform
+[✅ v1.10.3]  #11 autoUpdater nativo → electron-updater + bridge repo
+[✅ v1.10.4]  Gumroad launch Windows + Linux
+[⏳ futuro]   Build macOS — in attesa firma dal collega
+[⏳ futuro]   Runtime TelegramBot Server Mode (vedi PROGETTO-SERVER.md)
 ```
 
 ---

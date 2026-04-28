@@ -50,14 +50,26 @@ function generateId(link: string): string {
 function parseDate(item: any): Date | null {
     try {
         // Priorità a isoDate fornito da rss-parser (già normalizzato)
-        if (item.isoDate) return new Date(item.isoDate);
+        if (item.isoDate) {
+            const d = new Date(item.isoDate);
+            if (!isNaN(d.getTime())) return d;
+        }
 
         // Fallback per RSS standard
-        if (item.pubDate) return new Date(item.pubDate);
+        if (item.pubDate) {
+            const d = new Date(item.pubDate);
+            if (!isNaN(d.getTime())) return d;
+        }
 
         // Specifici per Atom (YouTube) se isoDate fallisce
-        if (item.published) return new Date(item.published);
-        if (item.updated) return new Date(item.updated);
+        if (item.published) {
+            const d = new Date(item.published);
+            if (!isNaN(d.getTime())) return d;
+        }
+        if (item.updated) {
+            const d = new Date(item.updated);
+            if (!isNaN(d.getTime())) return d;
+        }
 
         // Se non trova nulla, prova a cercare stringhe che somigliano a date nei campi personalizzati
         for (const key in item) {

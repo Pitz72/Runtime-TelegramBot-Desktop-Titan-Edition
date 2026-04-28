@@ -1,7 +1,7 @@
 # Titan Desktop — Stato del Progetto e Roadmap verso v2.0.0
 
-**Versione corrente:** v1.10.4  
-**Ultimo aggiornamento:** 18 Aprile 2026  
+**Versione corrente:** v1.10.8  
+**Ultimo aggiornamento:** 28 Aprile 2026  
 **Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
 
@@ -72,6 +72,18 @@ L'idea di modalità server/headless è stata separata in [`docs/PROGETTO-SERVER.
 
 ---
 
+## ✅ Completato — v1.10.5 "IronShield" Security Patch
+
+**Implementato in v1.10.5** (20 Aprile 2026). Hotfix critico per eliminare definitivamente il bug di spamming YouTube.
+
+- **Filtro cutoff iper-pessimista:** item con data fallback `2000-01-01` scartati categoricamente; validità temporale assoluta tra timestamp e `start_date` del bot
+- **Deduplica globale per bot:** `title_hash` svincolato dal `feed_id` — un contenuto già inviato viene bloccato indipendentemente da quale feed provenga
+- **Ottimizzazione DB:** `idx_history_title_dedup` semplificato (rimosso `feed_id`), controlli integrità post-migrazione rafforzati
+- Logging diagnostico migliorato; risolto potenziale conflitto coda invio tra bot diversi
+- Dettagli completi: [`docs/changelogs/CHANGELOG_v1.10.5.md`](changelogs/CHANGELOG_v1.10.5.md)
+
+---
+
 ## ✅ Completato — #11 autoUpdater nativo (v1.10.3)
 
 **Implementato in v1.10.3.** L'app usa ora `electron-updater` per aggiornamenti OTA firmati via GitHub Releases.
@@ -85,25 +97,23 @@ L'idea di modalità server/headless è stata separata in [`docs/PROGETTO-SERVER.
 
 ---
 
-## 🟠 Issue aperta — build.yml: release bloccata da macOS
+## ✅ Risolto — build.yml: release non più bloccata da macOS
 
-Il job `release` in `.github/workflows/build.yml` dichiara `needs: [build-windows, build-linux, build-mac]`. Finché macOS è in sospeso (nessuna firma), questo blocca la pubblicazione anche di Windows e Linux.
-
-**Fix da fare prima del primo release ufficiale:** cambiare il `needs` del job `release` in `needs: [build-windows, build-linux]` e tenere `build-mac` come job standalone opzionale (non bloccante). Quando macOS sarà pronto e firmato, si reintegra nella dipendenza.
+Il job `release` in `.github/workflows/build.yml` dichiara ora `needs: [build-linux, build-windows]`. macOS è un job standalone non bloccante. Risolto in v1.10.4 durante il CI cleanup.
 
 ---
 
-## ✅ PRODOTTO LIVE SU GUMROAD — v1.10.4
+## ✅ PRODOTTO LIVE SU GUMROAD — v1.10.8
 
-**Data lancio:** 18 Aprile 2026  
+**Data lancio:** 18 Aprile 2026 (aggiornato a v1.10.5 il 20 Aprile 2026)  
 **URL:** https://pizzisimone.gumroad.com/l/telegrambot  
 **Titolo:** "Runtime TelegramBot Titan Edition" (senza numero versione — evergreen)  
 **Prezzo:** €9.99 pagamento unico  
 **Piattaforme:** Windows + Linux (macOS in arrivo)
 
 **Pacchetti distribuiti:**
-- `RuntimeTelegramBot-TitanEdition-1.10.4-Windows.zip` (92.9 MB) — Setup .exe + benvenuto 8 lingue + guides/
-- `RuntimeTelegramBot-TitanEdition-1.10.4-Linux.zip` (189.4 MB) — AppImage + .deb + benvenuto 8 lingue + guides/
+- `RuntimeTelegramBot-TitanEdition-1.10.5-Windows.zip` — Setup .exe + benvenuto 8 lingue + guides/
+- `RuntimeTelegramBot-TitanEdition-1.10.5-Linux.zip` — AppImage + .deb + benvenuto 8 lingue + guides/
 - Sorgenti locali: `gumroad-packages/`
 
 **Per i prossimi release:** quando esce una nuova versione, aggiornare i due ZIP su Gumroad e fare run dell'Action "Build & Release" per aggiornare la bridge repo (electron-updater notifica gli utenti in-app automaticamente).
@@ -139,6 +149,15 @@ Il job `release` in `.github/workflows/build.yml` dichiara `needs: [build-window
 ──────────────────────────────────────────────────────────────────────────
 [FATTO] Gumroad launch — Windows + Linux, €9.99, descrizione EN             ✅  ← v1.10.4
 ──────────────────────────────────────────────────────────────────────────
+[FATTO] v1.10.5 "IronShield" — hotfix spamming, deduplica globale          ✅  ← v1.10.5
+──────────────────────────────────────────────────────────────────────────
+[FATTO] v1.10.6 "SteelCore" — audit post-lancio, bugfix digest + NaN      ✅  ← v1.10.6
+──────────────────────────────────────────────────────────────────────────
+[FATTO] v1.10.7 "SilentGuard" — pending_queue, quiet hours persistente    ✅  ← v1.10.7
+──────────────────────────────────────────────────────────────────────────
+[FATTO] v1.10.8 "Alignment" — YouTube locale forcing, audit docs completo  ✅  ← v1.10.8
+──────────────────────────────────────────────────────────────────────────
 [NEXT]  macOS: firma collega → build-mac in CI → ZIP Gumroad aggiornato
 [NEXT]  Marketing
+[NEXT]  Test end-to-end auto-updater OTA (Action → bridge repo → notifica in-app)
 ```
