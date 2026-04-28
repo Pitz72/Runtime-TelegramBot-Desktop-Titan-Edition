@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
-    FloppyDisk, Trash, Warning, Clock, X, Database,
-    Gear, SquaresFour, DownloadSimple, Eye, EyeSlash
-} from '@phosphor-icons/react';
+    Save, Trash2, AlertTriangle, Clock, X, Database,
+    Settings, LayoutTemplate, Download, Eye, EyeOff
+} from 'lucide-react';
 import { BotConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -104,7 +104,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
     };
 
     // Shared input class
-    const inputCls = "w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-3 text-on-surface focus:outline-none focus:border-primary/50 focus:shadow-[0_0_0_1px_rgba(173,198,255,0.15)] transition-all text-sm";
+    const inputCls = "w-full bg-surface-container-lowest border border-outline-variant/15 rounded-lg p-3 text-on-surface focus:outline-none focus:border-primary/50 focus:shadow-[0_0_0_1px_rgba(59,130,246,0.15)] transition-all text-sm";
     const labelCls = "text-micro text-outline-variant mb-1.5 flex items-center gap-1.5 block";
 
     return (
@@ -112,7 +112,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
             <div className="glass-panel w-full max-w-6xl rounded-xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
 
                 {/* Header */}
-                <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-outline-variant/15 bg-surface-container-high/50 flex-shrink-0">
+                <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-outline-variant/10 bg-surface-container-lowest flex-shrink-0">
                     <div>
                         <h2 className="font-headline text-xl font-bold text-on-surface">{t('botModal.editTitle')}</h2>
                         <p className="text-nano text-outline-variant/50 mt-0.5">
@@ -120,15 +120,15 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                         </p>
                     </div>
                     <button onClick={onClose} className="p-1 text-outline-variant hover:text-on-surface hover:bg-surface-container-highest/50 rounded transition-colors">
-                        <X size={18} weight="bold" />
+                        <X size={18} />
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-outline-variant/15 px-6 bg-surface-container-low/40">
+                <div className="flex border-b border-outline-variant/10 px-6 bg-surface-container-lowest">
                     {[
-                        { key: 'general', icon: Gear, label: t('templateEditor.tabGeneral') || 'Generale' },
-                        { key: 'templates', icon: SquaresFour, label: t('templateEditor.tabTemplates') || 'Template' },
+                        { key: 'general', icon: Settings, label: t('templateEditor.tabGeneral') || 'Generale' },
+                        { key: 'templates', icon: LayoutTemplate, label: t('templateEditor.tabTemplates') || 'Template' },
                     ].map(({ key, icon: Icon, label }) => (
                         <button
                             key={key}
@@ -139,7 +139,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                     : 'border-transparent text-outline-variant/50 hover:text-on-surface-variant'
                             }`}
                         >
-                            <Icon size={14} weight={activeTab === key ? 'duotone' : 'regular'} />
+                            <Icon size={14} />
                             {label}
                         </button>
                     ))}
@@ -173,8 +173,8 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                             tabIndex={-1}
                                         >
                                             {showToken
-                                                ? <EyeSlash size={14} weight="duotone" />
-                                                : <Eye size={14} weight="duotone" />
+                                                ? <EyeOff size={14} />
+                                                : <Eye size={14} />
                                             }
                                         </button>
                                     </div>
@@ -231,7 +231,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                 {/* Interval */}
                                 <div>
                                     <label className={labelCls}>
-                                        <Clock size={11} weight="duotone" />
+                                        <Clock size={11} />
                                         {t('botModal.intervalLabel')}
                                     </label>
                                     <div className="flex items-center gap-3">
@@ -250,7 +250,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                 {/* Quiet Hours */}
                                 <div>
                                     <label className={labelCls}>
-                                        <Clock size={11} weight="duotone" />
+                                        <Clock size={11} />
                                         {t('botModal.quietHoursLabel')}
                                     </label>
                                     <div className="grid grid-cols-2 gap-4">
@@ -272,7 +272,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                 <div className="flex-1 flex flex-col justify-end">
                                     <div className="pt-5 border-t border-error/10 space-y-4">
                                         <div className="flex items-center gap-2 text-micro text-error/80">
-                                            <Warning size={14} weight="duotone" />
+                                            <AlertTriangle size={14} />
                                             {t('botModal.dangerZone')}
                                         </div>
                                         <div className="bg-error/5 border border-error/15 rounded-xl p-4 flex items-center justify-between gap-4">
@@ -285,7 +285,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                                 disabled={clearing}
                                                 className="flex items-center gap-2 bg-error/10 hover:bg-error/20 text-error px-4 py-2 rounded-lg text-xs font-bold transition-all border border-error/20 flex-shrink-0"
                                             >
-                                                <Database size={13} weight="duotone" />
+                                                <Database size={13} />
                                                 {clearing ? '...' : t('botModal.clearHistoryBtn')}
                                             </button>
                                         </div>
@@ -294,7 +294,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                     {/* Export zone */}
                                     <div className="pt-5 border-t border-outline-variant/10 space-y-4 mt-4">
                                         <div className="flex items-center gap-2 text-micro text-outline-variant/50">
-                                            <DownloadSimple size={14} weight="bold" />
+                                            <Download size={14} />
                                             {t('botModal.shareZone')}
                                         </div>
                                         <div className="ghost-border bg-primary/5 rounded-xl p-4 flex items-center justify-between gap-4">
@@ -307,7 +307,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                                                 disabled={isExporting}
                                                 className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg text-xs font-bold transition-all border border-primary/20 flex-shrink-0"
                                             >
-                                                <DownloadSimple size={13} weight="bold" />
+                                                <Download size={13} />
                                                 {isExporting ? '...' : t('botModal.exportBtn')}
                                             </button>
                                         </div>
@@ -326,12 +326,12 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-6 border-t border-outline-variant/15 bg-surface-container-low/40 flex justify-between items-center flex-shrink-0">
+                <div className="p-6 border-t border-outline-variant/10 bg-surface-container-lowest flex justify-between items-center flex-shrink-0">
                     <button
                         onClick={() => setDeleteConfirmOpen(true)}
                         className="flex items-center gap-2 text-error/70 hover:text-error transition-colors text-sm px-4 py-2 hover:bg-error/10 rounded-lg border border-transparent hover:border-error/20"
                     >
-                        <Trash size={14} weight="duotone" />
+                        <Trash2 size={14} />
                         {t('botModal.delete')}
                     </button>
 
@@ -344,7 +344,7 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                             disabled={saving || !name.trim()}
                             className="flex items-center gap-2 ignition-btn px-6 py-2 rounded-lg text-sm font-headline font-bold text-on-primary-fixed disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
                         >
-                            <FloppyDisk size={14} weight="bold" />
+                            <Save size={14} />
                             {saving ? '...' : t('botModal.save')}
                         </button>
                     </div>

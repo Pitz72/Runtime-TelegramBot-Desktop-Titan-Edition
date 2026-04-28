@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, ChartBar, TrendUp, RssSimple } from '@phosphor-icons/react';
+import { X, BarChart3, TrendingUp, Rss } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
 
 interface Props {
@@ -36,7 +36,7 @@ export function StatsModal({ botId, botName, onClose }: Props) {
                 {/* Header */}
                 <div className="flex justify-between items-center px-6 pt-5 pb-4 border-b border-outline-variant/15 bg-surface-container-high/50 flex-shrink-0">
                     <div className="flex items-center gap-3">
-                        <ChartBar size={18} weight="duotone" className="text-primary drop-glow-primary" />
+                        <BarChart3 size={18}  className="text-primary drop-glow-primary" />
                         <div>
                             <h2 className="font-headline text-base font-bold text-on-surface">{t('stats.detailsTitle') as string}</h2>
                             <p className="text-nano text-outline-variant/50">{botName}</p>
@@ -46,7 +46,7 @@ export function StatsModal({ botId, botName, onClose }: Props) {
                         onClick={onClose}
                         className="p-1 text-outline-variant hover:text-on-surface hover:bg-surface-container-highest/50 rounded transition-colors"
                     >
-                        <X size={16} weight="bold" />
+                        <X size={16}  />
                     </button>
                 </div>
 
@@ -105,13 +105,13 @@ export function StatsModal({ botId, botName, onClose }: Props) {
                             {/* Per Feed breakdown */}
                             <div>
                                 <div className="flex items-center gap-2 text-micro text-outline-variant/50 mb-3">
-                                    <TrendUp size={11} weight="bold" />
+                                    <TrendingUp size={11}  />
                                     {t('stats.feedBreakdown') as string}
                                 </div>
 
                                 {stats.byFeed.length === 0 ? (
                                     <div className="text-center py-8 text-outline-variant/30">
-                                        <RssSimple size={32} weight="duotone" className="mx-auto mb-2 opacity-30" />
+                                        <Rss size={32}  className="mx-auto mb-2 opacity-30" />
                                         <p className="text-micro">{t('stats.noData') as string}</p>
                                     </div>
                                 ) : (

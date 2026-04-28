@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, DownloadSimple, FileJs, Globe, Lightning, ShieldCheck, UploadSimple, X } from '@phosphor-icons/react';
+import { Database, Download, FileCode, Globe, Zap, ShieldCheck, Upload, X } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
 import { flagsList } from './IntroScreen';
 import { useToast } from './ui/Toast';
@@ -82,13 +82,13 @@ export function SystemSettingsModal({ onClose }: Props) {
                 <div className="flex justify-between items-center p-6 border-b border-outline-variant/15 bg-surface-container-high/50">
                     <div>
                         <h2 className="font-headline text-xl font-bold text-on-surface flex items-center gap-3">
-                            <ShieldCheck size={20} weight="duotone" className="text-primary drop-glow-primary" />
+                            <ShieldCheck size={20}  className="text-primary drop-glow-primary" />
                             {t('systemSettings.title')}
                         </h2>
                         <p className="text-nano text-outline-variant/50 mt-1">{t('systemSettings.subtitle')}</p>
                     </div>
                     <button onClick={onClose} className="p-1 text-outline-variant hover:text-on-surface hover:bg-surface-container-highest/50 rounded transition-colors">
-                        <X size={18} weight="bold" />
+                        <X size={18}  />
                     </button>
                 </div>
 
@@ -115,7 +115,7 @@ export function SystemSettingsModal({ onClose }: Props) {
                         <div className="max-w-md">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <Globe size={13} weight="duotone" />
+                                    <Globe size={13}  />
                                     {t('systemSettings.langSection.title')}
                                 </div>
                                 <p className="text-xs text-on-surface-variant leading-relaxed">{t('systemSettings.langSection.desc')}</p>
@@ -150,20 +150,20 @@ export function SystemSettingsModal({ onClose }: Props) {
                             {/* Database */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <Database size={13} weight="duotone" />
+                                    <Database size={13}  />
                                     {t('systemSettings.dbSection.title')}
                                 </div>
                                 <p className="text-xs text-on-surface-variant leading-relaxed">{t('systemSettings.dbSection.desc')}</p>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button onClick={handleExport} disabled={isExporting || isImporting}
                                         className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl ghost-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all text-primary disabled:opacity-40">
-                                        <DownloadSimple size={24} weight="duotone" className="opacity-80" />
+                                        <Download size={24}  className="opacity-80" />
                                         <span className="text-sm font-bold">{t('systemSettings.dbSection.exportBtn')}</span>
                                         <span className="text-nano text-primary/40 text-center">{t('systemSettings.dbSection.exportHint')}</span>
                                     </button>
                                     <button onClick={handleImport} disabled={isExporting || isImporting}
                                         className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl ghost-border bg-tertiary/5 hover:bg-tertiary/10 hover:border-tertiary/30 transition-all text-tertiary disabled:opacity-40">
-                                        <UploadSimple size={24} weight="duotone" className="opacity-80" />
+                                        <Upload size={24}  className="opacity-80" />
                                         <span className="text-sm font-bold">{t('systemSettings.dbSection.importBtn')}</span>
                                         <span className="text-nano text-tertiary/40 text-center">{t('systemSettings.dbSection.importHint')}</span>
                                     </button>
@@ -173,20 +173,20 @@ export function SystemSettingsModal({ onClose }: Props) {
                             {/* JSON Config */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <FileJs size={13} weight="duotone" />
+                                    <FileCode size={13}  />
                                     {t('systemSettings.jsonSection.title')}
                                 </div>
                                 <p className="text-xs text-on-surface-variant leading-relaxed">{t('systemSettings.jsonSection.desc')}</p>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button onClick={handleExportConfig} disabled={isExporting || isImporting}
                                         className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl ghost-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all text-primary disabled:opacity-40">
-                                        <DownloadSimple size={20} weight="duotone" />
+                                        <Download size={20}  />
                                         <span className="text-sm font-bold">{t('systemSettings.jsonSection.exportBtn')}</span>
                                         <span className="text-nano text-primary/40 text-center mt-1">{t('systemSettings.jsonSection.exportHint')}</span>
                                     </button>
                                     <button onClick={handleImportConfig} disabled={isExporting || isImporting}
                                         className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl ghost-border bg-secondary/5 hover:bg-secondary/10 hover:border-secondary/30 transition-all text-secondary disabled:opacity-40">
-                                        <UploadSimple size={20} weight="duotone" />
+                                        <Upload size={20}  />
                                         <span className="text-sm font-bold">{t('systemSettings.jsonSection.importBtn')}</span>
                                         <span className="text-nano text-secondary/40 text-center mt-1">{t('systemSettings.jsonSection.importHint')}</span>
                                     </button>
@@ -198,7 +198,7 @@ export function SystemSettingsModal({ onClose }: Props) {
                     {activeTab === 'performance' && (
                         <div className="max-w-lg space-y-6">
                             <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                <Lightning size={13} weight="duotone" />
+                                <Zap size={13}  />
                                 {t('systemSettings.perfSection.title')}
                             </div>
                             <p className="text-xs text-on-surface-variant leading-relaxed">

@@ -9,8 +9,8 @@
 
 /* === BASE === */
 body {
-    background-color: #12121f;
-    color: #e3e0f3;
+    background-color: #050510;
+    color: #e0e7ff;
     font-family: 'Inter', sans-serif;
     font-feature-settings: 'liga' 1, 'calt' 1;
 }
@@ -87,32 +87,32 @@ body {
 
 /* === GHOST BORDER — No-Opaque-Line Rule === */
 .ghost-border {
-    border: 1px solid rgba(66, 71, 84, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.10);
 }
 
 .ghost-border-hover:hover {
-    border-color: rgba(66, 71, 84, 0.35);
+    border-color: rgba(59, 130, 246, 0.25);
 }
 
 /* === GLASS PANEL — Titan Glass === */
 .glass-panel {
-    background: rgba(31, 30, 43, 0.75);
+    background: rgba(10, 10, 15, 0.80);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(66, 71, 84, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.10);
     box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.45),
-        0 0 15px rgba(173, 198, 255, 0.04);
+        0 20px 40px rgba(0, 0, 0, 0.55),
+        0 0 15px rgba(59, 130, 246, 0.04);
 }
 
 .glass-panel-elevated {
-    background: rgba(41, 41, 54, 0.85);
+    background: rgba(16, 16, 26, 0.90);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(66, 71, 84, 0.20);
+    border: 1px solid rgba(59, 130, 246, 0.15);
     box-shadow:
-        0 24px 48px rgba(0, 0, 0, 0.5),
-        0 0 20px rgba(173, 198, 255, 0.06);
+        0 24px 48px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(59, 130, 246, 0.06);
 }
 
 /* === TEXT UTILITIES === */
@@ -255,12 +255,12 @@ body {
 
 /* === PANEL BORDERS — legacy compat === */
 .panel-border {
-    border: 1px solid rgba(66, 71, 84, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.10);
 }
 
 .panel-border-active {
-    border-color: rgba(173, 198, 255, 0.2);
-    box-shadow: inset 0 0 30px rgba(173, 198, 255, 0.03), 0 0 15px rgba(173, 198, 255, 0.04);
+    border-color: rgba(59, 130, 246, 0.25);
+    box-shadow: inset 0 0 30px rgba(59, 130, 246, 0.04), 0 0 15px rgba(59, 130, 246, 0.05);
 }
 
 /* === STATUS DOTS === */
@@ -274,7 +274,7 @@ body {
 
 /* === GRID DOT BACKGROUND === */
 .grid-dots {
-    background-image: radial-gradient(rgba(140, 144, 159, 0.12) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(59, 130, 246, 0.10) 1px, transparent 1px);
     background-size: 24px 24px;
 }
 
@@ -289,25 +289,25 @@ body {
     position: relative;
     padding: 1px;
     border-radius: 4px;
-    background: linear-gradient(135deg, #adc6ff, #4cd7f6);
+    background: linear-gradient(135deg, #93c5fd, #4cd7f6);
 }
 
 .gradient-border-btn > * {
     border-radius: 3px;
-    background: #1f1e2b;
+    background: #0a0a0f;
     transition: background 0.2s ease;
 }
 
 .gradient-border-btn:hover > * {
-    background: #292936;
+    background: #10101a;
 }
 
 /* === NAV ACTIVE STATE — border-left accent === */
 .nav-item-active {
-    border-left: 2px solid #4ade80;
-    background: rgba(31, 30, 43, 0.8);
-    box-shadow: inset 0 0 15px rgba(74, 222, 128, 0.05);
-    color: #4ade80;
+    border-left: 2px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.06);
+    box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.04);
+    color: #93c5fd;
 }
 
 .nav-item {
@@ -316,18 +316,18 @@ body {
 }
 
 .nav-item:hover {
-    border-left-color: rgba(173, 198, 255, 0.3);
-    background: rgba(66, 71, 84, 0.15);
-    color: #e3e0f3;
+    border-left-color: rgba(59, 130, 246, 0.35);
+    background: rgba(59, 130, 246, 0.06);
+    color: #e0e7ff;
 }
 
 /* === INPUT FIELDS — Terminal underline style === */
 .input-terminal {
     background: transparent;
     border: none;
-    border-bottom: 1px solid rgba(66, 71, 84, 0.35);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.25);
     border-radius: 0;
-    color: #e3e0f3;
+    color: #e0e7ff;
     padding: 0.5rem 0;
     font-family: 'Inter', sans-serif;
     outline: none;

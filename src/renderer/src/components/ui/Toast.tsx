@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, WarningCircle, Warning, Info } from '@phosphor-icons/react';
+import { X, CheckCircle2, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -27,21 +27,21 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 const typeConfig = {
     success: {
-        icon: CheckCircle,
+        icon: CheckCircle2,
         iconColor:   'text-secondary',
         stripeClass: 'toast-stripe-success',
         titleColor:  'text-secondary',
         dropGlow:    'drop-glow-secondary',
     },
     error: {
-        icon: WarningCircle,
+        icon: AlertCircle,
         iconColor:   'text-error',
         stripeClass: 'toast-stripe-error',
         titleColor:  'text-error',
         dropGlow:    'drop-glow-error',
     },
     warning: {
-        icon: Warning,
+        icon: AlertTriangle,
         iconColor:   'text-tertiary',
         stripeClass: 'toast-stripe-warning',
         titleColor:  'text-tertiary',
@@ -100,7 +100,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                                 <div className="flex items-start gap-3 p-4 flex-1 min-w-0 pr-8">
                                     <Icon
                                         size={20}
-                                        weight="duotone"
                                         className={cn('flex-shrink-0 mt-0.5', cfg.iconColor, cfg.dropGlow)}
                                     />
                                     <div className="flex-1 min-w-0">
@@ -123,7 +122,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                                     onClick={() => removeToast(t.id)}
                                     className="absolute top-3 right-3 p-1 rounded text-outline-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-colors"
                                 >
-                                    <X size={13} weight="bold" />
+                                    <X size={13} />
                                 </button>
                             </motion.div>
                         );

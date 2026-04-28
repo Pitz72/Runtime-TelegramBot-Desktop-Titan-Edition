@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Plus, Trash, RssSimple, FileText, Globe, Play,
-    PencilSimple, Lightning, CircleNotch, Funnel, Clock,
-    UploadSimple, BookOpen
-} from '@phosphor-icons/react';
+    Plus, Trash2, Rss, FileText, Globe, Play,
+    Pencil, Zap, Loader2, Filter, Clock,
+    Upload, BookOpen
+} from 'lucide-react';
 import { FeedConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -140,9 +140,9 @@ export function FeedManager({ botId }: Props) {
     };
 
     const typeConfig = {
-        podcast: { icon: RssSimple,  color: 'text-tertiary',  bg: 'bg-tertiary/10',   border: 'border-tertiary/20' },
-        youtube: { icon: Play,       color: 'text-error',     bg: 'bg-error/10',       border: 'border-error/20'    },
-        news:    { icon: FileText,   color: 'text-primary',   bg: 'bg-primary/10',     border: 'border-primary/20'  },
+        podcast: { icon: Rss,      color: 'text-tertiary',  bg: 'bg-tertiary/10',   border: 'border-tertiary/20' },
+        youtube: { icon: Play,     color: 'text-error',     bg: 'bg-error/10',       border: 'border-error/20'    },
+        news:    { icon: FileText, color: 'text-primary',   bg: 'bg-primary/10',     border: 'border-primary/20'  },
     };
 
     const intervalLabel = (v: number | null) => {
@@ -165,7 +165,7 @@ export function FeedManager({ botId }: Props) {
     return (
         <div className="flex-1 bg-surface-container-lowest flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="p-4 border-b border-outline-variant/15 flex justify-between items-center bg-surface-container-low/50">
+            <div className="p-4 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-lowest">
                 <div>
                     <h2 className="font-headline text-sm font-bold text-on-surface uppercase tracking-wide">{t('feedManager.title')}</h2>
                     <p className="text-nano text-outline-variant/40 mt-0.5">{t('feedManager.subtitle')}</p>
@@ -178,8 +178,8 @@ export function FeedManager({ botId }: Props) {
                         title={t('feedManager.importOpml') as string}
                     >
                         {importingOpml
-                            ? <CircleNotch size={12} weight="bold" className="animate-spin" />
-                            : <UploadSimple size={12} weight="bold" />
+                            ? <Loader2 size={12} className="animate-spin" />
+                            : <Upload size={12} />
                         }
                         OPML
                     </button>
@@ -188,7 +188,7 @@ export function FeedManager({ botId }: Props) {
                         className="gradient-border-btn"
                     >
                         <div className="px-3 py-1.5 flex items-center gap-1.5 text-nano font-bold text-on-surface rounded-sm">
-                            <Plus size={13} weight="bold" />
+                            <Plus size={13} />
                             {t('feedManager.addSource')}
                         </div>
                     </button>
@@ -237,7 +237,7 @@ export function FeedManager({ botId }: Props) {
                                     className="bg-primary/10 hover:bg-primary/20 text-primary px-3 rounded-lg text-xs font-bold transition-all border border-primary/20 flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
                                     title={t('feedManager.testTitle') as string}
                                 >
-                                    {testing !== null ? <CircleNotch size={12} weight="bold" className="animate-spin" /> : <Lightning size={12} weight="duotone" />}
+                                    {testing !== null ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
                                     {t('feedManager.testBtn')}
                                 </button>
                             </div>
@@ -256,7 +256,7 @@ export function FeedManager({ botId }: Props) {
                         {/* Interval */}
                         <div className="mb-3">
                             <label className={labelCls + " flex items-center gap-1.5"}>
-                                <Clock size={10} weight="duotone" />
+                                <Clock size={10} />
                                 {t('feedManager.intervalLabel')}
                             </label>
                             <select className={inputCls + " appearance-none"}
@@ -270,7 +270,7 @@ export function FeedManager({ botId }: Props) {
                         {/* Keyword Filter */}
                         <div className="mb-3">
                             <label className={labelCls + " flex items-center gap-1.5"}>
-                                <Funnel size={10} weight="duotone" />
+                                <Filter size={10} />
                                 {t('feedManager.filterLabel')}
                             </label>
                             <div className="grid grid-cols-2 gap-2">
@@ -296,7 +296,7 @@ export function FeedManager({ botId }: Props) {
                         {/* Digest Mode */}
                         <div className="mb-4">
                             <label className={labelCls + " flex items-center gap-1.5"}>
-                                <BookOpen size={10} weight="duotone" />
+                                <BookOpen size={10} />
                                 {t('feedManager.digestLabel')}
                             </label>
                             <select className={inputCls + " appearance-none"}
@@ -339,10 +339,10 @@ export function FeedManager({ botId }: Props) {
                             <div key={feed.id} className={`group ghost-border rounded-xl p-3 flex items-center gap-3 transition-all ${
                                 isEditing
                                     ? 'border-primary/30 bg-primary/5'
-                                    : 'bg-surface-container/30 hover:bg-surface-container/60 hover:border-outline-variant/25'
+                                    : 'bg-background/80 hover:bg-surface-container-lowest hover:border-outline-variant/20'
                             }`}>
-                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${cfg.bg} ${cfg.color} flex-shrink-0`}>
-                                    <Icon size={17} weight="duotone" />
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center border ${cfg.bg} ${cfg.color} ${cfg.border} flex-shrink-0`}>
+                                    <Icon size={16} />
                                 </div>
 
                                 <div className="flex-1 min-w-0">
@@ -353,25 +353,25 @@ export function FeedManager({ botId }: Props) {
                                         </span>
                                         {hasFilter && (
                                             <span className="text-nano px-1.5 py-0.5 rounded border border-tertiary/30 text-tertiary flex-shrink-0 flex items-center gap-0.5">
-                                                <Funnel size={8} weight="duotone" />
+                                                <Filter size={8} />
                                                 {t('feedManager.filterActive')}
                                             </span>
                                         )}
                                         {hasCustomInterval && (
                                             <span className="text-nano px-1.5 py-0.5 rounded border border-secondary/30 text-secondary flex-shrink-0 flex items-center gap-0.5">
-                                                <Clock size={8} weight="duotone" />
+                                                <Clock size={8} />
                                                 {intervalLabel(feed.check_interval)}
                                             </span>
                                         )}
                                         {hasDigest && (
                                             <span className="text-nano px-1.5 py-0.5 rounded border border-tertiary-container/40 text-tertiary-container flex-shrink-0 flex items-center gap-0.5">
-                                                <BookOpen size={8} weight="duotone" />
+                                                <BookOpen size={8} />
                                                 {t('feedManager.digestBadge')}
                                             </span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-nano text-outline-variant/50 mt-0.5 truncate font-mono">
-                                        <Globe size={9} weight="bold" />
+                                        <Globe size={9} />
                                         {feed.url}
                                     </div>
                                 </div>
@@ -379,17 +379,17 @@ export function FeedManager({ botId }: Props) {
                                 <div className="flex items-center gap-2 flex-shrink-0">
                                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button onClick={() => startEdit(feed)} className="p-1.5 text-outline-variant/50 hover:text-primary transition-colors rounded">
-                                            <PencilSimple size={13} weight="bold" />
+                                            <Pencil size={13} />
                                         </button>
                                         <button onClick={() => handleDelete(feed.id)} className="p-1.5 text-outline-variant/50 hover:text-error transition-colors rounded">
-                                            <Trash size={13} weight="duotone" />
+                                            <Trash2 size={13} />
                                         </button>
                                     </div>
 
                                     {/* Toggle switch */}
                                     <label className="relative inline-flex items-center cursor-pointer ml-1">
                                         <input type="checkbox" className="sr-only peer" checked={!!feed.is_active} onChange={() => toggleFeed(feed.id, !!feed.is_active)} />
-                                        <div className="w-8 h-4 bg-surface-container-highest peer-focus:outline-none border border-outline-variant/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[2px] after:bg-outline-variant/60 after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-secondary/20 peer-checked:after:bg-secondary" />
+                                        <div className="w-8 h-4 bg-surface-container-lowest peer-focus:outline-none border border-outline-variant/15 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[2px] after:bg-outline-variant/60 after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-primary/25 peer-checked:border-primary/40 peer-checked:after:bg-primary-container" />
                                     </label>
                                 </div>
                             </div>
@@ -398,7 +398,7 @@ export function FeedManager({ botId }: Props) {
 
                     {feeds.length === 0 && !loading && (
                         <div className="text-center py-12 text-outline-variant/30">
-                            <RssSimple size={36} weight="duotone" className="mx-auto mb-3 opacity-30" />
+                            <Rss size={36} strokeWidth={1} className="mx-auto mb-3 opacity-30" />
                             <p className="text-sm">{t('feedManager.noFeeds')}</p>
                             <p className="text-nano mt-1">{t('feedManager.addPrompt')}</p>
                         </div>

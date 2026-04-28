@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ArrowRight, Check } from '@phosphor-icons/react';
+import { ArrowRight, Check } from 'lucide-react';
 import logo from '../assets/logo.png';
 import { useTranslation } from '../locales/I18nContext';
 
@@ -145,8 +145,8 @@ export function SetupWizard({ onComplete, onSkip }: Props) {
                         >
                             {step < totalSteps ? t('setup.btnNext') : t('setup.btnLaunch')}
                             {step < totalSteps
-                                ? <ArrowRight size={18} weight="bold" />
-                                : <Check size={18} weight="bold" />
+                                ? <ArrowRight size={18}  />
+                                : <Check size={18}  />
                             }
                         </button>
                     </div>

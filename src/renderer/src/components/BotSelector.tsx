@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, SlidersHorizontal, Hash, Check, Trash, FileArrowDown } from '@phosphor-icons/react';
+import { Plus, SlidersHorizontal, Hash, Check, Trash2, FileDown } from 'lucide-react';
 import { BotConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -90,9 +90,9 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
     };
 
     return (
-        <div className="w-72 bg-surface-container-low border-r border-outline-variant/15 flex flex-col">
+        <div className="w-72 bg-background border-r border-outline-variant/10 flex flex-col">
             {/* Header */}
-            <div className="p-4 border-b border-outline-variant/15 flex justify-between items-center bg-surface-container-lowest/60">
+            <div className="p-4 border-b border-outline-variant/10 flex justify-between items-center bg-background">
                 <span className="text-micro text-outline-variant/60">{t('botSelector.title')}</span>
                 <div className="flex bg-surface-container-lowest rounded border border-outline-variant/10 p-0.5">
                     <button
@@ -101,7 +101,7 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                         className="p-1.5 rounded-sm hover:bg-primary/10 text-outline-variant hover:text-primary transition-all disabled:opacity-25 disabled:hover:bg-transparent"
                         title={t('botModal.editTitle') || 'Modifica Bot'}
                     >
-                        <SlidersHorizontal size={13} weight="bold" />
+                        <SlidersHorizontal size={13} />
                     </button>
                     <div className="w-px bg-outline-variant/15 mx-0.5 h-5 self-center" />
                     <button
@@ -109,7 +109,7 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                         className="p-1.5 rounded-sm hover:bg-primary/10 text-outline-variant hover:text-primary transition-all"
                         title={t('botSelector.importTitle') as string}
                     >
-                        <FileArrowDown size={13} weight="duotone" />
+                        <FileDown size={13} />
                     </button>
                     {/* Gradient-border new bot button */}
                     <div className="gradient-border-btn ml-0.5">
@@ -118,7 +118,7 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                             className="px-2 py-1.5 flex items-center gap-1 text-nano font-bold text-on-surface"
                             title={t('botSelector.newBot')}
                         >
-                            <Plus size={12} weight="bold" />
+                            <Plus size={12} />
                         </button>
                     </div>
                 </div>
@@ -198,9 +198,9 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                                     <h3 className={cn(
                                         "font-body font-semibold text-sm truncate transition-colors",
                                         currentBotId === bot.id
-                                            ? "text-success"
+                                            ? "text-primary"
                                             : bot.is_active
-                                            ? "text-on-surface-variant"
+                                            ? "text-on-surface"
                                             : "text-outline-variant/50"
                                     )}>{bot.name}</h3>
                                 </div>
@@ -209,7 +209,7 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                                         "text-nano font-mono flex items-center gap-1 truncate",
                                         bot.is_active ? "text-outline-variant/60" : "text-outline-variant/30"
                                     )}>
-                                        <Hash size={9} weight="bold" />
+                                        <Hash size={9} />
                                         {bot.channel_id}
                                     </p>
                                     <p className="text-nano text-primary/25">
@@ -218,13 +218,13 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                                 </div>
                             </div>
                             {currentBotId === bot.id && (
-                                <Check size={14} weight="bold" className="text-success flex-shrink-0 drop-glow-success" />
+                                <Check size={14} className="text-primary flex-shrink-0 drop-glow-primary" />
                             )}
                             <button
                                 onClick={(e) => handleDelete(e, bot.id)}
                                 className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-1.5 hover:text-error text-outline-variant/40 transition-all"
                             >
-                                <Trash size={13} weight="duotone" />
+                                <Trash2 size={13} />
                             </button>
                         </div>
                     </div>

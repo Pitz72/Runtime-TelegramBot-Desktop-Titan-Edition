@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation, Language } from '../locales/I18nContext';
 import { FlagIT, FlagFR, FlagDE, FlagES, FlagPT, FlagRU, FlagCN, FlagGB } from './ui/Flags';
-import { CaretRight } from '@phosphor-icons/react';
+import { ChevronRight } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 interface Props {
@@ -92,7 +92,7 @@ export function IntroScreen({ onComplete }: Props) {
                     className="ignition-btn flex items-center gap-2 text-on-primary-fixed px-10 py-3.5 rounded-full font-headline font-bold text-sm shadow-lg"
                 >
                     {t('setup.btnLaunch') || 'Lancia Titan'}
-                    <CaretRight size={18} weight="bold" />
+                    <ChevronRight size={18}  />
                 </motion.button>
 
                 <p className="text-nano text-outline-variant/25 mt-8">INIT_SEQ · TITAN_DESKTOP_RUNTIME</p>

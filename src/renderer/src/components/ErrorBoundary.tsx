@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Warning, ArrowsClockwise } from '@phosphor-icons/react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 const errorStrings: Record<string, { title: string; subtitle: string; body: string; reload: string; footer: string }> = {
     it: { title: 'Errore Critico di Sistema', subtitle: 'Arresto Interfaccia Rilevato', body: "L'interfaccia ha riscontrato un errore fatale. I processi in background (Bot) potrebbero essere ancora attivi, ma l'interfaccia deve essere ricaricata.", reload: 'Ricarica Interfaccia', footer: 'Protocollo di Sicurezza Titan Desktop Attivo' },
@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
                         {/* Header */}
                         <div className="flex items-center gap-4 p-8 border-b border-outline-variant/15">
                             <div className="w-14 h-14 rounded-xl bg-error-container/20 flex items-center justify-center text-error border border-error/20 drop-glow-error flex-shrink-0">
-                                <Warning size={28} weight="duotone" />
+                                <AlertTriangle size={28} />
                             </div>
                             <div>
                                 <h1 className="font-headline text-2xl font-black text-on-surface uppercase tracking-tight">
@@ -86,7 +86,7 @@ export class ErrorBoundary extends Component<Props, State> {
                                 onClick={this.handleReset}
                                 className="w-full bg-error/15 hover:bg-error/25 text-error border border-error/30 py-3 rounded-lg font-headline font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] drop-glow-error"
                             >
-                                <ArrowsClockwise size={18} weight="bold" />
+                                <RefreshCw size={18} />
                                 {s.reload}
                             </button>
                             <p className="text-center text-nano text-outline-variant/30 mt-1">{s.footer}</p>

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
-    Play, Stop, Gear, DownloadSimple, ChartBar, ShieldCheck,
-    CircleHalf
-} from '@phosphor-icons/react';
+    Play, Square, Settings, Download, BarChart3, Circle
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BotConfig, LogEntry } from '../../../shared/types';
 import { BotSelector } from './BotSelector';
@@ -174,7 +173,7 @@ export function Dashboard() {
                         </div>
                         <div className="relative z-10 grid-dots absolute inset-0 opacity-40" />
                         <div className="relative z-20">
-                            <CircleHalf size={40} weight="duotone" className="mx-auto mb-4 text-outline-variant/30" />
+                            <Circle size={40} strokeWidth={1} className="mx-auto mb-4 text-outline-variant/30" />
                             <p className="text-micro text-outline-variant/40">{t('status.selectBot')}</p>
                         </div>
                     </div>
@@ -187,7 +186,7 @@ export function Dashboard() {
                 {/* Header */}
                 <header className="px-6 py-3 border-b border-outline-variant/15 flex justify-between items-center bg-surface-container-low/90 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
                     <div className="flex items-center gap-3">
-                        <img src={logo} alt="Logo" className="w-9 h-9 drop-shadow-[0_0_10px_rgba(173,198,255,0.25)]" />
+                        <img src={logo} alt="Logo" className="w-9 h-9 drop-shadow-[0_0_10px_rgba(59,130,246,0.30)]" />
                         <div>
                             <h1 className="font-headline text-base font-bold tracking-tight text-on-surface uppercase leading-tight">
                                 {t('app.title')} <span className="text-primary font-light">{t('app.edition')}</span>
@@ -225,7 +224,7 @@ export function Dashboard() {
                             className="p-2 rounded hover:bg-surface-container-highest/60 text-outline-variant hover:text-primary transition-all border border-transparent hover:border-outline-variant/20"
                             title={t('dashboard.systemSettingsTitle')}
                         >
-                            <Gear size={16} weight="duotone" />
+                            <Settings size={16} />
                         </button>
                     </div>
                 </header>
@@ -262,9 +261,9 @@ export function Dashboard() {
                                     )}
                                 >
                                     {isRunning ? (
-                                        <Stop size={22} weight="fill" className="text-white relative z-10" />
+                                        <Square size={22} color="white" fill="white" className="relative z-10" />
                                     ) : (
-                                        <Play size={26} weight="fill" className="text-on-primary-fixed ml-1 relative z-10" />
+                                        <Play size={26} color="white" fill="white" className="ml-1 relative z-10" />
                                     )}
                                 </button>
                             </div>
@@ -282,7 +281,7 @@ export function Dashboard() {
                                         className="flex flex-col items-center gap-1 text-outline-variant/40 hover:text-primary transition-colors cursor-pointer group"
                                         title={t('stats.detailsTitle') as string}
                                     >
-                                        <ChartBar size={16} weight="duotone" className="group-hover:drop-glow-primary transition-all" />
+                                        <BarChart3 size={16} className="group-hover:drop-glow-primary transition-all" />
                                         <span className="text-nano">{t('stats.statsLabel')}</span>
                                     </button>
                                 </div>
@@ -326,7 +325,7 @@ export function Dashboard() {
                                                 className="text-outline-variant/40 hover:text-primary text-nano transition-colors flex items-center gap-1"
                                                 title={t('logs.exportTitle')}
                                             >
-                                                <DownloadSimple size={11} weight="bold" />
+                                                <Download size={11} />
                                                 {t('logs.export')}
                                             </button>
                                             <span className="text-outline-variant/20">|</span>

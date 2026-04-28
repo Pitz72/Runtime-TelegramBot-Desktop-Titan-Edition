@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Warning, X } from '@phosphor-icons/react';
+import { AlertTriangle, X } from 'lucide-react';
 
 interface ConfirmDialogProps {
     isOpen: boolean;
@@ -46,7 +46,7 @@ export function ConfirmDialog({
                         {/* Header */}
                         <div className="flex items-start gap-4 p-6 border-b border-outline-variant/15">
                             <div className="flex-shrink-0 p-2 rounded-lg bg-error-container/20 text-error">
-                                <Warning size={20} weight="duotone" />
+                                <AlertTriangle size={20} />
                             </div>
                             <div className="flex-1 pt-0.5">
                                 <h2 className="font-headline font-bold text-lg text-on-surface uppercase tracking-tight">
@@ -58,7 +58,7 @@ export function ConfirmDialog({
                                 onClick={onCancel}
                                 className="p-1 text-outline-variant hover:text-on-surface hover:bg-surface-container-highest/50 rounded transition-colors"
                             >
-                                <X size={16} weight="bold" />
+                                <X size={16} />
                             </button>
                         </div>
 

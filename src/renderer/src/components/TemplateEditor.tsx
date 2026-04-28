@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Eye, EyeSlash } from '@phosphor-icons/react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
 import { validateTemplate } from '../utils/templateValidator';
 
@@ -65,7 +65,7 @@ export function TemplateEditor({ label, value, onChange, defaultTemplate, hideCh
                             }`}
                             title={t('templateEditor.previewBtn') as string}
                         >
-                            {showPreview ? <EyeSlash size={10} weight="bold" /> : <Eye size={10} weight="bold" />}
+                            {showPreview ? <EyeOff size={10} /> : <Eye size={10} />}
                             {t('templateEditor.previewBtn') as string}
                         </button>
                     )}
