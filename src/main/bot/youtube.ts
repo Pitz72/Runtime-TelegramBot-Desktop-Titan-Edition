@@ -45,7 +45,7 @@ export function clearYouTubeCache() {
 async function getYouTubeInstance() {
     if (!youtube) {
         const { Innertube } = await import('youtubei.js');
-        youtube = await Innertube.create({ gl: 'US', hl: 'en' } as any);
+        youtube = await Innertube.create();
         TitanLogger.log('[YouTube] New Innertube instance created');
     }
     return youtube;
@@ -166,7 +166,7 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
                 const amountMatch = rawDateText.match(/(\d+)/);
                 const amount = amountMatch ? parseInt(amountMatch[0]) : 1;
 
-                // Forme abbreviate InnerTube con hl:'en' (es. "3mo ago", "1y ago", "22h ago").
+                // Forme abbreviate InnerTube (es. "3mo ago", "1y ago", "22h ago").
                 // La regex deve testare 'mo' prima di 'm' per evitare match parziali.
                 const abbrev = rawDateText.match(/(\d+)(mo|min|y|w|h|d|m|s)\s*ago/i);
                 if (abbrev) {
