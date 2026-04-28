@@ -63,15 +63,15 @@ module.exports = {
         'on-tertiary-container':'#340080',
 
         // ── Error ──
-        error:              '#ffb4ab',
-        'error-container':  '#93000a',
-        'on-error':         '#690005',
-        'on-error-container':'#ffdad6',
+        error:              '#f87171',
+        'error-container':  '#7f1d1d',
+        'on-error':         '#450a0a',
+        'on-error-container':'#fecaca',
 
-        // ── Success (Green) ──
-        success:             '#4ade80',
-        'success-container': '#166534',
-        'on-success':        '#052e16',
+        // ── Success (Emerald) ──
+        success:             '#34d399',
+        'success-container': '#064e3b',
+        'on-success':        '#022c22',
 
         // ── Legacy (retrocompatibilità) ──
         titan: {
