@@ -36,6 +36,7 @@ Centro documentale del progetto. Indice completo di guide, changelog e documenta
 
 | Versione | Data | Descrizione |
 | :--- | :--- | :--- |
+| **[v1.10.10](changelogs/CHANGELOG_v1.10.10.md)** | Apr 2026 | "LogVault + UpdateFix": auto-updater race condition, virtual scroll log, buffer 5000 entry |
 | **[v1.10.9](changelogs/CHANGELOG_v1.10.9.md)** | Apr 2026 | Hotfix: parser date YouTube abbreviate — v1.10.8 assegnava oggi a tutti gli item YouTube |
 | **[v1.10.8](changelogs/CHANGELOG_v1.10.8.md)** | Apr 2026 | "Alignment": YouTube locale forcing (Innertube gl/hl='en'), audit e sincronizzazione documentazione completa |
 | **[v1.10.7](changelogs/CHANGELOG_v1.10.7.md)** | Apr 2026 | "SilentGuard": `pending_queue` persistente per quiet hours — item non persi su feed con backlog corto. Schema DB v11 |

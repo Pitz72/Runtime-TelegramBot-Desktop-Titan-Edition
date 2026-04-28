@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
     Play, Stop, Gear, DownloadSimple, ChartBar, ShieldCheck,
     CircleHalf
@@ -28,6 +29,7 @@ export function Dashboard() {
     const [filterBySelectedBot, setFilterBySelectedBot] = useState(false);
     const [showStatsModal, setShowStatsModal] = useState(false);
     const [updateReady, setUpdateReady] = useState<{ version: string } | null>(null);
+    const logContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         window.api.getVersion().then(setVersion);
@@ -44,7 +46,7 @@ export function Dashboard() {
         });
 
         window.api.onLogsBatch((newLogs: LogEntry[]) => {
-            setLogs(prev => [...newLogs.reverse(), ...prev].slice(0, 300));
+            setLogs(prev => [...newLogs.reverse(), ...prev].slice(0, 5000));
         });
         window.api.onYouTubeApiError(() => {
             error(t('youtubeError.message'), t('youtubeError.title'));
@@ -95,7 +97,7 @@ export function Dashboard() {
             id: Date.now(),
             level,
             message: `[${timestamp}] ${message}`,
-        }, ...prev].slice(0, 300));
+        }, ...prev].slice(0, 5000));
     };
 
     const handleExportLog = async () => {
@@ -116,6 +118,13 @@ export function Dashboard() {
     const displayedLogs = filterBySelectedBot && selectedBot
         ? logs.filter(l => l.message.includes(`[${selectedBot.name}]`))
         : logs;
+
+    const logVirtualizer = useVirtualizer({
+        count: displayedLogs.length,
+        getScrollElement: () => logContainerRef.current,
+        estimateSize: () => 22,
+        overscan: 15,
+    });
 
     const handleBotUpdate = useCallback((updatedBot: BotConfig) => {
         setSelectedBot(updatedBot);
@@ -332,23 +341,43 @@ export function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* Log entries */}
-                            <div className="flex-1 overflow-y-auto space-y-0.5 p-4 relative z-10">
-                                {displayedLogs.map((log) => (
-                                    <div key={log.id} className="break-words font-medium opacity-75 hover:opacity-100 transition-opacity leading-relaxed">
-                                        <span className={
-                                            log.level === 'error'   ? "text-error"
-                                            : log.level === 'success' ? "text-secondary"
-                                            : log.level === 'warn'    ? "text-tertiary"
-                                            : "text-on-surface-variant"
-                                        }>{log.message}</span>
-                                    </div>
-                                ))}
-                                {displayedLogs.length === 0 && (
+                            {/* Log entries — virtual scroll, fino a 5000 righe senza impatto RAM/DOM */}
+                            <div
+                                ref={logContainerRef}
+                                className="flex-1 overflow-y-auto relative z-10 px-4 pt-2 pb-2"
+                            >
+                                {displayedLogs.length === 0 ? (
                                     <div className="h-full flex flex-col items-center justify-center text-outline-variant/20 gap-2">
                                         <span className="text-micro">
                                             {filterBySelectedBot ? `— ${selectedBot?.name} —` : t('status.awaiting')}
                                         </span>
+                                    </div>
+                                ) : (
+                                    <div style={{ height: logVirtualizer.getTotalSize(), position: 'relative' }}>
+                                        {logVirtualizer.getVirtualItems().map(vRow => {
+                                            const log = displayedLogs[vRow.index];
+                                            return (
+                                                <div
+                                                    key={vRow.key}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: 0,
+                                                        left: 0,
+                                                        width: '100%',
+                                                        transform: `translateY(${vRow.start}px)`,
+                                                        paddingBottom: '2px',
+                                                    }}
+                                                    className="break-words font-medium opacity-75 hover:opacity-100 transition-opacity leading-relaxed"
+                                                >
+                                                    <span className={
+                                                        log.level === 'error'   ? "text-error"
+                                                        : log.level === 'success' ? "text-secondary"
+                                                        : log.level === 'warn'    ? "text-tertiary"
+                                                        : "text-on-surface-variant"
+                                                    }>{log.message}</span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>

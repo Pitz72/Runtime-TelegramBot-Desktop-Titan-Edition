@@ -2,7 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v1.10.9 (Corrente)](docs/changelogs/CHANGELOG_v1.10.9.md) — Hotfix: parser date YouTube abbreviate ("3mo ago", "1y ago") — v1.10.8 assegnava la data odierna a tutti gli item YouTube.
+- [v1.10.10 (Corrente)](docs/changelogs/CHANGELOG_v1.10.10.md) — "LogVault + UpdateFix": auto-updater race condition fix, virtual scroll log panel, buffer 5000 entry (12-24h).
+- [v1.10.9 (Archivio)](docs/changelogs/CHANGELOG_v1.10.9.md) — Hotfix: parser date YouTube abbreviate ("3mo ago", "1y ago") — v1.10.8 assegnava la data odierna a tutti gli item YouTube.
 - [v1.10.8 (Archivio)](docs/changelogs/CHANGELOG_v1.10.8.md) — "Alignment": YouTube locale forcing (gl/hl='en'), audit documentazione completo, sincronizzazione docs/index.md e STATO-PROGETTO.md.
 - [v1.10.7 (Archivio)](docs/changelogs/CHANGELOG_v1.10.7.md) — "SilentGuard": pending_queue persistente per quiet hours — item non persi più su feed con backlog corto. Schema DB v11.
 - [v1.10.6 (Archivio)](docs/changelogs/CHANGELOG_v1.10.6.md) — "SteelCore" Quality Patch: bugfix digest (ordine operazioni), bugfix NaN bypass cutoff, fix UTC threshold anti-spam, warning start_date futura, consolidamento electron-builder.yml.
@@ -24,9 +25,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v1.10.9
+## Versione Attuale: v1.10.10
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.9.md](docs/changelogs/CHANGELOG_v1.10.9.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.10.md](docs/changelogs/CHANGELOG_v1.10.10.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 

@@ -1,6 +1,6 @@
 {
     "name": "titan-desktop",
-    "version": "1.10.9",
+    "version": "1.10.10",
     "description": "Desktop Application for Runtime Radio Telegram Bot",
     "author": {
         "name": "Runtime Radio",
@@ -22,6 +22,7 @@
         "@electron-toolkit/preload": "^2.0.0",
         "@electron-toolkit/utils": "^2.0.0",
         "@phosphor-icons/react": "^2.1.10",
+        "@tanstack/react-virtual": "^3.13.24",
         "better-sqlite3": "^11.8.1",
         "clsx": "^2.1.0",
         "electron-updater": "^6.8.3",

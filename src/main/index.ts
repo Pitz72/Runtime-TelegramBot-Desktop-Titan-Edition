@@ -131,7 +131,8 @@ app.whenReady().then(() => {
         autoUpdater.on('update-downloaded', (info) => {
             mainWindow?.webContents.send('update-downloaded', { version: info.version })
         })
-        autoUpdater.checkForUpdates().catch(() => {})
+        // checkForUpdates() è avviato dal renderer via IPC dopo il mount (window.api.checkForUpdates).
+        // Non chiamarlo qui: il renderer non è ancora pronto e il messaggio update-available verrebbe perso.
     }
 
     app.on('activate', () => {
