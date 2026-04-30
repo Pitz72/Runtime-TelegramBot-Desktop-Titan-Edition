@@ -6,7 +6,7 @@
   
   **La Piattaforma Definitiva per l'Automazione Multi-Canale RSS & YouTube su Telegram**
 
-  ![Version](https://img.shields.io/badge/Version-1.10.3-3b82f6?style=for-the-badge)
+  ![Version](https://img.shields.io/badge/Version-2.0.0-3b82f6?style=for-the-badge)
   ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-emerald?style=for-the-badge)
   ![Stack](https://img.shields.io/badge/Stack-Electron%20%7C%20React%20%7C%20SQLite-475569?style=for-the-badge)
   ![Lang](https://img.shields.io/badge/Languages-8%20Supported-purple?style=for-the-badge)
@@ -20,7 +20,7 @@
 
 **Runtime TelegramBot** (Titan Edition) è un'applicazione desktop cross-platform progettata per monitorare feed RSS, Podcast e canali YouTube, pubblicando automaticamente i nuovi contenuti su canali Telegram. Supporta la gestione simultanea di più bot e più canali da un'unica interfaccia.
 
-Il progetto nasce per superare i limiti di un precedente bot Python da terminale, offrendo un'interfaccia grafica moderna (Obsidian Pulse V2), un'architettura asincrona robusta e standard di sicurezza hardware-bound per la protezione delle credenziali.
+Il progetto nasce per superare i limiti di un precedente bot Python da terminale, offrendo un'interfaccia grafica moderna (Titan Blue), un'architettura asincrona robusta e standard di sicurezza hardware-bound per la protezione delle credenziali.
 
 ---
 
@@ -58,8 +58,8 @@ Interfaccia tradotta in 8 lingue con cambio istantaneo:
 | :--- | :--- |
 | **Framework** | Electron 32.3.3 + Node.js 20+ |
 | **Frontend** | React 18.3.1 + Vite 5.4.21 |
-| **Styling** | TailwindCSS + Phosphor Icons + Space Grotesk |
-| **Database** | SQLite via `better-sqlite3` (WAL mode, schema v10) |
+| **Styling** | TailwindCSS + Lucide React + Space Grotesk |
+| **Database** | SQLite via `better-sqlite3` (WAL mode, schema v11) |
 | **Telegram** | Telegraf v4 |
 | **Build** | electron-builder 25 (NSIS, DMG, AppImage/deb) |
 | **CI/CD** | GitHub Actions (Windows, macOS, Linux) |
