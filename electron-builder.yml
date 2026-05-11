@@ -32,7 +32,7 @@ win:
   icon: resources/icon.png
   target: nsis
 nsis:
-  artifactName: ${productName}-Setup-${version}.${ext}
+  artifactName: RuntimeTelegramBot-TitanEdition-Setup-${version}.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: true
@@ -46,7 +46,7 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  artifactName: ${productName}-${version}.${ext}
+  artifactName: RuntimeTelegramBot-TitanEdition-${version}.${ext}
 
 # === Linux ===
 linux:
@@ -56,7 +56,7 @@ linux:
     - AppImage
     - deb
   category: Utility
-  artifactName: ${productName}-${version}.${ext}
+  artifactName: RuntimeTelegramBot-TitanEdition-${version}.${ext}
 
 # === Auto-Update (bridge repo pubblico su Ecosystem-Runtime) ===
 publish:
