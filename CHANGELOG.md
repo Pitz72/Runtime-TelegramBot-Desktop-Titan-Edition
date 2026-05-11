@@ -2,7 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v2.0.0 (Corrente)](docs/changelogs/CHANGELOG_v2.0.0.md) — "Titan Blue": redesign UI completo — palette pure blue (#3b82f6), deep black background (#050510), migrazione totale Phosphor Icons → Lucide React.
+- [v2.0.1 (Corrente)](docs/changelogs/CHANGELOG_v2.0.1.md) — Hotfix: race condition drain+processFeed — doppio invio podcast al termine delle quiet hours.
+- [v2.0.0 (Archivio)](docs/changelogs/CHANGELOG_v2.0.0.md) — "Titan Blue": redesign UI completo — palette pure blue (#3b82f6), deep black background (#050510), migrazione totale Phosphor Icons → Lucide React.
 - [v1.10.11 (Archivio)](docs/changelogs/CHANGELOG_v1.10.11.md) — "CleanTube": rimosso locale forcing YouTube (gl/hl=en) che causava 0 item e session reset su diversi canali.
 - [v1.10.10 (Archivio)](docs/changelogs/CHANGELOG_v1.10.10.md) — "LogVault + UpdateFix": auto-updater race condition fix, virtual scroll log panel, buffer 5000 entry (12-24h).
 - [v1.10.9 (Archivio)](docs/changelogs/CHANGELOG_v1.10.9.md) — Hotfix: parser date YouTube abbreviate ("3mo ago", "1y ago") — v1.10.8 assegnava la data odierna a tutti gli item YouTube.
@@ -27,9 +28,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v2.0.0
+## Versione Attuale: v2.0.1
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v1.10.11.md](docs/changelogs/CHANGELOG_v1.10.11.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.0.1.md](docs/changelogs/CHANGELOG_v2.0.1.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 
