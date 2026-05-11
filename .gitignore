@@ -44,3 +44,7 @@ Thumbs.db
 
 # Claude Code internal
 .claude/
+
+# Distribuzione e design locale (non fanno parte del sorgente)
+gumroad-packages/
+INTERFACCIA/
