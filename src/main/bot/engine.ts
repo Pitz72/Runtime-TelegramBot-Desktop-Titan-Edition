@@ -309,8 +309,8 @@ export class BotEngine {
                 }
 
                 if (!this.isTimeAllowed(bot.send_from, bot.send_until)) {
-                    BotManager.addToPendingQueue(bot.id, feed.id, item);
-                    TitanLogger.log(`  🌙 ${tag} Quiet hours — salvato in coda persistente: ${item.title}`);
+                    const added = BotManager.addToPendingQueue(bot.id, feed.id, item);
+                    if (added) TitanLogger.log(`  🌙 ${tag} Quiet hours — salvato in coda persistente: ${item.title}`);
                     deferredCount++;
                     continue;
                 }
@@ -406,6 +406,15 @@ export class BotEngine {
             // se il bot originario della coda è stato eliminato prima del compimento dell'invio Telegram.
             if (!BotManager.getBots().some((b: any) => b.id === bot.id)) {
                 TitanLogger.log(`  ⚠️ [${bot.name}] Job scartato dalla coda: il bot originario è stato eliminato.`);
+                continue;
+            }
+
+            // DEDUP CHECK: item già processato. Può succedere quando drainPendingQueue e processFeed
+            // girano nello stesso ciclo — drain aggiunge l'item a publishQueue ma non lo marca in history
+            // (markProcessed avviene solo dopo il send), quindi processFeed lo trova ancora "nuovo" e
+            // lo accoda una seconda volta. Questo guard blocca il secondo invio.
+            if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
+                TitanLogger.log(`  ⏭️ [${bot.name}] Skip duplicato in coda: ${item.title}`);
                 continue;
             }
 

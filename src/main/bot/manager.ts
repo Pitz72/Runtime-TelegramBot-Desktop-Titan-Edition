@@ -240,10 +240,11 @@ export class BotManager {
     }
 
     // --- PENDING QUEUE (Quiet Hours) ---
-    static addToPendingQueue(botId: number, feedId: number, item: { id: string; title: string; link: string; summary: string; image?: string; pubDate: Date }) {
-        db().prepare(
+    static addToPendingQueue(botId: number, feedId: number, item: { id: string; title: string; link: string; summary: string; image?: string; pubDate: Date }): boolean {
+        const result = db().prepare(
             'INSERT OR IGNORE INTO pending_queue (bot_id, feed_id, item_id, item_title, item_link, item_summary, item_image, item_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         ).run(botId, feedId, item.id, item.title, item.link, item.summary || null, item.image || null, item.pubDate.toISOString());
+        return result.changes > 0;
     }
 
     static getPendingQueue(botId: number): Array<{ id: number; feed_id: number; item_id: string; item_title: string | null; item_link: string; item_summary: string | null; item_image: string | null; item_date: string }> {
