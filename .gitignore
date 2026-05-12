@@ -49,3 +49,6 @@ Thumbs.db
 # Distribuzione e design locale (non fanno parte del sorgente)
 gumroad-packages/
 INTERFACCIA/
+
+# Credenziali locali — MAI committare
+.secrets/
