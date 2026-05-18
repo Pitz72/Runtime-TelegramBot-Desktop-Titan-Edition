@@ -1,7 +1,7 @@
 # Titan Desktop — Stato del Progetto
 
-**Versione corrente:** v2.0.2  
-**Ultimo aggiornamento:** 11 Maggio 2026  
+**Versione corrente:** v2.0.3  
+**Ultimo aggiornamento:** 18 Maggio 2026  
 **Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
 
@@ -169,6 +169,9 @@ Il job `release` in `.github/workflows/build.yml` dichiara ora `needs: [build-li
 ──────────────────────────────────────────────────────────────────────────
 [FATTO] v2.0.2 Fix auto-updater — artifact name senza spazi, OTA funz.   ✅  ← v2.0.2
 ──────────────────────────────────────────────────────────────────────────
+[FATTO] v2.0.3 Mitigazione antibot YouTube — stop reset sess, backoff 5s ✅  ← v2.0.3
+──────────────────────────────────────────────────────────────────────────
+[NEXT]  v2.1.0 — cache persistente handle→ChannelID (bypass yt.search rate-limited)
 [NEXT]  macOS: firma collega → build-mac in CI → ZIP Gumroad aggiornato
 [NEXT]  Marketing
 [NEXT]  Test end-to-end auto-updater OTA (Action → bridge repo → notifica in-app)

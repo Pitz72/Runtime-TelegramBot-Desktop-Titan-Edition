@@ -127,9 +127,12 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
         TitanLogger.log(`[YouTube] Raw videos count: ${videoList.length}`);
 
         if (videoList.length === 0) {
-            TitanLogger.log(`[YouTube] WARNING: No videos returned for channel "${targetId}". Possible API issue — resetting session.`);
-            // Reset sessione per il prossimo tentativo
-            resetYouTubeSession();
+            // v2.0.3: NON resettare la sessione su 0 risultati.
+            // Issue upstream LuanRT/YouTube.js#1158 e #1166 (chiusa dal maintainer il 14/05/2026
+            // come "server-side, non fixabile") confermano che è rate-limiting YouTube:
+            // creare nuove istanze Innertube subito dopo un 0 *amplifica* il blocco invece di
+            // risolverlo. Manteniamo la sessione viva e lasciamo che il prossimo poll riprovi.
+            TitanLogger.log(`[YouTube] WARNING: No videos returned for channel "${targetId}". Probabile rate-limit YouTube — sessione mantenuta, riprova al prossimo ciclo.`);
             return [];
         }
 

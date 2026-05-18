@@ -204,8 +204,16 @@ export class BotEngine {
                     // Rate-limiting inter-feed: pausa tra un fetch e il successivo — fix #17
                     // Evita di inondare i server RSS/YouTube in loop stretti con molti feed.
                     // Salta la pausa sull'ultimo feed del ciclo per non ritardare inutilmente.
+                    //
+                    // v2.0.3: pausa estesa quando il feed corrente *o* il successivo è YouTube.
+                    // L'antibot lato YouTube (issue LuanRT/YouTube.js#1158, #1166) penalizza
+                    // burst ravvicinati di chiamate Innertube; un gap di 5s riduce drasticamente
+                    // la probabilità di risposte vuote.
                     if (i < activeFeeds.length - 1 && this.isRunning) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        const nextFeed = activeFeeds[i + 1];
+                        const involvesYoutube = feed.type === 'youtube' || nextFeed.type === 'youtube';
+                        const pauseMs = involvesYoutube ? 5000 : 1000;
+                        await new Promise(resolve => setTimeout(resolve, pauseMs));
                     }
                 }
 

@@ -9,11 +9,13 @@ Put your RSS feeds and YouTube publishing on autopilot with a powerful desktop a
 
 ---
 
-🚀 LATEST VERSION: v2.0.2 — Stability & Reliability Update
+🚀 LATEST VERSION: v2.0.3 — YouTube Anti-Bot Mitigation
 
 We've listened to our users and completely upgraded the Titan experience:
 
-🔧 **v2.0.2 Stability Patch:** Fixed the in-app automatic updater. A filename mismatch between the update manifest and GitHub's release assets was causing a 404 error when trying to download updates. The OTA update system now works flawlessly end-to-end.
+🛡️ **v2.0.3 YouTube Hotfix:** YouTube tightened its server-side anti-bot protection in May 2026, causing the InnerTube client to return empty channel results across the board (a known upstream issue closed by the library maintainer as "not fixable client-side"). Titan's previous defensive behavior — recreating the Innertube session on every empty response — was unintentionally *amplifying* the rate-limit. This release stops the aggressive session reset and adds a 5-second back-off between YouTube fetches. Result: fewer requests, friendlier traffic pattern, and feeds resume publishing as YouTube relaxes its throttling.
+
+🔧 **v2.0.3 Stability Patch:** Fixed the in-app automatic updater. A filename mismatch between the update manifest and GitHub's release assets was causing a 404 error when trying to download updates. The OTA update system now works flawlessly end-to-end.
 
 🔧 **v2.0.1 Stability Patch:** Fixed a rare but confirmed bug where podcast episodes could be published twice when Quiet Hours ended and a new episode had arrived overnight. The bot could send the same post once from the recovered queue and once again from the fresh feed scan — in the same cycle. This is now fully blocked by a pre-send deduplication guard. *If you've ever woken up on a Monday morning to a double post — this one's for you.*
 
@@ -73,15 +75,15 @@ Built for Security & Performance
 
 You will get immediate access to both Windows and Linux versions. Buy once, run anywhere.
 
-1. Windows Package (v2.0.2)
+1. Windows Package (v2.0.3)
 
-- `RuntimeTelegramBot-TitanEdition-Setup-2.0.2.exe` — Standard Windows Installer.
+- `RuntimeTelegramBot-TitanEdition-Setup-2.0.3.exe` — Standard Windows Installer.
 - Welcome messages and Quick-Start guides in 8 languages (EN, IT, FR, DE, ES, PT, RU, ZH).
 
-2. Linux Package (v2.0.2)
+2. Linux Package (v2.0.3)
 
-- `RuntimeTelegramBot-TitanEdition-2.0.2.AppImage` — Universal portable file.
-- `RuntimeTelegramBot-TitanEdition-2.0.2.deb` — For Debian/Ubuntu-based distros.
+- `RuntimeTelegramBot-TitanEdition-2.0.3.AppImage` — Universal portable file.
+- `RuntimeTelegramBot-TitanEdition-2.0.3.deb` — For Debian/Ubuntu-based distros.
 - Welcome messages and Quick-Start guides in 8 languages.
 
 (Note: macOS build is currently pending developer certificate signing. Windows/Linux buyers will receive the macOS package at no extra cost once it becomes available).
