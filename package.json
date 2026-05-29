@@ -1,12 +1,12 @@
 {
     "name": "titan-desktop",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "description": "Desktop Application for Runtime Radio Telegram Bot",
     "author": {
         "name": "Runtime Radio",
         "email": "info@runtimeradio.it"
     },
-    "homepage": "https://github.com/runtimeradio/titan-desktop",
+    "homepage": "https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition",
     "private": true,
     "type": "module",
     "main": "dist-electron/main/index.cjs",

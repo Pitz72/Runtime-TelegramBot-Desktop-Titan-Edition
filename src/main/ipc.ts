@@ -255,6 +255,8 @@ export function setupIpc() {
         return { success: true };
     });
 
+    ipcMain.handle('get-bot-status', () => ({ running: getBotEngine().isEngineRunning() }));
+
     // --- LOG EXPORT ---
     ipcMain.handle('export-logs', async (_, logs: string[]) => {
         try {

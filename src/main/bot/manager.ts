@@ -262,12 +262,14 @@ export class BotManager {
 
     // --- STATS ---
     static getStats(botId: number): { total: number; today: number; week: number } {
+        // sent_at è in UTC (CURRENT_TIMESTAMP); il confine "oggi"/"settimana" va calcolato
+        // nel fuso locale dell'utente, altrimenti "oggi" si azzererebbe a mezzanotte UTC.
         const total = (db().prepare('SELECT COUNT(*) as count FROM history WHERE bot_id = ?').get(botId) as any)?.count || 0;
         const today = (db().prepare(
-            "SELECT COUNT(*) as count FROM history WHERE bot_id = ? AND sent_at >= date('now', 'start of day')"
+            "SELECT COUNT(*) as count FROM history WHERE bot_id = ? AND datetime(sent_at, 'localtime') >= datetime('now', 'localtime', 'start of day')"
         ).get(botId) as any)?.count || 0;
         const week = (db().prepare(
-            "SELECT COUNT(*) as count FROM history WHERE bot_id = ? AND sent_at >= date('now', '-7 days')"
+            "SELECT COUNT(*) as count FROM history WHERE bot_id = ? AND datetime(sent_at, 'localtime') >= datetime('now', 'localtime', '-7 days', 'start of day')"
         ).get(botId) as any)?.count || 0;
 
         return { total, today, week };
@@ -278,7 +280,7 @@ export class BotManager {
         const rows = db().prepare(`
             SELECT h.feed_id as feedId, COALESCE(f.name, 'Feed rimosso') as feedName,
                 COUNT(*) as total,
-                SUM(CASE WHEN h.sent_at >= date('now', 'start of day') THEN 1 ELSE 0 END) as today
+                SUM(CASE WHEN datetime(h.sent_at, 'localtime') >= datetime('now', 'localtime', 'start of day') THEN 1 ELSE 0 END) as today
             FROM history h
             LEFT JOIN feeds f ON f.id = h.feed_id
             WHERE h.bot_id = ?

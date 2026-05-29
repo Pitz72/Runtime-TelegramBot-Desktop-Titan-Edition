@@ -29,9 +29,16 @@ export function Dashboard() {
     const [showStatsModal, setShowStatsModal] = useState(false);
     const [updateReady, setUpdateReady] = useState<{ version: string } | null>(null);
     const logContainerRef = useRef<HTMLDivElement>(null);
+    // ID monotono per i log generati localmente. Negativo decrescente: non collide mai
+    // con gli ID del backend (positivi crescenti) né con altri log locali nello stesso ms.
+    const localLogIdRef = useRef(0);
 
     useEffect(() => {
         window.api.getVersion().then(setVersion);
+
+        // Sincronizza con lo stato reale del motore (che vive nel main process e
+        // sopravvive a un reload del renderer): evita di mostrare "offline" se gira già.
+        window.api.getBotStatus().then(s => setIsRunning(s.running)).catch(() => {});
 
         window.api.checkForUpdates().catch(() => {});
 
@@ -93,7 +100,7 @@ export function Dashboard() {
             : (message.includes('✅') || message.includes('🚀')) ? 'success'
             : 'info';
         setLogs(prev => [{
-            id: Date.now(),
+            id: --localLogIdRef.current,
             level,
             message: `[${timestamp}] ${message}`,
         }, ...prev].slice(0, 5000));

@@ -41,6 +41,7 @@ const api = {
     // Engine
     startBot: () => ipcRenderer.invoke('start-bot'),
     stopBot: () => ipcRenderer.invoke('stop-bot'),
+    getBotStatus: () => ipcRenderer.invoke('get-bot-status'),
     onLog: (callback: (message: string) => void) => {
         ipcRenderer.removeAllListeners('bot-log');
         ipcRenderer.on('bot-log', (_, message) => callback(message));

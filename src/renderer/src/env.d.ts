@@ -36,6 +36,7 @@ export interface TitanAPI {
     // Engine
     startBot: () => Promise<{ success: boolean; error?: string }>
     stopBot: () => Promise<{ success: boolean }>
+    getBotStatus: () => Promise<{ running: boolean }>
     onLog: (callback: (message: string) => void) => void
     onLogsBatch: (callback: (messages: LogEntry[]) => void) => void
     onYouTubeApiError: (callback: () => void) => void

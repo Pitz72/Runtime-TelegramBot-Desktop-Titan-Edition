@@ -62,6 +62,11 @@ export class BotEngine {
 
     constructor() { }
 
+    /** Stato corrente del motore — usato dal renderer per sincronizzare la UI al mount. */
+    isEngineRunning(): boolean {
+        return this.isRunning;
+    }
+
     private isTimeAllowed(from: string, until: string): boolean {
         const current = new Date().toTimeString().slice(0, 5);
         if (from <= until) {
