@@ -146,7 +146,12 @@ export class BotEngine {
         const minutes = interval / 60000;
         TitanLogger.log(`⏳ Next check in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}...`);
         this.timeoutId = setTimeout(() => {
-            this.checkLoop().then(() => this.scheduleNext());
+            // .catch + .finally: un errore non gestito in checkLoop non deve interrompere
+            // il loop di scheduling (né propagarsi come unhandledRejection). Il prossimo
+            // ciclo viene comunque pianificato.
+            this.checkLoop()
+                .catch(e => TitanLogger.log(`❌ Errore non gestito in checkLoop: ${e}`))
+                .finally(() => this.scheduleNext());
         }, interval);
     }
 
@@ -234,9 +239,14 @@ export class BotEngine {
             }
         }
 
-        // Avvio consumer se non è già in esecuzione e la coda non è vuota
+        // Avvio consumer se non è già in esecuzione e la coda non è vuota.
+        // .catch obbligatorio: è fire-and-forget, senza handler una rejection qui
+        // diventerebbe un unhandledRejection a livello di processo.
         if (this.publishQueue.length > 0 && !this.isPublishing) {
-            this.processPublishQueue(); // fire and forget
+            this.processPublishQueue().catch(e => {
+                this.isPublishing = false;
+                TitanLogger.log(`❌ Errore non gestito in processPublishQueue: ${e}`);
+            });
         }
     }
 
@@ -404,69 +414,78 @@ export class BotEngine {
     private async processPublishQueue() {
         this.isPublishing = true;
 
-        while (this.isRunning && this.publishQueue.length > 0) {
-            const job = this.publishQueue.shift();
-            if (!job) continue;
+        try {
+            while (this.isRunning && this.publishQueue.length > 0) {
+                const job = this.publishQueue.shift();
+                if (!job) continue;
 
-            const { bot, feed, item } = job;
-            
-            // SAFETY CHECK: Validazione pre-publish. Evita che BotManager.markProcessed vada in crash (Foreign Key fail)
-            // se il bot originario della coda è stato eliminato prima del compimento dell'invio Telegram.
-            if (!BotManager.getBots().some((b: any) => b.id === bot.id)) {
-                TitanLogger.log(`  ⚠️ [${bot.name}] Job scartato dalla coda: il bot originario è stato eliminato.`);
-                continue;
-            }
+                // Ogni job è isolato: un errore (es. lock DB su markProcessed, token
+                // malformato in getClient) non deve far rigettare l'intera promise né
+                // bloccare il consumo dei job successivi.
+                try {
+                    const { bot, feed, item } = job;
 
-            // DEDUP CHECK: item già processato. Può succedere quando drainPendingQueue e processFeed
-            // girano nello stesso ciclo — drain aggiunge l'item a publishQueue ma non lo marca in history
-            // (markProcessed avviene solo dopo il send), quindi processFeed lo trova ancora "nuovo" e
-            // lo accoda una seconda volta. Questo guard blocca il secondo invio.
-            if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
-                TitanLogger.log(`  ⏭️ [${bot.name}] Skip duplicato in coda: ${item.title}`);
-                continue;
-            }
+                    // SAFETY CHECK: Validazione pre-publish. Evita che BotManager.markProcessed vada in crash (Foreign Key fail)
+                    // se il bot originario della coda è stato eliminato prima del compimento dell'invio Telegram.
+                    if (!BotManager.getBots().some((b: any) => b.id === bot.id)) {
+                        TitanLogger.log(`  ⚠️ [${bot.name}] Job scartato dalla coda: il bot originario è stato eliminato.`);
+                        continue;
+                    }
 
-            const tag = `[${bot.name}]`;
-            const client = this.getClient(bot);
+                    // DEDUP CHECK: item già processato. Può succedere quando drainPendingQueue e processFeed
+                    // girano nello stesso ciclo — drain aggiunge l'item a publishQueue ma non lo marca in history
+                    // (markProcessed avviene solo dopo il send), quindi processFeed lo trova ancora "nuovo" e
+                    // lo accoda una seconda volta. Questo guard blocca il secondo invio.
+                    if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
+                        TitanLogger.log(`  ⏭️ [${bot.name}] Skip duplicato in coda: ${item.title}`);
+                        continue;
+                    }
 
-            let success = false;
+                    const tag = `[${bot.name}]`;
+                    const client = this.getClient(bot);
 
-            try {
-                let template: string | null = null;
-                if (feed.type === 'podcast') template = bot.template_podcast || null;
-                else if (feed.type === 'youtube') template = bot.template_youtube || null;
-                else template = bot.template_news || null;
+                    let success = false;
 
-                success = await client.sendFormattedMessage(item, template, feed.type);
-            } catch (err) {
-                TitanLogger.log(`  ❌ ${tag} Telegram connection error: ${err}`);
-                success = false;
-            }
+                    try {
+                        let template: string | null = null;
+                        if (feed.type === 'podcast') template = bot.template_podcast || null;
+                        else if (feed.type === 'youtube') template = bot.template_youtube || null;
+                        else template = bot.template_news || null;
 
-            if (success) {
-                BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
-                TitanLogger.log(`  ✅ ${tag} Sent: ${item.title}`);
+                        success = await client.sendFormattedMessage(item, template, feed.type);
+                    } catch (err) {
+                        TitanLogger.log(`  ❌ ${tag} Telegram connection error: ${err}`);
+                        success = false;
+                    }
 
-                if (bot.notifications_enabled && Notification.isSupported()) {
-                    new Notification({
-                        title: `Titan: ${bot.name}`,
-                        body: `Inviato: ${item.title}`
-                    }).show();
+                    if (success) {
+                        BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
+                        TitanLogger.log(`  ✅ ${tag} Sent: ${item.title}`);
+
+                        if (bot.notifications_enabled && Notification.isSupported()) {
+                            new Notification({
+                                title: `Titan: ${bot.name}`,
+                                body: `Inviato: ${item.title}`
+                            }).show();
+                        }
+
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                    } else {
+                        if (job.retryCount < MAX_RETRIES) {
+                            TitanLogger.log(`  ⚠️ ${tag} Send failed (tentativo ${job.retryCount + 1}/${MAX_RETRIES}): ${item.title} — riaccodato`);
+                            this.publishQueue.push({ ...job, retryCount: job.retryCount + 1 });
+                        } else {
+                            TitanLogger.log(`  ❌ ${tag} Contenuto NON inviato al canale dopo ${MAX_RETRIES} tentativi: "${item.title}" — marcato come processato per evitare loop infinito. Verificare la connessione Telegram.`);
+                            BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
+                        }
+                    }
+                } catch (jobError) {
+                    TitanLogger.log(`  ❌ [${job.bot?.name ?? '?'}] Errore imprevisto durante l'elaborazione del job "${job.item?.title ?? '?'}": ${jobError} — job saltato.`);
                 }
-
-                await new Promise(resolve => setTimeout(resolve, 3000));
-            } else {
-                if (job.retryCount < MAX_RETRIES) {
-                    TitanLogger.log(`  ⚠️ ${tag} Send failed (tentativo ${job.retryCount + 1}/${MAX_RETRIES}): ${item.title} — riaccodato`);
-                    this.publishQueue.push({ ...job, retryCount: job.retryCount + 1 });
-                } else {
-                    TitanLogger.log(`  ❌ ${tag} Contenuto NON inviato al canale dopo ${MAX_RETRIES} tentativi: "${item.title}" — marcato come processato per evitare loop infinito. Verificare la connessione Telegram.`);
-                    BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
-                }
             }
+        } finally {
+            this.isPublishing = false;
         }
-
-        this.isPublishing = false;
     }
 
     /** F9 Digest: invia i digest scaduti per il bot dato. */

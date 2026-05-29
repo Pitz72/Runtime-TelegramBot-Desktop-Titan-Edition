@@ -24,20 +24,13 @@ process.on('uncaughtException', (error) => {
     app.exit(1);
 });
 
-// Cattura Promise rigettate e non gestite
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('CRITICAL: unhandledRejection:', reason);
-    try {
-        if (app.isReady()) {
-            dialog.showErrorBox('Errore Fatale di Rete/Asincrono (Unhandled Rejection)', String(reason) || 'Errore sconosciuto');
-        } else {
-            console.error('App non ancora pronta, dialog impossibile da mostrare in unhandledRejection.');
-        }
-    } catch (e) {
-        console.error('Fallimento nel mostrare showErrorBox:', e);
-    }
-    // Forza la chiusura del processo Node.js
-    app.exit(1);
+// Cattura Promise rigettate e non gestite.
+// NON chiudere l'app: una rejection è quasi sempre un errore transitorio (rete,
+// rate-limit, lock DB momentaneo) generato da un task in background del motore bot.
+// Per un'app che deve restare attiva 24/7, terminare il processo qui significherebbe
+// spegnere il bot a ogni singhiozzo di rete. Logghiamo e proseguiamo.
+process.on('unhandledRejection', (reason) => {
+    console.error('unhandledRejection (non fatale, app mantenuta attiva):', reason);
 });
 
 // --- DISABILITA ACCELERAZIONE HARDWARE ---
