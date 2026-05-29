@@ -2,7 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v2.0.4 (Corrente)](docs/changelogs/CHANGELOG_v2.0.4.md) — Hardening stabilità: `unhandledRejection` non chiude più l'app + messa in sicurezza della catena async dell'engine (`.catch` su `processPublishQueue`/`checkLoop`, `try/catch` per-job).
+- [v2.1.0 (Corrente)](docs/changelogs/CHANGELOG_v2.1.0.md) — IronShield v2: deduplica per titolo scoped per content_type (video YouTube e articolo RSS omonimi non si bloccano più) — schema DB v12. + Validazione file in import-database. + Token illeggibili non più silenziosi.
+- [v2.0.4 (Archivio)](docs/changelogs/CHANGELOG_v2.0.4.md) — Hardening stabilità: `unhandledRejection` non chiude più l'app + messa in sicurezza della catena async dell'engine (`.catch` su `processPublishQueue`/`checkLoop`, `try/catch` per-job).
 - [v2.0.3 (Archivio)](docs/changelogs/CHANGELOG_v2.0.3.md) — Mitigazione rate-limit YouTube: stop reset Innertube su 0 risultati + backoff inter-feed 5s. Issue upstream LuanRT/YouTube.js#1166 chiusa server-side.
 - [v2.0.2 (Archivio)](docs/changelogs/CHANGELOG_v2.0.2.md) — Fix auto-updater OTA: artifact name senza spazi — risolto 404 al download aggiornamento.
 - [v2.0.1 (Archivio)](docs/changelogs/CHANGELOG_v2.0.1.md) — Hotfix: race condition drain+processFeed — doppio invio podcast al termine delle quiet hours.
@@ -31,9 +32,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v2.0.4
+## Versione Attuale: v2.1.0
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.0.4.md](docs/changelogs/CHANGELOG_v2.0.4.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.0.md](docs/changelogs/CHANGELOG_v2.1.0.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 

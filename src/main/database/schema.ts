@@ -171,6 +171,7 @@ export function initDB() {
             feed_id INTEGER,
             title TEXT,
             title_hash TEXT,
+            content_type TEXT NOT NULL DEFAULT 'rss',
             sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id, bot_id),
             FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE
@@ -203,8 +204,11 @@ export function initDB() {
     // 3. Sistema di Versionamento Deterministic
     if (isNewInstall) {
         // È un'installazione pulita. Lo schema è già alla versione massima.
-        db.pragma('user_version = 11');
-        console.log("Nuova installazione rilevata. Database inizializzato alla v11.");
+        // Indice di deduplica title_hash scoped per content_type (IronShield v2).
+        // Va creato qui: il fresh-install ritorna prima del blocco migrazioni/safety-check.
+        db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, title_hash, content_type)`);
+        db.pragma('user_version = 12');
+        console.log("Nuova installazione rilevata. Database inizializzato alla v12.");
         console.log('Database initialized at:', dbPath);
         return db;
     }
@@ -215,7 +219,7 @@ export function initDB() {
     // 4. Backup automatico SOLO se servono migrazioni — fix #20
     // Cattura lo stato pre-migrazione per consentire il ripristino in caso di errore.
     // Su DB già alla versione corrente (nessuna migrazione), nessun backup viene creato.
-    if (currentVersion < 11) {
+    if (currentVersion < 12) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
@@ -397,6 +401,28 @@ export function initDB() {
         console.log("Database version set to 11");
     }
 
+    if (currentVersion < 12) {
+        console.log("Migration v12: IronShield v2 — content_type scoped title dedup...");
+        // Colonna content_type su history. Il backfill ricava il tipo dal feed
+        // di origine (feeds.type='youtube' → 'youtube', tutto il resto → 'rss').
+        // Le righe orfane (feed eliminato) restano sul default 'rss' (safe).
+        try { db.exec(`ALTER TABLE history ADD COLUMN content_type TEXT NOT NULL DEFAULT 'rss'`); } catch (e) { }
+        try {
+            db.exec(`
+                UPDATE history SET content_type = 'youtube'
+                WHERE feed_id IN (SELECT id FROM feeds WHERE type = 'youtube')
+            `);
+        } catch (e) { console.error("Migration v12: backfill content_type fallito:", e); }
+        // Rimpiazza l'indice di dedup includendo content_type
+        try {
+            db.exec(`DROP INDEX IF EXISTS idx_history_title_dedup`);
+            db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, title_hash, content_type)`);
+        } catch (e) { }
+        db.pragma('user_version = 12');
+        currentVersion = 12;
+        console.log("Database version set to 12");
+    }
+
     // Safety check post-migration: verifica fisicamente l'esistenza delle colonne critiche.
     // Difende da stati corrotti dove user_version è avanzato ma ALTER TABLE è fallito silenziosamente.
     try {
@@ -404,10 +430,16 @@ export function initDB() {
         if (!histCols.some((c: any) => c.name === 'title_hash')) {
             console.warn('Safety fix: title_hash mancante dalla tabella history — aggiunto retroattivamente.');
             db.exec(`ALTER TABLE history ADD COLUMN title_hash TEXT`);
-            db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, title_hash)`);
         }
+        if (!histCols.some((c: any) => c.name === 'content_type')) {
+            console.warn('Safety fix: content_type mancante dalla tabella history — aggiunto retroattivamente.');
+            db.exec(`ALTER TABLE history ADD COLUMN content_type TEXT NOT NULL DEFAULT 'rss'`);
+            db.exec(`UPDATE history SET content_type = 'youtube' WHERE feed_id IN (SELECT id FROM feeds WHERE type = 'youtube')`);
+        }
+        // Indice di dedup scoped per content_type (IronShield v2)
+        db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, title_hash, content_type)`);
     } catch (e) {
-        console.error('Safety check title_hash fallito:', e);
+        console.error('Safety check title_hash/content_type fallito:', e);
     }
 
     try {

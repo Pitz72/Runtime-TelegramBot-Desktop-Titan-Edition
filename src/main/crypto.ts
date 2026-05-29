@@ -63,10 +63,14 @@ export function decryptToken(stored: string): string {
     if (!stored) return '';
 
     if (stored.startsWith(PREFIX_SS)) {
-        if (!safeStorage.isEncryptionAvailable()) return '';
+        if (!safeStorage.isEncryptionAvailable()) {
+            console.warn('[crypto] Token cifrato con safeStorage ma il keychain OS non è disponibile su questa macchina — token illeggibile.');
+            return '';
+        }
         try {
             return safeStorage.decryptString(Buffer.from(stored.slice(PREFIX_SS.length), 'base64'));
-        } catch {
+        } catch (e) {
+            console.warn('[crypto] Decifratura safeStorage fallita — token illeggibile (probabile profilo utente/OS diverso da quello di cifratura):', e);
             return '';
         }
     }
@@ -81,7 +85,8 @@ export function decryptToken(stored: string): string {
             const decipher = nodeCrypto.createDecipheriv(ALGORITHM, key, iv);
             decipher.setAuthTag(authTag);
             return decipher.update(ciphertext).toString('utf8') + decipher.final('utf8');
-        } catch {
+        } catch (e) {
+            console.warn('[crypto] Decifratura machine-key fallita — token illeggibile (file .machine-key assente o diverso):', e);
             return '';
         }
     }

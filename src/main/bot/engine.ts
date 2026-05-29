@@ -68,7 +68,7 @@ export class BotEngine {
         // Broadcast startup message to Telegram
         const bots = BotManager.getBots();
         for (const bot of bots) {
-            if (bot.is_active) {
+            if (bot.is_active && bot.token) {
                 try {
                     const client = this.getClient(bot);
                     const customTemplate = bot.template_startup;
@@ -165,6 +165,14 @@ export class BotEngine {
             if (!this.isRunning) break;
             if (!bot.is_active) {
                 TitanLogger.log(`⏸️ Bot [${bot.name}] is disabled. Skipped.`);
+                continue;
+            }
+
+            // Token illeggibile su questa macchina (es. DB importato da un altro PC, keychain
+            // OS non disponibile): inutile tentare invii destinati a fallire con "Unauthorized".
+            // Segnaliamo in modo azionabile e saltiamo il bot.
+            if (!bot.token) {
+                TitanLogger.log(`⚠️ Bot [${bot.name}]: token non leggibile su questa macchina — bot saltato. Apri le impostazioni del bot e reinserisci il token.`);
                 continue;
             }
 
@@ -305,8 +313,8 @@ export class BotEngine {
                     continue;
                 }
 
-                // 3. Verifica deduplica (Hash Titolo + Hash URL)
-                if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
+                // 3. Verifica deduplica (Hash Titolo + Hash URL) — scoped per content_type (IronShield v2)
+                if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title, feed.type === 'youtube' ? 'youtube' : 'rss')) {
                     alreadyProcessedCount++;
                     continue;
                 }
@@ -320,7 +328,7 @@ export class BotEngine {
                 // F9 Digest Mode: se il feed ha un digest_interval, accoda nel buffer invece di pubblicare subito
                 if (feed.digest_interval) {
                     BotManager.addToDigestQueue(bot.id, feed.id, item);
-                    BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
+                    BotManager.markProcessed(bot.id, feed.id, item.id, item.title, feed.type === 'youtube' ? 'youtube' : 'rss');
                     TitanLogger.log(`  📋 ${tag} Buffered for digest: ${item.title}`);
                     newCount++;
                     continue;
@@ -387,7 +395,7 @@ export class BotEngine {
             }
 
             // Già processato (es. lo stesso item era ancora nel backlog del feed e inviato regolarmente)
-            if (BotManager.isProcessed(bot.id, p.item_id, p.feed_id, p.item_title ?? undefined)) {
+            if (BotManager.isProcessed(bot.id, p.item_id, p.feed_id, p.item_title ?? undefined, feed.type === 'youtube' ? 'youtube' : 'rss')) {
                 BotManager.removePendingItem(p.id);
                 continue;
             }
@@ -436,7 +444,7 @@ export class BotEngine {
                     // girano nello stesso ciclo — drain aggiunge l'item a publishQueue ma non lo marca in history
                     // (markProcessed avviene solo dopo il send), quindi processFeed lo trova ancora "nuovo" e
                     // lo accoda una seconda volta. Questo guard blocca il secondo invio.
-                    if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title)) {
+                    if (BotManager.isProcessed(bot.id, item.id, feed.id, item.title, feed.type === 'youtube' ? 'youtube' : 'rss')) {
                         TitanLogger.log(`  ⏭️ [${bot.name}] Skip duplicato in coda: ${item.title}`);
                         continue;
                     }
@@ -459,7 +467,7 @@ export class BotEngine {
                     }
 
                     if (success) {
-                        BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
+                        BotManager.markProcessed(bot.id, feed.id, item.id, item.title, feed.type === 'youtube' ? 'youtube' : 'rss');
                         TitanLogger.log(`  ✅ ${tag} Sent: ${item.title}`);
 
                         if (bot.notifications_enabled && Notification.isSupported()) {
@@ -476,7 +484,7 @@ export class BotEngine {
                             this.publishQueue.push({ ...job, retryCount: job.retryCount + 1 });
                         } else {
                             TitanLogger.log(`  ❌ ${tag} Contenuto NON inviato al canale dopo ${MAX_RETRIES} tentativi: "${item.title}" — marcato come processato per evitare loop infinito. Verificare la connessione Telegram.`);
-                            BotManager.markProcessed(bot.id, feed.id, item.id, item.title);
+                            BotManager.markProcessed(bot.id, feed.id, item.id, item.title, feed.type === 'youtube' ? 'youtube' : 'rss');
                         }
                     }
                 } catch (jobError) {

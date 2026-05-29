@@ -1,5 +1,6 @@
 import { ipcMain, app, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
+import Database from 'better-sqlite3';
 import { getBotEngine } from './bot/engine';
 import { getDB, initDB } from './database/schema';
 import { BotManager } from './bot/manager';
@@ -323,6 +324,24 @@ export function setupIpc() {
             });
 
             if (canceled || filePaths.length === 0) return { success: false, error: 'Cancelled' };
+
+            // Validazione PRIMA di toccare il DB attivo: un file corrotto o non-SQLite
+            // sovrascritto su titan.db renderebbe l'app non avviabile (initDB lancerebbe
+            // al riavvio, senza vie d'uscita dalla UI). Apriamo in sola lettura, verifichiamo
+            // l'integrità e la presenza della tabella "bots".
+            try {
+                const candidate = new Database(filePaths[0], { readonly: true, fileMustExist: true });
+                try {
+                    const integrity = candidate.pragma('integrity_check', { simple: true });
+                    if (integrity !== 'ok') throw new Error(`integrity_check ha restituito "${integrity}"`);
+                    const hasBots = candidate.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='bots'").get();
+                    if (!hasBots) throw new Error('non è un database Titan valido (tabella "bots" assente)');
+                } finally {
+                    candidate.close();
+                }
+            } catch (e: any) {
+                return { success: false, error: `File non importato: database non valido o corrotto. ${e.message || e}` };
+            }
 
             getBotEngine().stop();
             getDB().close();

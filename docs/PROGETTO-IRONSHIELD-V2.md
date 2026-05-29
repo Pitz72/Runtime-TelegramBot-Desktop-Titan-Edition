@@ -1,6 +1,8 @@
 # IronShield v2 — Content-Type Scoped Title Deduplication
 
-**Stato:** Da implementare  
+**Stato:** ✅ Implementato in v2.1.0 (2026-05-29) — schema DB v12.
+**Nota di implementazione:** rispetto a questo documento, `content_type` è stato aggiunto alla **sola tabella `history`** (dove serve per la query di dedup) e derivato dal campo `feeds.type` già esistente, invece di aggiungere una colonna ridondante alla tabella `feeds`. Il backfill usa `feeds.type='youtube'` anziché `url LIKE`. Comportamento identico a quanto descritto sotto.
+
 **Priorità:** Media (edge case reale, workaround manuale possibile)  
 **Versione target:** v2.1.0  
 **Schema DB target:** v12

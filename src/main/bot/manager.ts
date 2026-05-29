@@ -180,38 +180,38 @@ export class BotManager {
 
     /**
      * Controlla se un item è già stato pubblicato.
-     * Doppio controllo anti-spam — fix #27 (v1.8.6):
-     *   1. Match diretto su (bot_id, id): percorso veloce, comportamento invariato.
-     *   2. Match su title_hash: safety net per URL cambiate lato publisher.
-     *      Stesso titolo + stesso feed + stesso bot → già pubblicato, anche se il link è diverso.
+     * Doppio controllo anti-spam — fix #27 (v1.8.6), IronShield v2 (schema v12):
+     *   1. Match diretto su (bot_id, id): percorso veloce, globale, comportamento invariato.
+     *   2. Match su title_hash: safety net per URL cambiate lato publisher, ma ora
+     *      *scoped per content_type* — un video YouTube non blocca più un articolo RSS
+     *      con lo stesso titolo (e viceversa).
      */
-    static isProcessed(botId: number, itemId: string, feedId?: number, title?: string): boolean {
-        // Check 1: match esatto sull'ID (MD5 del link)
+    static isProcessed(botId: number, itemId: string, feedId?: number, title?: string, contentType: 'youtube' | 'rss' = 'rss'): boolean {
+        // Check 1: match esatto sull'ID (MD5 del link) — globale, invariato
         const byId = db().prepare('SELECT id FROM history WHERE bot_id = ? AND id = ?').get(botId, itemId);
         if (byId) return true;
 
-        // Check 2: match per titolo normalizzato per lo stesso bot (anti-spam globale per bot)
-        // Rimosso il vincolo del feed_id: se questo bot ha già inviato questo titolo, non deve reinviarlo
-        // anche se proviene da un feed_id diverso o se il link è cambiato.
+        // Check 2: match per titolo normalizzato, scoped al tipo di contenuto.
+        // Stesso titolo + stesso bot + stesso content_type → già pubblicato, anche se il link è cambiato.
         if (title && title.trim()) {
             const titleHash = nodeCrypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex');
             const byTitle = db().prepare(
-                'SELECT id FROM history WHERE bot_id = ? AND title_hash = ?'
-            ).get(botId, titleHash);
+                'SELECT id FROM history WHERE bot_id = ? AND title_hash = ? AND content_type = ?'
+            ).get(botId, titleHash, contentType);
             if (byTitle) return true;
         }
 
         return false;
     }
 
-    static markProcessed(botId: number, feedId: number, itemId: string, title: string) {
+    static markProcessed(botId: number, feedId: number, itemId: string, title: string, contentType: 'youtube' | 'rss' = 'rss') {
         const titleHash = title && title.trim()
             ? nodeCrypto.createHash('md5').update(title.toLowerCase().trim()).digest('hex')
             : null;
         const stmt = db().prepare(
-            'INSERT OR IGNORE INTO history (id, bot_id, feed_id, title, title_hash) VALUES (?, ?, ?, ?, ?)'
+            'INSERT OR IGNORE INTO history (id, bot_id, feed_id, title, title_hash, content_type) VALUES (?, ?, ?, ?, ?, ?)'
         );
-        stmt.run(itemId, botId, feedId, title, titleHash);
+        stmt.run(itemId, botId, feedId, title, titleHash, contentType);
     }
 
     static clearHistory(botId: number) {
