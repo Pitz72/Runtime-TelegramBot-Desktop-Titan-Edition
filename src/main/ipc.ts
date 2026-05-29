@@ -150,7 +150,7 @@ export function setupIpc() {
     });
 
     // --- FEED MANAGEMENT ---
-    ipcMain.handle('get-feeds', (_, botId) => BotManager.getFeeds(botId));
+    ipcMain.handle('get-feeds', (_, botId) => BotManager.getFeeds(assertPositiveInt(botId, 'botId')));
 
     ipcMain.handle('add-feed', (_, { botId, name, url, type, keywordFilter, checkInterval, digestInterval }) => {
         const validBotId = assertPositiveInt(botId, 'botId');
@@ -177,7 +177,7 @@ export function setupIpc() {
     ipcMain.handle('delete-feed', (_, id) => BotManager.deleteFeed(assertPositiveInt(id, 'id')));
 
     ipcMain.handle('toggle-feed', (_, { id, isActive }) => {
-        BotManager.toggleFeed(assertPositiveInt(id, 'id'), isActive);
+        BotManager.toggleFeed(assertPositiveInt(id, 'id'), !!isActive);
     });
 
     ipcMain.handle('test-feed', async (_, { url, type }) => {

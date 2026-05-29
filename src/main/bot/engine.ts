@@ -20,11 +20,25 @@ function passesKeywordFilter(item: { title: string; summary: string }, feed: Fee
     }
 }
 
+/**
+ * Interpreta un timestamp del DB come UTC.
+ * Le righe scritte da `datetime('now')` (formato "YYYY-MM-DD HH:MM:SS", UTC senza timezone)
+ * verrebbero lette da `new Date()` come ora locale, sfasando i confronti di N ore.
+ * Le righe nuove sono in ISO-UTC con 'Z' (vedi manager.updateFeedLastFetch) e vengono
+ * parsate correttamente dal ramo `new Date()`.
+ */
+export function parseUtcTimestamp(s: string): number {
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) {
+        return Date.parse(s.replace(' ', 'T') + 'Z');
+    }
+    return new Date(s).getTime();
+}
+
 /** Controlla se il feed ha superato il proprio intervallo di check (F5). */
 function isFeedDue(feed: FeedConfig, bot: BotConfig): boolean {
     const interval = feed.check_interval ?? bot.check_interval ?? 15;
     if (!feed.last_fetch_at) return true;
-    const elapsed = Date.now() - new Date(feed.last_fetch_at).getTime();
+    const elapsed = Date.now() - parseUtcTimestamp(feed.last_fetch_at);
     return elapsed >= interval * 60 * 1000;
 }
 
@@ -502,7 +516,7 @@ export class BotEngine {
         for (const feed of feeds) {
             if (!this.isRunning) break;
             const interval = feed.digest_interval!;
-            const lastSent = feed.digest_last_sent ? new Date(feed.digest_last_sent).getTime() : 0;
+            const lastSent = feed.digest_last_sent ? parseUtcTimestamp(feed.digest_last_sent) : 0;
             if (Date.now() - lastSent < interval * 60 * 1000) continue;
 
             const items = BotManager.getDigestQueue(bot.id, feed.id);

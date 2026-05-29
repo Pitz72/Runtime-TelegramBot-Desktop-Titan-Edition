@@ -6,6 +6,13 @@ import { TitanLogger } from '../logger';
 
 let youtube: any = null;
 
+// Contatore errori consecutivi: evitiamo di ricreare l'istanza Innertube a ogni errore
+// transitorio (issue LuanRT/YouTube.js#1158 — nuovi handshake ravvicinati amplificano
+// l'antibot). Resettiamo la sessione solo dopo errori ripetuti, quando è plausibile che
+// sia davvero compromessa. Azzerato a ogni risposta valida.
+let consecutiveErrors = 0;
+const MAX_CONSECUTIVE_ERRORS_BEFORE_RESET = 5;
+
 // --- Cache YouTube Innertube — fix #19 ---
 // Evita fetch ripetuti dello stesso canale nello stesso ciclo o con intervalli molto brevi.
 // TTL: 5 minuti. Chiave: channel ID/handle normalizzato.
@@ -124,6 +131,8 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
         // oggetti non-video (RichItem, sezioni) con v.id non corrispondente al videoId YouTube,
         // producendo MD5 diversi tra sessioni diverse e bypassing del controllo isProcessed.
         const videoList = videosTab?.videos || [];
+        // Risposta valida dall'API (anche se 0 video): la sessione funziona, azzera gli errori.
+        consecutiveErrors = 0;
         TitanLogger.log(`[YouTube] Raw videos count: ${videoList.length}`);
 
         if (videoList.length === 0) {
@@ -261,9 +270,16 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
 
         return items;
     } catch (error) {
-        TitanLogger.log(`[YouTube] Error fetching videos: ${error}`);
-        // Reset sessione dopo errore (clearYouTubeCache è chiamato dentro resetYouTubeSession)
-        resetYouTubeSession();
+        consecutiveErrors++;
+        TitanLogger.log(`[YouTube] Error fetching videos (${consecutiveErrors} consecutivi): ${error}`);
+        // NON ricreare l'istanza Innertube a ogni errore: i nuovi handshake ravvicinati
+        // amplificano il blocco antibot (issue #1158). Manteniamo sessione e cache intatte;
+        // resettiamo solo dopo errori ripetuti, quando la sessione è plausibilmente compromessa.
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS_BEFORE_RESET) {
+            TitanLogger.log(`[YouTube] ${consecutiveErrors} errori consecutivi — reset sessione Innertube.`);
+            resetYouTubeSession();
+            consecutiveErrors = 0;
+        }
         throw error;
     }
 }

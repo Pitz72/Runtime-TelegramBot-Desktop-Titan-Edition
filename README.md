@@ -6,7 +6,7 @@
   
   **La Piattaforma Definitiva per l'Automazione Multi-Canale RSS & YouTube su Telegram**
 
-  ![Version](https://img.shields.io/badge/Version-2.1.0-3b82f6?style=for-the-badge)
+  ![Version](https://img.shields.io/badge/Version-2.1.1-3b82f6?style=for-the-badge)
   ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-emerald?style=for-the-badge)
   ![Stack](https://img.shields.io/badge/Stack-Electron%20%7C%20React%20%7C%20SQLite-475569?style=for-the-badge)
   ![Lang](https://img.shields.io/badge/Languages-8%20Supported-purple?style=for-the-badge)

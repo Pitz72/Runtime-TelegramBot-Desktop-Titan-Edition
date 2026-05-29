@@ -165,7 +165,9 @@ export class BotManager {
     }
 
     static updateFeedLastFetch(id: number) {
-        db().prepare("UPDATE feeds SET last_fetch_at = datetime('now') WHERE id = ?").run(id);
+        // ISO-UTC esplicito con 'Z': datetime('now') produce "YYYY-MM-DD HH:MM:SS" (UTC senza
+        // timezone), che new Date() in JS interpreterebbe come ora locale — sfasando isFeedDue.
+        db().prepare("UPDATE feeds SET last_fetch_at = strftime('%Y-%m-%dT%H:%M:%SZ','now') WHERE id = ?").run(id);
     }
 
     static deleteFeed(id: number) {
@@ -236,7 +238,8 @@ export class BotManager {
     }
 
     static updateFeedDigestLastSent(feedId: number) {
-        db().prepare("UPDATE feeds SET digest_last_sent = datetime('now') WHERE id = ?").run(feedId);
+        // ISO-UTC esplicito con 'Z' — vedi nota in updateFeedLastFetch.
+        db().prepare("UPDATE feeds SET digest_last_sent = strftime('%Y-%m-%dT%H:%M:%SZ','now') WHERE id = ?").run(feedId);
     }
 
     // --- PENDING QUEUE (Quiet Hours) ---

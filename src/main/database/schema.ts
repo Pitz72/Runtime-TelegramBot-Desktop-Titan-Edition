@@ -507,6 +507,26 @@ export function initDB() {
         console.error('Safety check pending_queue fallito:', e);
     }
 
+    // Pruning history: la tabella cresceva senza limiti. Manteniamo per ogni bot solo le
+    // righe più recenti (per sent_at). Il cap è enorme rispetto a qualsiasi finestra di feed
+    // reale (feed RSS/YouTube espongono al più poche centinaia di item), quindi una riga
+    // eliminata è ben oltre il backlog visibile e non può causare ri-pubblicazioni.
+    try {
+        const HISTORY_CAP_PER_BOT = 20000;
+        const res = db.prepare(`
+            DELETE FROM history WHERE rowid IN (
+                SELECT rowid FROM (
+                    SELECT rowid, ROW_NUMBER() OVER (
+                        PARTITION BY bot_id ORDER BY sent_at DESC, rowid DESC
+                    ) AS rn FROM history
+                ) WHERE rn > ?
+            )
+        `).run(HISTORY_CAP_PER_BOT);
+        if (res.changes > 0) console.log(`Pruning history: rimosse ${res.changes} righe oltre il cap (${HISTORY_CAP_PER_BOT}/bot).`);
+    } catch (e) {
+        console.error('Pruning history fallito:', e);
+    }
+
     console.log('Database initialized at:', dbPath);
     return db;
 }
