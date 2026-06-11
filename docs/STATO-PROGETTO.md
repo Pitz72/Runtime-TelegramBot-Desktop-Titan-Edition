@@ -1,7 +1,7 @@
 # Titan Desktop — Stato del Progetto
 
-**Versione corrente:** v2.0.3  
-**Ultimo aggiornamento:** 18 Maggio 2026  
+**Versione corrente:** v2.1.3  
+**Ultimo aggiornamento:** 11 Giugno 2026  
 **Repository:** https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition  
 **Stack:** Electron 32.3.3 · React 18.3.1 · TypeScript 5.9.3 · better-sqlite3 · Telegraf · Vite 5.4.21 · TailwindCSS
 
@@ -171,7 +171,19 @@ Il job `release` in `.github/workflows/build.yml` dichiara ora `needs: [build-li
 ──────────────────────────────────────────────────────────────────────────
 [FATTO] v2.0.3 Mitigazione antibot YouTube — stop reset sess, backoff 5s ✅  ← v2.0.3
 ──────────────────────────────────────────────────────────────────────────
-[NEXT]  v2.1.0 — cache persistente handle→ChannelID (bypass yt.search rate-limited)
+[FATTO] v2.0.4 Hardening stabilità — unhandledRejection non fatale       ✅  ← v2.0.4
+──────────────────────────────────────────────────────────────────────────
+[FATTO] v2.1.0 IronShield v2 — dedup scoped content_type, schema v12     ✅  ← v2.1.0
+──────────────────────────────────────────────────────────────────────────
+[FATTO] v2.1.1 Robustezza — fuso orario, reset dopo 5 errori, pruning    ✅  ← v2.1.1
+──────────────────────────────────────────────────────────────────────────
+[FATTO] v2.1.2 Rifiniture — stats giorno locale, key log, sync motore    ✅  ← v2.1.2
+──────────────────────────────────────────────────────────────────────────
+[FATTO] v2.1.3 Fix YouTube "0 video" — fallback LockupView (non era      ✅  ← v2.1.3
+        antibot: cambio formato YouTube non parsato da youtubei.js 17.0.1)
+──────────────────────────────────────────────────────────────────────────
+[NEXT]  v2.2.0 — cache persistente handle→ChannelID (getChannel @handle dà 400)
+[NEXT]  Aggiornare youtubei.js a 17.1.0 quando uscirà (fix LockupView ufficiale)
 [NEXT]  macOS: firma collega → build-mac in CI → ZIP Gumroad aggiornato
 [NEXT]  Marketing
 [NEXT]  Test end-to-end auto-updater OTA (Action → bridge repo → notifica in-app)

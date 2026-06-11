@@ -69,6 +69,50 @@ function generateId(link: string): string {
     return crypto.createHash('md5').update(link).digest('hex');
 }
 
+// --- Fallback LockupView (maggio 2026) ---
+// YouTube sta servendo le liste video dei canali come nodi `LockupView` invece di `Video`
+// (esperimento lato server, issue LuanRT/YouTube.js#1181). youtubei.js 17.0.1 non li include
+// in videosTab.videos: il fix upstream (PR #1163) è mergiato ma non ancora rilasciato su npm.
+// Estraiamo i LockupView dal memo del feed e li adattiamo alla forma `Video` usata nel loop
+// di parsing. Quando uscirà 17.1.0 questo fallback smetterà semplicemente di attivarsi.
+function extractLockupVideos(videosTab: any): any[] {
+    const lockups: any[] = videosTab?.memo?.get?.('LockupView') || [];
+    const adapted: any[] = [];
+
+    for (const lockup of lockups) {
+        const type = lockup?.content_type;
+        if (type !== 'VIDEO' && type !== 'MOVIE' && type !== 'SHORT') continue;
+
+        const videoId = lockup?.content_id;
+        if (!videoId || !/^[a-zA-Z0-9_-]{11}$/.test(videoId)) continue;
+
+        // Testo data: nelle metadata rows ("12.345 visualizzazioni • 2 giorni fa")
+        const parts: string[] = (lockup.metadata?.metadata?.metadata_rows || [])
+            .flatMap((row: any) => row?.metadata_parts || [])
+            .map((part: any) => part?.text?.text || '')
+            .filter(Boolean);
+        const dateText = parts.find((t: string) => /\bago\b|\bfa\b/i.test(t))
+            || parts.find((t: string) => /premier|upcoming|scheduled|in attesa/i.test(t))
+            || '';
+
+        const img = lockup.content_image;
+        const thumbUrl = img?.image?.[0]?.url               // ThumbnailView
+            || img?.primary_thumbnail?.image?.[0]?.url      // CollectionThumbnailView
+            || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+        adapted.push({
+            id: videoId,
+            video_id: videoId,
+            title: { text: lockup.metadata?.title?.text || 'No Title' },
+            published: { text: dateText },
+            thumbnails: [{ url: thumbUrl }],
+            type: 'LockupView'
+        });
+    }
+    return adapted;
+}
+// -----------------------------------------
+
 /**
  * Funzione per recuperare i video di un canale YouTube senza API Key.
  * Supporta ID canale (UC...), handle (@...) o URL completi.
@@ -130,10 +174,19 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
         // Usiamo SOLO videosTab.videos — il fallback su videosTab.contents restituisce
         // oggetti non-video (RichItem, sezioni) con v.id non corrispondente al videoId YouTube,
         // producendo MD5 diversi tra sessioni diverse e bypassing del controllo isProcessed.
-        const videoList = videosTab?.videos || [];
+        let videoList = videosTab?.videos || [];
         // Risposta valida dall'API (anche se 0 video): la sessione funziona, azzera gli errori.
         consecutiveErrors = 0;
         TitanLogger.log(`[YouTube] Raw videos count: ${videoList.length}`);
+
+        if (videoList.length === 0) {
+            // Nuovo formato LockupView non riconosciuto da youtubei.js 17.0.1 — vedi helper sopra.
+            const lockupVideos = extractLockupVideos(videosTab);
+            if (lockupVideos.length > 0) {
+                TitanLogger.log(`[YouTube] Formato LockupView rilevato: ${lockupVideos.length} video estratti via fallback (fix upstream PR #1163 non ancora su npm)`);
+                videoList = lockupVideos;
+            }
+        }
 
         if (videoList.length === 0) {
             // v2.0.3: NON resettare la sessione su 0 risultati.
