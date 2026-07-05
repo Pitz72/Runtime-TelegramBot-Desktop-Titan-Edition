@@ -2,7 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v2.1.3 (Corrente)](docs/changelogs/CHANGELOG_v2.1.3.md) — Fix YouTube "0 video": YouTube serve le liste canale come nodi LockupView che youtubei.js 17.0.1 non parsa; aggiunto fallback di estrazione autocontenuto (logica PR upstream #1163, non ancora su npm). Non era antibot.
+- [v2.1.4 (Corrente)](docs/changelogs/CHANGELOG_v2.1.4.md) — Fix link Spreaker (deriva la pagina episodio dal guid api.spreaker.com), chiusura DB pulita su before-quit con checkpoint WAL (G3), HTML stripping robusto in cleanSummary (M6), perf: botExists() al posto di getBots().some() nei loop caldi (niente più decifratura di massa dei token).
+- [v2.1.3 (Archivio)](docs/changelogs/CHANGELOG_v2.1.3.md) — Fix YouTube "0 video": YouTube serve le liste canale come nodi LockupView che youtubei.js 17.0.1 non parsa; aggiunto fallback di estrazione autocontenuto (logica PR upstream #1163, non ancora su npm). Non era antibot.
 - [v2.1.2 (Archivio)](docs/changelogs/CHANGELOG_v2.1.2.md) — Rifiniture (criticità lievi): stat oggi/settimana sul giorno locale, ID log locali senza collisioni, stato motore sincronizzato al mount (get-bot-status), metadata package.json.
 - [v2.1.1 (Archivio)](docs/changelogs/CHANGELOG_v2.1.1.md) — Robustezza (criticità medie): fix fuso orario su last_fetch_at/digest_last_sent, reset Innertube solo dopo 5 errori consecutivi, pruning history (cap 20k/bot), validazione IPC get-feeds/toggle-feed.
 - [v2.1.0 (Archivio)](docs/changelogs/CHANGELOG_v2.1.0.md) — IronShield v2: deduplica per titolo scoped per content_type (video YouTube e articolo RSS omonimi non si bloccano più) — schema DB v12. + Validazione file in import-database. + Token illeggibili non più silenziosi.
@@ -35,9 +36,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v2.1.3
+## Versione Attuale: v2.1.4
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.3.md](docs/changelogs/CHANGELOG_v2.1.3.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.4.md](docs/changelogs/CHANGELOG_v2.1.4.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 
