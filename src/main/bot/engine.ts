@@ -296,7 +296,7 @@ export class BotEngine {
 
             // SAFETY CHECK: Validazione post-fetch. Poiché il fetch è asincrono (può durare svariati secondi),
             // il bot potrebbe essere stato eliminato (CASCADE) in quel frangente dall'utente tramite la Dashboard.
-            if (!BotManager.getBots().some((b: any) => b.id === bot.id)) {
+            if (!BotManager.botExists(bot.id)) {
                 TitanLogger.log(`  ⚠️ ${tag} Elaborazione interrotta: il bot è stato eliminato durante il fetch.`);
                 return;
             }
@@ -454,7 +454,7 @@ export class BotEngine {
 
                     // SAFETY CHECK: Validazione pre-publish. Evita che BotManager.markProcessed vada in crash (Foreign Key fail)
                     // se il bot originario della coda è stato eliminato prima del compimento dell'invio Telegram.
-                    if (!BotManager.getBots().some((b: any) => b.id === bot.id)) {
+                    if (!BotManager.botExists(bot.id)) {
                         TitanLogger.log(`  ⚠️ [${bot.name}] Job scartato dalla coda: il bot originario è stato eliminato.`);
                         continue;
                     }

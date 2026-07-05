@@ -3,6 +3,8 @@ import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
 import { setupIpc } from './ipc'
+import { getBotEngine } from './bot/engine'
+import { closeDB } from './database/schema'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -140,4 +142,19 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit()
     }
+})
+
+// --- CHIUSURA PULITA (fix #G3) ---
+// Alla chiusura normale dell'app fermiamo il motore (abort invii in corso, svuota code)
+// e chiudiamo il database con checkpoint WAL, così titan.db resta consistente e il file
+// -wal non cresce indefinitamente tra un avvio e l'altro.
+// Nota: app.exit() (uncaughtException, import-database) NON scatena before-quit — in quei
+// percorsi la chiusura è già gestita o volutamente forzata.
+app.on('before-quit', () => {
+    try {
+        getBotEngine().stop()
+    } catch (e) {
+        console.error('Errore durante lo stop del motore in before-quit:', e)
+    }
+    closeDB()
 })

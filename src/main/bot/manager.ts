@@ -147,6 +147,16 @@ export class BotManager {
         db().prepare('DELETE FROM bots WHERE id = ?').run(id);
     }
 
+    /**
+     * Verifica leggera dell'esistenza di un bot — perf.
+     * Usato nei loop caldi dell'engine (post-fetch e per-job) al posto di
+     * getBots().some(...), che rileggeva TUTTI i bot e decifrava ogni token via
+     * safeStorage a ogni chiamata. Qui una singola SELECT indicizzata sulla PK.
+     */
+    static botExists(id: number): boolean {
+        return db().prepare('SELECT id FROM bots WHERE id = ?').get(id) !== undefined;
+    }
+
     // --- FEEDS ---
     static getFeeds(botId: number): FeedConfig[] {
         const rows = db().prepare('SELECT * FROM feeds WHERE bot_id = ? ORDER BY created_at DESC').all(botId) as any[];

@@ -22,6 +22,27 @@ export function getDB(): Database.Database {
 }
 
 /**
+ * Chiude il database in modo pulito (fix #G3).
+ * Esegue un checkpoint WAL con TRUNCATE per garantire che tutte le scritture
+ * confluiscano in titan.db e che il file -wal venga svuotato prima della chiusura,
+ * poi rilascia l'istanza. Idempotente: sicura da chiamare più volte o senza DB aperto.
+ */
+export function closeDB() {
+    if (!_db) return;
+    try {
+        _db.pragma('wal_checkpoint(TRUNCATE)');
+    } catch (e) {
+        console.error('Errore durante il checkpoint WAL alla chiusura:', e);
+    }
+    try {
+        _db.close();
+    } catch (e) {
+        console.error('Errore durante la chiusura del database:', e);
+    }
+    _db = null;
+}
+
+/**
  * Funzione per gestire le migrazioni legacy (pre-versione 1).
  * Queste migrazioni usavano blocchi try/catch per aggiungere colonne o modificare tabelle.
  */

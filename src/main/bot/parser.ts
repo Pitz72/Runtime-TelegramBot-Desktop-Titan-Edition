@@ -84,11 +84,43 @@ function parseDate(item: any): Date | null {
     return null;
 }
 
+/** Decodifica un'entità numerica (&#123; o &#x1F;) in carattere, ignorando codepoint invalidi. */
+function decodeNumericEntity(raw: string, radix: number): string {
+    try {
+        const code = parseInt(raw, radix);
+        if (!Number.isFinite(code) || code < 0 || code > 0x10FFFF) return '';
+        return String.fromCodePoint(code);
+    } catch {
+        return '';
+    }
+}
+
 // Rewrite of `clean_summary`
 function cleanSummary(html: string): string {
     if (!html) return "";
-    // Strip HTML tags and decode basic entities if needed
-    let text = html.replace(/<[^>]*>?/gm, '').trim();
+
+    // 1. Rimuovi interi blocchi <script>/<style> (contenuto incluso, non solo i tag)
+    let text = html.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, '');
+
+    // 2. Rimuovi i tag HTML, inclusi quelli malformati o non chiusi a fine stringa
+    //    (la vecchia regex /<[^>]*>?/gm lasciava passare "<b senza chiusura").
+    text = text.replace(/<[^>]*>/g, '').replace(/<[^>]*$/g, '');
+
+    // 3. Decodifica le entità HTML/XML più comuni. &amp; per ultimo per non
+    //    trasformare sequenze come "&amp;lt;" in "<".
+    text = text
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&quot;/gi, '"')
+        .replace(/&apos;/gi, "'")
+        .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => decodeNumericEntity(n, 16))
+        .replace(/&#(\d+);/g, (_, n) => decodeNumericEntity(n, 10))
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&amp;/gi, '&');
+
+    // 4. Normalizza spazi bianchi
+    text = text.replace(/\s+/g, ' ').trim();
+
     if (text.length > 300) {
         return text.substring(0, 297) + "...";
     }
@@ -124,6 +156,16 @@ export async function fetchFeed(name: string, url: string): Promise<RssItem[]> {
             if (!link || link.trim() === "") {
                 console.warn(`[Parser] Salto item senza link in ${name}: ${entry.title}`);
                 continue;
+            }
+
+            // --- Spreaker: normalizza il link alla pagina dell'episodio ---
+            // Alcune show Spreaker impostano come <link> il sito personale dell'autore
+            // (es. dk.dataknightmare.eu) invece della pagina dell'episodio. Il <guid> è però
+            // sempre "https://api.spreaker.com/episode/{ID}": lo convertiamo nell'URL pubblico
+            // "https://www.spreaker.com/episode/{ID}" così il click porta all'episodio Spreaker.
+            const spreakerMatch = (typeof entry.guid === 'string' ? entry.guid : '').match(/api\.spreaker\.com\/episode\/(\d+)/);
+            if (spreakerMatch) {
+                link = `https://www.spreaker.com/episode/${spreakerMatch[1]}`;
             }
 
             const date = parseDate(entry);
