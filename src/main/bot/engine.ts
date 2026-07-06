@@ -52,6 +52,14 @@ interface PublishJob {
 
 const MAX_RETRIES = 3;
 
+/**
+ * Perf Fix B (v2.1.5): numero massimo di fetch RSS/Atom eseguiti in parallelo per bot.
+ * Ogni feed colpisce di norma un host diverso, quindi 6 richieste concorrenti non
+ * sovraccaricano un singolo server ma abbattono il tempo di ciclo con molti feed.
+ * I feed YouTube restano fuori dal pool (seriali + throttle) per via dell'antibot Innertube.
+ */
+const RSS_FETCH_CONCURRENCY = 6;
+
 export class BotEngine {
     private isRunning: boolean = false;
     private timeoutId: NodeJS.Timeout | null = null;
@@ -218,14 +226,37 @@ export class BotEngine {
                     TitanLogger.log(`   ⏸️ Bot [${bot.name}]: ${skippedFeeds} feed disabilitati, saltati.`);
                 }
 
-                for (let i = 0; i < activeFeeds.length; i++) {
-                    if (!this.isRunning) break;
-                    const feed = activeFeeds[i];
-
+                // F5: filtra i feed effettivamente da controllare in questo ciclo (intervallo scaduto).
+                const dueFeeds = activeFeeds.filter(feed => {
                     if (!isFeedDue(feed, bot)) {
                         TitanLogger.log(`  ⏱️ [${feed.name}] Intervallo non scaduto, saltato.`);
-                        continue;
+                        return false;
                     }
+                    return true;
+                });
+
+                // --- Perf Fix B (v2.1.5): fetch RSS in parallelo, YouTube seriale ---
+                // I feed RSS/Atom si scaricano in un pool con concorrenza limitata: il tempo di ciclo
+                // passa dalla *somma* dei fetch al fetch più lento del gruppo. Il processamento degli item
+                // dopo il fetch è sincrono (better-sqlite3), quindi non c'è race tra feed sullo stesso bot.
+                const rssFeeds = dueFeeds.filter(f => f.type !== 'youtube');
+                const youtubeFeeds = dueFeeds.filter(f => f.type === 'youtube');
+
+                await this.runPool(rssFeeds, RSS_FETCH_CONCURRENCY, async (feed) => {
+                    if (!this.isRunning) return;
+                    try {
+                        await this.processFeed(bot, client, feed);
+                    } catch (feedError) {
+                        TitanLogger.log(`  ❌ [${feed.name}] Critical error: ${feedError}`);
+                    }
+                });
+
+                // I feed YouTube restano SERIALI e distanziati (throttle 5s): l'antibot Innertube
+                // (issue LuanRT/YouTube.js#1158, #1166) penalizza i burst ravvicinati di chiamate,
+                // che degenerano in risposte vuote. La pausa si salta sull'ultimo del gruppo.
+                for (let i = 0; i < youtubeFeeds.length; i++) {
+                    if (!this.isRunning) break;
+                    const feed = youtubeFeeds[i];
 
                     try {
                         await this.processFeed(bot, client, feed);
@@ -233,19 +264,8 @@ export class BotEngine {
                         TitanLogger.log(`  ❌ [${feed.name}] Critical error: ${feedError}`);
                     }
 
-                    // Rate-limiting inter-feed: pausa tra un fetch e il successivo — fix #17
-                    // Evita di inondare i server RSS/YouTube in loop stretti con molti feed.
-                    // Salta la pausa sull'ultimo feed del ciclo per non ritardare inutilmente.
-                    //
-                    // v2.0.3: pausa estesa quando il feed corrente *o* il successivo è YouTube.
-                    // L'antibot lato YouTube (issue LuanRT/YouTube.js#1158, #1166) penalizza
-                    // burst ravvicinati di chiamate Innertube; un gap di 5s riduce drasticamente
-                    // la probabilità di risposte vuote.
-                    if (i < activeFeeds.length - 1 && this.isRunning) {
-                        const nextFeed = activeFeeds[i + 1];
-                        const involvesYoutube = feed.type === 'youtube' || nextFeed.type === 'youtube';
-                        const pauseMs = involvesYoutube ? 5000 : 1000;
-                        await new Promise(resolve => setTimeout(resolve, pauseMs));
+                    if (i < youtubeFeeds.length - 1 && this.isRunning) {
+                        await new Promise(resolve => setTimeout(resolve, 5000));
                     }
                 }
 
@@ -275,6 +295,24 @@ export class BotEngine {
                 TitanLogger.log(`❌ Errore non gestito in processPublishQueue: ${e}`);
             });
         }
+    }
+
+    /**
+     * Esegue `worker` su tutti gli item con al massimo `concurrency` esecuzioni in parallelo
+     * (Perf Fix B). Il worker gestisce i propri errori: qui non si intercetta nulla, così un
+     * feed lento o fallito non blocca gli altri runner del pool.
+     */
+    private async runPool<T>(items: T[], concurrency: number, worker: (item: T) => Promise<void>): Promise<void> {
+        if (items.length === 0) return;
+        let cursor = 0;
+        const size = Math.max(1, Math.min(concurrency, items.length));
+        const runners = Array.from({ length: size }, async () => {
+            while (cursor < items.length && this.isRunning) {
+                const item = items[cursor++];
+                await worker(item);
+            }
+        });
+        await Promise.all(runners);
     }
 
     private async processFeed(bot: BotConfig, client: TelegramClient, feed: FeedConfig) {

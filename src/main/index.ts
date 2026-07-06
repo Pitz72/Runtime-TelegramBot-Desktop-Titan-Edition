@@ -117,14 +117,25 @@ app.whenReady().then(() => {
     createWindow()
 
     if (!is.dev) {
-        autoUpdater.autoDownload = true
+        // autoDownload = false: l'utente decide se scaricare tramite la schermata di aggiornamento
+        // (window.api.downloadUpdate). Prima il download partiva da solo appena trovato un update.
+        autoUpdater.autoDownload = false
         autoUpdater.autoInstallOnAppQuit = false
 
         autoUpdater.on('update-available', (info) => {
             mainWindow?.webContents.send('update-available', { version: info.version })
         })
+        autoUpdater.on('update-not-available', () => {
+            mainWindow?.webContents.send('update-not-available')
+        })
+        autoUpdater.on('download-progress', (progress) => {
+            mainWindow?.webContents.send('update-progress', { percent: progress.percent })
+        })
         autoUpdater.on('update-downloaded', (info) => {
             mainWindow?.webContents.send('update-downloaded', { version: info.version })
+        })
+        autoUpdater.on('error', (err) => {
+            mainWindow?.webContents.send('update-error', { message: err?.message || String(err) })
         })
         // checkForUpdates() è avviato dal renderer via IPC dopo il mount (window.api.checkForUpdates).
         // Non chiamarlo qui: il renderer non è ancora pronto e il messaggio update-available verrebbe perso.

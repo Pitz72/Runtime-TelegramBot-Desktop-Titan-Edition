@@ -240,6 +240,21 @@
         "msg": "Titan Edition v{{version}} is available! Go to the portal to download the update.",
         "downloading": "Downloading update v{{version}}...",
         "ready": "v{{version}} ready — Restart to install",
-        "install": "Restart & Install"
+        "install": "Restart & Install",
+        "availableMsg": "A new version of Titan Edition is available. Do you want to download it now?",
+        "currentLabel": "Current version",
+        "newLabel": "New version",
+        "download": "Download now",
+        "later": "Later",
+        "progress": "Downloading… {{percent}}%",
+        "downloadedTitle": "Update ready",
+        "downloadedMsg": "Version v{{version}} has been downloaded. Restart now to install it?",
+        "checking": "Checking for updates…",
+        "upToDate": "You're on the latest version",
+        "checkBtn": "Check for updates",
+        "errorMsg": "Unable to check for updates",
+        "sectionTitle": "Updates",
+        "sectionDesc": "Manually check whether a new version of Titan Edition is available.",
+        "newBadge": "New version v{{version}} available"
     }
 }

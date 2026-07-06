@@ -69,14 +69,27 @@ const api = {
     // System
     getVersion: () => ipcRenderer.invoke('get-version'),
     checkForUpdates: () => ipcRenderer.invoke('check-for-updates') as Promise<{ success: boolean; error?: string }>,
+    downloadUpdate: () => ipcRenderer.invoke('download-update') as Promise<{ success: boolean; error?: string }>,
     installUpdate: () => ipcRenderer.invoke('install-update'),
     onUpdateAvailable: (callback: (info: { version: string }) => void) => {
         ipcRenderer.removeAllListeners('update-available');
         ipcRenderer.on('update-available', (_, info) => callback(info));
     },
+    onUpdateNotAvailable: (callback: () => void) => {
+        ipcRenderer.removeAllListeners('update-not-available');
+        ipcRenderer.on('update-not-available', () => callback());
+    },
+    onUpdateProgress: (callback: (info: { percent: number }) => void) => {
+        ipcRenderer.removeAllListeners('update-progress');
+        ipcRenderer.on('update-progress', (_, info) => callback(info));
+    },
     onUpdateDownloaded: (callback: (info: { version: string }) => void) => {
         ipcRenderer.removeAllListeners('update-downloaded');
         ipcRenderer.on('update-downloaded', (_, info) => callback(info));
+    },
+    onUpdateError: (callback: (info: { message: string }) => void) => {
+        ipcRenderer.removeAllListeners('update-error');
+        ipcRenderer.on('update-error', (_, info) => callback(info));
     },
     exportLogs: (logs: string[]) => ipcRenderer.invoke('export-logs', logs),
     exportDatabase: () => ipcRenderer.invoke('export-database'),

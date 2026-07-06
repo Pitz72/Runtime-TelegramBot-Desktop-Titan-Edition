@@ -240,6 +240,21 @@
         "msg": "È disponibile Titan Edition v{{version}}! Vai sul portale per scaricare l'aggiornamento.",
         "downloading": "Download aggiornamento v{{version}} in corso...",
         "ready": "v{{version}} pronto — Riavvia per installare",
-        "install": "Riavvia e installa"
+        "install": "Riavvia e installa",
+        "availableMsg": "È disponibile una nuova versione di Titan Edition. Vuoi scaricarla ora?",
+        "currentLabel": "Versione attuale",
+        "newLabel": "Nuova versione",
+        "download": "Scarica ora",
+        "later": "Più tardi",
+        "progress": "Download in corso… {{percent}}%",
+        "downloadedTitle": "Aggiornamento pronto",
+        "downloadedMsg": "La versione v{{version}} è stata scaricata. Riavviare ora per installarla?",
+        "checking": "Controllo aggiornamenti…",
+        "upToDate": "Sei alla versione più recente",
+        "checkBtn": "Verifica aggiornamenti",
+        "errorMsg": "Impossibile verificare gli aggiornamenti",
+        "sectionTitle": "Aggiornamenti",
+        "sectionDesc": "Controlla manualmente se è disponibile una nuova versione di Titan Edition.",
+        "newBadge": "Nuova versione v{{version}} disponibile"
     }
 }

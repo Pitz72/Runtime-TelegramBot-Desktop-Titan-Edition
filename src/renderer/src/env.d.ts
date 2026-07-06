@@ -55,9 +55,13 @@ export interface TitanAPI {
     // System
     getVersion: () => Promise<string>
     checkForUpdates: () => Promise<{ success: boolean; error?: string }>
+    downloadUpdate: () => Promise<{ success: boolean; error?: string }>
     installUpdate: () => Promise<void>
     onUpdateAvailable: (callback: (info: { version: string }) => void) => void
+    onUpdateNotAvailable: (callback: () => void) => void
+    onUpdateProgress: (callback: (info: { percent: number }) => void) => void
     onUpdateDownloaded: (callback: (info: { version: string }) => void) => void
+    onUpdateError: (callback: (info: { message: string }) => void) => void
     exportLogs: (logs: string[]) => Promise<{ success: boolean; path?: string; error?: string }>
     exportDatabase: () => Promise<{ success: boolean; path?: string; error?: string }>
     importDatabase: () => Promise<{ success: boolean; error?: string }>

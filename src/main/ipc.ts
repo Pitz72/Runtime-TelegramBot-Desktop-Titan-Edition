@@ -471,6 +471,15 @@ export function setupIpc() {
         }
     });
 
+    ipcMain.handle('download-update', async () => {
+        try {
+            await autoUpdater.downloadUpdate();
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: String(error) };
+        }
+    });
+
     ipcMain.handle('install-update', () => {
         autoUpdater.quitAndInstall(false, true);
     });

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Download, FileCode, Globe, Zap, ShieldCheck, Upload, X } from 'lucide-react';
+import { Database, Download, FileCode, Globe, Zap, ShieldCheck, Upload, X, RefreshCw, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
 import { flagsList } from './IntroScreen';
 import { useToast } from './ui/Toast';
+import type { Updater } from '../hooks/useUpdater';
 
-interface Props { onClose: () => void; }
+interface Props { onClose: () => void; updater?: Updater; }
 
-export function SystemSettingsModal({ onClose }: Props) {
+export function SystemSettingsModal({ onClose, updater }: Props) {
     const { toast, success, error } = useToast();
     const { locale, setLocale, t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'general' | 'backup' | 'performance'>('general');
@@ -112,7 +113,7 @@ export function SystemSettingsModal({ onClose }: Props) {
                 {/* Content */}
                 <div className="p-6">
                     {activeTab === 'general' && (
-                        <div className="max-w-md">
+                        <div className="max-w-md space-y-8">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
                                     <Globe size={13}  />
@@ -140,6 +141,42 @@ export function SystemSettingsModal({ onClose }: Props) {
                                             </button>
                                         );
                                     })}
+                                </div>
+                            </div>
+
+                            {/* Aggiornamenti */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
+                                    <RefreshCw size={13} />
+                                    {t('updater.sectionTitle')}
+                                </div>
+                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('updater.sectionDesc')}</p>
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        onClick={() => updater?.check(true)}
+                                        disabled={!updater || updater.status === 'checking' || updater.status === 'downloading'}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all text-primary text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        {updater?.status === 'checking'
+                                            ? <Loader2 size={15} className="animate-spin" />
+                                            : <RefreshCw size={15} />}
+                                        {t('updater.checkBtn')}
+                                    </button>
+                                    <div className="text-nano">
+                                        {updater?.status === 'available' || updater?.status === 'downloading' || updater?.status === 'downloaded' ? (
+                                            <span className="flex items-center gap-1.5 text-primary drop-glow-primary">
+                                                <Sparkles size={12} />
+                                                {t('updater.newBadge').replace('{{version}}', updater.newVersion || '')}
+                                            </span>
+                                        ) : updater?.status === 'uptodate' ? (
+                                            <span className="flex items-center gap-1.5 text-success">
+                                                <CheckCircle2 size={12} />
+                                                {t('updater.upToDate')}
+                                            </span>
+                                        ) : (
+                                            <span className="text-outline-variant/40 font-mono">v{updater?.currentVersion || ''}</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

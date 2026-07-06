@@ -38,19 +38,29 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('titan-lang', lang);
     };
 
-    const t = (path: string): string => {
-        const keys = path.split('.');
-        let current: any = translations[locale];
-
+    // Risolve una chiave "a.b.c" dentro un oggetto traduzioni; undefined se manca un anello.
+    const resolve = (dict: any, keys: string[]): unknown => {
+        let current: any = dict;
         for (const key of keys) {
-            if (current[key] === undefined) {
-                console.warn(`Translation missing for key: ${path} in lang: ${locale}`);
-                return path;
-            }
+            if (current == null || current[key] === undefined) return undefined;
             current = current[key];
         }
+        return current;
+    };
 
-        return typeof current === 'string' ? current : path;
+    const t = (path: string): string => {
+        const keys = path.split('.');
+
+        // 1) lingua attiva → 2) fallback inglese (evita di mostrare chiavi grezze quando una
+        // traduzione non è ancora stata portata in tutte le 8 lingue) → 3) la chiave stessa.
+        const local = resolve(translations[locale], keys);
+        if (typeof local === 'string') return local;
+
+        const fallback = resolve(translations.en, keys);
+        if (typeof fallback === 'string') return fallback;
+
+        console.warn(`Translation missing for key: ${path} in lang: ${locale}`);
+        return path;
     };
 
     return (

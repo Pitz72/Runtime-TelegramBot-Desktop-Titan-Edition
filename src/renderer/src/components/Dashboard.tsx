@@ -13,10 +13,11 @@ import { SystemSettingsModal } from './SystemSettingsModal';
 import { StatsModal } from './StatsModal';
 import { useTranslation } from '../locales/I18nContext';
 import { useToast } from './ui/Toast';
+import type { Updater } from '../hooks/useUpdater';
 
-export function Dashboard() {
+export function Dashboard({ updater }: { updater?: Updater }) {
     const { t } = useTranslation();
-    const { error, toast } = useToast();
+    const { error } = useToast();
     const [selectedBot, setSelectedBot] = useState<BotConfig | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -27,7 +28,6 @@ export function Dashboard() {
     const [stats, setStats] = useState<{ total: number; today: number; week: number } | null>(null);
     const [filterBySelectedBot, setFilterBySelectedBot] = useState(false);
     const [showStatsModal, setShowStatsModal] = useState(false);
-    const [updateReady, setUpdateReady] = useState<{ version: string } | null>(null);
     const logContainerRef = useRef<HTMLDivElement>(null);
     // ID monotono per i log generati localmente. Negativo decrescente: non collide mai
     // con gli ID del backend (positivi crescenti) né con altri log locali nello stesso ms.
@@ -40,16 +40,8 @@ export function Dashboard() {
         // sopravvive a un reload del renderer): evita di mostrare "offline" se gira già.
         window.api.getBotStatus().then(s => setIsRunning(s.running)).catch(() => {});
 
-        window.api.checkForUpdates().catch(() => {});
-
-        window.api.onUpdateAvailable((info) => {
-            const msg = t('updater.downloading').replace('{{version}}', info.version);
-            toast(msg, 'info', t('updater.title'));
-        });
-
-        window.api.onUpdateDownloaded((info) => {
-            setUpdateReady(info);
-        });
+        // Il controllo aggiornamenti e la relativa schermata sono gestiti a livello di App
+        // (useUpdater + UpdateModal), così partono già dall'intro. Qui non serve più nulla.
 
         window.api.onLogsBatch((newLogs: LogEntry[]) => {
             setLogs(prev => [...newLogs.reverse(), ...prev].slice(0, 5000));
@@ -146,19 +138,6 @@ export function Dashboard() {
 
     return (
         <div className="h-screen bg-background text-on-surface flex font-body overflow-hidden relative" style={{ userSelect: 'none' }}>
-
-            {/* Update-ready banner */}
-            {updateReady && (
-                <div className="absolute bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-3 px-5 py-2.5 bg-primary/90 text-on-primary text-xs backdrop-blur-sm">
-                    <span>{t('updater.ready').replace('{{version}}', updateReady.version)}</span>
-                    <button
-                        onClick={() => window.api.installUpdate()}
-                        className="px-3 py-1 rounded bg-on-primary/20 hover:bg-on-primary/30 font-semibold transition-colors"
-                    >
-                        {t('updater.install')}
-                    </button>
-                </div>
-            )}
 
             {/* LEFT HALF — Bot Selector + Feed Manager */}
             <div className="w-1/2 flex h-full">
@@ -365,6 +344,8 @@ export function Dashboard() {
                                             return (
                                                 <div
                                                     key={vRow.key}
+                                                    data-index={vRow.index}
+                                                    ref={logVirtualizer.measureElement}
                                                     style={{
                                                         position: 'absolute',
                                                         top: 0,
@@ -410,7 +391,7 @@ export function Dashboard() {
             )}
 
             {showSystemSettings && (
-                <SystemSettingsModal onClose={() => setShowSystemSettings(false)} />
+                <SystemSettingsModal onClose={() => setShowSystemSettings(false)} updater={updater} />
             )}
 
             {showStatsModal && selectedBot && (

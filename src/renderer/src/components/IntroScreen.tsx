@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation, Language } from '../locales/I18nContext';
 import { FlagIT, FlagFR, FlagDE, FlagES, FlagPT, FlagRU, FlagCN, FlagGB } from './ui/Flags';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import logo from '../assets/logo.png';
+import type { UpdateStatus } from '../hooks/useUpdater';
 
 interface Props {
     onComplete: () => void;
+    updateStatus?: UpdateStatus;
+    newVersion?: string | null;
+    currentVersion?: string;
 }
 
 export const flagsList: { id: Language; label: string; component: React.FC<{ className?: string }> }[] = [
@@ -20,8 +24,10 @@ export const flagsList: { id: Language; label: string; component: React.FC<{ cla
     { id: 'zh', label: '中文', component: FlagCN }
 ];
 
-export function IntroScreen({ onComplete }: Props) {
+export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, currentVersion }: Props) {
     const { locale, setLocale, t } = useTranslation();
+
+    const updateAvailable = updateStatus === 'available' || updateStatus === 'downloading' || updateStatus === 'downloaded';
 
     return (
         <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-50 selection:bg-primary/30">
@@ -43,9 +49,28 @@ export function IntroScreen({ onComplete }: Props) {
                     {t('app.title')} <span className="text-primary drop-glow-primary">Titan Edition</span>
                 </h1>
 
-                <p className="text-outline-variant/60 text-sm font-body mb-12">
+                <p className="text-outline-variant/60 text-sm font-body mb-3">
                     {t('app.copyright') || '© 2026 Simone Pizzi per Runtime Radio'}
                 </p>
+
+                {/* Versione + stato controllo aggiornamenti */}
+                <div className="h-6 mb-9 flex items-center justify-center">
+                    {updateAvailable ? (
+                        <span className="flex items-center gap-1.5 text-xs font-body text-primary drop-glow-primary">
+                            <Sparkles size={13} />
+                            {t('updater.newBadge').replace('{{version}}', newVersion || '')}
+                        </span>
+                    ) : updateStatus === 'checking' ? (
+                        <span className="flex items-center gap-1.5 text-nano text-outline-variant/40">
+                            <Loader2 size={11} className="animate-spin" />
+                            {t('updater.checking')}
+                        </span>
+                    ) : (
+                        currentVersion && (
+                            <span className="text-nano text-outline-variant/35 font-mono">v{currentVersion}</span>
+                        )
+                    )}
+                </div>
 
                 {/* Language selector panel */}
                 <div className="w-full glass-panel rounded-2xl p-6 mb-8">

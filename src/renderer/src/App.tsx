@@ -3,10 +3,15 @@ import { Dashboard } from '@/components/Dashboard';
 import { SetupWizard } from '@/components/SetupWizard';
 import { IntroScreen } from '@/components/IntroScreen';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { UpdateModal } from '@/components/UpdateModal';
+import { useUpdater } from '@/hooks/useUpdater';
 
 function App(): JSX.Element {
     const [hasBots, setHasBots] = useState<boolean | null>(null);
     const [introDone, setIntroDone] = useState<boolean>(false);
+    // Controllo aggiornamenti centralizzato: parte già dall'intro e la schermata di avviso
+    // (UpdateModal) compare sopra qualunque vista.
+    const updater = useUpdater();
 
     useEffect(() => {
         window.api.getBots().then((bots) => {
@@ -32,15 +37,23 @@ function App(): JSX.Element {
     return (
         <ErrorBoundary>
             {!introDone ? (
-                <IntroScreen onComplete={() => setIntroDone(true)} />
+                <IntroScreen
+                    onComplete={() => setIntroDone(true)}
+                    updateStatus={updater.status}
+                    newVersion={updater.newVersion}
+                    currentVersion={updater.currentVersion}
+                />
             ) : hasBots ? (
-                <Dashboard />
+                <Dashboard updater={updater} />
             ) : (
                 <SetupWizard
                     onComplete={(name, token, channel, startDate) => handleSetupComplete(name, token, channel, startDate)}
                     onSkip={() => setHasBots(true)}
                 />
             )}
+
+            {/* Schermata di aggiornamento — sopra ogni vista */}
+            <UpdateModal updater={updater} />
         </ErrorBoundary>
     );
 }
