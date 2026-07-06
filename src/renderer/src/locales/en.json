@@ -6,7 +6,7 @@
         "copyright": "© 2026 Simone Pizzi for Runtime Radio"
     },
     "setup": {
-        "subtitle": "Initialize your bot environment",
+        "subtitle": "Initialise your bot environment",
         "step1Label": "1. Bot Name",
         "step1Placeholder": "e.g. Runtime Radio Bot",
         "step1Desc": "A descriptive name to identify this bot",
@@ -20,7 +20,7 @@
         "invalidDate": "Invalid Date",
         "btnNext": "Next Step",
         "btnLaunch": "Launch Titan",
-        "btnInit": "Initialize",
+        "btnInit": "Initialise",
         "btnSkip": "Skip"
     },
     "status": {
@@ -67,11 +67,11 @@
         "editTitle": "Edit Bot",
         "newTitle": "New Bot Configuration",
         "nameLabel": "Bot Label / Name",
-        "namePlaceholder": "es. Radio News Bot",
+        "namePlaceholder": "e.g. Radio News Bot",
         "tokenLabel": "Telegram Bot Token",
         "tokenPlaceholder": "paste token from @BotFather",
         "channelLabel": "Destination Channel ID",
-        "channelPlaceholder": "es. @mychannel or -10012345678",
+        "channelPlaceholder": "e.g. @mychannel or -10012345678",
         "intervalLabel": "Check Interval",
         "intervalHint": "Minutes between feeds checks",
         "startDateLabel": "Cutoff Date",
