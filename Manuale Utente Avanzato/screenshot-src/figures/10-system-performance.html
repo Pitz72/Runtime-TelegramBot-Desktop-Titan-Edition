@@ -1,0 +1,239 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Titan · 10-system-performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{headline:['"Space Grotesk"','sans-serif'],body:['"Inter"','sans-serif'],titan:['"Inter"','sans-serif'],mono:['"Fira Code"','monospace'],machine:['"Fira Code"','monospace']},colors:{"background":"#050510","surface-container-lowest":"#0a0a0f","surface-container-low":"#10101a","surface-container":"#16162a","surface-container-high":"#1a1a2e","surface-container-highest":"#1e2040","surface-variant":"#1e2040","surface-dim":"#050510","surface-bright":"#252542","on-surface":"#e0e7ff","on-surface-variant":"#bfdbfe","on-background":"#e0e7ff","outline":"#6b7280","outline-variant":"#3b82f6","inverse-surface":"#e0e7ff","inverse-on-surface":"#1e2040","primary":"#93c5fd","primary-container":"#3b82f6","primary-fixed":"#dbeafe","primary-fixed-dim":"#93c5fd","on-primary":"#1e3a8a","on-primary-fixed":"#172554","on-primary-container":"#1e40af","inverse-primary":"#2563eb","secondary":"#4cd7f6","secondary-container":"#03b5d3","secondary-fixed":"#acedff","secondary-fixed-dim":"#4cd7f6","on-secondary":"#003640","on-secondary-fixed":"#001f26","on-secondary-container":"#00424e","tertiary":"#d0bcff","tertiary-container":"#a078ff","tertiary-fixed":"#e9ddff","tertiary-fixed-dim":"#d0bcff","on-tertiary":"#3c0091","on-tertiary-fixed":"#23005c","on-tertiary-container":"#340080","error":"#f87171","error-container":"#7f1d1d","on-error":"#450a0a","on-error-container":"#fecaca","success":"#34d399","success-container":"#064e3b","on-success":"#022c22"}}}}</script>
+<style>
+body { background-color:#050510; color:#e0e7ff; font-family:'Inter',sans-serif; margin:0; font-feature-settings:'liga' 1,'calt' 1; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#424754; border-radius:0.75rem; }
+.scanline-bg { position:relative; overflow:hidden; }
+.scanline-bg::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(208,188,255,0.04) 1px,rgba(208,188,255,0.04) 2px); pointer-events:none; z-index:1; }
+.scanline-bg::after { content:''; position:absolute; top:0; left:0; right:0; height:100%; background:linear-gradient(180deg,rgba(173,198,255,0.03) 0%,transparent 50%,rgba(76,215,246,0.02) 100%); pointer-events:none; z-index:1; opacity:0.6; }
+.ghost-border { border:1px solid rgba(59,130,246,0.10); }
+.glass-panel { background:rgba(10,10,15,0.80); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(59,130,246,0.10); box-shadow:0 20px 40px rgba(0,0,0,0.55),0 0 15px rgba(59,130,246,0.04); }
+.glass-panel-elevated { background:rgba(16,16,26,0.90); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(59,130,246,0.15); box-shadow:0 24px 48px rgba(0,0,0,0.6),0 0 20px rgba(59,130,246,0.06); }
+.text-glow { text-shadow:0 0 8px rgba(173,198,255,0.5); }
+.text-glow-cyan { text-shadow:0 0 8px rgba(76,215,246,0.6); }
+.text-glow-error { text-shadow:0 0 8px rgba(255,180,171,0.5); }
+.text-micro { font-family:'Fira Code',monospace; font-size:11px; letter-spacing:0.2em; text-transform:uppercase; }
+.text-nano { font-family:'Fira Code',monospace; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; }
+.glow-primary { box-shadow:0 0 8px rgba(173,198,255,0.5); }
+.glow-secondary { box-shadow:0 0 8px rgba(76,215,246,0.6); }
+.glow-ambient { box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 15px rgba(173,198,255,0.05); }
+.drop-glow-primary { filter:drop-shadow(0 0 8px rgba(173,198,255,0.5)); }
+.drop-glow-secondary { filter:drop-shadow(0 0 8px rgba(76,215,246,0.6)); }
+.drop-glow-success { filter:drop-shadow(0 0 8px rgba(74,222,128,0.6)); }
+.text-glow-success { text-shadow:0 0 8px rgba(74,222,128,0.5); }
+.glow-success { box-shadow:0 0 8px rgba(74,222,128,0.5); }
+.ignition-btn { position:relative; isolation:isolate; background:conic-gradient(from 180deg at 50% 50%,#4d8eff 0deg,#03b5d3 180deg,#4d8eff 360deg); box-shadow:0 0 8px rgba(59,130,246,0.5); }
+.ignition-btn.stopping { background:conic-gradient(from 180deg at 50% 50%,#93000a 0deg,#ffb4ab 180deg,#93000a 360deg); box-shadow:0 0 8px rgba(255,180,171,0.5); }
+.ignition-ring { position:absolute; inset:-4px; border-radius:inherit; padding:2px; background:conic-gradient(from 0deg,rgba(173,198,255,0) 0%,rgba(173,198,255,0.6) 25%,rgba(76,215,246,0.4) 50%,rgba(173,198,255,0.6) 75%,rgba(173,198,255,0) 100%); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+.panel-border { border:1px solid rgba(59,130,246,0.10); }
+.status-dot-active { box-shadow:0 0 6px rgba(74,222,128,0.8),0 0 12px rgba(74,222,128,0.4); }
+.status-dot-stopped { box-shadow:0 0 6px rgba(255,180,171,0.6); }
+.grid-dots { background-image:radial-gradient(rgba(59,130,246,0.10) 1px,transparent 1px); background-size:24px 24px; }
+.gradient-border-btn { position:relative; padding:1px; border-radius:4px; background:linear-gradient(135deg,#93c5fd,#4cd7f6); }
+.gradient-border-btn > * { border-radius:3px; background:#0a0a0f; }
+.nav-item-active { border-left:2px solid #3b82f6; background:rgba(59,130,246,0.06); box-shadow:inset 0 0 15px rgba(59,130,246,0.04); color:#93c5fd; }
+.nav-item { border-left:2px solid transparent; }
+.input-label { font-family:'Fira Code',monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:#8c909f; display:block; margin-bottom:4px; }
+.toast-stripe-success { background:#4cd7f6; box-shadow:0 0 8px rgba(76,215,246,0.6); }
+.tile-stripe-primary { background:linear-gradient(90deg,#adc6ff,transparent); }
+.tile-stripe-secondary { background:linear-gradient(90deg,#4cd7f6,transparent); }
+.tile-stripe-tertiary { background:linear-gradient(90deg,#d0bcff,transparent); }
+/* Freeze every animation at its resting/end frame for a clean still capture */
+*, *::before, *::after { animation-duration:0s !important; animation-delay:0s !important; transition:none !important; }
+</style></head><body><div style="width:1280px;height:800px;overflow:hidden;position:relative" class="bg-background"><div class="absolute inset-0" style="filter:blur(14px) brightness(0.5)"><div class="h-full w-full bg-background text-on-surface flex font-body overflow-hidden relative">
+    <div class="w-1/2 flex h-full"><div class="w-72 bg-background border-r border-outline-variant/10 flex flex-col h-full">
+    <div class="p-4 border-b border-outline-variant/10 flex justify-between items-center bg-background">
+      <span class="text-micro text-outline-variant/60">Active Bots</span>
+      <div class="flex bg-surface-container-lowest rounded border border-outline-variant/10 p-0.5">
+        <button class="p-1.5 rounded-sm text-primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="21" y1="6" x2="14" y2="6"/><line x1="10" y1="6" x2="3" y2="6"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="18" x2="16" y2="18"/><line x1="12" y1="18" x2="3" y2="18"/><circle cx="12" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></svg></button>
+        <div class="w-px bg-outline-variant/15 mx-0.5 h-5 self-center"></div>
+        <button class="p-1.5 rounded-sm text-outline-variant"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15l3 3 3-3"/></svg></button>
+        <div class="gradient-border-btn ml-0.5"><div class="px-2 py-1.5 flex items-center gap-1 text-nano font-bold text-on-surface"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div>
+      </div>
+    </div>
+    <div class="flex-1 overflow-hidden"><div class="group p-3 cursor-pointer relative nav-item nav-item-active">
+      <div class="flex justify-between items-start">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5">
+            <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-px bg-success status-dot-active"></div>
+            <h3 class="font-body font-semibold text-sm truncate text-primary">Runtime News Desk</h3>
+          </div>
+          <div class="flex flex-col gap-0.5 mt-1 pl-3">
+            <p class="text-nano font-mono flex items-center gap-1 truncate text-outline-variant/60"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>@runtime_news</p>
+            <p class="text-nano text-primary/25">From: 2026-01-15</p>
+          </div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="text-primary flex-shrink-0 drop-glow-primary"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+    </div><div class="group p-3 cursor-pointer relative nav-item ">
+      <div class="flex justify-between items-start">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5">
+            <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-px bg-success status-dot-active"></div>
+            <h3 class="font-body font-semibold text-sm truncate text-on-surface">Synthwave Sessions</h3>
+          </div>
+          <div class="flex flex-col gap-0.5 mt-1 pl-3">
+            <p class="text-nano font-mono flex items-center gap-1 truncate text-outline-variant/60"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>@synthwave_fm</p>
+            <p class="text-nano text-primary/25">From: 2025-11-02</p>
+          </div>
+        </div>
+        
+      </div>
+    </div><div class="group p-3 cursor-pointer relative nav-item ">
+      <div class="flex justify-between items-start">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5">
+            <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-px bg-success status-dot-active"></div>
+            <h3 class="font-body font-semibold text-sm truncate text-on-surface">Titan Tech Radar</h3>
+          </div>
+          <div class="flex flex-col gap-0.5 mt-1 pl-3">
+            <p class="text-nano font-mono flex items-center gap-1 truncate text-outline-variant/60"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>@titan_tech</p>
+            <p class="text-nano text-primary/25">From: 2026-03-10</p>
+          </div>
+        </div>
+        
+      </div>
+    </div><div class="group p-3 cursor-pointer relative nav-item ">
+      <div class="flex justify-between items-start">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5">
+            <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-px bg-outline-variant/40"></div>
+            <h3 class="font-body font-semibold text-sm truncate text-outline-variant/50">Night Signal</h3>
+          </div>
+          <div class="flex flex-col gap-0.5 mt-1 pl-3">
+            <p class="text-nano font-mono flex items-center gap-1 truncate text-outline-variant/30"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>-1001987654321</p>
+            <p class="text-nano text-primary/25">From: 2026-02-20</p>
+          </div>
+        </div>
+        
+      </div>
+    </div></div>
+  </div><div class="flex-1 border-r border-outline-variant/15 flex flex-col bg-surface-container-lowest h-full overflow-hidden"><div class="flex-1 bg-surface-container-lowest flex flex-col h-full overflow-hidden">
+    <div class="p-4 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-lowest">
+      <div>
+        <h2 class="font-headline text-sm font-bold text-on-surface uppercase tracking-wide">Feed Sources</h2>
+        <p class="text-nano text-outline-variant/40 mt-0.5">Manage RSS feeds</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="ghost-border bg-surface-container text-on-surface-variant px-3 py-1.5 rounded-lg text-nano font-bold flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>OPML</button>
+        <button class="gradient-border-btn"><div class="px-3 py-1.5 flex items-center gap-1.5 text-nano font-bold text-on-surface rounded-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Source</div></button>
+      </div>
+    </div>
+    <div class="p-4 overflow-hidden flex-1">
+      
+      <div class="space-y-2"><div class="group ghost-border rounded-xl p-3 flex items-center gap-3 bg-background/80">
+    <div class="w-9 h-9 rounded-lg flex items-center justify-center border bg-primary/10 text-primary border-primary/20 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg></div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <h3 class="font-semibold text-on-surface text-sm truncate">Ars Technica</h3><span class="text-nano px-1.5 py-0.5 rounded border border-primary/20 text-primary flex-shrink-0">NEWS</span><span class="text-nano px-1.5 py-0.5 rounded border border-tertiary/30 text-tertiary flex-shrink-0 flex items-center gap-0.5"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><polygon points="22 3 2 3 10 12.5 10 19 14 21 14 12.5 22 3"/></svg>filter active</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-nano text-outline-variant/50 mt-0.5 truncate font-mono"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>feeds.arstechnica.com/arstechnica/index</div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0"><label class="relative inline-flex items-center ml-1"><div class="w-8 h-4 rounded-full relative border border-primary/40" style="background:rgba(59,130,246,0.25)"><div class="absolute top-[1px] right-[2px] h-3.5 w-3.5 rounded-full bg-primary-container"></div></div></label></div>
+  </div><div class="group ghost-border rounded-xl p-3 flex items-center gap-3 bg-background/80">
+    <div class="w-9 h-9 rounded-lg flex items-center justify-center border bg-primary/10 text-primary border-primary/20 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg></div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <h3 class="font-semibold text-on-surface text-sm truncate">The Verge</h3><span class="text-nano px-1.5 py-0.5 rounded border border-primary/20 text-primary flex-shrink-0">NEWS</span><span class="text-nano px-1.5 py-0.5 rounded border border-secondary/30 text-secondary flex-shrink-0 flex items-center gap-0.5"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>15 min</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-nano text-outline-variant/50 mt-0.5 truncate font-mono"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>theverge.com/rss/index.xml</div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0"><label class="relative inline-flex items-center ml-1"><div class="w-8 h-4 rounded-full relative border border-primary/40" style="background:rgba(59,130,246,0.25)"><div class="absolute top-[1px] right-[2px] h-3.5 w-3.5 rounded-full bg-primary-container"></div></div></label></div>
+  </div><div class="group ghost-border rounded-xl p-3 flex items-center gap-3 bg-background/80">
+    <div class="w-9 h-9 rounded-lg flex items-center justify-center border bg-tertiary/10 text-tertiary border-tertiary/20 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <h3 class="font-semibold text-on-surface text-sm truncate">Darknet Diaries</h3><span class="text-nano px-1.5 py-0.5 rounded border border-tertiary/20 text-tertiary flex-shrink-0">PODCAST</span><span class="text-nano px-1.5 py-0.5 rounded border border-tertiary-container/40 text-tertiary-container flex-shrink-0 flex items-center gap-0.5"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>digest</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-nano text-outline-variant/50 mt-0.5 truncate font-mono"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>feeds.megaphone.fm/darknetdiaries</div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0"><label class="relative inline-flex items-center ml-1"><div class="w-8 h-4 rounded-full relative border border-primary/40" style="background:rgba(59,130,246,0.25)"><div class="absolute top-[1px] right-[2px] h-3.5 w-3.5 rounded-full bg-primary-container"></div></div></label></div>
+  </div><div class="group ghost-border rounded-xl p-3 flex items-center gap-3 bg-background/80">
+    <div class="w-9 h-9 rounded-lg flex items-center justify-center border bg-primary/10 text-primary border-primary/20 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg></div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <h3 class="font-semibold text-on-surface text-sm truncate">Hacker News</h3><span class="text-nano px-1.5 py-0.5 rounded border border-primary/20 text-primary flex-shrink-0">NEWS</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-nano text-outline-variant/50 mt-0.5 truncate font-mono"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>hnrss.org/frontpage</div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0"><label class="relative inline-flex items-center ml-1"><div class="w-8 h-4 rounded-full relative border border-primary/40" style="background:rgba(59,130,246,0.25)"><div class="absolute top-[1px] right-[2px] h-3.5 w-3.5 rounded-full bg-primary-container"></div></div></label></div>
+  </div><div class="group ghost-border rounded-xl p-3 flex items-center gap-3 bg-background/80">
+    <div class="w-9 h-9 rounded-lg flex items-center justify-center border bg-error/10 text-error border-error/20 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <h3 class="font-semibold text-on-surface text-sm truncate">Kurzgesagt</h3><span class="text-nano px-1.5 py-0.5 rounded border border-error/20 text-error flex-shrink-0">YOUTUBE</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-nano text-outline-variant/50 mt-0.5 truncate font-mono"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>youtube.com/feeds/videos.xml?channel_id=UCsXVk37</div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0"><label class="relative inline-flex items-center ml-1"><div class="w-8 h-4 rounded-full relative border border-outline-variant/15 bg-surface-container-lowest"><div class="absolute top-[1px] left-[2px] h-3.5 w-3.5 rounded-full bg-outline-variant/60"></div></div></label></div>
+  </div></div>
+    </div>
+  </div></div></div>
+    <main class="w-1/2 flex flex-col relative bg-surface-container-lowest h-full">
+    <header class="px-6 py-3 border-b border-outline-variant/15 flex justify-between items-center bg-surface-container-low/90 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
+      <div class="flex items-center gap-3">
+        <img src="file:///C:/Users/Utente/Documents/SVILUPPO/UTILITY/BOT-TELEGRAM-RSS/Manuale Utente Avanzato/screenshot-src/assets/logo.png" class="w-9 h-9 drop-shadow-[0_0_10px_rgba(59,130,246,0.30)]">
+        <div>
+          <h1 class="font-headline text-base font-bold tracking-tight text-on-surface uppercase leading-tight">Runtime TelegramBot <span class="text-primary font-light">Titan Edition</span></h1>
+          <div class="flex gap-2 items-baseline"><p class="text-nano text-outline-variant/40">© 2026 Simone Pizzi for Runtime Radio</p><p class="text-nano text-primary/30">v2.1.5</p></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3"><div class="px-3 py-1 rounded text-micro font-bold border flex items-center gap-2 bg-success/10 border-success/25 text-success"><div class="w-1.5 h-1.5 rounded-full bg-success status-dot-active"></div>ONLINE</div><div class="w-px h-5 bg-outline-variant/20"></div><button class="p-2 rounded text-outline-variant border border-transparent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
+    </header>
+    <div class="flex-1 flex flex-col p-5 gap-4 overflow-hidden">
+      <div class="flex items-center justify-center gap-8 py-2">
+        <div class="flex items-center gap-5">
+          <div class="text-center"><p class="font-headline text-2xl font-bold text-primary text-glow leading-none">12</p><p class="text-nano text-outline-variant/50 mt-1">Today</p></div>
+          <div class="w-px h-8 bg-outline-variant/20"></div>
+          <div class="text-center"><p class="font-headline text-2xl font-bold text-secondary text-glow-cyan leading-none">87</p><p class="text-nano text-outline-variant/50 mt-1">7 Days</p></div>
+        </div>
+        <div class="relative"><div class="ignition-ring"></div><button class="ignition-btn stopping relative w-20 h-20 rounded-2xl flex items-center justify-center"><svg width="22" height="22" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="relative z-10"><rect x="5" y="5" width="14" height="14" rx="1.5"/></svg></button></div>
+        <div class="flex items-center gap-5">
+          <div class="text-center"><p class="font-headline text-2xl font-bold text-on-surface-variant leading-none">3421</p><p class="text-nano text-outline-variant/50 mt-1">Total</p></div>
+          <div class="w-px h-8 bg-outline-variant/20"></div>
+          <div class="flex flex-col items-center gap-1 text-outline-variant/40"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M3 3v18h18"/><path d="M7 16V9"/><path d="M12 16V5"/><path d="M17 16v-5"/></svg><span class="text-nano">Stats</span></div>
+        </div>
+      </div>
+      <div class="flex-1 bg-surface-container-lowest rounded-xl ghost-border font-mono text-xs overflow-hidden flex flex-col shadow-inner relative scanline-bg">
+        <div class="flex justify-between items-center px-4 py-2.5 border-b border-outline-variant/10 bg-surface-container-low/60 relative z-10">
+          <div class="flex items-center gap-3">
+            <span class="text-micro text-outline-variant/50">System Logs // All Channels</span>
+            <div class="flex items-center bg-surface-container-lowest/80 rounded border border-outline-variant/10 overflow-hidden">
+              <button class="px-2 py-0.5 text-nano font-bold bg-primary/15 text-primary">All Bots</button>
+              <button class="px-2 py-0.5 text-nano font-bold text-outline-variant/40">This Bot</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="text-outline-variant/40 text-nano flex items-center gap-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+            <span class="text-outline-variant/20">|</span>
+            <button class="text-outline-variant/40 text-nano">Clear</button>
+          </div>
+        </div>
+        <div class="flex-1 overflow-hidden relative z-10 px-4 pt-2 pb-2"><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-secondary">[14:36:07] ✅ [Hacker News] Posted: "Show HN: I built a self-hosted RSS-to-Telegram bridge"</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-on-surface-variant">[14:36:05] [Hacker News] 2 new items found.</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-on-surface-variant">[14:35:52] [The Verge] No new items.</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-tertiary">[14:35:40] ⚠️ FloodWait: pausing 30s to respect Telegram rate limits.</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-secondary">[14:35:09] ✅ [Ars Technica] Posted: "Apple unveils the M5 chip lineup"</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-secondary">[14:35:08] ✅ [Ars Technica] Posted: "NASA confirms Europa Clipper flyby data"</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-on-surface-variant">[14:35:06] [Ars Technica] 4 new items · filtering by keyword...</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-secondary">[14:34:58] ✅ [Darknet Diaries] Posted: "Ep. 148 — Secret Codes"</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-on-surface-variant">[14:34:55] [Darknet Diaries] Digest window reached — releasing 1 item.</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-on-surface-variant">[14:34:31] [Runtime News Desk] Monitoring 5 feeds · next scan in 15 min.</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-secondary">[14:34:30] 🚀 Engine online.</span></div><div class="opacity-75 leading-relaxed break-words font-medium" style="margin-bottom:2px"><span class="text-secondary">[14:34:29] 🚀 Starting engine...</span></div></div>
+      </div>
+    </div>
+  </main>
+  </div></div>
+    <div class="absolute inset-0 bg-background/70"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4"><div class="glass-panel w-full max-w-4xl rounded-xl overflow-hidden flex flex-col">
+    <div class="flex justify-between items-center p-6 border-b border-outline-variant/15 bg-surface-container-high/50">
+      <div><h2 class="font-headline text-xl font-bold text-on-surface flex items-center gap-3"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="text-primary drop-glow-primary"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M9 12l2 2 4-4"/></svg>System Settings</h2><p class="text-nano text-outline-variant/50 mt-1">Data and Database Management</p></div>
+      <button class="p-1 text-outline-variant rounded"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="flex bg-surface-container-lowest border-b border-outline-variant/15 px-6 pt-2"><button class="px-5 py-3 text-micro border-b-2 border-transparent text-outline-variant/50">General</button><button class="px-5 py-3 text-micro border-b-2 border-transparent text-outline-variant/50">Data & Backup</button><button class="px-5 py-3 text-micro border-b-2 border-primary text-primary">Performance</button></div>
+    <div class="p-6"><div class="max-w-lg space-y-6">
+    <div class="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Performance Mode</div>
+    <p class="text-xs text-on-surface-variant leading-relaxed">Disable GPU-heavy visual effects (scanlines, blur, glow, animations) to improve smoothness on 4K displays or legacy GPU hardware.</p>
+    <label class="flex items-center justify-between p-4 rounded-xl ghost-border bg-surface-container-lowest">
+      <div class="space-y-1"><p class="text-sm font-bold text-on-surface font-headline">Enable Performance Mode</p><p class="text-nano text-outline-variant/50">Takes effect immediately — no restart required</p></div>
+      <div class="relative w-11 h-6 rounded-full flex-shrink-0 bg-surface-container-highest"><span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-outline-variant"></span></div>
+    </label>
+    <div class="space-y-2 text-xs text-outline-variant/60"><p class="text-micro text-outline-variant/40 pb-1">Disabled effects:</p><div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-outline-variant/30 flex-shrink-0"></span>Phosphorescent scanline overlay</div><div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-outline-variant/30 flex-shrink-0"></span>Glass effect (backdrop-blur)</div><div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-outline-variant/30 flex-shrink-0"></span>Glow, box-shadow and text-shadow effects</div><div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-outline-variant/30 flex-shrink-0"></span>Ignition-pulse and ignition-ring animations</div></div>
+  </div></div>
+    <div class="p-4 border-t border-outline-variant/15 bg-surface-container-low/40 flex justify-end"><button class="px-6 py-2 rounded-lg text-sm font-headline font-bold ignition-btn text-on-primary-fixed shadow-lg">Close</button></div>
+  </div></div></div></body></html>

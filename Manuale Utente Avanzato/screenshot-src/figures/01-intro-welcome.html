@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Titan · 01-intro-welcome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{headline:['"Space Grotesk"','sans-serif'],body:['"Inter"','sans-serif'],titan:['"Inter"','sans-serif'],mono:['"Fira Code"','monospace'],machine:['"Fira Code"','monospace']},colors:{"background":"#050510","surface-container-lowest":"#0a0a0f","surface-container-low":"#10101a","surface-container":"#16162a","surface-container-high":"#1a1a2e","surface-container-highest":"#1e2040","surface-variant":"#1e2040","surface-dim":"#050510","surface-bright":"#252542","on-surface":"#e0e7ff","on-surface-variant":"#bfdbfe","on-background":"#e0e7ff","outline":"#6b7280","outline-variant":"#3b82f6","inverse-surface":"#e0e7ff","inverse-on-surface":"#1e2040","primary":"#93c5fd","primary-container":"#3b82f6","primary-fixed":"#dbeafe","primary-fixed-dim":"#93c5fd","on-primary":"#1e3a8a","on-primary-fixed":"#172554","on-primary-container":"#1e40af","inverse-primary":"#2563eb","secondary":"#4cd7f6","secondary-container":"#03b5d3","secondary-fixed":"#acedff","secondary-fixed-dim":"#4cd7f6","on-secondary":"#003640","on-secondary-fixed":"#001f26","on-secondary-container":"#00424e","tertiary":"#d0bcff","tertiary-container":"#a078ff","tertiary-fixed":"#e9ddff","tertiary-fixed-dim":"#d0bcff","on-tertiary":"#3c0091","on-tertiary-fixed":"#23005c","on-tertiary-container":"#340080","error":"#f87171","error-container":"#7f1d1d","on-error":"#450a0a","on-error-container":"#fecaca","success":"#34d399","success-container":"#064e3b","on-success":"#022c22"}}}}</script>
+<style>
+body { background-color:#050510; color:#e0e7ff; font-family:'Inter',sans-serif; margin:0; font-feature-settings:'liga' 1,'calt' 1; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#424754; border-radius:0.75rem; }
+.scanline-bg { position:relative; overflow:hidden; }
+.scanline-bg::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(208,188,255,0.04) 1px,rgba(208,188,255,0.04) 2px); pointer-events:none; z-index:1; }
+.scanline-bg::after { content:''; position:absolute; top:0; left:0; right:0; height:100%; background:linear-gradient(180deg,rgba(173,198,255,0.03) 0%,transparent 50%,rgba(76,215,246,0.02) 100%); pointer-events:none; z-index:1; opacity:0.6; }
+.ghost-border { border:1px solid rgba(59,130,246,0.10); }
+.glass-panel { background:rgba(10,10,15,0.80); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(59,130,246,0.10); box-shadow:0 20px 40px rgba(0,0,0,0.55),0 0 15px rgba(59,130,246,0.04); }
+.glass-panel-elevated { background:rgba(16,16,26,0.90); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(59,130,246,0.15); box-shadow:0 24px 48px rgba(0,0,0,0.6),0 0 20px rgba(59,130,246,0.06); }
+.text-glow { text-shadow:0 0 8px rgba(173,198,255,0.5); }
+.text-glow-cyan { text-shadow:0 0 8px rgba(76,215,246,0.6); }
+.text-glow-error { text-shadow:0 0 8px rgba(255,180,171,0.5); }
+.text-micro { font-family:'Fira Code',monospace; font-size:11px; letter-spacing:0.2em; text-transform:uppercase; }
+.text-nano { font-family:'Fira Code',monospace; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; }
+.glow-primary { box-shadow:0 0 8px rgba(173,198,255,0.5); }
+.glow-secondary { box-shadow:0 0 8px rgba(76,215,246,0.6); }
+.glow-ambient { box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 15px rgba(173,198,255,0.05); }
+.drop-glow-primary { filter:drop-shadow(0 0 8px rgba(173,198,255,0.5)); }
+.drop-glow-secondary { filter:drop-shadow(0 0 8px rgba(76,215,246,0.6)); }
+.drop-glow-success { filter:drop-shadow(0 0 8px rgba(74,222,128,0.6)); }
+.text-glow-success { text-shadow:0 0 8px rgba(74,222,128,0.5); }
+.glow-success { box-shadow:0 0 8px rgba(74,222,128,0.5); }
+.ignition-btn { position:relative; isolation:isolate; background:conic-gradient(from 180deg at 50% 50%,#4d8eff 0deg,#03b5d3 180deg,#4d8eff 360deg); box-shadow:0 0 8px rgba(59,130,246,0.5); }
+.ignition-btn.stopping { background:conic-gradient(from 180deg at 50% 50%,#93000a 0deg,#ffb4ab 180deg,#93000a 360deg); box-shadow:0 0 8px rgba(255,180,171,0.5); }
+.ignition-ring { position:absolute; inset:-4px; border-radius:inherit; padding:2px; background:conic-gradient(from 0deg,rgba(173,198,255,0) 0%,rgba(173,198,255,0.6) 25%,rgba(76,215,246,0.4) 50%,rgba(173,198,255,0.6) 75%,rgba(173,198,255,0) 100%); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+.panel-border { border:1px solid rgba(59,130,246,0.10); }
+.status-dot-active { box-shadow:0 0 6px rgba(74,222,128,0.8),0 0 12px rgba(74,222,128,0.4); }
+.status-dot-stopped { box-shadow:0 0 6px rgba(255,180,171,0.6); }
+.grid-dots { background-image:radial-gradient(rgba(59,130,246,0.10) 1px,transparent 1px); background-size:24px 24px; }
+.gradient-border-btn { position:relative; padding:1px; border-radius:4px; background:linear-gradient(135deg,#93c5fd,#4cd7f6); }
+.gradient-border-btn > * { border-radius:3px; background:#0a0a0f; }
+.nav-item-active { border-left:2px solid #3b82f6; background:rgba(59,130,246,0.06); box-shadow:inset 0 0 15px rgba(59,130,246,0.04); color:#93c5fd; }
+.nav-item { border-left:2px solid transparent; }
+.input-label { font-family:'Fira Code',monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:#8c909f; display:block; margin-bottom:4px; }
+.toast-stripe-success { background:#4cd7f6; box-shadow:0 0 8px rgba(76,215,246,0.6); }
+.tile-stripe-primary { background:linear-gradient(90deg,#adc6ff,transparent); }
+.tile-stripe-secondary { background:linear-gradient(90deg,#4cd7f6,transparent); }
+.tile-stripe-tertiary { background:linear-gradient(90deg,#d0bcff,transparent); }
+/* Freeze every animation at its resting/end frame for a clean still capture */
+*, *::before, *::after { animation-duration:0s !important; animation-delay:0s !important; transition:none !important; }
+</style></head><body><div style="width:1280px;height:800px;overflow:hidden;position:relative" class="bg-background"><div class="h-full w-full bg-background flex flex-col items-center justify-center relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none grid-dots">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[120px] opacity-60"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[80px] opacity-40"></div>
+    </div>
+    <div class="relative z-10 max-w-2xl w-full p-8 flex flex-col items-center">
+      <img src="file:///C:/Users/Utente/Documents/SVILUPPO/UTILITY/BOT-TELEGRAM-RSS/Manuale Utente Avanzato/screenshot-src/assets/logo.png" class="w-28 h-28 mb-6" style="filter:drop-shadow(0 0 24px rgba(173,198,255,0.25))">
+      <h1 class="font-headline text-4xl font-black tracking-tight mb-2 text-on-surface">Runtime TelegramBot <span class="text-primary drop-glow-primary">Titan Edition</span></h1>
+      <p class="text-outline-variant/60 text-sm font-body mb-3">© 2026 Simone Pizzi for Runtime Radio</p>
+      <div class="h-6 mb-9 flex items-center justify-center"><span class="text-nano text-outline-variant/35 font-mono">v2.1.5</span></div>
+      <div class="w-full glass-panel rounded-2xl p-6 mb-8">
+        <h3 class="text-center text-micro text-secondary mb-6 drop-glow-secondary">Interface Language</h3>
+        <div class="grid grid-cols-4 gap-4"><button class="relative flex flex-col items-center p-3 rounded-xl border bg-primary/15 border-primary/40 text-on-surface">
+      <div class="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50"><svg viewBox="0 0 60 30" class="w-full h-full object-cover"><clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg></div>
+      <span class="text-nano">English</span>
+      <div class="absolute inset-0 border-2 border-primary/50 rounded-xl pointer-events-none"></div>
+    </button><button class="relative flex flex-col items-center p-3 rounded-xl border bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60">
+      <div class="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50"><svg viewBox="0 0 3 2" class="w-full h-full object-cover"><rect width="1" height="2" fill="#009246"/><rect width="1" height="2" x="1" fill="#FFF"/><rect width="1" height="2" x="2" fill="#CE2B37"/></svg></div>
+      <span class="text-nano">Italiano</span>
+      
+    </button><button class="relative flex flex-col items-center p-3 rounded-xl border bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60">
+      <div class="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50"><svg viewBox="0 0 3 2" class="w-full h-full object-cover"><rect width="1" height="2" fill="#0055A4"/><rect width="1" height="2" x="1" fill="#FFF"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg></div>
+      <span class="text-nano">Français</span>
+      
+    </button><button class="relative flex flex-col items-center p-3 rounded-xl border bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60">
+      <div class="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50"><svg viewBox="0 0 5 3" class="w-full h-full object-cover"><rect width="5" height="3" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg></div>
+      <span class="text-nano">Deutsch</span>
+      
+    </button><button class="relative flex flex-col items-center p-3 rounded-xl border bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60">
+      <div class="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50"><svg viewBox="0 0 750 500" class="w-full h-full object-cover"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg></div>
+      <span class="text-nano">Español</span>
+      
+    </button><button class="relative flex flex-col items-center p-3 rounded-xl border bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60">
+      <div class="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50"><svg viewBox="0 0 600 400" class="w-full h-full object-cover"><rect width="600" height="400" fill="#f00"/><rect width="240" height="400" fill="#060"/></svg></div>
+      <span class="text-nano">Português</span>
+      
+    </button><button class="relative flex flex-col items-center p-3 rounded-xl border bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60">
+      <div class="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50"><svg viewBox="0 0 9 6" class="w-full h-full object-cover"><rect width="9" height="6" fill="#FFF"/><rect width="9" height="4" y="2" fill="#0039A6"/><rect width="9" height="2" y="4" fill="#D52B1E"/></svg></div>
+      <span class="text-nano">Русский</span>
+      
+    </button><button class="relative flex flex-col items-center p-3 rounded-xl border bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60">
+      <div class="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50"><svg viewBox="0 0 30 20" class="w-full h-full object-cover"><rect width="30" height="20" fill="#DE2910"/><polygon fill="#FFDE00" points="5,2 6,4 8,4 6.5,5.5 7,7.5 5,6.5 3,7.5 3.5,5.5 2,4 4,4"/></svg></div>
+      <span class="text-nano">中文</span>
+      
+    </button></div>
+      </div>
+      <button class="ignition-btn flex items-center gap-2 text-on-primary-fixed px-10 py-3.5 rounded-full font-headline font-bold text-sm shadow-lg">Launch Titan <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><polyline points="9 18 15 12 9 6"/></svg></button>
+      <p class="text-nano text-outline-variant/25 mt-8">INIT_SEQ · TITAN_DESKTOP_RUNTIME</p>
+    </div>
+  </div></div></body></html>

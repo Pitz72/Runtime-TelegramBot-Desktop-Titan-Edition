@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Titan · 02-setup-wizard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{headline:['"Space Grotesk"','sans-serif'],body:['"Inter"','sans-serif'],titan:['"Inter"','sans-serif'],mono:['"Fira Code"','monospace'],machine:['"Fira Code"','monospace']},colors:{"background":"#050510","surface-container-lowest":"#0a0a0f","surface-container-low":"#10101a","surface-container":"#16162a","surface-container-high":"#1a1a2e","surface-container-highest":"#1e2040","surface-variant":"#1e2040","surface-dim":"#050510","surface-bright":"#252542","on-surface":"#e0e7ff","on-surface-variant":"#bfdbfe","on-background":"#e0e7ff","outline":"#6b7280","outline-variant":"#3b82f6","inverse-surface":"#e0e7ff","inverse-on-surface":"#1e2040","primary":"#93c5fd","primary-container":"#3b82f6","primary-fixed":"#dbeafe","primary-fixed-dim":"#93c5fd","on-primary":"#1e3a8a","on-primary-fixed":"#172554","on-primary-container":"#1e40af","inverse-primary":"#2563eb","secondary":"#4cd7f6","secondary-container":"#03b5d3","secondary-fixed":"#acedff","secondary-fixed-dim":"#4cd7f6","on-secondary":"#003640","on-secondary-fixed":"#001f26","on-secondary-container":"#00424e","tertiary":"#d0bcff","tertiary-container":"#a078ff","tertiary-fixed":"#e9ddff","tertiary-fixed-dim":"#d0bcff","on-tertiary":"#3c0091","on-tertiary-fixed":"#23005c","on-tertiary-container":"#340080","error":"#f87171","error-container":"#7f1d1d","on-error":"#450a0a","on-error-container":"#fecaca","success":"#34d399","success-container":"#064e3b","on-success":"#022c22"}}}}</script>
+<style>
+body { background-color:#050510; color:#e0e7ff; font-family:'Inter',sans-serif; margin:0; font-feature-settings:'liga' 1,'calt' 1; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#424754; border-radius:0.75rem; }
+.scanline-bg { position:relative; overflow:hidden; }
+.scanline-bg::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(208,188,255,0.04) 1px,rgba(208,188,255,0.04) 2px); pointer-events:none; z-index:1; }
+.scanline-bg::after { content:''; position:absolute; top:0; left:0; right:0; height:100%; background:linear-gradient(180deg,rgba(173,198,255,0.03) 0%,transparent 50%,rgba(76,215,246,0.02) 100%); pointer-events:none; z-index:1; opacity:0.6; }
+.ghost-border { border:1px solid rgba(59,130,246,0.10); }
+.glass-panel { background:rgba(10,10,15,0.80); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(59,130,246,0.10); box-shadow:0 20px 40px rgba(0,0,0,0.55),0 0 15px rgba(59,130,246,0.04); }
+.glass-panel-elevated { background:rgba(16,16,26,0.90); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(59,130,246,0.15); box-shadow:0 24px 48px rgba(0,0,0,0.6),0 0 20px rgba(59,130,246,0.06); }
+.text-glow { text-shadow:0 0 8px rgba(173,198,255,0.5); }
+.text-glow-cyan { text-shadow:0 0 8px rgba(76,215,246,0.6); }
+.text-glow-error { text-shadow:0 0 8px rgba(255,180,171,0.5); }
+.text-micro { font-family:'Fira Code',monospace; font-size:11px; letter-spacing:0.2em; text-transform:uppercase; }
+.text-nano { font-family:'Fira Code',monospace; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; }
+.glow-primary { box-shadow:0 0 8px rgba(173,198,255,0.5); }
+.glow-secondary { box-shadow:0 0 8px rgba(76,215,246,0.6); }
+.glow-ambient { box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 15px rgba(173,198,255,0.05); }
+.drop-glow-primary { filter:drop-shadow(0 0 8px rgba(173,198,255,0.5)); }
+.drop-glow-secondary { filter:drop-shadow(0 0 8px rgba(76,215,246,0.6)); }
+.drop-glow-success { filter:drop-shadow(0 0 8px rgba(74,222,128,0.6)); }
+.text-glow-success { text-shadow:0 0 8px rgba(74,222,128,0.5); }
+.glow-success { box-shadow:0 0 8px rgba(74,222,128,0.5); }
+.ignition-btn { position:relative; isolation:isolate; background:conic-gradient(from 180deg at 50% 50%,#4d8eff 0deg,#03b5d3 180deg,#4d8eff 360deg); box-shadow:0 0 8px rgba(59,130,246,0.5); }
+.ignition-btn.stopping { background:conic-gradient(from 180deg at 50% 50%,#93000a 0deg,#ffb4ab 180deg,#93000a 360deg); box-shadow:0 0 8px rgba(255,180,171,0.5); }
+.ignition-ring { position:absolute; inset:-4px; border-radius:inherit; padding:2px; background:conic-gradient(from 0deg,rgba(173,198,255,0) 0%,rgba(173,198,255,0.6) 25%,rgba(76,215,246,0.4) 50%,rgba(173,198,255,0.6) 75%,rgba(173,198,255,0) 100%); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+.panel-border { border:1px solid rgba(59,130,246,0.10); }
+.status-dot-active { box-shadow:0 0 6px rgba(74,222,128,0.8),0 0 12px rgba(74,222,128,0.4); }
+.status-dot-stopped { box-shadow:0 0 6px rgba(255,180,171,0.6); }
+.grid-dots { background-image:radial-gradient(rgba(59,130,246,0.10) 1px,transparent 1px); background-size:24px 24px; }
+.gradient-border-btn { position:relative; padding:1px; border-radius:4px; background:linear-gradient(135deg,#93c5fd,#4cd7f6); }
+.gradient-border-btn > * { border-radius:3px; background:#0a0a0f; }
+.nav-item-active { border-left:2px solid #3b82f6; background:rgba(59,130,246,0.06); box-shadow:inset 0 0 15px rgba(59,130,246,0.04); color:#93c5fd; }
+.nav-item { border-left:2px solid transparent; }
+.input-label { font-family:'Fira Code',monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:#8c909f; display:block; margin-bottom:4px; }
+.toast-stripe-success { background:#4cd7f6; box-shadow:0 0 8px rgba(76,215,246,0.6); }
+.tile-stripe-primary { background:linear-gradient(90deg,#adc6ff,transparent); }
+.tile-stripe-secondary { background:linear-gradient(90deg,#4cd7f6,transparent); }
+.tile-stripe-tertiary { background:linear-gradient(90deg,#d0bcff,transparent); }
+/* Freeze every animation at its resting/end frame for a clean still capture */
+*, *::before, *::after { animation-duration:0s !important; animation-delay:0s !important; transition:none !important; }
+</style></head><body><div style="width:1280px;height:800px;overflow:hidden;position:relative" class="bg-background"><div class="h-full w-full flex items-center justify-center bg-background text-on-surface p-8 font-body overflow-hidden relative">
+    <div class="absolute inset-0 grid-dots pointer-events-none opacity-40"></div>
+    <div class="absolute top-1/2 left-1/2 w-[500px] h-[500px] bg-primary/6 blur-[150px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+    <div class="absolute top-1/2 left-1/2 w-[250px] h-[250px] bg-secondary/4 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+    <div class="max-w-md w-full space-y-8 relative z-10">
+      <div class="text-center space-y-2">
+        <img src="file:///C:/Users/Utente/Documents/SVILUPPO/UTILITY/BOT-TELEGRAM-RSS/Manuale Utente Avanzato/screenshot-src/assets/logo.png" class="w-16 h-16 mx-auto mb-4" style="filter:drop-shadow(0 0 16px rgba(173,198,255,0.2))">
+        <h1 class="font-headline text-3xl font-black text-on-surface tracking-tighter uppercase">Runtime TelegramBot <span class="text-primary drop-glow-primary">Titan Edition</span></h1>
+        <p class="text-outline-variant/50 text-sm">Initialize your bot environment</p>
+        <p class="text-nano text-outline-variant/25">© 2026 Simone Pizzi for Runtime Radio</p>
+      </div>
+      <div class="glass-panel rounded-2xl overflow-hidden relative">
+        <div class="h-0.5 bg-surface-container-lowest w-full"><div class="h-full" style="width:25%;background:linear-gradient(90deg,#4d8eff,#03b5d3);box-shadow:0 0 8px rgba(77,142,255,0.5)"></div></div>
+        <div class="p-8">
+          <div class="flex items-center justify-between mb-6"><span class="text-nano text-outline-variant/40">SETUP_WIZARD</span><span class="text-nano text-primary/60">1/4</span></div>
+          <div class="space-y-4">
+            <label class="block text-micro text-primary/60">1. Bot Name</label>
+            <input class="w-full bg-surface-container-lowest border border-outline-variant/15 rounded-lg p-3.5 text-on-surface outline-none text-sm font-body" value="Runtime News Desk">
+            <p class="text-nano text-outline-variant/40">A descriptive name to identify this bot</p>
+          </div>
+          <button class="mt-8 w-full ignition-btn text-on-primary-fixed font-headline font-bold py-4 rounded-xl flex items-center justify-center gap-2">Next Step <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class=""><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div></div></body></html>
