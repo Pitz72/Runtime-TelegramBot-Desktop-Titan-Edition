@@ -25,6 +25,7 @@ fileAssociations:
     name: Titan Bot Profile
     description: Runtime Telegram Bot Configuration File
     role: Editor
+    icon: build/icon.ico
 
 # === Windows ===
 win:
