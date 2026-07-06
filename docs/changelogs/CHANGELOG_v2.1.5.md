@@ -32,7 +32,7 @@ Nella console dei log le righe lunghe che andavano a capo si sovrapponevano alla
 
 ## CI
 
-`setup-node` aggiornato da Node 20 a **Node 24** in `build.yml` (job Linux e Windows), rimuovendo il warning di deprecazione delle GitHub Actions.
+Nota: il tentativo di portare `setup-node` a Node 24 è stato annullato — resta **Node 20**. La build Windows compila `better-sqlite3`, che non ha ancora binari precompilati per Node 24 e cadrebbe su `node-gyp` (che non rileva Visual Studio sul runner). Il warning di deprecazione visibile nelle Actions riguarda il *runtime delle action* (checkout/setup-node/cache), gestito automaticamente da GitHub, non la `node-version` della build: non è quindi risolvibile cambiando questo campo.
 
 ## Note
 
@@ -49,5 +49,4 @@ Rimangono volutamente non toccati `any` casting residui (M2) e l'atomicità dell
 - `src/renderer/src/App.tsx`, `IntroScreen.tsx`, `Dashboard.tsx`, `SystemSettingsModal.tsx` — cablaggio updater + versione/badge in intro + tasto in impostazioni.
 - `src/renderer/src/locales/I18nContext.tsx` — fallback su `en`; nuove chiavi `updater.*` in `it.json`/`en.json`.
 - `src/renderer/src/components/Dashboard.tsx` — misurazione dinamica righe log.
-- `.github/workflows/build.yml` — Node 24.
 - `package.json`, changelog.
