@@ -15,7 +15,11 @@ Per aggiungere una sorgente:
 
 Prima di salvare puoi usare il pulsante **Testa (⚡)**: fa una chiamata reale al link e ti dice subito se risponde. Se il feed è valido, un avviso verde riporta quante notizie ha trovato; se qualcosa non va (sito offline, link errato), l'avviso è rosso. Il test è solo una verifica: non ti obbliga a nulla, puoi salvare comunque, ma è il modo più rapido per non inserire un indirizzo sbagliato.
 
+![Il modulo di inserimento di una nuova sorgente, con nome, tipo, URL e il pulsante di test.](screenshots/06-feed-form.png)
+
 Ogni sorgente nella lista ha un interruttore per attivarla o metterla in pausa senza cancellarla, e le icone per modificarla o eliminarla.
+
+![La lista delle sorgenti: tipo, badge dei filtri attivi e interruttore per ciascun feed.](screenshots/13-feed-list.png)
 
 Se una sorgente smette di rispondere (per esempio un errore 404), te ne accorgi: nei System Logs compare una riga rossa con il nome del feed. E se ti stai chiedendo quante sorgenti puoi aggiungere, non c'è un tetto fisso: tieni però presente che il motore le controlla a rotazione, quindi con molte decine di feed (o molti bot) il giro completo di controllo si allunga.
 

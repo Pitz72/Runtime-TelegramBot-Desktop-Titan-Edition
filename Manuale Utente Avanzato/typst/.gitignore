@@ -1,0 +1,7 @@
+# Artefatti generati dalla pipeline (rigenerabili con build.ps1): non versionati.
+capitoli/
+pag-*.png
+manuale.pdf
+
+# I PDF finali localizzati (Titan-*.pdf, Manuale-Utente-Avanzato-Titan-IT.pdf)
+# sono invece versionati di proposito, come i media.

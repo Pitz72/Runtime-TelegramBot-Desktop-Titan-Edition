@@ -7,6 +7,8 @@ Clicca sull'icona a ingranaggio (⚙️) in alto a destra per aprire le **Impost
 
 Il pulsante **Esporta DB** crea un clone completo del database `titan.db`: dentro c'è tutto, i profili bot, i feed e l'intera memoria storica delle pubblicazioni. Con **Importa DB** selezioni un file salvato in precedenza e Titan si riavvia da solo, ripristinando la situazione esatta di quel momento.
 
+![La scheda Backup: esportazione e importazione del database e della configurazione.](screenshots/09-system-backup.png)
+
 È il metodo giusto per una copia di sicurezza completa, o per rimettere tutto in piedi dopo una reinstallazione sullo stesso computer.
 
 *Dove vive il database.* Il file `titan.db` è conservato in una cartella di sistema, separata dal programma, così una reinstallazione non lo tocca. La trovi su Windows in `%APPDATA%\runtime-telegram-bot-titan-edition\`, su Linux in `~/.config/runtime-telegram-bot-titan-edition/`. Se un giorno il software non si avviasse, puoi copiare `titan.db` da lì a mano per metterlo al sicuro.

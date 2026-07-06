@@ -7,6 +7,8 @@ In cima alla colonna dei bot, a destra, c'è un gruppetto di comandi. Il **+** a
 
 Ogni profilo vive per conto suo: feed, orari e template sono separati. Quando premi Play, Titan orchestra tutti i bot attivi in un unico ciclo di lavoro, servendoli a rotazione.
 
+![Il Bot Selector: ogni profilo mostra nome, canale e stato online/offline.](screenshots/12-bot-selector.png)
+
 ### 4.2 Recuperare il Token da @BotFather
 Il **Bot Token** è la «chiave di casa» che permette al software di parlare con i server di Telegram. Per ottenerne uno ti serve Telegram, da smartphone o da computer:
 

@@ -17,10 +17,14 @@ L'installazione è semplice.
 2. **Su Windows:** avvia il file `.exe` e segui le istruzioni a schermo. Il programma crea da solo un collegamento sul desktop.
 3. **Su Linux:** con il pacchetto `.deb` fai doppio clic e lascia fare al gestore pacchetti; con l'`.AppImage` rendi il file eseguibile (clic destro → Proprietà → Permessi → Consenti l'esecuzione) e avvialo con un doppio clic.
 
-A installazione fatta non dovrai più scaricare nulla a mano: Titan controlla da solo se esiste una versione più recente, la scarica in background e ti propone un pulsante per installarla al riavvio.
+A installazione fatta non dovrai più scaricare nulla a mano: Titan controlla da solo se esiste una versione più recente e, quando la trova, te lo segnala con una schermata dedicata che ti chiede se scaricarla e, a download concluso, se riavviare per installarla.
+
+![L'avviso di aggiornamento disponibile: Titan chiede conferma prima di scaricare e prima di riavviare.](screenshots/11-update-available.png)
 
 ### 2.3 Il Setup Wizard (primo avvio)
 Al primissimo avvio, dopo la sequenza animata di boot e la scelta della lingua, Titan ti accoglie con una procedura guidata (Setup Wizard) in quattro passaggi, per configurare subito la tua prima automazione.
+
+![Il Setup Wizard guida la configurazione del primo bot in quattro passaggi.](screenshots/02-setup-wizard.png)
 
 1.  **Nome Bot:** un nome descrittivo che ti aiuti a riconoscere il profilo dentro l'interfaccia (es. «Bot Notizie Sportive»). Non sarà visibile ai tuoi utenti su Telegram.
 2.  **Token Bot:** incolla qui il Token segreto generato da `@BotFather`. *(Come ottenerlo è spiegato nel Capitolo 4.2.)*

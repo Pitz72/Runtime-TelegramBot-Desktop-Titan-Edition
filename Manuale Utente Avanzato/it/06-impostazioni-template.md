@@ -10,6 +10,8 @@ Nella scheda **Generale**, oltre ai dati che già conosci (Nome, Token, Channel 
 
 Accanto al campo Token, un'icona a forma di occhio ti permette di mostrarlo o nasconderlo mentre lo incolli.
 
+![La scheda Generale delle impostazioni del bot: intervallo di controllo, notifiche e fasce orarie.](screenshots/04-bot-settings-general.png)
+
 ### 6.2 Fasce orarie di silenzio (Quiet Hours)
 Giornali esteri e creatori internazionali pubblicano spesso nel cuore della notte, e una notifica push alle tre del mattino non fa piacere a nessuno. Le fasce orarie di silenzio servono proprio a questo.
 
@@ -24,6 +26,8 @@ Così le tue automazioni rispettano il riposo del pubblico e il contenuto arriva
 Di default Titan pubblica con un layout pulito ma standard. Se vuoi dare ai messaggi la tua linea editoriale (un'emoji come logo, i link disposti a modo tuo), apri la scheda **Template**.
 
 Trovi quattro aree di testo separate, una per ogni formato: **Avvio**, **News**, **Podcast**, **YouTube**. Si scrivono nell'**HTML supportato da Telegram**: i tag utili sono `<b>` (grassetto), `<i>` (corsivo), `<code>` (monospazio) e `<a href="...">` (link).
+
+![La scheda Template con l'editor, gli Smart Chips per le variabili e l'anteprima del messaggio.](screenshots/05-bot-settings-templates.png)
 
 Sopra ogni area, i pulsanti **Smart Chips** inseriscono le variabili dinamiche, che il bot sostituirà con il dato reale al momento dell'invio:
 

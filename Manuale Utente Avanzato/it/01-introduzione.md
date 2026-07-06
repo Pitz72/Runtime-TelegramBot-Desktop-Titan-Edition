@@ -7,6 +7,8 @@ Benvenuto in **Runtime TelegramBot Titan Edition**. Non è un semplice «script�
 
 La differenza rispetto ai servizi Cloud commerciali sta in dove gira. Quelli vivono su server altrui, spesso con un abbonamento mensile e un tetto ai messaggi che puoi inviare. Titan gira **in locale**, sul tuo computer o sul tuo server: i tuoi dati e le tue credenziali restano sulla tua macchina, non paghi un canone e nessun piano commerciale ti limita il numero di invii. Restano soltanto i normali limiti anti-spam di Telegram, che Titan gestisce da sé.
 
+![La schermata di benvenuto che accoglie l'utente all'avvio di Titan Edition.](screenshots/01-intro-welcome.png)
+
 ### 1.2 L'ecosistema «sotto il cofano»
 Per usarlo al meglio basta afferrare due concetti su come Titan gestisce le informazioni.
 
