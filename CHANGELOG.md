@@ -2,7 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v2.1.6 (Corrente)](docs/changelogs/CHANGELOG_v2.1.6.md) — Documentazione in-app: guida rapida a schermo nella lingua corrente, download del manuale d'uso completo in PDF, e nuova schermata «Novità» al primo avvio dopo un aggiornamento. Consolidamento branding Titan. Rilascio commerciale v2.
+- [v2.1.7 (Corrente)](docs/changelogs/CHANGELOG_v2.1.7.md) — Rifiniture: nome prodotto uniforme «Runtime TelegramBot Desktop Titan Edition» ovunque (via «Titan Desktop»), icona nella barra applicazioni Windows (icona finestra .ico), schermata «Novità» affidabile anche aggiornando da versioni precedenti, banner aggiornato.
+- [v2.1.6 (Archivio)](docs/changelogs/CHANGELOG_v2.1.6.md) — Documentazione in-app: guida rapida a schermo nella lingua corrente, download del manuale d'uso completo in PDF, e nuova schermata «Novità» al primo avvio dopo un aggiornamento. Consolidamento branding Titan. Rilascio commerciale v2.
 - [v2.1.5 (Archivio)](docs/changelogs/CHANGELOG_v2.1.5.md) — Scansione RSS parallela (pool di concorrenza, Fix B), UX aggiornamenti ridisegnata con conferma download/riavvio, fix accavallamento righe log nella console.
 - [v2.1.4 (Archivio)](docs/changelogs/CHANGELOG_v2.1.4.md) — Fix link Spreaker (deriva la pagina episodio dal guid api.spreaker.com), chiusura DB pulita su before-quit con checkpoint WAL (G3), HTML stripping robusto in cleanSummary (M6), perf: botExists() al posto di getBots().some() nei loop caldi (niente più decifratura di massa dei token).
 - [v2.1.3 (Archivio)](docs/changelogs/CHANGELOG_v2.1.3.md) — Fix YouTube "0 video": YouTube serve le liste canale come nodi LockupView che youtubei.js 17.0.1 non parsa; aggiunto fallback di estrazione autocontenuto (logica PR upstream #1163, non ancora su npm). Non era antibot.
@@ -38,9 +39,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v2.1.6
+## Versione Attuale: v2.1.7
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.6.md](docs/changelogs/CHANGELOG_v2.1.6.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.7.md](docs/changelogs/CHANGELOG_v2.1.7.md).
 
 ## Stato progetto e roadmap verso v2.0.0
 

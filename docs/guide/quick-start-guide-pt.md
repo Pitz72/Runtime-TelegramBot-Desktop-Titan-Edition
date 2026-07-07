@@ -1,6 +1,6 @@
-# Runtime TelegramBot — Guia de Início Rápido
+# Runtime TelegramBot Desktop Titan Edition — Guia de Início Rápido
 
-Bem-vindo ao **Runtime TelegramBot** (Titan Edition). Este guia permite-lhe configurar o seu primeiro bot e começar a publicar conteúdo no seu canal do Telegram em poucos minutos.
+Bem-vindo ao **Runtime TelegramBot Desktop Titan Edition**. Este guia permite-lhe configurar o seu primeiro bot e começar a publicar conteúdo no seu canal do Telegram em poucos minutos.
 
 ---
 

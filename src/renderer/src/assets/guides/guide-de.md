@@ -1,6 +1,6 @@
-# ⚡ Titan Desktop: Kurzanleitung
+# ⚡ Runtime TelegramBot Desktop Titan Edition: Kurzanleitung
 
-Willkommen bei der **Runtime TelegramBot Titan Edition**. Diese Kurzanleitung ermöglicht es Ihnen, Ihren ersten Bot zu konfigurieren und in weniger als 3 Minuten erste Inhalte in Ihrem Telegram-Kanal zu veröffentlichen.
+Willkommen bei der **Runtime TelegramBot Desktop Titan Edition**. Diese Kurzanleitung ermöglicht es Ihnen, Ihren ersten Bot zu konfigurieren und in weniger als 3 Minuten erste Inhalte in Ihrem Telegram-Kanal zu veröffentlichen.
 
 ---
 
@@ -12,7 +12,7 @@ Bevor Sie Titan starten, müssen Sie einen „Bot“ auf Telegram erstellen:
 4. Fügen Sie den neu erstellten Bot als **Administrator** zu Ihrem Telegram-Kanal hinzu (er muss die Berechtigung „Nachrichten senden“ haben).
 
 ## 2. Der erste Start (Setup-Assistent)
-Starten Sie Titan Desktop. Wenn dies Ihr erstes Mal ist, erscheint der 4-stufige Assistent:
+Starten Sie Runtime TelegramBot Desktop Titan Edition. Wenn dies Ihr erstes Mal ist, erscheint der 4-stufige Assistent:
 *   **Bot-Name:** Wählen Sie einen Namen, um ihn zu erkennen (z. B. *News-Kanal*).
 *   **Bot Token:** Fügen Sie den von @BotFather bereitgestellten Token ein.
 *   **Channel ID:** Geben Sie den Namen Ihres Kanals ein (z. B. `@meinkanal`). Wenn es ein privater Kanal ist, geben Sie die numerische ID (z. B. `-100123456789`).

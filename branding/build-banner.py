@@ -8,9 +8,8 @@ import base64, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOGO = ROOT / "src" / "renderer" / "src" / "assets" / "logo.png"
-OUT = pathlib.Path(__file__).resolve().parent / "banner-titan-v2.1.6.svg"
-
-VERSION = "2.1.6"
+VERSION = "2.1.7"
+OUT = pathlib.Path(__file__).resolve().parent / f"banner-titan-v{VERSION}.svg"
 W, H = 2520, 1080
 
 # Ancore layout
@@ -30,7 +29,7 @@ def orbital_rings():
     return "\n    ".join(rings)
 
 def build_svg(logo_uri):
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="Runtime TelegramBot — Titan Edition v{VERSION}">
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="Runtime TelegramBot Desktop Titan Edition v{VERSION}">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="{W}" y2="{H}" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#070b18"/>
@@ -41,6 +40,10 @@ def build_svg(logo_uri):
       <stop offset="0" stop-color="#7cc4ff"/>
       <stop offset="0.5" stop-color="#3b82f6"/>
       <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="titleLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#aecbf7"/>
     </linearGradient>
     <linearGradient id="ringStroke" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#4cd7f6"/>
@@ -98,10 +101,11 @@ def build_svg(logo_uri):
   <!-- Separatore verticale -->
   <line x1="1024" y1="300" x2="1024" y2="780" stroke="#4cd7f6" stroke-opacity="0.16" stroke-width="2"/>
 
-  <!-- Titolo unico su più righe: RUNTIME TELEGRAMBOT / TITAN / EDITION -->
-  <text x="{TX}" y="322" font-family="Segoe UI Semibold, Segoe UI, Helvetica, Arial, sans-serif" font-size="52" font-weight="600" letter-spacing="8" fill="#a7bad9">RUNTIME TELEGRAMBOT</text>
-  <text x="{TX - 8}" y="512" font-family="Segoe UI Black, Segoe UI, Helvetica, Arial, sans-serif" font-size="184" font-weight="900" letter-spacing="2" fill="#eef4ff">TITAN</text>
-  <text x="{TX}" y="626" font-family="Segoe UI Black, Segoe UI, Helvetica, Arial, sans-serif" font-size="96" font-weight="800" letter-spacing="16" fill="url(#titanBlue)">EDITION</text>
+  <!-- Titolo unico "Runtime TelegramBot Desktop Titan Edition" su più righe,
+       stesso font (Segoe UI Black), gradienti, EDITION in blu. -->
+  <text x="{TX}" y="316" font-family="Segoe UI Black, Segoe UI, Helvetica, Arial, sans-serif" font-size="66" font-weight="900" letter-spacing="4" fill="url(#titleLight)">RUNTIME TELEGRAMBOT DESKTOP</text>
+  <text x="{TX - 8}" y="506" font-family="Segoe UI Black, Segoe UI, Helvetica, Arial, sans-serif" font-size="180" font-weight="900" letter-spacing="2" fill="url(#titleLight)">TITAN</text>
+  <text x="{TX}" y="624" font-family="Segoe UI Black, Segoe UI, Helvetica, Arial, sans-serif" font-size="108" font-weight="900" letter-spacing="14" fill="url(#titanBlue)">EDITION</text>
 
   <!-- Badge versione -->
   <g>

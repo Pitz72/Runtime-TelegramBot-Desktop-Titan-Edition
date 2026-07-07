@@ -48,7 +48,9 @@ function createWindow(): void {
         height: 670,
         show: false,
         autoHideMenuBar: true,
-        icon: join(__dirname, '../../resources/icon.png'),
+        // Su Windows serve un .ico multi-size per l'icona nella barra applicazioni;
+        // il PNG 1024px non viene mostrato correttamente nella taskbar.
+        icon: join(__dirname, process.platform === 'win32' ? '../../resources/icon.ico' : '../../resources/icon.png'),
         webPreferences: {
             preload: join(__dirname, '../preload/index.cjs'),
             sandbox: true

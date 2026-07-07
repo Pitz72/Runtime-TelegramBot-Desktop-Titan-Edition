@@ -1,6 +1,6 @@
-# Runtime TelegramBot — 快速入门指南
+# Runtime TelegramBot Desktop Titan Edition — 快速入门指南
 
-欢迎使用 **Runtime TelegramBot**（Titan Edition）。本指南将帮助您配置第一个机器人，并在几分钟内开始向您的 Telegram 频道发布内容。
+欢迎使用 **Runtime TelegramBot Desktop Titan Edition**。本指南将帮助您配置第一个机器人，并在几分钟内开始向您的 Telegram 频道发布内容。
 
 ---
 

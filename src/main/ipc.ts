@@ -133,7 +133,15 @@ export function setupIpc() {
         const current = app.getVersion();
         const s = await readSettings();
         const previous = s.lastSeenVersion;
-        const show = previous !== undefined && previous !== current;
+        // È un utente esistente (non una prima installazione) se ha già salvato una
+        // versione, oppure se ha già dei bot: in tal caso, se la versione è cambiata,
+        // mostriamo le novità. Il secondo caso copre gli aggiornamenti da versioni
+        // precedenti alla 2.1.6, che non salvavano ancora lastSeenVersion.
+        let existingUser = previous !== undefined;
+        if (!existingUser) {
+            try { existingUser = BotManager.getBots().length > 0; } catch { /* DB non pronto */ }
+        }
+        const show = existingUser && previous !== current;
         if (previous !== current) {
             s.lastSeenVersion = current;
             await writeSettings(s);

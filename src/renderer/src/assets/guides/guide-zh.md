@@ -1,6 +1,6 @@
-# ⚡ Titan Desktop: 快速入门指南
+# ⚡ Runtime TelegramBot Desktop Titan Edition: 快速入门指南
 
-欢迎使用 **Runtime TelegramBot Titan Edition**。这份快速指南将帮助您在不到3分钟的时间内配置您的第一个机器人，并开始将内容发布到您的Telegram频道。
+欢迎使用 **Runtime TelegramBot Desktop Titan Edition**。这份快速指南将帮助您在不到3分钟的时间内配置您的第一个机器人，并开始将内容发布到您的Telegram频道。
 
 ---
 
@@ -12,7 +12,7 @@
 4. 将新创建的机器人作为 **管理员** 添加到您的Telegram频道（它必须具有"发送消息"的权限）。
 
 ## 2. 首次启动（安装向导）
-启动 Titan Desktop。如果是第一次启动，将出现4步向导：
+启动 Runtime TelegramBot Desktop Titan Edition。如果是第一次启动，将出现4步向导：
 *   **机器人名称：** 选择一个名称以便识别它（例如，*新闻频道*）。
 *   **Bot Token：** 粘贴由 @BotFather 提供的 Token。
 *   **频道ID：** 输入您的频道名称（例如，`@mychannel`）。如果是私人频道，请输入数字ID（例如，`-100123456789`）。
