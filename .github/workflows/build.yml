@@ -112,7 +112,7 @@ jobs:
             | **Linux (AppImage)** | `*.AppImage` |
             | **Linux (deb)** | `*.deb` |
 
-            > macOS builds coming soon.
+            > Supported platforms: Windows and Linux.
             > The app updates automatically — existing users will be notified in-app.
           files: |
             artifacts/linux/*.AppImage
