@@ -233,7 +233,18 @@
     },
     "quickGuide": {
         "btn": "快速指南",
-        "title": "快速入门指南"
+        "title": "快速入门指南",
+        "manualBtn": "下载手册 (PDF)",
+        "docsSection": "文档",
+        "docsDesc": "打开内置快速指南，或下载您所用语言的完整 PDF 用户手册。",
+        "close": "关闭"
+    },
+    "whatsNew": {
+        "badge": "更新已安装",
+        "title": "Titan Edition 新功能",
+        "subtitle": "您现已升级到 v{{version}} 版本",
+        "cta": "继续",
+        "fallback": "此版本包含错误修复和稳定性改进。"
     },
     "updater": {
         "title": "有新版本可用",

@@ -233,7 +233,18 @@
     },
     "quickGuide": {
         "btn": "Quick Guide",
-        "title": "Quick Start Guide"
+        "title": "Quick Start Guide",
+        "manualBtn": "Download Manual (PDF)",
+        "docsSection": "Documentation",
+        "docsDesc": "Open the built-in quick guide or download the full user manual as a PDF in your language.",
+        "close": "Close"
+    },
+    "whatsNew": {
+        "badge": "Update installed",
+        "title": "What’s New in Titan Edition",
+        "subtitle": "You’re now on version v{{version}}",
+        "cta": "Continue",
+        "fallback": "This release includes bug fixes and stability improvements."
     },
     "updater": {
         "title": "New Version Available",

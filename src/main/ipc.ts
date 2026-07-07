@@ -1,4 +1,4 @@
-import { ipcMain, app, dialog } from 'electron';
+import { ipcMain, app, dialog, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import Database from 'better-sqlite3';
 import { getBotEngine } from './bot/engine';
@@ -10,7 +10,7 @@ import { writeFile, copyFile, readFile } from 'fs/promises';
 import { join } from 'path';
 
 // --- Settings File (titan-settings.json in userData) ---
-interface TitanSettings { performanceMode: boolean; }
+interface TitanSettings { performanceMode: boolean; lastSeenVersion?: string; }
 const DEFAULT_SETTINGS: TitanSettings = { performanceMode: false };
 
 function getSettingsPath(): string {
@@ -118,6 +118,28 @@ export function setupIpc() {
 
     // --- SYSTEM ---
     ipcMain.handle('get-version', () => app.getVersion());
+
+    // Apre un URL esterno nel browser di sistema. Solo https per sicurezza.
+    ipcMain.handle('open-external', (_, url: string) => {
+        if (typeof url === 'string' && /^https:\/\//i.test(url)) {
+            shell.openExternal(url);
+        }
+    });
+
+    // Schermata "Novità": va mostrata SOLO al primo avvio dopo un aggiornamento
+    // (versione salvata diversa dalla corrente e non prima installazione).
+    // Consuma il flag: aggiorna subito lastSeenVersion così compare una volta sola.
+    ipcMain.handle('consume-whats-new', async () => {
+        const current = app.getVersion();
+        const s = await readSettings();
+        const previous = s.lastSeenVersion;
+        const show = previous !== undefined && previous !== current;
+        if (previous !== current) {
+            s.lastSeenVersion = current;
+            await writeSettings(s);
+        }
+        return { show, version: current };
+    });
 
     // --- BOT MANAGEMENT ---
     ipcMain.handle('get-bots', () => BotManager.getBots());

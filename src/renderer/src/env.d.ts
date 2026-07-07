@@ -57,6 +57,8 @@ export interface TitanAPI {
     checkForUpdates: () => Promise<{ success: boolean; error?: string }>
     downloadUpdate: () => Promise<{ success: boolean; error?: string }>
     installUpdate: () => Promise<void>
+    openExternal: (url: string) => Promise<void>
+    consumeWhatsNew: () => Promise<{ show: boolean; version: string }>
     onUpdateAvailable: (callback: (info: { version: string }) => void) => void
     onUpdateNotAvailable: (callback: () => void) => void
     onUpdateProgress: (callback: (info: { percent: number }) => void) => void

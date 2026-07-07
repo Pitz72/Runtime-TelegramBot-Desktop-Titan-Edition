@@ -4,11 +4,14 @@ import { SetupWizard } from '@/components/SetupWizard';
 import { IntroScreen } from '@/components/IntroScreen';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { UpdateModal } from '@/components/UpdateModal';
+import { WhatsNewModal } from '@/components/WhatsNewModal';
 import { useUpdater } from '@/hooks/useUpdater';
 
 function App(): JSX.Element {
     const [hasBots, setHasBots] = useState<boolean | null>(null);
     const [introDone, setIntroDone] = useState<boolean>(false);
+    // Schermata "Novità": mostrata al primo avvio dopo un aggiornamento automatico.
+    const [whatsNew, setWhatsNew] = useState<{ show: boolean; version: string } | null>(null);
     // Controllo aggiornamenti centralizzato: parte già dall'intro e la schermata di avviso
     // (UpdateModal) compare sopra qualunque vista.
     const updater = useUpdater();
@@ -20,6 +23,9 @@ function App(): JSX.Element {
         window.api.getPerformanceMode().then((enabled) => {
             document.body.classList.toggle('performance-mode', enabled);
         });
+        window.api.consumeWhatsNew().then((res) => {
+            if (res?.show) setWhatsNew(res);
+        }).catch(() => {});
     }, []);
 
     const handleSetupComplete = async (name: string, token: string, channelId: string, startDate: string) => {
@@ -54,6 +60,11 @@ function App(): JSX.Element {
 
             {/* Schermata di aggiornamento — sopra ogni vista */}
             <UpdateModal updater={updater} />
+
+            {/* Novità della versione — primo avvio dopo un aggiornamento, sopra tutto */}
+            {whatsNew?.show && (
+                <WhatsNewModal version={whatsNew.version} onClose={() => setWhatsNew(null)} />
+            )}
         </ErrorBoundary>
     );
 }

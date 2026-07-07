@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Download, FileCode, Globe, Zap, ShieldCheck, Upload, X, RefreshCw, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
+import { Database, Download, FileCode, Globe, Zap, ShieldCheck, Upload, X, RefreshCw, Loader2, CheckCircle2, Sparkles, BookOpen } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
 import { flagsList } from './IntroScreen';
 import { useToast } from './ui/Toast';
 import type { Updater } from '../hooks/useUpdater';
+import { GuideModal } from './GuideModal';
+import { openManual } from '../lib/docs';
 
 interface Props { onClose: () => void; updater?: Updater; }
 
@@ -11,6 +13,7 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
     const { toast, success, error } = useToast();
     const { locale, setLocale, t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'general' | 'backup' | 'performance'>('general');
+    const [showGuide, setShowGuide] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
     const [performanceMode, setPerformanceMode] = useState(false);
@@ -179,6 +182,31 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Documentazione */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
+                                    <BookOpen size={13} />
+                                    {t('quickGuide.docsSection')}
+                                </div>
+                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('quickGuide.docsDesc')}</p>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => setShowGuide(true)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all text-primary text-sm font-bold"
+                                    >
+                                        <BookOpen size={15} />
+                                        {t('quickGuide.btn')}
+                                    </button>
+                                    <button
+                                        onClick={() => openManual(locale)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border bg-secondary/5 hover:bg-secondary/10 hover:border-secondary/30 transition-all text-secondary text-sm font-bold"
+                                    >
+                                        <Download size={15} />
+                                        {t('quickGuide.manualBtn')}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -290,6 +318,8 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
                     </button>
                 </div>
             </div>
+
+            {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
         </div>
     );
 }

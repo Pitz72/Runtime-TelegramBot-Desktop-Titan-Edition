@@ -233,7 +233,18 @@
     },
     "quickGuide": {
         "btn": "Guide Rapide",
-        "title": "Guide de Démarrage Rapide"
+        "title": "Guide de Démarrage Rapide",
+        "manualBtn": "Télécharger le Manuel (PDF)",
+        "docsSection": "Documentation",
+        "docsDesc": "Ouvrez le guide rapide intégré ou téléchargez le manuel d'utilisation complet en PDF dans votre langue.",
+        "close": "Fermer"
+    },
+    "whatsNew": {
+        "badge": "Mise à jour installée",
+        "title": "Nouveautés de Titan Edition",
+        "subtitle": "Vous êtes maintenant en version v{{version}}",
+        "cta": "Continuer",
+        "fallback": "Cette version inclut des corrections et des améliorations de stabilité."
     },
     "updater": {
         "title": "Nouvelle version disponible",

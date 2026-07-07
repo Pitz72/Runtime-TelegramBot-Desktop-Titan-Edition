@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation, Language } from '../locales/I18nContext';
 import { FlagIT, FlagFR, FlagDE, FlagES, FlagPT, FlagRU, FlagCN, FlagGB } from './ui/Flags';
-import { ChevronRight, Loader2, Sparkles } from 'lucide-react';
+import { ChevronRight, Loader2, Sparkles, BookOpen, Download } from 'lucide-react';
 import logo from '../assets/logo.png';
 import type { UpdateStatus } from '../hooks/useUpdater';
+import { GuideModal } from './GuideModal';
+import { openManual } from '../lib/docs';
 
 interface Props {
     onComplete: () => void;
@@ -26,6 +28,7 @@ export const flagsList: { id: Language; label: string; component: React.FC<{ cla
 
 export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, currentVersion }: Props) {
     const { locale, setLocale, t } = useTranslation();
+    const [showGuide, setShowGuide] = useState(false);
 
     const updateAvailable = updateStatus === 'available' || updateStatus === 'downloading' || updateStatus === 'downloaded';
 
@@ -120,8 +123,28 @@ export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, cur
                     <ChevronRight size={18}  />
                 </motion.button>
 
+                {/* Azioni documentazione: guida rapida + manuale PDF */}
+                <div className="flex items-center gap-3 mt-6">
+                    <button
+                        onClick={() => setShowGuide(true)}
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full ghost-border text-outline-variant/70 hover:text-on-surface hover:border-primary/30 hover:bg-primary/5 transition-all text-xs font-body"
+                    >
+                        <BookOpen size={14} />
+                        {t('quickGuide.btn')}
+                    </button>
+                    <button
+                        onClick={() => openManual(locale)}
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full ghost-border text-outline-variant/70 hover:text-on-surface hover:border-secondary/30 hover:bg-secondary/5 transition-all text-xs font-body"
+                    >
+                        <Download size={14} />
+                        {t('quickGuide.manualBtn')}
+                    </button>
+                </div>
+
                 <p className="text-nano text-outline-variant/25 mt-8">INIT_SEQ · TITAN_DESKTOP_RUNTIME</p>
             </motion.div>
+
+            {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
         </div>
     );
 }

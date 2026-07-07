@@ -71,6 +71,8 @@ const api = {
     checkForUpdates: () => ipcRenderer.invoke('check-for-updates') as Promise<{ success: boolean; error?: string }>,
     downloadUpdate: () => ipcRenderer.invoke('download-update') as Promise<{ success: boolean; error?: string }>,
     installUpdate: () => ipcRenderer.invoke('install-update'),
+    openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+    consumeWhatsNew: () => ipcRenderer.invoke('consume-whats-new') as Promise<{ show: boolean; version: string }>,
     onUpdateAvailable: (callback: (info: { version: string }) => void) => {
         ipcRenderer.removeAllListeners('update-available');
         ipcRenderer.on('update-available', (_, info) => callback(info));
