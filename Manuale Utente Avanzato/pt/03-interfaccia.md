@@ -20,7 +20,7 @@ A consola dos registos, em baixo à direita, é o reflexo direto do motor assín
 As mensagens estão codificadas por cores para uma leitura rápida:
 
 -   🟢 **Verde (`Sent` / `Found New Item`):** foi encontrado e enviado ao Telegram um elemento novo.
--   🟡 **Amarelo/laranja (`Skipped` / `FloodWait`):** o motor ignorou um elemento (por exemplo por ser anterior à *Start Date*) ou o Telegram pediu uma pausa anti-spam, que o bot gere sozinho.
+-   🟡 **Amarelo/laranja (`Skipped` / `FloodWait`):** o motor ignorou um elemento (por exemplo por ser anterior à *Data de Corte*) ou o Telegram pediu uma pausa anti-spam, que o bot gere sozinho.
 -   🔴 **Vermelho (`Error` / `Failed`):** um erro crítico, como uma ligação interrompida, um Token API errado ou uma alteração nos servidores do YouTube.
 -   ⚪ **Cinzento/branco (`Fetching` / `No updates`):** rotina normal. O bot está a ler a fonte mas não encontrou nada de novo desde a última verificação.
 

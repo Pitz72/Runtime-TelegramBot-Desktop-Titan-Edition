@@ -3,7 +3,7 @@
 The settings for each bot open from the sliders icon (🎚️) next to its name, in the left-hand column. The window has two tabs: **General** (the bot's parameters) and **Templates** (the look of the messages).
 
 ### 6.1 Check interval and notifications
-In the **General** tab, besides the data you already know (Name, Token, Channel ID, Start Date), there are two settings that shape the bot's behaviour:
+In the **General** tab, besides the data you already know (Name, Token, Channel ID, Cutoff Date), there are two settings that shape the bot's behaviour:
 
 -   **Check Interval.** A slider from 1 to 120 minutes (15 by default) that sets how often the bot goes to check the feeds. It is the baseline rhythm; if a single source needs a different pace, you give it one from the Feed Manager (Chapter 5).
 -   **Notifications.** A switch: when it is on, Titan pops up a system alert (a desktop notification) on every successful publication. If you run very busy channels and do not want to be alerted on every post, turn it off.
@@ -49,6 +49,6 @@ Two tools help you avoid mistakes:
 At the bottom of the **General** tab there is a red section, the *Danger Zone*. The **Clear History** button is powerful and destructive: it wipes the bot's memory, that is, everything it has already published.
 
 -   *When it helps.* If you have accidentally deleted many messages from the channel and want the bot to republish the latest stories to rebuild the board.
--   *How to use it without disaster.* If you clear the history and press Play, the bot treats everything it finds in the feeds as "new" and sends it in bulk, flooding the channel. To avoid this, after clearing, set the **Start Date** (in the same tab) back to today: that way the bot forgets the past but publishes only from today onwards.
+-   *How to use it without disaster.* If you clear the history and press Play, the bot treats everything it finds in the feeds as "new" and sends it in bulk, flooding the channel. To avoid this, after clearing, set the **Cutoff Date** (in the same tab) back to today: that way the bot forgets the past but publishes only from today onwards.
 
 Clearing the history also resets the statistics counters to zero (Chapter 3). Next to the Danger Zone you will also find the bot export in `.rtb` format, which we cover in Chapter 7.

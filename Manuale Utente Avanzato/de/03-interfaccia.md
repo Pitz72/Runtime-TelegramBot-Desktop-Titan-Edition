@@ -12,7 +12,7 @@ Oben in der rechten Hälfte zeigt eine Leiste das Logo, den Namen und die instal
 
 *Tipp.* Sobald Play gedrückt ist, spielt es keine Rolle, welchen Bot Sie gerade betrachten: bei laufender Engine arbeitet Titan im Hintergrund an **allen** aktiven Bots zugleich. Die Auswahl links dient nur Ihnen, um die Konfiguration dieses Profils einzusehen.
 
-### 3.2 Das Panel „Systemprotokolle"
+### 3.2 Das Panel „Systemprotokolle“
 Die Protokollkonsole, unten rechts, ist das direkte Spiegelbild der asynchronen Engine. Sie bleibt auf Englisch, auch wenn die Oberfläche in einer anderen Sprache ist: So bleiben die Meldungen ein universeller technischer Standard, praktisch, wenn Sie Unterstützung anfordern müssen.
 
 ![Die Konsole der Systemprotokolle zeigt in Echtzeit, Zeile für Zeile, was die Engine tut.](screenshots/14-log-console.png)
@@ -20,7 +20,7 @@ Die Protokollkonsole, unten rechts, ist das direkte Spiegelbild der asynchronen 
 Die Meldungen sind zum schnellen Lesen farblich codiert:
 
 -   🟢 **Grün (`Sent` / `Found New Item`):** ein neues Element wurde gefunden und an Telegram gesendet.
--   🟡 **Gelb/Orange (`Skipped` / `FloodWait`):** die Engine hat ein Element übersprungen (etwa weil es vor dem *Start Date* liegt) oder Telegram hat eine Anti-Spam-Pause verlangt, die der Bot selbst handhabt.
+-   🟡 **Gelb/Orange (`Skipped` / `FloodWait`):** die Engine hat ein Element übersprungen (etwa weil es vor dem *Stichtag* liegt) oder Telegram hat eine Anti-Spam-Pause verlangt, die der Bot selbst handhabt.
 -   🔴 **Rot (`Error` / `Failed`):** ein kritischer Fehler, etwa eine unterbrochene Verbindung, ein falscher API-Token oder eine Änderung an den YouTube-Servern.
 -   ⚪ **Grau/Weiß (`Fetching` / `No updates`):** normaler Betrieb. Der Bot liest die Quelle, hat aber seit der letzten Prüfung nichts Neues gefunden.
 

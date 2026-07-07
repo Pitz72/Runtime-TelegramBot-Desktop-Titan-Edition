@@ -16,7 +16,7 @@ Es ist die richtige Methode für eine vollständige Sicherheitskopie oder um nac
 ### 7.2 Das Format .rtb: einen Bot sicher verschieben
 Um einen einzelnen Bot von einer Installation zur anderen zu bringen (zum Beispiel zu einem Kollegen in der Redaktion), gibt es **OmniSync**, das Format `.rtb` (Runtime Telegram Bot).
 
-In den Bot-Einstellungen, im Abschnitt **Teilen**, erzeugt die Schaltfläche **Exportieren** eine `.rtb`-Datei: eine „digitale Kartusche", die den Namen des Bots, alle seine Feeds (mit Filtern, Intervallen und Digests) und die Vorlagen enthält, aber nicht den Verlauf der bereits gesendeten Nachrichten. Wer sie erhält, lädt sie mit der Schaltfläche **Importieren** in der Bot-Spalte, dem Pfeilsymbol neben dem **+**.
+In den Bot-Einstellungen, im Abschnitt **Teilen**, erzeugt die Schaltfläche **Exportieren** eine `.rtb`-Datei: eine „digitale Kartusche“, die den Namen des Bots, alle seine Feeds (mit Filtern, Intervallen und Digests) und die Vorlagen enthält, aber nicht den Verlauf der bereits gesendeten Nachrichten. Wer sie erhält, lädt sie mit der Schaltfläche **Importieren** in der Bot-Spalte, dem Pfeilsymbol neben dem **+**.
 
 Und der Token? Hier trifft Titan eine klare Sicherheitsentscheidung: Der Token reist in der Datei mit, aber verschlüsselt und an den Computer gebunden, der den Export erstellt hat. Deshalb:
 

@@ -6,7 +6,7 @@ Il Feed Manager (il pannello sotto la lista dei bot) è la «dieta» del tuo bot
 Per aggiungere una sorgente:
 
 1. Seleziona il bot a cui vuoi assegnarla.
-2. Clicca su **Aggiungi Sorgente**.
+2. Clicca su **Aggiungi**.
 3. Dai un **Nome** alla fonte. Non è un'etichetta qualsiasi: è il testo che potrai stampare in cima ai messaggi come firma della notizia (è il campo `{{feedName}}` dei template, Capitolo 6).
 4. Scegli il **Tipo**:
     -   **Podcast:** per i flussi audio (MP3). Titan prova a recuperare l'immagine di copertina, spesso nascosta nei tag *iTunes* usati da servizi come Spreaker o AzuraCast.
@@ -26,7 +26,7 @@ Se una sorgente smette di rispondere (per esempio un errore 404), te ne accorgi:
 ### 5.2 La gestione nativa di YouTube
 Di solito integrare YouTube in un sistema di automazione è una scocciatura: richiede un account sviluppatore su Google Cloud e una chiave API, con relativi costi e limiti. Titan salta tutto questo grazie a *InnerTube*, un motore che legge le pagine di YouTube come farebbe un browser, senza nessuna chiave.
 
-1.  In **Aggiungi Sorgente** scegli il tipo **YouTube (Video)**.
+1.  Nel modulo **Aggiungi** scegli il tipo **YouTube (Video)**.
 2.  Nel campo URL non servono codici strani né feed XML: incolla l'handle del canale (la chiocciola sotto il nome dello YouTuber, per esempio `@RuntimeRadio`) oppure l'indirizzo completo del canale copiato dal browser.
 
 Al resto pensa Titan. C'è però un accorgimento utile: il **filtro anti-premiere**. Quando uno YouTuber programma una diretta o un video «in uscita tra due giorni», YouTube lo mostra comunque in cima alla lista. Un bot ingenuo manderebbe subito la notifica, e chi clicca finisce su un video non ancora disponibile. Titan invece controlla lo stato del video: se è segnato come *upcoming* o *premiere*, lo scarta e lo pubblica solo quando diventa davvero visibile.

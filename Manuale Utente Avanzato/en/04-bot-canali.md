@@ -3,7 +3,7 @@
 ### 4.1 Creating multiple bots
 Titan is multi-channel: you can run several bots from the same window, each with its own channel. Say you run a radio station: you need one Telegram channel for written news (News), one for audio episodes (Podcast) and maybe a third for behind-the-scenes (YouTube). You do not have to install the program three times.
 
-At the top of the bot column, on the right, there is a small cluster of controls. The **+** opens a quick form: enter Name, Token, Channel ID and Start Date, save, and the new profile appears in the list. Next to the **+** you will also find the button to **import** a bot from a `.rtb` file (Chapter 7) and the sliders button (🎚️) that opens its **settings** (Chapter 6).
+At the top of the bot column, on the right, there is a small cluster of controls. The **+** opens a quick form: enter Name, Token, Channel ID and Cutoff Date, save, and the new profile appears in the list. Next to the **+** you will also find the button to **import** a bot from a `.rtb` file (Chapter 7) and the sliders button (🎚️) that opens its **settings** (Chapter 6).
 
 Each profile lives on its own: feeds, schedules and templates are separate. When you press Play, Titan orchestrates all the active bots in a single work cycle, serving them in rotation.
 

@@ -26,7 +26,7 @@ Beim allerersten Start, nach der animierten Boot-Sequenz und der Sprachwahl, emp
 
 ![Der Einrichtungsassistent führt in vier Schritten durch die Einrichtung des ersten Bots.](screenshots/02-setup-wizard.png)
 
-1.  **Bot-Name:** ein aussagekräftiger Name, der Ihnen hilft, das Profil in der Oberfläche zu erkennen (z. B. „Bot Sportnachrichten"). Er ist für Ihre Nutzer auf Telegram nicht sichtbar.
+1.  **Bot-Name:** ein aussagekräftiger Name, der Ihnen hilft, das Profil in der Oberfläche zu erkennen (z. B. „Bot Sportnachrichten“). Er ist für Ihre Nutzer auf Telegram nicht sichtbar.
 2.  **Bot-Token:** Fügen Sie hier den geheimen Token ein, der von `@BotFather` erzeugt wurde. *(Wie Sie ihn erhalten, wird in Kapitel 4.2 erklärt.)*
 3.  **Kanal-ID (Channel ID):** der öffentliche Benutzername des Kanals, dem At-Zeichen vorangestellt (z. B. `@meinkanal`). Ist der Kanal privat, geben Sie seine numerische Kennung ein, die meist mit dem Minuszeichen beginnt (z. B. `-100123456789`).
 4.  **Startdatum (Start Date):** ein wichtiger Parameter. Standardmäßig ist es das heutige Datum: Titan liest Ihre Feeds trotzdem, **ignoriert und verwirft** jedoch jede Nachricht oder jedes Video, das vor diesem Datum veröffentlicht wurde. Das verhindert, dass der Bot beim ersten Start den Kanal mit wochenalten Nachrichten überschwemmt.

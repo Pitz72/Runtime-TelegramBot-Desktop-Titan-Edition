@@ -101,6 +101,16 @@ def transform_blocks(text, troubleshoot):
     return "\n\n".join(out)
 
 def post_typ(t, troubleshoot):
+    # 0. Virgolette tedesche: il writer typst di pandoc rende le doppie come
+    #    „ (U+201E, apertura) + " dritta (U+0022, chiusura). Quella " dritta, sola
+    #    davanti a Typst con lang=de, viene ricurvata come *apertura* (→ „ bassa),
+    #    producendo una chiusura errata. Sostituiamo la chiusura dritta con la
+    #    " letterale (U+201C): non essendo ASCII, lo smartquote di Typst la lascia
+    #    intatta e la resa è corretta „…". `[^"]` si ferma alla prima chiusura,
+    #    quindi non tocca le " dritte del codice (path immagini, link), che non
+    #    sono mai precedute da „.
+    if LANG == "de":
+        t = re.sub(r'„([^"]+?)"', '„\\1“', t)
     # 1. via gli anchor dei titoli (<slug>) e i separatori decorativi (---)
     t = "\n".join(ln for ln in t.splitlines()
                   if ln.strip() != "#horizontalrule"

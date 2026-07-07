@@ -1,4 +1,4 @@
-## 第1章：介绍与基本概念
+## 第 1 章：介绍与基本概念
 
 ### 1.1 什么是 Titan Edition？
 欢迎使用 **Runtime TelegramBot Titan Edition**。它不是一个只会复制粘贴链接的简单"脚本"：它是一款编辑自动化工具，会读取您的来源（RSS 源、播客、YouTube 频道），并把新内容发布到您的 Telegram 频道，无需您手动跟进。

@@ -3,7 +3,7 @@
 Los ajustes de cada bot se abren desde el icono de deslizadores (🎚️) junto a su nombre, en la columna de la izquierda. La ventana tiene dos pestañas: **General** (los parámetros del bot) y **Plantillas** (el aspecto de los mensajes).
 
 ### 6.1 Intervalo de revisión y notificaciones
-En la pestaña **General**, además de los datos que ya conoces (Nombre, Token, ID del Canal, Fecha de Inicio), hay dos ajustes que deciden el comportamiento del bot:
+En la pestaña **General**, además de los datos que ya conoces (Nombre, Token, ID del Canal, Fecha de Corte), hay dos ajustes que deciden el comportamiento del bot:
 
 -   **Intervalo de Revisión.** Un deslizador de 1 a 120 minutos (15 por defecto) que establece cada cuánto va el bot a revisar los feeds. Es el ritmo de base; si una fuente concreta necesita otro paso, se lo das desde el Feed Manager (Capítulo 5).
 -   **Notificaciones.** Un interruptor: cuando está encendido, Titan hace aparecer un aviso del sistema (una notificación de escritorio) en cada publicación con éxito. Si gestionas canales muy activos y no quieres que se te avise en cada post, apágalo.
@@ -49,7 +49,7 @@ Dos herramientas te ayudan a no equivocarte:
 Al final de la pestaña **General** hay una sección roja, la *Zona de Peligro*. El botón **Borrar Historial** es potente y destructivo: borra la memoria del bot, es decir, todo lo que ya ha publicado.
 
 -   *Cuándo sirve.* Si has borrado por error muchos mensajes del canal y quieres que el bot vuelva a publicar las últimas noticias para reconstruir el tablón.
--   *Cómo usarlo sin desastres.* Si borras el historial y pulsas Play, el bot considera «nuevo» todo lo que encuentra en los feeds y lo envía en bloque, inundando el canal. Para evitarlo, tras borrar, devuelve la **Fecha de Inicio** (en la misma pestaña) a la fecha de hoy: así el bot olvida el pasado pero publica solo de hoy en adelante.
+-   *Cómo usarlo sin desastres.* Si borras el historial y pulsas Play, el bot considera «nuevo» todo lo que encuentra en los feeds y lo envía en bloque, inundando el canal. Para evitarlo, tras borrar, devuelve la **Fecha de Corte** (en la misma pestaña) a la fecha de hoy: así el bot olvida el pasado pero publica solo de hoy en adelante.
 
 Al borrar el historial, los contadores de las estadísticas también vuelven a cero (Capítulo 3). Junto a la Zona de Peligro también está la exportación del bot en formato `.rtb`, que vemos en el Capítulo 7.
 

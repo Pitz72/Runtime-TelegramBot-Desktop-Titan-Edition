@@ -3,7 +3,7 @@
 As definições de cada bot abrem-se a partir do ícone de cursores (🎚️) junto ao seu nome, na coluna da esquerda. A janela tem dois separadores: **Geral** (os parâmetros do bot) e **Modelos** (o aspeto das mensagens).
 
 ### 6.1 Intervalo de verificação e notificações
-No separador **Geral**, além dos dados que já conhece (Nome, Token, ID do Canal, Data de Início), há duas regulações que decidem o comportamento do bot:
+No separador **Geral**, além dos dados que já conhece (Nome, Token, ID do Canal, Data de Corte), há duas regulações que decidem o comportamento do bot:
 
 -   **Intervalo de Verificação.** Um cursor de 1 a 120 minutos (15 por predefinição) que estabelece de quanto em quanto tempo o bot vai verificar os feeds. É o ritmo de base; se uma fonte concreta precisar de um passo diferente, dá-lho a partir do Feed Manager (Capítulo 5).
 -   **Notificações.** Um interruptor: quando está ligado, o Titan faz aparecer um aviso do sistema (uma notificação do ambiente de trabalho) em cada publicação bem-sucedida. Se gere canais muito ativos e não quer ser avisado a cada publicação, desligue-o.
@@ -49,7 +49,7 @@ Duas ferramentas ajudam-no a não errar:
 No fundo do separador **Geral** há uma secção vermelha, a *Zona de Perigo*. O botão **Limpar Histórico** é potente e destrutivo: apaga a memória do bot, ou seja, tudo o que já publicou.
 
 -   *Quando serve.* Se apagou por engano muitas mensagens do canal e quer que o bot volte a publicar as últimas notícias para reconstruir o mural.
--   *Como usá-lo sem desastres.* Se limpar o histórico e premir o Play, o bot considera «novo» tudo o que encontra nos feeds e envia-o em bloco, inundando o canal. Para o evitar, depois de limpar, reponha a **Data de Início** (no mesmo separador) na data de hoje: assim o bot esquece o passado mas publica apenas de hoje em diante.
+-   *Como usá-lo sem desastres.* Se limpar o histórico e premir o Play, o bot considera «novo» tudo o que encontra nos feeds e envia-o em bloco, inundando o canal. Para o evitar, depois de limpar, reponha a **Data de Corte** (no mesmo separador) na data de hoje: assim o bot esquece o passado mas publica apenas de hoje em diante.
 
 Ao limpar o histórico, os contadores das estatísticas também voltam a zero (Capítulo 3). Junto à Zona de Perigo encontra também a exportação do bot em formato `.rtb`, que vemos no Capítulo 7.
 

@@ -3,11 +3,11 @@
 Titan tiene al sicuro il tuo lavoro e ti dà tre modi per salvarlo o spostarlo: il backup completo del database, il formato `.rtb` per un singolo bot e l'esportazione dell'intera configurazione. Vediamoli.
 
 ### 7.1 Backup completo del database
-Clicca sull'icona a ingranaggio (⚙️) in alto a destra per aprire le **Impostazioni di Sistema**, poi vai nella scheda **Backup**.
+Clicca sull'icona a ingranaggio (⚙️) in alto a destra per aprire le **Impostazioni di Sistema**, poi vai nella scheda **Dati e Backup**.
 
 Il pulsante **Esporta DB** crea un clone completo del database `titan.db`: dentro c'è tutto, i profili bot, i feed e l'intera memoria storica delle pubblicazioni. Con **Importa DB** selezioni un file salvato in precedenza e Titan si riavvia da solo, ripristinando la situazione esatta di quel momento.
 
-![La scheda Backup: esportazione e importazione del database e della configurazione.](screenshots/09-system-backup.png)
+![La scheda Dati e Backup: esportazione e importazione del database e della configurazione.](screenshots/09-system-backup.png)
 
 È il metodo giusto per una copia di sicurezza completa, o per rimettere tutto in piedi dopo una reinstallazione sullo stesso computer.
 
@@ -28,6 +28,6 @@ In pratica il `.rtb` sposta la configurazione in modo comodo, ma il segreto vero
 *Nota per Linux.* La cifratura del token si appoggia al portachiavi di sistema (GNOME Keyring, KWallet o un altro servizio Secret Service). Se la tua distribuzione non ne ha uno, Titan non si blocca: usa una cifratura interna, comunque legata alla macchina. Per attivare il portachiavi nativo, installa `libsecret`.
 
 ### 7.3 Esportare tutti i bot insieme (configurazione)
-Se vuoi spostare non un bot ma l'intero assetto, torna nella scheda **Backup**: accanto al database trovi l'esportazione della **configurazione** in formato JSON. Funziona come il `.rtb`, ma su tutti i bot in una volta: porta con sé profili, feed e template di ognuno, sempre senza lo storico. Vale la stessa regola del token vista sopra: si ripristina da solo sullo stesso computer, altrove va reinserito.
+Se vuoi spostare non un bot ma l'intero assetto, torna nella scheda **Dati e Backup**: accanto al database trovi l'esportazione dell'intera **configurazione**, un unico file `.rtb`. Funziona come quello del singolo bot, ma comprende tutti i bot in una volta: porta con sé profili, feed e template di ognuno, sempre senza lo storico. Vale la stessa regola del token vista sopra: si ripristina da solo sullo stesso computer, altrove va reinserito.
 
 ---

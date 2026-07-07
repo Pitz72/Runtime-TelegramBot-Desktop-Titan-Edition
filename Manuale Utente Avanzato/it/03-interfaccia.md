@@ -20,7 +20,7 @@ La console dei log, in basso a destra, è lo specchio diretto del motore asincro
 I messaggi sono codificati a colori per una lettura rapida:
 
 -   🟢 **Verde (`Sent` / `Found New Item`):** un nuovo elemento è stato trovato e inviato a Telegram.
--   🟡 **Giallo/arancione (`Skipped` / `FloodWait`):** il motore ha ignorato un elemento (per esempio perché precedente alla *Start Date*) oppure Telegram ha chiesto una pausa anti-spam, che il bot gestisce da solo.
+-   🟡 **Giallo/arancione (`Skipped` / `FloodWait`):** il motore ha ignorato un elemento (per esempio perché precedente alla *Data di Filtro*) oppure Telegram ha chiesto una pausa anti-spam, che il bot gestisce da solo.
 -   🔴 **Rosso (`Error` / `Failed`):** un errore critico, come una connessione interrotta, un Token API errato o un cambiamento nei server di YouTube.
 -   ⚪ **Grigio/bianco (`Fetching` / `No updates`):** normale amministrazione. Il bot sta leggendo la sorgente ma non ha trovato nulla di nuovo dall'ultimo controllo.
 

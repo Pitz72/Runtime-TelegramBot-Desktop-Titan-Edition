@@ -3,18 +3,18 @@
 ### 4.1 Mehrere Bots anlegen
 Titan ist mehrkanalig: Sie können mehrere Bots aus demselben Fenster verwalten, jeden mit seinem Kanal. Angenommen, Sie betreiben ein Radio: Sie brauchen einen Telegram-Kanal für die geschriebenen Nachrichten (News), einen für die Audiofolgen (Podcast) und vielleicht einen dritten für die Kulissen (YouTube). Sie müssen das Programm nicht dreimal installieren.
 
-Oben in der Bot-Spalte, rechts, gibt es eine kleine Befehlsgruppe. Das **+** öffnet ein schnelles Formular: Geben Sie Name, Token, Kanal-ID und Startdatum ein, speichern Sie, und das neue Profil erscheint in der Liste. Neben dem **+** finden Sie auch die Schaltfläche, um einen Bot aus einer `.rtb`-Datei zu **importieren** (Kapitel 7), und die mit Schiebereglern (🎚️), um seine **Einstellungen** zu öffnen (Kapitel 6).
+Oben in der Bot-Spalte, rechts, gibt es eine kleine Befehlsgruppe. Das **+** öffnet ein schnelles Formular: Geben Sie Name, Token, Kanal-ID und Stichtag ein, speichern Sie, und das neue Profil erscheint in der Liste. Neben dem **+** finden Sie auch die Schaltfläche, um einen Bot aus einer `.rtb`-Datei zu **importieren** (Kapitel 7), und die mit Schiebereglern (🎚️), um seine **Einstellungen** zu öffnen (Kapitel 6).
 
 Jedes Profil lebt für sich: Feeds, Zeiten und Vorlagen sind getrennt. Wenn Sie Play drücken, orchestriert Titan alle aktiven Bots in einem einzigen Arbeitszyklus und bedient sie reihum.
 
 ![Der Bot Selector: jedes Profil zeigt seinen Namen, seinen Kanal und seinen Status online/offline.](screenshots/12-bot-selector.png)
 
 ### 4.2 Den Token von @BotFather beziehen
-Der **Bot Token** (Token des Bots) ist der „Hausschlüssel", der es der Software erlaubt, mit den Servern von Telegram zu sprechen. Um einen zu erhalten, brauchen Sie Telegram, auf dem Smartphone oder dem Computer:
+Der **Bot Token** (Token des Bots) ist der „Hausschlüssel“, der es der Software erlaubt, mit den Servern von Telegram zu sprechen. Um einen zu erhalten, brauchen Sie Telegram, auf dem Smartphone oder dem Computer:
 
 1. Geben Sie in der Telegram-Suche `BotFather` ein und öffnen Sie das offizielle Profil, erkennbar am blauen Verifizierungshäkchen.
 2. Drücken Sie **Start** und senden Sie den Befehl `/newbot`.
-3. BotFather fragt zuerst nach einem „Namen" (dem, den die Nutzer lesen), dann nach einem eindeutigen „Username", der mit dem Wort *bot* enden muss (zum Beispiel `meinradio_news_bot`).
+3. BotFather fragt zuerst nach einem „Namen“ (dem, den die Nutzer lesen), dann nach einem eindeutigen „Username“, der mit dem Wort *bot* enden muss (zum Beispiel `meinradio_news_bot`).
 4. Ist der Username frei, antwortet BotFather mit einer Glückwunschnachricht, die eine lange alphanumerische Zeichenfolge enthält, unter dem Hinweis *Use this token to access the HTTP API*.
 5. Kopieren Sie diese Zeichenfolge: Sie ist der Token, den Sie in Titan einfügen.
 

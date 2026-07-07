@@ -3,7 +3,7 @@
 Le impostazioni di ogni bot si aprono dall'icona a cursori (🎚️) accanto al suo nome, nella colonna di sinistra. La finestra ha due schede: **Generale** (i parametri del bot) e **Template** (l'aspetto dei messaggi).
 
 ### 6.1 Intervallo di controllo e notifiche
-Nella scheda **Generale**, oltre ai dati che già conosci (Nome, Token, Channel ID, Data di Partenza), ci sono due regolazioni che decidono il comportamento del bot:
+Nella scheda **Generale**, oltre ai dati che già conosci (Nome, Token, Channel ID, Data di Filtro), ci sono due regolazioni che decidono il comportamento del bot:
 
 -   **Intervallo di controllo.** Uno slider da 1 a 120 minuti (di default 15) che stabilisce ogni quanto il bot va a controllare i feed. È il ritmo di base; se una singola sorgente ha bisogno di un passo diverso, glielo dai dal Feed Manager (Capitolo 5).
 -   **Notifiche.** Un interruttore: quando è acceso, Titan fa comparire un avviso di sistema (una notifica del desktop) a ogni pubblicazione andata a buon fine. Se gestisci canali molto attivi e non vuoi essere avvisato a ogni post, spegnilo.
@@ -49,7 +49,7 @@ Due strumenti ti aiutano a non sbagliare:
 In fondo alla scheda **Generale** c'è una sezione rossa, la *Danger Zone*. Il pulsante **Azzera Cronologia** è potente e distruttivo: cancella la memoria del bot, cioè tutto ciò che ha già pubblicato.
 
 -   *Quando serve.* Se hai cancellato per sbaglio molti messaggi dal canale e vuoi che il bot ripubblichi le ultime notizie per ricostruire la bacheca.
--   *Come usarlo senza disastri.* Se azzeri la cronologia e premi Play, il bot considera «nuovo» tutto quello che trova nei feed e lo invia in blocco, inondando il canale. Per evitarlo, dopo aver azzerato riporta la **Data di Partenza** (nella stessa scheda) alla data di oggi: così il bot dimentica il passato ma pubblica solo da oggi in avanti.
+-   *Come usarlo senza disastri.* Se azzeri la cronologia e premi Play, il bot considera «nuovo» tutto quello che trova nei feed e lo invia in blocco, inondando il canale. Per evitarlo, dopo aver azzerato riporta la **Data di Filtro** (nella stessa scheda) alla data di oggi: così il bot dimentica il passato ma pubblica solo da oggi in avanti.
 
 Azzerando lo storico, anche i contatori delle statistiche tornano a zero (Capitolo 3). Accanto alla Danger Zone trovi anche l'esportazione del bot in formato `.rtb`, che vediamo nel Capitolo 7.
 
