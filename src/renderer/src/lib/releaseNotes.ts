@@ -6,6 +6,56 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.1.7': {
+        it: [
+            'Nome del prodotto uniforme in tutta l’applicazione.',
+            'Icona dell’app corretta nella barra applicazioni di Windows.',
+            'Schermata delle novità affidabile a ogni aggiornamento.',
+            'Guida rapida e manuale PDF completo sempre a portata di mano.',
+        ],
+        en: [
+            'Consistent product name across the whole app.',
+            'Fixed the app icon in the Windows taskbar.',
+            'Reliable what’s-new screen after every update.',
+            'Quick guide and full PDF manual always at hand.',
+        ],
+        fr: [
+            'Nom du produit uniforme dans toute l’application.',
+            'Icône de l’application corrigée dans la barre des tâches Windows.',
+            'Écran des nouveautés fiable à chaque mise à jour.',
+            'Guide rapide et manuel PDF complet toujours accessibles.',
+        ],
+        de: [
+            'Einheitlicher Produktname in der gesamten App.',
+            'App-Symbol in der Windows-Taskleiste korrigiert.',
+            'Zuverlässiger Neuigkeiten-Bildschirm nach jedem Update.',
+            'Kurzanleitung und vollständiges PDF-Handbuch immer griffbereit.',
+        ],
+        es: [
+            'Nombre del producto uniforme en toda la aplicación.',
+            'Icono de la app corregido en la barra de tareas de Windows.',
+            'Pantalla de novedades fiable tras cada actualización.',
+            'Guía rápida y manual PDF completo siempre a mano.',
+        ],
+        pt: [
+            'Nome do produto uniforme em toda a aplicação.',
+            'Ícone da aplicação corrigido na barra de tarefas do Windows.',
+            'Ecrã de novidades fiável após cada atualização.',
+            'Guia rápido e manual PDF completo sempre à mão.',
+        ],
+        ru: [
+            'Единое название продукта во всём приложении.',
+            'Исправлен значок приложения на панели задач Windows.',
+            'Надёжный экран новинок после каждого обновления.',
+            'Краткое руководство и полный PDF-мануал всегда под рукой.',
+        ],
+        zh: [
+            '整个应用中产品名称保持一致。',
+            '修复了 Windows 任务栏中的应用图标。',
+            '每次更新后都会可靠地显示更新说明界面。',
+            '快速指南和完整 PDF 手册随手可得。',
+        ],
+    },
     '2.1.6': {
         it: [
             'Guida rapida integrata, consultabile in ogni lingua direttamente dall’app.',
