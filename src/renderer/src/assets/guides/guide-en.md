@@ -16,7 +16,7 @@ Launch Titan Desktop. If it's your first time, the 4-step wizard will appear:
 *   **Bot Name:** Choose a name to recognize it (e.g., *News Channel*).
 *   **Bot Token:** Paste the Token provided by @BotFather.
 *   **Channel ID:** Enter the name of your channel (e.g., `@mychannel`). If it's a private channel, enter the numeric ID (e.g., `-100123456789`).
-*   **Start Date:** Choose a date. The bot **will ignore** all articles and videos published before this date, avoiding flooding your channel with old content.
+*   **Cutoff Date:** Choose a date. The bot **will ignore** all articles and videos published before this date, avoiding flooding your channel with old content.
 
 ## 3. Adding Sources (Feed Manager)
 Once inside the Dashboard:

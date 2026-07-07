@@ -16,7 +16,7 @@ Starten Sie Titan Desktop. Wenn dies Ihr erstes Mal ist, erscheint der 4-stufige
 *   **Bot-Name:** Wählen Sie einen Namen, um ihn zu erkennen (z. B. *News-Kanal*).
 *   **Bot Token:** Fügen Sie den von @BotFather bereitgestellten Token ein.
 *   **Channel ID:** Geben Sie den Namen Ihres Kanals ein (z. B. `@meinkanal`). Wenn es ein privater Kanal ist, geben Sie die numerische ID (z. B. `-100123456789`).
-*   **Startdatum:** Wählen Sie ein Datum. Der Bot **ignoriert** alle Artikel und Videos, die vor diesem Datum veröffentlicht wurden, um zu vermeiden, dass Ihr Kanal mit alten Inhalten überflutet wird.
+*   **Stichtag:** Wählen Sie ein Datum. Der Bot **ignoriert** alle Artikel und Videos, die vor diesem Datum veröffentlicht wurden, um zu vermeiden, dass Ihr Kanal mit alten Inhalten überflutet wird.
 
 ## 3. Quellen hinzufügen (Feed-Manager)
 Sobald Sie sich im Dashboard befinden:

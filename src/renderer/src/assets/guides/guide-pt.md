@@ -16,7 +16,7 @@ Inicie o Titan Desktop. Se for a primeira vez, aparecerá o assistente de 4 pass
 *   **Nome do Bot:** Escolha um nome para o reconhecer (ex., *Canal de Notícias*).
 *   **Bot Token:** Cole o Token fornecido pelo @BotFather.
 *   **ID do Canal:** Introduza o nome do seu canal (ex., `@meucanal`). Se for um canal privado, introduza o ID numérico (ex., `-100123456789`).
-*   **Data de Início:** Escolha uma data. O bot **ignorará** todos os artigos e vídeos publicados antes desta data, evitando inundar o seu canal com conteúdo antigo.
+*   **Data de Corte:** Escolha uma data. O bot **ignorará** todos os artigos e vídeos publicados antes desta data, evitando inundar o seu canal com conteúdo antigo.
 
 ## 3. Adicionar Fontes (Gestor de Feed)
 Depois de entrar no Painel:

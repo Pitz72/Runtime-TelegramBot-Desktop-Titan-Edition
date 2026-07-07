@@ -22,7 +22,7 @@ Al primo avvio, clicca **«+ Nuovo Bot»** e compila i campi:
 - **Nome** — un nome per riconoscere il bot nell'interfaccia (es. *Canale News*).
 - **Token** — il Token API fornito da @BotFather.
 - **Channel ID** — il nome del canale (es. `@ilmiocanale`) o l'ID numerico per i canali privati (es. `-100123456789`).
-- **Data di Partenza** — il bot ignorerà tutti i contenuti pubblicati prima di questa data. Utile per evitare di inondare il canale con vecchi articoli.
+- **Data di Filtro (Cutoff)** — il bot ignorerà tutti i contenuti pubblicati prima di questa data. Utile per evitare di inondare il canale con vecchi articoli.
 
 ---
 
@@ -39,10 +39,10 @@ Nella dashboard del bot, clicca **«+ Aggiungi Feed»**:
 
 ### Opzioni avanzate per feed
 
-- **Filtro Keyword (F4)** — Filtra gli articoli per parole chiave da includere o escludere. Attivabile nelle impostazioni del feed. Un badge ambra indica il filtro attivo.
-- **Intervallo Personalizzato (F5)** — Imposta un intervallo di fetch individuale per il feed (da 5 minuti a 24 ore), indipendente dall'intervallo globale del bot.
-- **Digest Mode (F9)** — Invece di pubblicare ogni articolo singolarmente, accumula i contenuti per un intervallo configurabile (1h, 6h, 12h, 24h, 7gg) e li invia in un unico messaggio riepilogativo. Un badge viola indica la modalità attiva.
-- **Import OPML (F8)** — Importa più feed contemporaneamente da un file `.opml` standard tramite il pulsante OPML nel Feed Manager.
+- **Filtro Keyword** — Filtra gli articoli per parole chiave da includere o escludere. Attivabile nelle impostazioni del feed. Un badge ambra indica il filtro attivo.
+- **Intervallo Personalizzato** — Imposta un intervallo di fetch individuale per il feed (da 5 minuti a 24 ore), indipendente dall'intervallo globale del bot.
+- **Digest Mode** — Invece di pubblicare ogni articolo singolarmente, accumula i contenuti per un intervallo configurabile (1h, 6h, 12h, 24h, 7gg) e li invia in un unico messaggio riepilogativo. Un badge viola indica la modalità attiva.
+- **Import OPML** — Importa più feed contemporaneamente da un file `.opml` standard tramite il pulsante OPML nel Feed Manager.
 
 ---
 
@@ -53,7 +53,7 @@ Vai nelle impostazioni del bot → scheda **Template**:
 - Usa i **Smart Chips** per inserire variabili dinamiche: `{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`, ecc.
 - Sono disponibili 4 template separati: Avvio, News, Podcast, YouTube.
 - Il **Validatore** segnala in tempo reale eventuali errori (tag non bilanciati, chip sconosciuti, link non sicuri).
-- Il pulsante **Anteprima (F7)** mostra come apparirà il messaggio con dati campione, senza uscire dall'editor.
+- Il pulsante **Anteprima** mostra come apparirà il messaggio con dati campione, senza uscire dall'editor.
 
 Tag HTML supportati da Telegram: `<b>`, `<i>`, `<code>`, `<a href="...">`.
 
@@ -71,7 +71,7 @@ Per monitorare più bot contemporaneamente, usa il toggle **ALL BOTS / THIS BOT*
 
 ---
 
-## 6. Statistiche (F6)
+## 6. Statistiche
 
 Clicca l'icona **Analytics (📊)** nella dashboard per vedere:
 

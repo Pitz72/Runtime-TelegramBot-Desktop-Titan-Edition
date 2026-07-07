@@ -22,7 +22,7 @@ On first launch, click **"+ New Bot"** and fill in the fields:
 - **Name** — a name to identify the bot in the interface (e.g. *News Channel*).
 - **Token** — the API Token provided by @BotFather.
 - **Channel ID** — the channel name (e.g. `@mychannel`) or the numeric ID for private channels (e.g. `-100123456789`).
-- **Start Date** — the bot will ignore all content published before this date. Useful to avoid flooding the channel with old articles.
+- **Cutoff Date** — the bot will ignore all content published before this date. Useful to avoid flooding the channel with old articles.
 
 ---
 
@@ -39,10 +39,10 @@ In the bot dashboard, click **"+ Add Feed"**:
 
 ### Advanced feed options
 
-- **Keyword Filter (F4)** — Filters articles by keywords to include or exclude. Can be enabled in the feed settings. An amber badge indicates the filter is active.
-- **Custom Interval (F5)** — Sets an individual fetch interval for the feed (from 5 minutes to 24 hours), independent of the bot's global interval.
-- **Digest Mode (F9)** — Instead of publishing each article individually, accumulates content over a configurable interval (1h, 6h, 12h, 24h, 7d) and sends it in a single summary message. A purple badge indicates the mode is active.
-- **OPML Import (F8)** — Imports multiple feeds at once from a standard `.opml` file via the OPML button in the Feed Manager.
+- **Keyword Filter** — Filters articles by keywords to include or exclude. Can be enabled in the feed settings. An amber badge indicates the filter is active.
+- **Custom Interval** — Sets an individual fetch interval for the feed (from 5 minutes to 24 hours), independent of the bot's global interval.
+- **Digest Mode** — Instead of publishing each article individually, accumulates content over a configurable interval (1h, 6h, 12h, 24h, 7d) and sends it in a single summary message. A purple badge indicates the mode is active.
+- **OPML Import** — Imports multiple feeds at once from a standard `.opml` file via the OPML button in the Feed Manager.
 
 ---
 
@@ -53,7 +53,7 @@ Go to bot settings → **Template** tab:
 - Use **Smart Chips** to insert dynamic variables: `{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`, etc.
 - Four separate templates are available: Startup, News, Podcast, YouTube.
 - The **Validator** flags errors in real time (unbalanced tags, unknown chips, unsafe links).
-- The **Preview (F7)** button shows how the message will look with sample data, without leaving the editor.
+- The **Preview** button shows how the message will look with sample data, without leaving the editor.
 
 Telegram-supported HTML tags: `<b>`, `<i>`, `<code>`, `<a href="...">`.
 
@@ -71,7 +71,7 @@ To monitor multiple bots simultaneously, use the **ALL BOTS / THIS BOT** toggle 
 
 ---
 
-## 6. Statistics (F6)
+## 6. Statistics
 
 Click the **Analytics (📊)** icon in the dashboard to see:
 
