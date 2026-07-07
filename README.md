@@ -6,8 +6,8 @@
   
   **La Piattaforma Definitiva per l'Automazione Multi-Canale RSS & YouTube su Telegram**
 
-  ![Version](https://img.shields.io/badge/Version-2.1.2-3b82f6?style=for-the-badge)
-  ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-emerald?style=for-the-badge)
+  ![Version](https://img.shields.io/badge/Version-2.1.6-3b82f6?style=for-the-badge)
+  ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20Linux-emerald?style=for-the-badge)
   ![Stack](https://img.shields.io/badge/Stack-Electron%20%7C%20React%20%7C%20SQLite-475569?style=for-the-badge)
   ![Lang](https://img.shields.io/badge/Languages-8%20Supported-purple?style=for-the-badge)
 
@@ -44,7 +44,8 @@ Il progetto nasce per superare i limiti di un precedente bot Python da terminale
 - **F8 — Import OPML** — Importazione bulk di feed da file OPML standard. Nessuna dipendenza esterna, validazione anti-SSRF.
 - **F9 — Digest Mode** — Accumula gli articoli di un feed per un intervallo configurabile (1h → 7gg) e li invia in un unico messaggio riepilogativo.
 - **Performance Mode** — Disabilita effetti GPU-heavy (scanline, backdrop-blur, glow, animazioni). Persistente, efficace senza riavvio.
-- **Auto-Updater nativo** — Verifica nuove versioni all'avvio via GitHub Releases, scarica in background e installa su richiesta con un click.
+- **Auto-Updater nativo** — Verifica nuove versioni all'avvio via GitHub Releases, scarica in background e installa su richiesta con un click. Al primo avvio dopo un aggiornamento mostra una schermata con le novità.
+- **Documentazione in-app** — Guida rapida integrata consultabile a schermo nella lingua corrente e download del manuale d'uso completo in PDF (8 lingue), da schermata iniziale e Impostazioni.
 
 ### Internazionalizzazione
 Interfaccia tradotta in 8 lingue con cambio istantaneo:
@@ -58,11 +59,11 @@ Interfaccia tradotta in 8 lingue con cambio istantaneo:
 | :--- | :--- |
 | **Framework** | Electron 32.3.3 + Node.js 20+ |
 | **Frontend** | React 18.3.1 + Vite 5.4.21 |
-| **Styling** | TailwindCSS + Lucide React + Space Grotesk |
-| **Database** | SQLite via `better-sqlite3` (WAL mode, schema v11) |
+| **Styling** | TailwindCSS + Lucide React + Inter |
+| **Database** | SQLite via `better-sqlite3` (WAL mode, schema v12) |
 | **Telegram** | Telegraf v4 |
-| **Build** | electron-builder 25 (NSIS, DMG, AppImage/deb) |
-| **CI/CD** | GitHub Actions (Windows, macOS, Linux) |
+| **Build** | electron-builder 25 (NSIS, AppImage/deb) |
+| **CI/CD** | GitHub Actions (Windows, Linux) |
 
 ---
 
@@ -73,8 +74,9 @@ Interfaccia tradotta in 8 lingue con cambio istantaneo:
 Scarica l'installer dalla [pagina Releases](https://github.com/Ecosystem-Runtime/runtime-telegrambot-releases/releases/latest) e lancia l'eseguibile per il tuo sistema operativo:
 
 - **Windows** — `.exe` (NSIS Installer)
-- **macOS** — `.dmg`. Al primo avvio: tasto destro → Apri (app non firmata, avviso Gatekeeper normale).
 - **Linux** — `.AppImage` (eseguibile diretto) o `.deb` (Ubuntu/Debian). Potrebbe essere necessario `libsecret-1-0`.
+
+> Piattaforme supportate: **Windows e Linux**.
 
 ### Sviluppatori
 
