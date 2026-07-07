@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Runtime TelegramBot — Titan Edition · Interface Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  html,body{margin:0;padding:0;background:#f0eee9;font-family:Inter,system-ui,sans-serif;}
+  *{box-sizing:border-box;}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-track{background:rgba(0,0,0,0.05);}
+  ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:5px;}
+  .titan-root *::-webkit-scrollbar{width:6px;height:6px;}
+  .titan-root *::-webkit-scrollbar-track{background:rgba(5,5,16,0.5);}
+  .titan-root *::-webkit-scrollbar-thumb{background:rgba(59,130,246,0.25);border-radius:3px;}
+  input[readonly]{cursor:default;}
+  button{font-family:Inter,sans-serif;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="components/shared.jsx"></script>
+<script type="text/babel" src="components/dashboard.jsx"></script>
+<script type="text/babel" src="components/modals.jsx"></script>
+<script type="text/babel">
+function Frame({ label, children, w=1280, h=800 }) {
+  return (
+    <DCArtboard label={label} width={w} height={h}>
+      <div className="titan-root" style={{width:w, height:h, overflow:'hidden'}}>{children}</div>
+    </DCArtboard>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      {/* Intro line */}
+      <div style={{padding:'0 60px 28px', maxWidth:1000}}>
+        <div style={{fontSize:11, letterSpacing:'0.25em', fontWeight:700, color:'#3b82f680', textTransform:'uppercase'}}>Runtime Radio</div>
+        <div style={{fontSize:34, fontWeight:800, color:'#1a1a1a', marginTop:6, letterSpacing:'-0.02em'}}>Runtime TelegramBot — Titan Edition</div>
+        <div style={{fontSize:14, color:'#6b6b6b', marginTop:8, lineHeight:1.55, maxWidth:720}}>
+          Pixel layout frames for the Electron desktop app. Dark‑mode only, 1280×800 fixed window,
+          strict 50/50 split between bot/feed management and the broadcast console.
+        </div>
+      </div>
+
+      <DCSection title="Dashboard" subtitle="Main screen — three states">
+        <Frame label="01 · Dashboard — IDLE (bot selected, stats loaded)">
+          <Dashboard state="idle"/>
+        </Frame>
+        <Frame label="02 · Dashboard — ONLINE (ignition engaged, live log)">
+          <Dashboard state="active"/>
+        </Frame>
+        <Frame label="03 · Dashboard — no bot selected">
+          <Dashboard state="empty"/>
+        </Frame>
+      </DCSection>
+
+      <DCSection title="Feed Manager" subtitle="Add‑feed form expanded with successful validation">
+        <Frame label="04 · Feed Manager — Add Feed (valid)">
+          <Dashboard state="idle" feedFormOpen={true}/>
+        </Frame>
+      </DCSection>
+
+      <DCSection title="Bot Settings" subtitle="Two tabs, full‑feature modal at 960×720">
+        <Frame label="05 · Bot Settings — General">
+          <BotSettingsGeneral/>
+        </Frame>
+        <Frame label="06 · Bot Settings — Templates">
+          <BotSettingsTemplates/>
+        </Frame>
+      </DCSection>
+
+      <DCSection title="System Settings & Stats">
+        <Frame label="07 · System Settings — General + Data & Backup">
+          <SystemSettings/>
+        </Frame>
+        <Frame label="08 · Detailed Statistics">
+          <StatsModal/>
+        </Frame>
+      </DCSection>
+
+      <DCSection title="Overlays" subtitle="Confirm, toasts, fatal error">
+        <Frame label="09 · Confirm Dialog">
+          <ConfirmDialog/>
+        </Frame>
+        <Frame label="10 · Toast stack — success / error / info">
+          <ToastStack/>
+        </Frame>
+        <Frame label="13 · ErrorBoundary fallback">
+          <ErrorScreen/>
+        </Frame>
+      </DCSection>
+
+      <DCSection title="Startup flow" subtitle="Language picker and 4‑step wizard">
+        <Frame label="11 · IntroScreen">
+          <IntroScreen/>
+        </Frame>
+        <Frame label="12 · SetupWizard — step 2 of 4">
+          <SetupWizard/>
+        </Frame>
+      </DCSection>
+
+      <DCPostIt top={20} left={1020} rotate={-3} width={220}>
+        Tip: hold <b>Space</b> + drag to pan, scroll to zoom. Each frame is a 1280×800 window.
+      </DCPostIt>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
