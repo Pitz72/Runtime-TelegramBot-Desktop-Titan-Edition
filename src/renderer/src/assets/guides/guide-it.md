@@ -5,11 +5,11 @@ Benvenuto in **Runtime TelegramBot Titan Edition**. Questa guida rapida ti perme
 ---
 
 ## 1. Preparazione: Ottieni il Token di Telegram
-Prima di avviare Titan, devi creare un "Bot" su Telegram:
+Prima di avviare Titan, devi creare un «Bot» su Telegram:
 1. Apri Telegram e cerca l'utente **@BotFather** (ha la spunta blu).
 2. Invia il comando `/newbot` e segui le istruzioni per dare un nome al tuo bot.
 3. Alla fine, @BotFather ti restituirà un **Token API** (una lunga stringa tipo `123456789:ABCdefGHIjklMNOpqr...`). **Copialo e tienilo al sicuro.**
-4. Aggiungi il bot appena creato al tuo Canale Telegram come **Amministratore** (deve avere il permesso di "Inviare Messaggi").
+4. Aggiungi il bot appena creato al tuo Canale Telegram come **Amministratore** (deve avere il permesso di «Inviare Messaggi»).
 
 ## 2. Il Primo Avvio (Setup Wizard)
 Avvia Titan Desktop. Se è la prima volta, apparirà la procedura guidata in 4 passaggi:
@@ -21,7 +21,7 @@ Avvia Titan Desktop. Se è la prima volta, apparirà la procedura guidata in 4 p
 ## 3. Aggiungere le Fonti (Feed Manager)
 Una volta entrato nella Dashboard:
 1. Assicurati che il tuo bot sia selezionato nella colonna di sinistra.
-2. Nel pannello **Sorgenti Feed**, clicca su **"+ Aggiungi Sorgente"**.
+2. Nel pannello **Sorgenti Feed**, clicca su **«+ Aggiungi Sorgente»**.
 3. Inserisci il Nome (es. *Il mio Podcast*) e seleziona il **Tipo** (Podcast, News o YouTube).
 4. Incolla l'URL:
    * Per News e Podcast: incolla l'URL del feed RSS.
@@ -45,7 +45,7 @@ Hai inserito il token e aggiunto i feed? Sei pronto.
 
 ### 💡 Consigli Utili & Troubleshooting
 *   **Fasce di Silenzio:** Nelle impostazioni del bot puoi definire l'orario di attività. Se imposti dalle 08:00 alle 22:00, le notizie notturne non andranno perse, ma verranno messe in coda e pubblicate alle 08:00 del mattino!
-*   **Errori YouTube:** Se ricevi errori "rossi" sui canali YouTube, niente panico. Google aggiorna spesso i suoi server. Spegni temporaneamente il feed YouTube dal bottoncino dedicato nell'interfaccia e attendi un nostro aggiornamento software.
+*   **Errori YouTube:** Se ricevi errori «rossi» sui canali YouTube, niente panico. Google aggiorna spesso i suoi server. Spegni temporaneamente il feed YouTube dal bottoncino dedicato nell'interfaccia e attendi un nostro aggiornamento software.
 *   **Cambio PC:** Devi spostare il bot su un altro computer? Non copiare i file! Usa la funzione **Esporta (.rtb)** nelle impostazioni. Questo genererà un file sicuro da importare nel nuovo PC, mantenendo le tue password crittografate.
 
 *Per assistenza avanzata, fai riferimento al Manuale d'Uso Pro in formato PDF.*

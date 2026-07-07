@@ -5,11 +5,11 @@ Willkommen bei der **Runtime TelegramBot Titan Edition**. Diese Kurzanleitung er
 ---
 
 ## 1. Vorbereitung: Den Telegram-Token erhalten
-Bevor Sie Titan starten, müssen Sie einen "Bot" auf Telegram erstellen:
+Bevor Sie Titan starten, müssen Sie einen „Bot“ auf Telegram erstellen:
 1. Öffnen Sie Telegram und suchen Sie nach dem Benutzer **@BotFather** (er hat das blaue Verifizierungsabzeichen).
 2. Senden Sie den Befehl `/newbot` und folgen Sie den Anweisungen, um Ihrem Bot einen Namen zu geben.
 3. Am Ende gibt Ihnen @BotFather einen **API-Token** (eine lange Zeichenfolge wie `123456789:ABCdefGHIjklMNOpqr...`). **Kopieren Sie diesen und bewahren Sie ihn sicher auf.**
-4. Fügen Sie den neu erstellten Bot als **Administrator** zu Ihrem Telegram-Kanal hinzu (er muss die Berechtigung "Nachrichten senden" haben).
+4. Fügen Sie den neu erstellten Bot als **Administrator** zu Ihrem Telegram-Kanal hinzu (er muss die Berechtigung „Nachrichten senden“ haben).
 
 ## 2. Der erste Start (Setup-Assistent)
 Starten Sie Titan Desktop. Wenn dies Ihr erstes Mal ist, erscheint der 4-stufige Assistent:
@@ -21,7 +21,7 @@ Starten Sie Titan Desktop. Wenn dies Ihr erstes Mal ist, erscheint der 4-stufige
 ## 3. Quellen hinzufügen (Feed-Manager)
 Sobald Sie sich im Dashboard befinden:
 1. Stellen Sie sicher, dass Ihr Bot in der linken Spalte ausgewählt ist.
-2. Klicken Sie im Bereich **Feed-Quellen** auf **"+ Quelle hinzufügen"**.
+2. Klicken Sie im Bereich **Feed-Quellen** auf **„+ Quelle hinzufügen“**.
 3. Geben Sie den Namen ein (z. B. *Mein Podcast*) und wählen Sie den **Typ** aus (Podcast, News oder YouTube).
 4. Fügen Sie die URL ein:
    * Für Nachrichten und Podcasts: Fügen Sie die URL des RSS-Feeds ein.
@@ -45,7 +45,7 @@ Haben Sie den Token eingegeben und die Feeds hinzugefügt? Sie sind bereit.
 
 ### 💡 Nützliche Tipps & Fehlerbehebung
 *   **Ruhezeiten:** In den Bot-Einstellungen können Sie die Aktivitätszeiten definieren. Wenn Sie die Zeit von 08:00 bis 22:00 Uhr einstellen, gehen die Nachtnachrichten nicht verloren, sondern werden in die Warteschlange gestellt und morgens um 08:00 Uhr veröffentlicht!
-*   **YouTube-Fehler:** Wenn Sie "rote" Fehler auf YouTube-Kanälen erhalten, geraten Sie nicht in Panik. Google aktualisiert häufig seine Server. Schalten Sie den YouTube-Feed vorübergehend über die entsprechende Schaltfläche in der Oberfläche ab und warten Sie auf unser Software-Update.
+*   **YouTube-Fehler:** Wenn Sie „rote“ Fehler auf YouTube-Kanälen erhalten, geraten Sie nicht in Panik. Google aktualisiert häufig seine Server. Schalten Sie den YouTube-Feed vorübergehend über die entsprechende Schaltfläche in der Oberfläche ab und warten Sie auf unser Software-Update.
 *   **PC-Wechsel:** Müssen Sie den Bot auf einen anderen Computer übertragen? Kopieren Sie die Dateien nicht! Verwenden Sie die Funktion **Exportieren (.rtb)** in den Einstellungen. Dadurch wird eine sichere Datei generiert, die in den neuen PC importiert werden kann, wobei Ihre Passwörter verschlüsselt bleiben.
 
 *Für erweiterte Hilfe lesen Sie bitte das Pro-Benutzerhandbuch im PDF-Format.*
