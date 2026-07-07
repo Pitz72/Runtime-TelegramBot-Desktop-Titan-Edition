@@ -11,7 +11,7 @@
 您的数据。
 
 === 此套件包含什么 ===
-1. Titan Edition 安装可执行文件 (Setup.exe 或 .dmg / .AppImage)。
+1. Titan Edition 安装可执行文件 (Windows 用 Setup.exe，Linux 用 .AppImage)。
 2. "Documentation" 文件夹，其中包含 Pro 用户手册（8 种语言）和快速入门指南。
 
 === 快速安装说明 ===

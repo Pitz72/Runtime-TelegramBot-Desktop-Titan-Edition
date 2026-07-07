@@ -11,7 +11,7 @@ with no limits, no subscriptions, and full control over
 your data.
 
 === WHAT IS INCLUDED IN THIS PACKAGE ===
-1. The Titan Edition installation executable (Setup.exe or .dmg / .AppImage).
+1. The Titan Edition installation executable (Setup.exe for Windows or .AppImage for Linux).
 2. The "Documentation" folder containing the Pro User Manuals (in 8 languages) and the Quick Start Guide.
 
 === QUICK INSTALLATION INSTRUCTIONS ===

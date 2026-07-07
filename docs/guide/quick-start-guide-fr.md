@@ -6,7 +6,7 @@ Bienvenue dans **Runtime TelegramBot** (Titan Edition). Ce guide vous permet de 
 
 ## 1. Obtenir le Token Telegram
 
-Avant de lancer l'application, vous devez créer un bot sur Telegram :
+Avant de lancer l'application, vous devez créer un bot sur Telegram :
 
 1. Ouvrez Telegram et recherchez **@BotFather** (il a la coche bleue).
 2. Envoyez la commande `/newbot` et suivez les instructions pour attribuer un nom au bot.
@@ -17,7 +17,7 @@ Avant de lancer l'application, vous devez créer un bot sur Telegram :
 
 ## 2. Premier Lancement — Configuration du Bot
 
-Au premier lancement, cliquez sur **"+ Nouveau Bot"** et remplissez les champs :
+Au premier lancement, cliquez sur **« + Nouveau Bot »** et remplissez les champs :
 
 - **Nom** — un nom pour identifier le bot dans l'interface (ex. *Canal d'Actualités*).
 - **Token** — le Token API fourni par @BotFather.
@@ -28,13 +28,13 @@ Au premier lancement, cliquez sur **"+ Nouveau Bot"** et remplissez les champs :
 
 ## 3. Ajouter des Feeds (Feed Manager)
 
-Dans le tableau de bord du bot, cliquez sur **"+ Ajouter un Feed"** :
+Dans le tableau de bord du bot, cliquez sur **« + Ajouter un Feed »** :
 
 1. Attribuez un **Nom** descriptif au feed.
-2. Sélectionnez le **Type** : News, Podcast ou YouTube.
-3. Collez l'**URL** :
-   - News / Podcast : URL du feed RSS.
-   - YouTube : URL de la chaîne ou handle (ex. `@RuntimeRadio`). *Aucune API Key requise.*
+2. Sélectionnez le **Type** : News, Podcast ou YouTube.
+3. Collez l'**URL** :
+   - News / Podcast : URL du feed RSS.
+   - YouTube : URL de la chaîne ou handle (ex. `@RuntimeRadio`). *Aucune API Key requise.*
 4. Utilisez **Tester (⚡)** pour vérifier la validité du lien, puis **Enregistrer**.
 
 ### Options avancées de feed
@@ -48,20 +48,20 @@ Dans le tableau de bord du bot, cliquez sur **"+ Ajouter un Feed"** :
 
 ## 4. Personnaliser les Messages (Template)
 
-Allez dans les paramètres du bot → onglet **Template** :
+Allez dans les paramètres du bot → onglet **Template** :
 
-- Utilisez les **Smart Chips** pour insérer des variables dynamiques : `{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`, etc.
-- 4 templates séparés sont disponibles : Démarrage, News, Podcast, YouTube.
+- Utilisez les **Smart Chips** pour insérer des variables dynamiques : `{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`, etc.
+- 4 templates séparés sont disponibles : Démarrage, News, Podcast, YouTube.
 - Le **Validateur** signale en temps réel les erreurs éventuelles (balises non équilibrées, chips inconnus, liens non sécurisés).
 - Le bouton **Aperçu (F7)** montre comment le message apparaîtra avec des données d'exemple, sans quitter l'éditeur.
 
-Balises HTML prises en charge par Telegram : `<b>`, `<i>`, `<code>`, `<a href="...">`.
+Balises HTML prises en charge par Telegram : `<b>`, `<i>`, `<code>`, `<a href="...">`.
 
 ---
 
 ## 5. Démarrage — Ignition
 
-Lorsque le bot est configuré et que les feeds ont été ajoutés :
+Lorsque le bot est configuré et que les feeds ont été ajoutés :
 
 - Cliquez sur le bouton **Play (▶)** dans la console.
 - L'anneau de statut commencera à tourner et le bot entrera en fonction.
@@ -73,16 +73,16 @@ Pour surveiller plusieurs bots simultanément, utilisez le toggle **ALL BOTS / T
 
 ## 6. Statistiques (F6)
 
-Cliquez sur l'icône **Analytics (📊)** dans le tableau de bord pour voir :
+Cliquez sur l'icône **Analytics (📊)** dans le tableau de bord pour voir :
 
-- Compteurs d'articles publiés : aujourd'hui / 7 derniers jours / total.
+- Compteurs d'articles publiés : aujourd'hui / 7 derniers jours / total.
 - Répartition par feed, triée par volume de publication.
 
 ---
 
 ## Paramètres Système
 
-Accessibles depuis l'icône d'engrenage en haut à droite :
+Accessibles depuis l'icône d'engrenage en haut à droite :
 
 - **Général** — intervalle de vérification global, heures silencieuses, langue.
 - **Backup** — export et restauration de la base de données.
@@ -92,7 +92,7 @@ Accessibles depuis l'icône d'engrenage en haut à droite :
 
 ## Portabilité — Fichier .rtb
 
-Pour déplacer un bot sur un autre ordinateur sans perdre la configuration :
+Pour déplacer un bot sur un autre ordinateur sans perdre la configuration :
 
 1. Dans les paramètres du bot → **Exporter (.rtb)**.
 2. Transférez le fichier sur le nouveau PC.
@@ -104,8 +104,7 @@ Pour déplacer un bot sur un autre ordinateur sans perdre la configuration :
 
 - **Erreurs YouTube** — Google met régulièrement à jour ses serveurs. Si des erreurs rouges apparaissent sur les feeds YouTube, désactivez temporairement le feed et attendez une mise à jour de l'application.
 - **Token non valide** — Vérifiez que le bot a été ajouté au canal en tant qu'administrateur avec la permission d'envoyer des messages.
-- **Linux sans libsecret** — L'application fonctionne normalement en utilisant le fallback AES-256-GCM. Pour le trousseau natif, installez : `sudo apt-get install libsecret-1-0`.
-- **macOS — avertissement Gatekeeper** — Au premier lancement : clic droit sur l'app → Ouvrir → Ouvrir.
+- **Linux sans libsecret** — L'application fonctionne normalement en utilisant le fallback AES-256-GCM. Pour le trousseau natif, installez : `sudo apt-get install libsecret-1-0`.
 
 ---
 

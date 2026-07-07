@@ -105,7 +105,6 @@ Telegram 支持的 HTML 标签：`<b>`、`<i>`、`<code>`、`<a href="...">`。
 - **YouTube 错误** — Google 会定期更新其服务器。如果 YouTube feed 出现红色错误，请暂时禁用该 feed，等待应用程序更新。
 - **令牌无效** — 确认机器人已作为管理员添加到频道，且具有发送消息的权限。
 - **Linux 缺少 libsecret** — 应用程序使用 AES-256-GCM 回退方案正常运行。如需原生密钥链，请安装：`sudo apt-get install libsecret-1-0`。
-- **macOS — Gatekeeper 警告** — 首次启动时：右键点击应用程序 → 打开 → 打开。
 
 ---
 

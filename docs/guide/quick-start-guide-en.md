@@ -105,7 +105,6 @@ To move a bot to another computer without losing the configuration:
 - **YouTube errors** — Google periodically updates its servers. If red errors appear on YouTube feeds, temporarily disable the feed and wait for an app update.
 - **Invalid token** — Verify that the bot has been added to the channel as an administrator with permission to send messages.
 - **Linux without libsecret** — The app works normally using the AES-256-GCM fallback. For the native keychain install: `sudo apt-get install libsecret-1-0`.
-- **macOS — Gatekeeper warning** — On first launch: right-click the app → Open → Open.
 
 ---
 

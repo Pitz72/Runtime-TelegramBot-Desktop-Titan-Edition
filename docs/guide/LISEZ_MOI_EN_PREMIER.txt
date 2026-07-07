@@ -11,8 +11,8 @@ sans limites, sans abonnements et avec le contrôle total de
 vos données.
 
 === CE QUE CONTIENT CE PACK ===
-1. L'exécutable d'installation de Titan Edition (Setup.exe ou .dmg / .AppImage).
-2. Le dossier "Documentation" contenant les Manuels d'Utilisation Pro (en 8 langues) et le Guide de Démarrage Rapide.
+1. L'exécutable d'installation de Titan Edition (Setup.exe pour Windows ou .AppImage pour Linux).
+2. Le dossier « Documentation » contenant les Manuels d'Utilisation Pro (en 8 langues) et le Guide de Démarrage Rapide.
 
 === INSTRUCTIONS D'INSTALLATION RAPIDE ===
 Lancez le fichier d'installation. Le logiciel installera l'interface 
@@ -21,17 +21,17 @@ Au premier lancement, un Assistant de Configuration vous guidera étape par éta
 
 *** ATTENTION UTILISATEURS WINDOWS (SMARTSCREEN) ***
 Titan Edition est un logiciel indépendant, distribué sans
-intermédiaires. Au premier lancement du fichier ".exe", Windows Defender
-pourrait afficher un écran bleu avec le texte :
-"Windows a protégé votre ordinateur - Éditeur inconnu".
+intermédiaires. Au premier lancement du fichier « .exe », Windows Defender
+pourrait afficher un écran bleu avec le texte :
+« Windows a protégé votre ordinateur - Éditeur inconnu ».
 
 Il s'agit d'une procédure de sécurité normale de Windows pour les logiciels
 distribués en dehors du Microsoft Store.
 Le fichier que vous avez téléchargé est SÛR à 100% et sans malware.
 
-Pour procéder à l'installation :
-1. Cliquez sur le petit texte "Informations complémentaires".
-2. Cliquez sur le bouton qui apparaîtra en bas à droite "Exécuter quand même".
+Pour procéder à l'installation :
+1. Cliquez sur le petit texte « Informations complémentaires ».
+2. Cliquez sur le bouton qui apparaîtra en bas à droite « Exécuter quand même ».
 
 Le message disparaîtra pour toujours.
 
@@ -42,16 +42,16 @@ de mises à jour au démarrage. Si une version plus récente est disponible,
 vous verrez apparaître une alerte (Toast) dans l'application.
 
 === SUPPORT ET DOCUMENTATION ===
-Avant de démarrer le logiciel, nous vous invitons à lire le "Guide de Démarrage Rapide" 
+Avant de démarrer le logiciel, nous vous invitons à lire le « Guide de Démarrage Rapide » 
 pour comprendre comment vous procurer le Token Telegram nécessaire au fonctionnement.
 Pour des questions techniques avancées (ex. Formatage des Modèles ou Sauvegarde), consultez 
-le "Manuel d'Utilisation Avancé" ci-joint.
+le « Manuel d'Utilisation Avancé » ci-joint.
 
-Pour une assistance technique ou des signalements, vous pouvez nous écrire à :
+Pour une assistance technique ou des signalements, vous pouvez nous écrire à :
 info@runtimeradio.it
 
 Merci encore pour votre soutien à l'écosystème indépendant.
-Bonne automatisation !
+Bonne automatisation !
 
 - Simone Pizzi (Runtime Radio)
 https://ecosystem.runtimeradio.com

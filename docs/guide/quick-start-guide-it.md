@@ -17,7 +17,7 @@ Prima di avviare l'app, devi creare un bot su Telegram:
 
 ## 2. Primo Avvio — Configurazione Bot
 
-Al primo avvio, clicca **"+ Nuovo Bot"** e compila i campi:
+Al primo avvio, clicca **«+ Nuovo Bot»** e compila i campi:
 
 - **Nome** — un nome per riconoscere il bot nell'interfaccia (es. *Canale News*).
 - **Token** — il Token API fornito da @BotFather.
@@ -28,7 +28,7 @@ Al primo avvio, clicca **"+ Nuovo Bot"** e compila i campi:
 
 ## 3. Aggiungere Feed (Feed Manager)
 
-Nella dashboard del bot, clicca **"+ Aggiungi Feed"**:
+Nella dashboard del bot, clicca **«+ Aggiungi Feed»**:
 
 1. Assegna un **Nome** descrittivo al feed.
 2. Seleziona il **Tipo**: News, Podcast o YouTube.
@@ -105,7 +105,6 @@ Per spostare un bot su un altro computer senza perdere la configurazione:
 - **Errori YouTube** — Google aggiorna periodicamente i propri server. Se compaiono errori rossi sui feed YouTube, disabilita temporaneamente il feed e attendi un aggiornamento dell'app.
 - **Token non valido** — Verifica che il bot sia stato aggiunto al canale come amministratore con il permesso di inviare messaggi.
 - **Linux senza libsecret** — L'app funziona normalmente usando il fallback AES-256-GCM. Per il keychain nativo installa: `sudo apt-get install libsecret-1-0`.
-- **macOS — avviso Gatekeeper** — Al primo avvio: tasto destro sull'app → Apri → Apri.
 
 ---
 
