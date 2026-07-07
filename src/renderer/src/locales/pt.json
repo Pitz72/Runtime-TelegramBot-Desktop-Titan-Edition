@@ -74,7 +74,7 @@
         "channelPlaceholder": "ex. @omeucanal ou -10012345678",
         "intervalLabel": "Intervalo de Verificação",
         "intervalHint": "Minutos entre verificações dos feeds",
-        "startDateLabel": "Data de Início",
+        "startDateLabel": "Data de Corte",
         "startDateHint": "Ignorar artigos anteriores a esta data",
         "activeLabel": "Bot Ativo",
         "activeHint": "Se desativado, o bot não verifica nada",
@@ -180,7 +180,7 @@
         "tabPerformance": "Desempenho",
         "dbSection": {
             "title": "Gestão da Base de Dados",
-            "desc": "Exporte ou importe todo o arquivo do bot.",
+            "desc": "Exporte ou importe toda a base de dados do bot.",
             "exportBtn": "Exportar BD",
             "exportHint": "Guardar titan.db",
             "importBtn": "Importar BD",
