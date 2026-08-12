@@ -12,7 +12,7 @@ tuoi dati.
 
 === COSA CONTIENE QUESTO PACCHETTO ===
 1. L'eseguibile di installazione di Titan Edition (Setup.exe per Windows o .AppImage per Linux).
-2. La cartella «Documentation» contenente i Manuali d'Uso Pro (in 8 lingue) e la Quick Start Guide.
+2. La cartella «Documentation» contenente i Manuali d'Uso Pro (in italiano e inglese) e la Quick Start Guide.
 
 === ISTRUZIONI DI INSTALLAZIONE RAPIDA ===
 Avvia il file di installazione. Il software installerà l'interfaccia 

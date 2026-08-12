@@ -34,7 +34,7 @@ Al primissimo avvio, dopo la sequenza animata di boot e la scelta della lingua, 
 Completati i quattro passaggi, clicca su **Lancia Titan**: ti ritroverai nella plancia di comando principale.
 
 ### 2.4 La schermata di benvenuto: lingua, guida e manuale
-La schermata con le otto bandiere non è solo del primo avvio: torna a ogni accensione, e da lì scegli la lingua dell'interfaccia, che cambia all'istante. Il tasto **Lancia Titan** ti porta dentro.
+La schermata con le due bandiere non è solo del primo avvio: torna a ogni accensione, e da lì scegli la lingua dell'interfaccia, che cambia all'istante. Il tasto **Lancia Titan** ti porta dentro.
 
 Sotto quel tasto ci sono tre scorciatoie:
 

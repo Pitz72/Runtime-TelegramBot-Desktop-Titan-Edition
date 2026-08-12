@@ -18,6 +18,16 @@ Lavoro svolto il 12 agosto 2026, in vista del passaggio a open source. Non è an
 - Completate le 15 stringhe dell'interfaccia di aggiornamento mancanti in tedesco, spagnolo, francese, russo e cinese: quel flusso usciva in inglese in 5 lingue su 8.
 - Il messaggio di avvio inviato su Telegram usa il nome corretto del prodotto.
 
+**Lingue: da otto a due**
+
+Titan parla ora **italiano e inglese**. Francese, tedesco, spagnolo, portoghese, russo e cinese sono stati ritirati: interfaccia, guida in-app, guida rapida, file «leggimi» e manuale PDF.
+
+Il motivo è la manutenzione. Sei lingue che nessuno nel progetto sa rileggere sono sei modi di pubblicare testo sbagliato senza accorgersene, e l'ultima revisione seria di quelle traduzioni risale a luglio. Meglio due lingue verificate che otto di cui sei sulla fiducia.
+
+- Chi aveva selezionato una delle sei lingue ritirate trova l'interfaccia **in inglese** al primo avvio della nuova versione, non in italiano. La preferenza viene riscritta.
+- I sei manuali PDF corrispondenti non vengono più pubblicati. Restano l'italiano e l'inglese.
+- La schermata iniziale mostra due bandiere invece di otto.
+
 **Progetto**
 - Licenza **MIT** al posto dell'EULA proprietaria, archiviata in `docs/storico/`.
 - Aggiunti `CONTRIBUTING.md`, `SECURITY.md`, i template delle issue e un controllo di parità delle traduzioni (`scripts/check-locales.mjs`), eseguito in CI su ogni pull request insieme a type check e build.

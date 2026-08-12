@@ -1,10 +1,11 @@
 /**
- * Verifica che gli 8 file di traduzione abbiano esattamente le stesse chiavi.
+ * Verifica che i due file di traduzione abbiano esattamente le stesse chiavi.
  *
  * Serve perché I18nContext fa fallback sull'inglese quando una chiave manca: una
  * dimenticanza non rompe nulla, lascia semplicemente pezzi di interfaccia in inglese
  * e passa inosservata a lungo (è già successo con l'intero flusso di aggiornamento,
- * rimasto in inglese in 5 lingue su 8 per un mese).
+ * rimasto in inglese per un mese). Con l'italiano come riferimento il controllo dice
+ * quindi se `en.json` è indietro rispetto a `it.json`.
  *
  * Uso: node scripts/check-locales.mjs
  */
@@ -12,7 +13,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const LANGS = ['it', 'en', 'fr', 'de', 'es', 'pt', 'ru', 'zh'];
+const LANGS = ['it', 'en'];
 const REFERENCE = 'it';
 
 const localesDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'renderer', 'src', 'locales');
@@ -48,4 +49,4 @@ if (failed) {
     process.exit(1);
 }
 
-console.log(`✓ Chiavi allineate su tutte e ${LANGS.length} le lingue (${reference.length} chiavi).`);
+console.log(`✓ Chiavi allineate su ${LANGS.length} lingue (${reference.length} chiavi).`);

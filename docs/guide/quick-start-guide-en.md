@@ -112,7 +112,7 @@ To move a bot to another computer without losing the configuration:
 
 Most of the code was written with language models (Google Gemini, Anthropic Claude). The concept, the design direction and the verification are Simone Pizzi's.
 
-For the full treatment see the **Advanced User Manual** in PDF, available in eight languages.
+For the full treatment see the **Advanced User Manual** in PDF, available in Italian and English.
 
 Contact: simonepizzi.runtimeradio.it/contatti
 Voluntary donation: paypal.me/runtimeradio

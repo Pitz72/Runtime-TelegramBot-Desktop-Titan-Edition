@@ -1,12 +1,13 @@
 // =============================================================================
-// strings.typ — Dizionario multilingua del Manuale Utente Avanzato di
+// strings.typ — Dizionario del Manuale Utente Avanzato di
 // Runtime TelegramBot · Titan Edition. La lingua si sceglie da riga di comando:
 // `--input lang=<lang>`. Un solo punto di verità per tutte le stringhe di
 // template (copertina, frontespizio, colophon, header, box, indice, capitolo).
-// Lingue: it · en · fr · de · es · pt · ru · zh
+// Lingue: it (sorgente) · en. Dalla 2.1.8 sono queste due e basta: fr, de, es,
+// pt, ru e zh sono state ritirate.
 // I nomi di prodotto "Runtime TelegramBot" e "Titan Edition" restano in latino
-// in ogni lingua (marchio). La copertina è vettoriale nativa: si localizza da
-// queste stringhe, non servono immagini di copertina per lingua.
+// in entrambe le lingue (marchio). La copertina è vettoriale nativa: si localizza
+// da queste stringhe, non servono immagini di copertina per lingua.
 // =============================================================================
 
 #let LANG = sys.inputs.at("lang", default: "it")
@@ -47,114 +48,6 @@
     repro: "This manual and the software it describes are free: you may use, copy, modify and redistribute them, including commercially, under the terms of the MIT Licence, reproduced in full in the LICENSE file of the source code. The only obligation is to keep the copyright notice and the licence text with them.",
     trademark: "Runtime TelegramBot Desktop · Titan Edition is an original software product. Telegram, YouTube and the other trademarks mentioned belong to their respective owners.",
     credits: "Software conceived and directed by SIMONE PIZZI, who defined every one of its behaviours. Most of the code was written with language models (Google Gemini, Anthropic Claude); this manual was produced by the same method and read line by line. Produced by Ecosystem Runtime. Typeset with Typst; headings in Sora, body in Inter, code in Source Code Pro.",
-  ),
-  fr: (
-    typst-lang: "fr",
-    manual-title: "Manuel Utilisateur Avancé",
-    toc-title: "Sommaire",
-    tagline: "PUBLICATION AUTOMATIQUE DE RSS VERS TELEGRAM",
-    aligned-to: "Aligné sur la version",
-    version-word: "Version",
-    language-name: "Français",
-    edition-name: "Deuxième Édition",
-    production-word: "Production",
-    chapter-prefix: "Chapitre ", chapter-suffix: "",
-    note-label: "Note", tip-label: "Conseil", warning-label: "⚠ Attention",
-    rule-label: "Règle d'or", problem-label: "Problème", solution-label: "Solution",
-    rights: "Publié sous licence MIT.",
-    repro: "Ce manuel et le logiciel qu'il décrit sont libres : vous pouvez les utiliser, les copier, les modifier et les redistribuer, y compris à des fins commerciales, aux conditions de la licence MIT, reproduite intégralement dans le fichier LICENSE du code source. La seule obligation est de conserver la mention de copyright et le texte de la licence.",
-    trademark: "Runtime TelegramBot Desktop · Titan Edition est un logiciel original. Telegram, YouTube et les autres marques citées appartiennent à leurs propriétaires respectifs.",
-    credits: "Logiciel conçu et dirigé par SIMONE PIZZI, qui en a défini chaque comportement. La majeure partie du code a été écrite avec des modèles de langage (Google Gemini, Anthropic Claude) ; ce manuel est né de la même méthode et a été relu ligne à ligne. Production Ecosystem Runtime. Composé avec Typst ; titres en Sora, texte en Inter, code en Source Code Pro.",
-  ),
-  de: (
-    typst-lang: "de",
-    manual-title: "Erweitertes Benutzerhandbuch",
-    toc-title: "Inhaltsverzeichnis",
-    tagline: "AUTOMATISCHE RSS-ZU-TELEGRAM-VERÖFFENTLICHUNG",
-    aligned-to: "Abgestimmt auf Version",
-    version-word: "Version",
-    language-name: "Deutsch",
-    edition-name: "Zweite Auflage",
-    production-word: "Produktion",
-    chapter-prefix: "Kapitel ", chapter-suffix: "",
-    note-label: "Hinweis", tip-label: "Tipp", warning-label: "⚠ Achtung",
-    rule-label: "Faustregel", problem-label: "Problem", solution-label: "Lösung",
-    rights: "Veröffentlicht unter der MIT-Lizenz.",
-    repro: "Dieses Handbuch und die darin beschriebene Software sind frei: Sie dürfen sie verwenden, kopieren, verändern und weitergeben, auch zu kommerziellen Zwecken, zu den Bedingungen der MIT-Lizenz, die vollständig in der Datei LICENSE des Quellcodes wiedergegeben ist. Die einzige Auflage ist, den Copyright-Hinweis und den Lizenztext beizubehalten.",
-    trademark: "Runtime TelegramBot Desktop · Titan Edition ist eine eigenständige Software. Telegram, YouTube und die übrigen genannten Marken gehören ihren jeweiligen Eigentümern.",
-    credits: "Software konzipiert und geleitet von SIMONE PIZZI; jedes Verhalten wurde einzeln festgelegt. Der Großteil des Codes wurde mit Sprachmodellen geschrieben (Google Gemini, Anthropic Claude); dieses Handbuch entstand nach derselben Methode und wurde Zeile für Zeile geprüft. Produktion Ecosystem Runtime. Gesetzt mit Typst; Überschriften in Sora, Text in Inter, Code in Source Code Pro.",
-  ),
-  es: (
-    typst-lang: "es",
-    manual-title: "Manual de Usuario Avanzado",
-    toc-title: "Índice",
-    tagline: "PUBLICACIÓN AUTOMÁTICA DE RSS A TELEGRAM",
-    aligned-to: "Alineado con la versión",
-    version-word: "Versión",
-    language-name: "Español",
-    edition-name: "Segunda Edición",
-    production-word: "Producción",
-    chapter-prefix: "Capítulo ", chapter-suffix: "",
-    note-label: "Nota", tip-label: "Sugerencia", warning-label: "⚠ Atención",
-    rule-label: "Regla de oro", problem-label: "Problema", solution-label: "Solución",
-    rights: "Publicado bajo licencia MIT.",
-    repro: "Este manual y el software que describe son libres: puedes usarlos, copiarlos, modificarlos y redistribuirlos, también con fines comerciales, en las condiciones de la licencia MIT, reproducida íntegramente en el archivo LICENSE del código fuente. La única obligación es conservar el aviso de copyright y el texto de la licencia.",
-    trademark: "Runtime TelegramBot Desktop · Titan Edition es un software original. Telegram, YouTube y las demás marcas citadas pertenecen a sus respectivos propietarios.",
-    credits: "Software ideado y dirigido por SIMONE PIZZI, que definió cada uno de sus comportamientos. La mayor parte del código se escribió con modelos de lenguaje (Google Gemini, Anthropic Claude); este manual nació del mismo método y se releyó línea por línea. Producción Ecosystem Runtime. Compuesto con Typst; títulos en Sora, texto en Inter, código en Source Code Pro.",
-  ),
-  pt: (
-    typst-lang: "pt",
-    manual-title: "Manual do Utilizador Avançado",
-    toc-title: "Índice",
-    tagline: "PUBLICAÇÃO AUTOMÁTICA DE RSS PARA TELEGRAM",
-    aligned-to: "Alinhado com a versão",
-    version-word: "Versão",
-    language-name: "Português",
-    edition-name: "Segunda Edição",
-    production-word: "Produção",
-    chapter-prefix: "Capítulo ", chapter-suffix: "",
-    note-label: "Nota", tip-label: "Dica", warning-label: "⚠ Atenção",
-    rule-label: "Regra de ouro", problem-label: "Problema", solution-label: "Solução",
-    rights: "Publicado sob a licença MIT.",
-    repro: "Este manual e o software que descreve são livres: pode utilizá-los, copiá-los, modificá-los e redistribuí-los, inclusive para fins comerciais, nas condições da licença MIT, reproduzida integralmente no ficheiro LICENSE do código-fonte. A única obrigação é conservar o aviso de copyright e o texto da licença.",
-    trademark: "Runtime TelegramBot Desktop · Titan Edition é um software original. Telegram, YouTube e as restantes marcas citadas pertencem aos respetivos proprietários.",
-    credits: "Software concebido e dirigido por SIMONE PIZZI, que definiu cada um dos seus comportamentos. A maior parte do código foi escrita com modelos de linguagem (Google Gemini, Anthropic Claude); este manual nasceu do mesmo método e foi relido linha a linha. Produção Ecosystem Runtime. Composto com Typst; títulos em Sora, texto em Inter, código em Source Code Pro.",
-  ),
-  ru: (
-    typst-lang: "ru",
-    manual-title: "Расширенное руководство пользователя",
-    toc-title: "Содержание",
-    tagline: "АВТОМАТИЧЕСКАЯ ПУБЛИКАЦИЯ ИЗ RSS В TELEGRAM",
-    aligned-to: "Соответствует версии",
-    version-word: "Версия",
-    language-name: "Русский",
-    edition-name: "Второе издание",
-    production-word: "Производство",
-    chapter-prefix: "Глава ", chapter-suffix: "",
-    note-label: "Примечание", tip-label: "Совет", warning-label: "⚠ Внимание",
-    rule-label: "Золотое правило", problem-label: "Проблема", solution-label: "Решение",
-    rights: "Опубликовано под лицензией MIT.",
-    repro: "Это руководство и описанная в нём программа свободны: их можно использовать, копировать, изменять и распространять, в том числе в коммерческих целях, на условиях лицензии MIT, полный текст которой приведён в файле LICENSE исходного кода. Единственное обязательство — сохранять уведомление об авторских правах и текст лицензии.",
-    trademark: "Runtime TelegramBot Desktop · Titan Edition — оригинальное программное обеспечение. Telegram, YouTube и другие упомянутые товарные знаки принадлежат их владельцам.",
-    credits: "Замысел и руководство проектом — SIMONE PIZZI: каждое поведение программы определено вручную. Большая часть кода написана с помощью языковых моделей (Google Gemini, Anthropic Claude); это руководство создано тем же способом и вычитано строка за строкой. Производство Ecosystem Runtime. Свёрстано в Typst; заголовки — Sora, текст — Inter, код — Source Code Pro.",
-  ),
-  zh: (
-    typst-lang: "zh",
-    manual-title: "高级用户手册",
-    toc-title: "目录",
-    tagline: "从 RSS 到 TELEGRAM 的自动发布",
-    aligned-to: "对应版本",
-    version-word: "版本",
-    language-name: "简体中文",
-    edition-name: "第二版",
-    production-word: "制作",
-    chapter-prefix: "第 ", chapter-suffix: " 章",
-    note-label: "注意", tip-label: "提示", warning-label: "⚠ 警告",
-    rule-label: "黄金法则", problem-label: "问题", solution-label: "解决方法",
-    rights: "依据 MIT 许可证发布。",
-    repro: "本手册及其所述软件均为自由软件：您可以使用、复制、修改并再分发，包括用于商业用途，条件是遵守 MIT 许可证，其完整文本见源代码中的 LICENSE 文件。唯一的义务是保留版权声明与许可证文本。",
-    trademark: "Runtime TelegramBot Desktop · Titan Edition 是一款原创软件。Telegram、YouTube 及文中提及的其他商标均归各自所有者所有。",
-    credits: "软件由 SIMONE PIZZI 构思并主导，每一项行为均经逐一设定。大部分代码借助语言模型编写（Google Gemini、Anthropic Claude）；本手册以同样的方法撰写，并逐行校订。制作 Ecosystem Runtime。使用 Typst 排版；标题 Sora，正文 Inter，代码 Source Code Pro。",
   ),
 )
 

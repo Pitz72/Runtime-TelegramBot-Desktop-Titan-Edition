@@ -1,15 +1,10 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import en from './en.json';
 import it from './it.json';
-import fr from './fr.json';
-import de from './de.json';
-import es from './es.json';
-import pt from './pt.json';
-import ru from './ru.json';
-import zh from './zh.json';
 
+// Le lingue del progetto sono due: l'italiano è la sorgente, l'inglese la traduzione.
 const translations = {
-    en, it, fr, de, es, pt, ru, zh
+    en, it
 };
 
 export type Language = keyof typeof translations;
@@ -26,10 +21,15 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     const [locale, setLocaleState] = useState<Language>('it');
 
     useEffect(() => {
-        // Carica lingua salvata all'avvio
+        // Carica lingua salvata all'avvio.
         const saved = localStorage.getItem('titan-lang') as Language;
-        if (saved && Object.keys(translations).includes(saved)) {
+        if (!saved) return;
+        if (Object.keys(translations).includes(saved)) {
             setLocaleState(saved);
+        } else {
+            // Lingua rimossa dalla 2.1.8 (fr, de, es, pt, ru, zh): chi la usava viene
+            // portato in inglese, non in italiano, e la preferenza morta viene riscritta.
+            setLocale('en');
         }
     }, []);
 
@@ -52,7 +52,7 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
         const keys = path.split('.');
 
         // 1) lingua attiva → 2) fallback inglese (evita di mostrare chiavi grezze quando una
-        // traduzione non è ancora stata portata in tutte le 8 lingue) → 3) la chiave stessa.
+        // traduzione non è ancora stata portata in entrambe le lingue) → 3) la chiave stessa.
         const local = resolve(translations[locale], keys);
         if (typeof local === 'string') return local;
 

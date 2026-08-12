@@ -12,9 +12,9 @@ Indice della documentazione del progetto.
 
 | | |
 | :--- | :--- |
-| [Manuale Utente Avanzato](../Manuale%20Utente%20Avanzato/) | 9 capitoli in 8 lingue, con i PDF impaginati in `typst/`. Documento completo e definitivo. |
-| [Guide rapide](guide/) | Guida di avvio rapido e file «leggimi» in 8 lingue, distribuiti insieme agli installer. |
-| [Guide in-app](../src/renderer/src/assets/guides/) | La guida consultabile dentro l'applicazione, in 8 lingue. Documento più breve delle quick-start. |
+| [Manuale Utente Avanzato](../Manuale%20Utente%20Avanzato/) | 9 capitoli in italiano e inglese, con i PDF impaginati in `typst/`. Documento completo e definitivo. |
+| [Guide rapide](guide/) | Guida di avvio rapido e file «leggimi» in italiano e inglese, distribuiti insieme agli installer. |
+| [Guide in-app](../src/renderer/src/assets/guides/) | La guida consultabile dentro l'applicazione, in italiano e inglese. Documento più breve delle quick-start. |
 
 ## Per chi lavora sul codice
 

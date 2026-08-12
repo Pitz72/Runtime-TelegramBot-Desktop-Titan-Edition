@@ -3,7 +3,7 @@
 Nella stessa finestra dell'ingranaggio (⚙️) in alto a destra, quella che ospita anche il Backup visto nel Capitolo 7, ci sono due preferenze valide per tutta l'applicazione (non per il singolo bot): la lingua e l'aspetto grafico. Le trovi nelle schede **Generale** e **Performance**.
 
 ### 8.1 Lingua dell'interfaccia
-Nella scheda **Generale** scegli la lingua di Titan tra otto disponibili: italiano, inglese, francese, tedesco, spagnolo, portoghese, russo e cinese. Basta cliccare la bandierina corrispondente e l'interfaccia cambia subito.
+Nella scheda **Generale** scegli la lingua di Titan: italiano o inglese. Basta cliccare la bandierina corrispondente e l'interfaccia cambia subito.
 
 Nella stessa scheda trovi il pulsante **Verifica aggiornamenti**, che forza subito il controllo di una nuova versione senza aspettare quello automatico (Capitolo 2). La versione installata è sempre indicata, con un contrassegno quando è disponibile un aggiornamento.
 

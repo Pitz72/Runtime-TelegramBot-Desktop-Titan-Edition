@@ -23,12 +23,6 @@ $manRoot = Split-Path $root -Parent
 $FileNames = @{
   it = "Manuale-Utente-Avanzato-Titan-IT.pdf"
   en = "Titan-Advanced-User-Manual-EN.pdf"
-  fr = "Titan-Manuel-Utilisateur-FR.pdf"
-  de = "Titan-Benutzerhandbuch-DE.pdf"
-  es = "Titan-Manual-de-Usuario-ES.pdf"
-  pt = "Titan-Manual-do-Utilizador-PT.pdf"
-  ru = "Titan-Rukovodstvo-Polzovatelya-RU.pdf"
-  zh = "Titan-Yonghu-Shouce-ZH.pdf"
 }
 
 function Build-One([string]$L) {
@@ -48,7 +42,7 @@ function Build-One([string]$L) {
 
 if ($All) {
   # Compila ogni lingua che ha una cartella sorgente non vuota.
-  foreach ($L in @('it','en','fr','de','es','pt','ru','zh')) {
+  foreach ($L in @('it','en')) {
     $dir = Join-Path $manRoot $L
     if ((Test-Path $dir) -and (Get-ChildItem $dir -Filter '*.md' -ErrorAction SilentlyContinue)) {
       Build-One $L | Out-Null

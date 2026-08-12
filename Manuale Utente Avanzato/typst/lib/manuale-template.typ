@@ -31,13 +31,11 @@
 #let brandGrad-h = gradient.linear(c.cyan, c.blue, c.indigo, angle: 0deg)
 
 // --- FONT ---------------------------------------------------------------------
-// La coda "Microsoft YaHei" copre i glifi cinesi (edizione zh); Inter/Segoe UI
-// coprono il cirillico (edizione ru). Sora non ha cirillico/CJK: i titoli in
-// quelle lingue ripiegano sui font successivi della catena.
-#let cjk = ("Microsoft YaHei", "Microsoft YaHei UI", "SimSun")
-#let font-display = ("Sora", "Segoe UI", "Arial", ..cjk)
-#let font-body    = ("Inter", "Segoe UI", "Arial", ..cjk)
-#let font-mono    = ("Source Code Pro", "Consolas", ..cjk)
+// Italiano e inglese sono coperti da Sora, Inter e Source Code Pro, che stanno in
+// fonts/. Segoe UI e Arial restano come rete di sicurezza per i glifi rari.
+#let font-display = ("Sora", "Segoe UI", "Arial")
+#let font-body    = ("Inter", "Segoe UI", "Arial")
+#let font-mono    = ("Source Code Pro", "Consolas")
 
 #let _capnum = counter("titan-capitolo")
 

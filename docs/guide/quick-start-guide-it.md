@@ -112,7 +112,7 @@ Per spostare un bot su un altro computer senza perdere la configurazione:
 
 Gran parte del codice è stata scritta con modelli linguistici (Google Gemini, Anthropic Claude). Concezione, direzione progettuale e verifica sono di Simone Pizzi.
 
-Per la trattazione completa consulta il **Manuale Utente Avanzato** in PDF, disponibile in otto lingue.
+Per la trattazione completa consulta il **Manuale Utente Avanzato** in PDF, disponibile in italiano e in inglese.
 
 Contatti: simonepizzi.runtimeradio.it/contatti
 Donazione libera: paypal.me/runtimeradio

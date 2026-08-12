@@ -2,7 +2,9 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** in corso — **Fase 1 chiusa e pushata**, **Fase 2 eseguita con una riserva e due voci aperte** (12/08). Prossimo passo: sciogliere la riserva sulla Fase 2 (revisione della prosa nuova + gli 8 leggimi), poi le decisioni aperte che sbloccano la Fase 3. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** in corso — **Fase 1 chiusa e pushata** (12/08), **Fase 2 eseguita con una riserva** (12/08), **Fase 2-bis eseguita** (13/08). Prossimo passo: revisionare la prosa nuova rimasta, che ora è solo italiana e inglese, riscrivere i 2 «leggimi» ancora commerciali e ricompilare i 2 PDF; poi le decisioni aperte che sbloccano la Fase 3. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+
+> **Una fase per sessione.** Regola dell'utente, 13/08: ogni fase si esegue in una sola sessione, e se ne serve più d'una va bene. Due fasi nella stessa sessione, no.
 
 > **Come si legge.** Le fasi sono in ordine di dipendenza, non di importanza: invertirle rompe qualcosa. Le voci marcate ⛔ sono blocchi veri — se le salti, un utente reale ne subisce le conseguenze.
 
@@ -27,7 +29,7 @@
 
 - [ ] **Come spostare la repo su `Pitz72`**: trasferimento nativo GitHub (preserva storia, tag, issue, stelle e lascia un redirect) oppure repo nuova con push della storia (perde redirect, issue e stelle). *Serve prima della Fase 4.*
 - [ ] **Nome della repo di destinazione**: mantenere `Runtime-TelegramBot-Desktop-Titan-Edition` o accorciarlo. Se cambia, cambiano tutti i link nella documentazione e in `docs.ts`.
-- [ ] **Dove vivono gli 8 manuali PDF** dopo la migrazione: committati nella repo (come oggi sulla ponte) oppure come allegati di una release. Incide sul peso del repository.
+- [ ] **Dove vivono i 2 manuali PDF** dopo la migrazione: committati nella repo (come oggi sulla ponte) oppure come allegati di una release. Incide sul peso del repository.
 - [ ] **Quanto tempo lasciare alla finestra di migrazione** prima di cancellare la ponte.
 - [ ] **Se pubblicare una v2.1.8 anche sulla ponte** con i soli fix, o aspettare di avere anche i manuali rifatti e fare una sola release.
 
@@ -98,7 +100,7 @@ Il colophon conteneva l'EULA: tutti e 8 i PDF pubblicati dicevano «Tutti i diri
 - [x] Verifica a video di copertina, frontespizio e colophon per tutte e 8 le lingue, più una pagina con vignetta. Il nome più lungo entra ovunque
 - **Peso: 258 → 72,4 MB** (9,0 MB a lingua, 9,4 per il cinese)
 
-⚠️ **Gli 8 PDF ricompilati NON sono stati committati**, di proposito: andranno rifatti dopo la revisione della prosa, e committarli due volte lascerebbe 144 MB nella storia di una repo che sta per diventare pubblica. In `HEAD` restano quindi i **vecchi** PDF da 32 MB, con il colophon EULA. Si rigenerano in qualsiasi momento con `pwsh typst/build.ps1 -All`. **Vanno committati una volta sola, alla fine**, e la decisione aperta «PDF nel repo o allegati di release» va sciolta prima. I sorgenti (vignette ricampionate incluse) sono invece committati.
+⚠️ **Gli 8 PDF ricompilati NON sono stati committati**, di proposito: andranno rifatti dopo la revisione della prosa, e committarli due volte lascerebbe 144 MB nella storia di una repo che sta per diventare pubblica. In `HEAD` restano quindi i **vecchi** PDF da 32 MB, con il colophon EULA. Si rigenerano in qualsiasi momento con `pwsh typst/build.ps1 -All` (che dalla Fase 2-bis produce 2 PDF, non 8). **Vanno committati una volta sola, alla fine**, e la decisione aperta «PDF nel repo o allegati di release» va sciolta prima. I sorgenti (vignette ricampionate incluse) sono invece committati.
 
 #### Difetti tipografici visti e non corretti
 
@@ -108,20 +110,59 @@ Il colophon conteneva l'EULA: tutti e 8 i PDF pubblicati dicevano «Tutti i diri
 
 ---
 
+## FASE 2-BIS — Da otto lingue a due ✅ ESEGUITA IL 13/08
+
+**Decisione dell'utente del 13 agosto 2026: il progetto è in italiano e inglese e basta.** L'italiano è la sorgente, l'inglese la traduzione. Francese, tedesco, spagnolo, portoghese, russo e cinese escono dal software, dalla documentazione e dai manuali.
+
+Questa fase **scioglie la riserva della Fase 2**: la prosa nuova non revisionata stava in sei lingue che nessuno nel progetto può rileggere. Ritirandole, l'unica prosa nuova da revisionare è quella italiana e inglese, che è verificabile.
+
+**Cancellati**
+- [x] `Manuale Utente Avanzato/{fr,de,es,pt,ru,zh}/` — 54 capitoli
+- [x] I 6 PDF corrispondenti in `typst/`
+- [x] `src/renderer/src/locales/{fr,de,es,pt,ru,zh}.json`
+- [x] `src/renderer/src/assets/guides/guide-{fr,de,es,pt,ru,zh}.md`
+- [x] `docs/guide/quick-start-guide-{fr,de,es,pt,ru,zh}.md` e i 6 «leggimi» `.txt`
+
+**Codice**
+- [x] `I18nContext.tsx` — due sole traduzioni. Chi aveva salvato una lingua ritirata viene portato **in inglese**, non in italiano, e la preferenza morta viene riscritta
+- [x] `IntroScreen.tsx` — `flagsList` a due voci; `ui/Flags.tsx` — via i 6 componenti bandiera inutilizzati
+- [x] `lib/docs.ts` — `GUIDES` e `MANUAL_FILES` a due voci
+- [x] `lib/releaseNotes.ts` — via i blocchi delle 6 lingue da `2.1.6` e `2.1.7`: `Record<Language, …>` non compilava più
+- [x] `ErrorBoundary.tsx` — il dizionario d'emergenza scende a due voci
+- [x] `scripts/check-locales.mjs` — `LANGS = ['it','en']`
+
+**Manuale (toolchain Typst)**
+- [x] `lib/strings.typ` — da 8 blocchi a 2 (161 → 53 righe)
+- [x] `build.ps1` — `$FileNames` e il ciclo `-All` a due lingue
+- [x] `build-typst.py` — via l'hack delle virgolette tedesche e le etichette dei callout nelle 6 lingue
+- [x] `lib/manuale-template.typ` — via la catena di font CJK, che serviva solo all'edizione cinese
+
+**Documentazione**
+- [x] `README.md` (badge, sezione «Lingue», albero, tabella), `CONTRIBUTING.md` (sezione «Traduzioni» riscritta, nuove lingue messe fuori perimetro), `docs/README.md`, `CHANGELOG.md`
+- [x] Le quattro frasi nei manuali IT/EN che dicevano «otto bandiere» / «tra otto disponibili», le due nelle guide rapide e le due nei «leggimi»
+
+**Non toccati di proposito:** `docs/changelogs/` e `docs/storico/`. Sono archivi: registrano che *all'epoca* le lingue erano otto, ed è vero. Riscriverli sarebbe falsificare la storia del progetto.
+
+**Verifiche** — `npx tsc --noEmit`, `npx vite build`, `node scripts/check-locales.mjs` (237 chiavi × 2) e `pwsh typst/build.ps1 -All` passano tutti puliti. I due PDF sono stati ricompilati: 33 pagine, 9,4 MB ciascuno, colophon MIT, versione 2.1.8, nessuna formula di riserva dei diritti.
+
+⚠️ **I 2 PDF restano NON committati**, coerentemente con la Fase 2: si committano una volta sola, alla fine, dopo la revisione della prosa e dopo aver sciolto la decisione «PDF nel repo o allegati di release». In `HEAD` restano quindi i **vecchi** IT/EN da 32 MB col colophon EULA.
+
+---
+
 ## FASE 3 — La build 2.1.8, che fa da traghetto
 
 ⛔ **Va costruita solo dopo che la repo di destinazione esiste** (Fase 4.1–4.2), perché il suo `app-update.yml` viene generato dalla configurazione di publish e deve già puntare alla destinazione nuova.
 
 - [ ] `electron-builder.yml` → `publish` verso la repo nuova
 - [ ] ⛔ **`src/renderer/src/lib/docs.ts` — `MANUAL_BASE`** oggi è un URL fisso alla ponte. Se non lo sposti, il pulsante «Scarica manuale» si rompe anche per chi *ha* aggiornato, nel momento in cui cancelli la ponte
-- [ ] ⛔ Gli 8 PDF caricati nella nuova posizione **prima** che la 2.1.8 esca, altrimenti il punto sopra punta nel vuoto
+- [ ] ⛔ I 2 PDF (IT, EN) caricati nella nuova posizione **prima** che la 2.1.8 esca, altrimenti il punto sopra punta nel vuoto
 - [ ] `package.json` — `homepage`, `repository`, `bugs` verso la destinazione nuova
 - [ ] `src/renderer/src/lib/links.ts` — `SOURCE_URL` aggiornato
 - [ ] Tutti i link nella documentazione che puntano a `Ecosystem-Runtime`
 - [ ] `version` a `2.1.8` in `package.json`
 - [ ] ⛔ **Entry `2.1.8` in `src/renderer/src/lib/releaseNotes.ts`** — se manca, la schermata «Novità» mostra il testo generico invece dell'elenco
 - [ ] `CHANGELOG.md` — la sezione «Non ancora rilasciato» diventa `v2.1.8`, più `docs/changelogs/CHANGELOG_v2.1.8.md`. **Da citare fra le novità: il campo della data ora si chiama «Data di Partenza» anche nelle impostazioni del bot** (prima era «Data di Filtro (Cutoff)»); è una stringa visibile che cambia sotto agli occhi degli utenti esistenti
-- [ ] I manuali sono già compilati alla versione **2.1.8**: se la versione che si rilascia cambia, `typst/manuale.typ` va aggiornato e gli 8 PDF ricompilati
+- [ ] I manuali sono già impostati sulla versione **2.1.8**: se la versione che si rilascia cambia, `typst/manuale.typ` va aggiornato. In ogni caso i 2 PDF vanno ricompilati, perché `strings.typ` è cambiato con la Fase 2-bis
 - [ ] Build e **pubblicazione sulla vecchia repo ponte** (serve il secret `RELEASE_TOKEN` riconfigurato sulla repo nuova): è lì che le installazioni esistenti vanno a cercare l'aggiornamento
 
 ---

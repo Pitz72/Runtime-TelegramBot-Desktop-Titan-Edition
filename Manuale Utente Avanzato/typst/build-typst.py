@@ -18,23 +18,21 @@ IMPORT = '#import "../lib/manuale-template.typ": *\n\n'
 # Etichette dei callout imposte per lingua (paragrafo che inizia con
 # #emph[Etichetta.]) -> tipo di box. Una parola/locuzione fissa per riquadro,
 # per lingua, così il riconoscimento è certo (stesso principio di RRLMP).
+# Le lingue sono due: italiano e inglese. Fino alla 2.1.7 l'elenco copriva anche
+# francese, tedesco, spagnolo, portoghese, russo e cinese.
 _CALLOUT = {
     "suggerimento": {  # TIP
-        "suggerimento", "consiglio", "tip", "conseil", "tipp",
-        "sugerencia", "consejo", "dica", "sugestão", "совет", "建议", "提示",
+        "suggerimento", "consiglio", "tip",
     },
     "regola": {        # GOLDEN RULE
         "regola d'oro", "regola d’oro", "regola aurea",
         "golden rule", "rule of thumb",
-        "règle d'or", "règle d’or", "faustregel", "goldene regel",
-        "regla de oro", "regra de ouro", "золотое правило", "黄金法则", "黄金准则",
     },
     "attenzione": {    # WARNING
-        "attenzione", "avvertenza", "warning", "caution", "attention",
-        "achtung", "atención", "atenção", "внимание", "警告", "注意事项",
+        "attenzione", "avvertenza", "warning", "caution",
     },
     "nota": {          # NOTE
-        "nota", "note", "hinweis", "примечание", "注",
+        "nota", "note",
         "nota linux", "nota tecnica",  # varianti già usate nel sorgente IT
     },
 }
@@ -101,16 +99,6 @@ def transform_blocks(text, troubleshoot):
     return "\n\n".join(out)
 
 def post_typ(t, troubleshoot):
-    # 0. Virgolette tedesche: il writer typst di pandoc rende le doppie come
-    #    „ (U+201E, apertura) + " dritta (U+0022, chiusura). Quella " dritta, sola
-    #    davanti a Typst con lang=de, viene ricurvata come *apertura* (→ „ bassa),
-    #    producendo una chiusura errata. Sostituiamo la chiusura dritta con la
-    #    " letterale (U+201C): non essendo ASCII, lo smartquote di Typst la lascia
-    #    intatta e la resa è corretta „…". `[^"]` si ferma alla prima chiusura,
-    #    quindi non tocca le " dritte del codice (path immagini, link), che non
-    #    sono mai precedute da „.
-    if LANG == "de":
-        t = re.sub(r'„([^"]+?)"', '„\\1“', t)
     # 1. via gli anchor dei titoli (<slug>) e i separatori decorativi (---)
     t = "\n".join(ln for ln in t.splitlines()
                   if ln.strip() != "#horizontalrule"

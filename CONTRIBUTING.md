@@ -88,19 +88,20 @@ Il tentativo di portare la CI a Node 24 ha rotto la build Windows: `better-sqlit
 - non riordinare né rinumerare i blocchi esistenti — si aggiunge in coda;
 - le migrazioni legacy per-statement non sono transazionali: è una scelta consapevole, il safety check post-migrazione è la rete.
 
-### Traduzioni: tutte e otto o nessuna
+### Traduzioni: due lingue, entrambe o nessuna
 
-Le lingue supportate sono **8** (it, en, fr, de, es, pt, ru, zh) e i file in `src/renderer/src/locales/` devono avere **le stesse identiche chiavi**. `I18nContext` fa fallback sull'inglese per le chiavi mancanti, quindi una dimenticanza non rompe l'interfaccia — la lascia semplicemente in inglese, in silenzio, e passa inosservata a lungo.
+Le lingue del progetto sono **due**: l'italiano è la sorgente, l'inglese la traduzione. I due file in `src/renderer/src/locales/` devono avere **le stesse identiche chiavi**. `I18nContext` fa fallback sull'inglese per le chiavi mancanti, quindi una dimenticanza non rompe l'interfaccia — la lascia semplicemente nell'altra lingua, in silenzio, e passa inosservata a lungo.
+
+Fino alla 2.1.7 le lingue erano otto. Francese, tedesco, spagnolo, portoghese, russo e cinese sono state ritirate con la 2.1.8, insieme ai rispettivi manuali e guide. **Le pull request che le reintroducono non vengono accettate**: la ragione non è tecnica ma di manutenzione — sei lingue che nessuno può rileggere sono sei modi di pubblicare testo sbagliato senza accorgersene.
 
 Convenzioni consolidate, da rispettare:
-- **pt** è portoghese europeo (pt-PT): *ficheiro*, *aplicação*, *ecrã*, *guardar*, *definições*, *transferir*.
 - **en** è inglese britannico.
-- La terminologia dell'interfaccia è allineata ai manuali: il campo data si chiama «Data di Filtro (Cutoff)» nelle impostazioni bot e «Data di Inizio» nel wizard iniziale — sono due cose diverse e non vanno uniformate.
+- La terminologia dell'interfaccia è allineata ai manuali: il campo data si chiama **«Data di Partenza»** sia nelle impostazioni bot (`botModal.startDateLabel`) sia nel wizard iniziale (`setup.step4Label`). Erano due nomi diversi per la stessa cosa fino alla 2.1.8, che li ha unificati.
 
 Controllo di parità delle chiavi:
 
 ```bash
-node -e "const l=['it','en','fr','de','es','pt','ru','zh'].map(x=>[x,require('./src/renderer/src/locales/'+x+'.json')]);const f=(o,p='')=>Object.entries(o).flatMap(([k,v])=>typeof v==='object'?f(v,p+k+'.'):[p+k]);const base=f(l[0][1]);for(const [n,d] of l){const k=f(d);console.log(n,k.length,base.filter(x=>!k.includes(x)))}"
+node scripts/check-locales.mjs
 ```
 
 ---
@@ -136,7 +137,7 @@ Il modello è **producer-consumer**: `checkLoop()` scarica i feed e accoda i job
 - Correzioni di bug con una descrizione di come riprodurli.
 - Test: non esistono, e le funzioni pure ad alto rischio sono poche e ben identificate — `parseUtcTimestamp`, `isFeedDue`, `passesKeywordFilter`, `cleanSummary`, `validateFeedUrl`, `normalizeChannelId`, `validateTemplate`, il parser delle date YouTube.
 - Il parser delle date YouTube riconosce oggi solo inglese e italiano: estenderlo ad altre lingue è un contributo autocontenuto e di valore reale (se InnerTube risponde in un'altra lingua, i video smettono di essere pubblicati senza segnalare nulla).
-- Miglioramenti alle traduzioni da parte di madrelingua.
+- Miglioramenti alla traduzione inglese da parte di madrelingua.
 - Documentazione tecnica.
 
 **Da concordare prima in una issue**
@@ -145,6 +146,7 @@ Il modello è **producer-consumer**: `checkLoop()` scarica i feed e accoda i job
 - Cambi all'interfaccia: la grafica «Titan Blue» è una scelta autoriale, non un default in attesa di essere migliorato.
 
 **Fuori perimetro**
+- **Nuove lingue.** Il progetto è in italiano e inglese e ci resta: vedi «Traduzioni» qui sopra.
 - Migrazione a un altro framework (Tauri è stato valutato e scartato: il backend andrebbe riscritto in Rust e `youtubei.js` non ha equivalenti maturi).
 - **Installer ufficiali per macOS.** Il codice è cross-platform e su macOS compila e gira; quello che non c'è è la *distribuzione*, perché un `.dmg` senza avviso di Gatekeeper richiede un certificato Apple a pagamento che il progetto non ha motivo di mantenere. Chi usa macOS compila dal sorgente (servono Node 20 e Xcode Command Line Tools). Le pull request che aggiungono un target macOS alla CI non verranno accolte; quelle che correggono un bug che si manifesta *anche* su macOS, sì.
 - Telemetria, analytics, servizi cloud: l'applicazione funziona in locale e ci resta.
@@ -157,7 +159,7 @@ Il modello è **producer-consumer**: `checkLoop()` scarica i feed e accoda i job
 2. `npx tsc --noEmit` deve passare pulito.
 3. Descrivere **cosa** cambia e **perché**; se è un bugfix, come riprodurlo.
 4. Commenti e messaggi di commit in italiano o inglese, indifferentemente. I commenti nel codice spiegano il *perché* di una scelta, non il *cosa* fa la riga — è lo stile del progetto, e vale la pena mantenerlo.
-5. Le modifiche all'interfaccia vanno accompagnate dalle chiavi in tutte e 8 le lingue (l'inglese come minimo; il resto si può chiedere in issue).
+5. Le modifiche all'interfaccia vanno accompagnate dalle chiavi in italiano e in inglese, e `node scripts/check-locales.mjs` deve passare pulito.
 
 ## Sicurezza
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation, Language } from '../locales/I18nContext';
-import { FlagIT, FlagFR, FlagDE, FlagES, FlagPT, FlagRU, FlagCN, FlagGB } from './ui/Flags';
+import { FlagIT, FlagGB } from './ui/Flags';
 import { ChevronRight, Loader2, Sparkles, BookOpen, Download, Heart } from 'lucide-react';
 import logo from '../assets/logo.png';
 import type { UpdateStatus } from '../hooks/useUpdater';
@@ -18,13 +18,7 @@ interface Props {
 
 export const flagsList: { id: Language; label: string; component: React.FC<{ className?: string }> }[] = [
     { id: 'en', label: 'English', component: FlagGB },
-    { id: 'it', label: 'Italiano', component: FlagIT },
-    { id: 'fr', label: 'Français', component: FlagFR },
-    { id: 'de', label: 'Deutsch', component: FlagDE },
-    { id: 'es', label: 'Español', component: FlagES },
-    { id: 'pt', label: 'Português', component: FlagPT },
-    { id: 'ru', label: 'Русский', component: FlagRU },
-    { id: 'zh', label: '中文', component: FlagCN }
+    { id: 'it', label: 'Italiano', component: FlagIT }
 ];
 
 export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, currentVersion }: Props) {

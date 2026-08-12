@@ -10,7 +10,7 @@
   ![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)
   ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20Linux-emerald?style=for-the-badge)
   ![Stack](https://img.shields.io/badge/Stack-Electron%20%7C%20React%20%7C%20SQLite-475569?style=for-the-badge)
-  ![Lang](https://img.shields.io/badge/Languages-8%20Supported-purple?style=for-the-badge)
+  ![Lang](https://img.shields.io/badge/Languages-IT%20%7C%20EN-purple?style=for-the-badge)
 </div>
 
 ---
@@ -48,7 +48,9 @@ Nasce nel 2025 come script Python da terminale per i canali di [Runtime Radio](h
 - **Documentazione integrata** — guida rapida a schermo nella lingua corrente e manuale completo in PDF.
 
 ### Lingue
-🇮🇹 Italiano · 🇬🇧 English · 🇫🇷 Français · 🇩🇪 Deutsch · 🇪🇸 Español · 🇵🇹 Português · 🇷🇺 Русский · 🇨🇳 中文
+🇮🇹 Italiano · 🇬🇧 English
+
+L'italiano è la lingua sorgente: interfaccia, guide e manuale nascono lì e vengono poi portati in inglese. Fino alla 2.1.7 le lingue erano otto; francese, tedesco, spagnolo, portoghese, russo e cinese sono state ritirate con la 2.1.8.
 
 ---
 
@@ -107,7 +109,7 @@ npm run build       # build completa + installer
 ├── docs/                     # documentazione tecnica, guide, changelog
 │   ├── storico/              # materiale d'epoca, non più aggiornato
 │   └── idee/                 # progetti analizzati e mai realizzati
-├── Manuale Utente Avanzato/  # manuale in 8 lingue + sorgenti Typst
+├── Manuale Utente Avanzato/  # manuale in italiano e inglese + sorgenti Typst
 ├── branding/                 # banner e asset grafici
 ├── build/  ·  resources/     # icone e risorse di packaging
 └── .github/workflows/        # CI
@@ -125,7 +127,7 @@ npm run build       # build completa + installer
 | [docs/architettura.md](docs/architettura.md) | Whitepaper architetturale |
 | [docs/database.md](docs/database.md) | Schema SQLite e migrazioni |
 | [CHANGELOG.md](CHANGELOG.md) | Storia delle versioni |
-| [Manuale Utente Avanzato](Manuale%20Utente%20Avanzato/) | Manuale completo, 8 lingue |
+| [Manuale Utente Avanzato](Manuale%20Utente%20Avanzato/) | Manuale completo, italiano e inglese |
 
 ---
 

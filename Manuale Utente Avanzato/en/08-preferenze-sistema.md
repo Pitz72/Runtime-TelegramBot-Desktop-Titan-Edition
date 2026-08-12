@@ -3,7 +3,7 @@
 In the same gear window (⚙️) at the top right, the one that also hosts the Backup seen in Chapter 7, there are two preferences that apply to the whole application (not to the individual bot): the language and the graphical look. You will find them in the **General** and **Performance** tabs.
 
 ### 8.1 Interface language
-In the **General** tab you choose Titan's language among eight: Italian, English, French, German, Spanish, Portuguese, Russian and Chinese. Just click the matching flag and the interface changes at once.
+In the **General** tab you choose Titan's language: Italian or English. Just click the matching flag and the interface changes at once.
 
 A detail already met in Chapter 3: the log console stays in English whatever language you choose, so the technical messages remain a universal standard when you ask for support.
 

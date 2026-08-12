@@ -32,7 +32,7 @@ On the very first launch, after the animated boot sequence and the language choi
 Once the four steps are done, click **Launch Titan**: you will land in the main command console.
 
 ### 2.4 The welcome screen: language, guide and manual
-The screen with the eight flags is not just for the first run: it comes back at every start, and it is where you pick the interface language, which switches instantly. The **Launch Titan** button takes you in.
+The screen with the two flags is not just for the first run: it comes back at every start, and it is where you pick the interface language, which switches instantly. The **Launch Titan** button takes you in.
 
 Below that button there are three shortcuts:
 
