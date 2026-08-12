@@ -2,7 +2,6 @@
     "app": {
         "title": "Runtime TelegramBot Desktop",
         "edition": "Titan Edition",
-        "version": "v1.7.1",
         "copyright": "© 2026 Simone Pizzi"
     },
     "setup": {
@@ -107,7 +106,8 @@
         "exportBtn": "导出",
         "shareZone": "分享",
         "successExport": "配置文件导出成功",
-        "errorExport": "导出错误："
+        "errorExport": "导出错误：",
+        "errorSave": "无法保存设置："
     },
     "feedManager": {
         "title": "信息流来源",
@@ -251,6 +251,21 @@
         "msg": "Titan Edition v{{version}} 已发布！请前往门户下载更新。",
         "downloading": "正在下载更新 v{{version}}...",
         "ready": "v{{version}} 准备就绪 — 重启以安装",
-        "install": "重启并安装"
+        "install": "重启并安装",
+        "availableMsg": "Titan Edition 有新版本可用。现在下载吗？",
+        "currentLabel": "当前版本",
+        "newLabel": "新版本",
+        "download": "立即下载",
+        "later": "稍后",
+        "progress": "正在下载... {{percent}}%",
+        "downloadedTitle": "更新已就绪",
+        "downloadedMsg": "版本 v{{version}} 已下载完成。现在重启以安装吗？",
+        "checking": "正在检查更新...",
+        "upToDate": "已是最新版本",
+        "checkBtn": "检查更新",
+        "errorMsg": "无法检查更新",
+        "sectionTitle": "更新",
+        "sectionDesc": "手动检查 Titan Edition 是否有新版本可用。",
+        "newBadge": "有新版本 v{{version}} 可用"
     }
 }

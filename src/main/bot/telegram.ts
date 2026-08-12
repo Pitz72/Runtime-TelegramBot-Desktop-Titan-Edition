@@ -155,9 +155,26 @@ export class TelegramClient {
             .replace(/>/g, "&gt;");
     }
 
-    /** Escape URL per uso dentro attributi href — codifica solo & che non è già &amp; */
+    /**
+     * Rende un URL proveniente dal feed sicuro dentro un attributo href.
+     *
+     * Non basta codificare `&`: i template inseriscono il link in `href='{{link}}'` (apici
+     * singoli) e un URL contenente `'`, `"`, `<` o `>` uscirebbe dall'attributo, permettendo
+     * a chi controlla il feed di iniettare HTML nel messaggio pubblicato — in pratica di far
+     * comparire sul canale un link verso un dominio diverso da quello annunciato dal titolo.
+     * I caratteri strutturali vengono percent-encodati (sono URL, non testo), `&` resta
+     * `&amp;` perché il contesto è un attributo HTML.
+     * Gli URL con schema diverso da http/https vengono scartati del tutto.
+     */
     private escapeUrl(url: string): string {
-        return url.replace(/&(?!amp;)/g, '&amp;');
+        if (!/^https?:\/\//i.test(url.trim())) return '';
+        return url
+            .replace(/%(?![0-9A-Fa-f]{2})/g, '%25')
+            .replace(/'/g, '%27')
+            .replace(/"/g, '%22')
+            .replace(/</g, '%3C')
+            .replace(/>/g, '%3E')
+            .replace(/&(?!amp;)/g, '&amp;');
     }
 
     /** Sleep that can be interrupted by abort(). Returns true if aborted. */

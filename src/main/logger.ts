@@ -7,6 +7,20 @@ import { LogEntry, LogLevel } from '../shared/types';
 let _logId = 0;
 
 /**
+ * Rimuove i token dei bot Telegram da qualsiasi messaggio di log.
+ *
+ * Telegraf costruisce le chiamate come `https://api.telegram.org/bot<TOKEN>/sendMessage`:
+ * se l'URL finisce nel testo di un'eccezione di rete, il token arriverebbe nel file di log,
+ * nella console della Dashboard e nel log esportato — cioè in qualunque allegato di una
+ * segnalazione di bug. Il formato del token è `<8-10 cifre>:<35 caratteri>`.
+ */
+function redactTokens(message: string): string {
+    return message
+        .replace(/\b\d{8,10}:[A-Za-z0-9_-]{35}\b/g, '<TOKEN-REDACTED>')
+        .replace(/\/bot\d{8,10}:[A-Za-z0-9_-]+/g, '/bot<TOKEN-REDACTED>');
+}
+
+/**
  * Rileva il livello semantico di un messaggio dagli emoji/keyword — fix #23.
  * Ordine: error > warn > success > info.
  */
@@ -77,7 +91,7 @@ class Logger {
 
     public async log(message: string) {
         const timestamp = new Date().toLocaleTimeString();
-        const formattedMessage = `[${timestamp}] ${message}`;
+        const formattedMessage = `[${timestamp}] ${redactTokens(message)}`;
 
         // 1. Console log
         console.log(formattedMessage);

@@ -1,10 +1,50 @@
 
 import Parser from 'rss-parser';
 import crypto from 'crypto';
+import dns from 'node:dns';
+import { isIP } from 'node:net';
 import { RssItem } from './types';
 
 // --- Anti-SSRF URL Validation ---
 // Blocca schemi non HTTP/HTTPS e indirizzi di rete privata/loopback.
+
+/** True se l'indirizzo IP (v4 o v6) appartiene a una rete privata, loopback o link-local. */
+function isPrivateAddress(addr: string): boolean {
+    const a = addr.toLowerCase().replace(/^\[|\]$/g, '');
+
+    // IPv4 (anche in forma IPv4-mapped IPv6 ::ffff:127.0.0.1)
+    const v4 = a.startsWith('::ffff:') ? a.slice(7) : a;
+    if (isIP(v4) === 4) {
+        const [o1, o2] = v4.split('.').map(Number);
+        return (
+            o1 === 0 ||                             // 0.0.0.0/8
+            o1 === 10 ||                            // 10.0.0.0/8
+            o1 === 127 ||                           // loopback
+            (o1 === 100 && o2 >= 64 && o2 <= 127) || // CGNAT 100.64.0.0/10
+            (o1 === 169 && o2 === 254) ||           // link-local
+            (o1 === 172 && o2 >= 16 && o2 <= 31) || // 172.16.0.0/12
+            (o1 === 192 && o2 === 168) ||           // 192.168.0.0/16
+            o1 >= 224                               // multicast + riservati
+        );
+    }
+
+    if (isIP(a) === 6) {
+        return (
+            a === '::' || a === '::1' ||
+            /^f[cd]/.test(a) ||   // fc00::/7 unique-local
+            /^fe[89ab]/.test(a)   // fe80::/10 link-local
+        );
+    }
+
+    return false;
+}
+
+/**
+ * Validazione sincrona dell'URL di un feed: schema e forma dell'host.
+ * Copre anche le forme che il vecchio controllo testuale lasciava passare — IPv6 privati,
+ * IPv4 in forma decimale/ottale/esadecimale (es. http://2130706433/), IPv4-mapped IPv6,
+ * CGNAT e i domini `.local`/`.internal` delle reti domestiche e dei metadata server cloud.
+ */
 export function validateFeedUrl(url: string): void {
     let parsed: URL;
     try {
@@ -15,18 +55,60 @@ export function validateFeedUrl(url: string): void {
     if (!['http:', 'https:'].includes(parsed.protocol)) {
         throw new Error(`Protocollo non consentito: "${parsed.protocol}". Usare http:// o https://`);
     }
-    const h = parsed.hostname.toLowerCase();
-    if (
-        h === 'localhost' ||
-        h === '::1' ||
-        /^127\./.test(h) ||
-        /^0\.0\.0\.0/.test(h) ||
-        /^10\./.test(h) ||
-        /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h) ||
-        /^192\.168\./.test(h) ||
-        /^169\.254\./.test(h)  // link-local
-    ) {
+
+    const h = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+
+    if (h === 'localhost' || /\.(local|internal|localdomain|home\.arpa)$/.test(h)) {
         throw new Error(`Indirizzo di rete privata/locale non consentito: "${h}"`);
+    }
+
+    if (isIP(h) !== 0) {
+        if (isPrivateAddress(h)) {
+            throw new Error(`Indirizzo di rete privata/locale non consentito: "${h}"`);
+        }
+        return;
+    }
+
+    // IPv4 scritto in forma non puntata (decimale, ottale o esadecimale): new URL() lo
+    // lascia passare come "hostname" ma il resolver lo tratta come indirizzo numerico.
+    // Es. http://2130706433/ e http://0x7f000001/ sono entrambi 127.0.0.1.
+    if (/^(0x[0-9a-f]+|\d+)$/.test(h)) {
+        const n = h.startsWith('0x') ? parseInt(h, 16) : parseInt(h, 10);
+        if (Number.isFinite(n) && n <= 0xffffffff) {
+            const dotted = [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+            if (isPrivateAddress(dotted)) {
+                throw new Error(`Indirizzo di rete privata/locale non consentito: "${h}" (${dotted})`);
+            }
+        }
+    }
+}
+
+/**
+ * Secondo livello di difesa: risolve davvero il nome e rifiuta se punta a una rete privata.
+ *
+ * Il controllo testuale di validateFeedUrl non vede il caso in cui un dominio pubblico
+ * risolve a 127.0.0.1 o a un IP RFC-1918. Qui si guarda l'indirizzo effettivo.
+ * Se la risoluzione fallisce NON si blocca nulla: il fetch successivo produrrà comunque
+ * l'errore di rete corretto, e non vogliamo trasformare un DNS lento in un feed rotto.
+ *
+ * Limite noto e accettato: rss-parser segue i redirect e la destinazione di un 3xx non
+ * ripassa da qui. Bloccare i redirect romperebbe i molti feed legittimi che fanno
+ * http→https o passano da servizi di aggregazione.
+ */
+async function assertPublicHost(url: string): Promise<void> {
+    const host = new URL(url).hostname.replace(/^\[|\]$/g, '');
+    if (isIP(host) !== 0) return; // già validato in forma numerica da validateFeedUrl
+
+    let addresses: dns.LookupAddress[];
+    try {
+        addresses = await dns.promises.lookup(host, { all: true });
+    } catch {
+        return;
+    }
+
+    const priv = addresses.find(a => isPrivateAddress(a.address));
+    if (priv) {
+        throw new Error(`Il dominio "${host}" risolve a un indirizzo di rete privata (${priv.address}): richiesta bloccata.`);
     }
 }
 
@@ -130,6 +212,7 @@ function cleanSummary(html: string): string {
 export async function fetchFeed(name: string, url: string): Promise<RssItem[]> {
     try {
         validateFeedUrl(url);
+        await assertPublicHost(url);
         const feed = await parser.parseURL(url);
         const items: RssItem[] = [];
 

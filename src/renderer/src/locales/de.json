@@ -2,7 +2,6 @@
     "app": {
         "title": "Runtime TelegramBot Desktop",
         "edition": "Titan Edition",
-        "version": "v1.7.1",
         "copyright": "© 2026 Simone Pizzi für Runtime Radio"
     },
     "setup": {
@@ -107,7 +106,8 @@
         "exportBtn": "Exportieren",
         "shareZone": "Teilen",
         "successExport": "Profil erfolgreich exportiert",
-        "errorExport": "Exportfehler:"
+        "errorExport": "Exportfehler:",
+        "errorSave": "Einstellungen konnten nicht gespeichert werden:"
     },
     "feedManager": {
         "title": "Feed-Quellen",
@@ -251,6 +251,21 @@
         "msg": "Titan Edition v{{version}} ist verfügbar! Besuchen Sie das Portal, um das Update herunterzuladen.",
         "downloading": "Update v{{version}} wird heruntergeladen...",
         "ready": "v{{version}} bereit — Neustart zum Installieren",
-        "install": "Neu starten & installieren"
+        "install": "Neu starten & installieren",
+        "availableMsg": "Eine neue Version von Titan Edition ist verfügbar. Möchten Sie sie jetzt herunterladen?",
+        "currentLabel": "Aktuelle Version",
+        "newLabel": "Neue Version",
+        "download": "Jetzt herunterladen",
+        "later": "Später",
+        "progress": "Wird heruntergeladen... {{percent}}%",
+        "downloadedTitle": "Update bereit",
+        "downloadedMsg": "Version v{{version}} wurde heruntergeladen. Jetzt neu starten, um sie zu installieren?",
+        "checking": "Suche nach Updates...",
+        "upToDate": "Sie verwenden die neueste Version",
+        "checkBtn": "Nach Updates suchen",
+        "errorMsg": "Updates konnten nicht gesucht werden",
+        "sectionTitle": "Updates",
+        "sectionDesc": "Prüfen Sie manuell, ob eine neue Version von Titan Edition verfügbar ist.",
+        "newBadge": "Neue Version v{{version}} verfügbar"
     }
 }

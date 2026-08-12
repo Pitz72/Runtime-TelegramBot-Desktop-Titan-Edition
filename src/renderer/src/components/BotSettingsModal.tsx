@@ -56,8 +56,13 @@ export function BotSettingsModal({ bot, onClose, onUpdate, onDelete }: Props) {
                 template_news: templateNews, template_youtube: templateYoutube, template_startup: templateStartup
             });
             onClose();
-        } catch (e) {
+        } catch (e: any) {
+            // Il salvataggio non deve MAI fallire in silenzio: il modale resterebbe aperto
+            // senza spiegazioni e il pulsante Salva sembrerebbe rotto. Caso reale: token non
+            // decifrabile su questa macchina (DB importato da un altro PC, keychain OS
+            // assente) → il campo Token è vuoto e la validazione IPC rifiuta il salvataggio.
             console.error('Failed to save bot settings:', e);
+            error(`${t('botModal.errorSave')} ${e?.message || String(e)}`);
         } finally {
             setSaving(false);
         }

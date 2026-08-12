@@ -2,7 +2,6 @@
     "app": {
         "title": "Runtime TelegramBot Desktop",
         "edition": "Titan Edition",
-        "version": "v1.7.1",
         "copyright": "© 2026 Simone Pizzi per Runtime Radio"
     },
     "setup": {
@@ -107,7 +106,8 @@
         "exportBtn": "Esporta",
         "shareZone": "Condivisione",
         "successExport": "Profilo esportato con successo",
-        "errorExport": "Errore esportazione:"
+        "errorExport": "Errore esportazione:",
+        "errorSave": "Impossibile salvare le impostazioni:"
     },
     "feedManager": {
         "title": "Sorgenti Feed",

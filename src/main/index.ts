@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, shell, dialog } from 'electron'
 import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
@@ -34,6 +34,25 @@ process.on('uncaughtException', (error) => {
 process.on('unhandledRejection', (reason) => {
     console.error('unhandledRejection (non fatale, app mantenuta attiva):', reason);
 });
+
+// --- ISTANZA SINGOLA ---
+// Due processi Titan aperti sullo stesso profilo utente aprirebbero lo stesso titan.db e
+// avvierebbero DUE motori indipendenti. La deduplica non protegge da questo: markProcessed()
+// viene eseguita solo DOPO l'invio Telegram riuscito, quindi entrambe le istanze possono
+// superare isProcessed() sullo stesso item e pubblicarlo due volte sul canale (oltre alla
+// contesa WAL su SQLite). La seconda istanza esce subito e passa il fuoco alla prima.
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+    app.quit()
+} else {
+    app.on('second-instance', () => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            if (mainWindow.isMinimized()) mainWindow.restore()
+            mainWindow.show()
+            mainWindow.focus()
+        }
+    })
+}
 
 // --- DISABILITA ACCELERAZIONE HARDWARE ---
 // Previene crash GPU "silenti" su macchine vecchie o Server Virtualizzati (VPS),
@@ -81,7 +100,12 @@ function createWindow(): void {
     }, 10000);
 
     mainWindow.webContents.setWindowOpenHandler((details) => {
-        shell.openExternal(details.url)
+        // Solo http/https finiscono nel browser di sistema: schemi come file:, smb: o
+        // custom-protocol non devono poter essere aperti dal renderer (stessa regola
+        // dell'handler IPC 'open-external').
+        if (/^https?:\/\//i.test(details.url)) {
+            shell.openExternal(details.url)
+        }
         return { action: 'deny' }
     })
 
@@ -104,6 +128,10 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(() => {
+    // Seconda istanza: app.quit() è già stato richiesto sopra, non inizializzare nulla
+    // (niente DB, niente engine, niente finestra).
+    if (!gotTheLock) return
+
     // Set app user model id for windows
     electronApp.setAppUserModelId('com.runtimeradio.titandesktop')
 

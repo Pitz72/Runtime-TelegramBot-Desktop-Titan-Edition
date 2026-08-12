@@ -102,7 +102,7 @@ export class BotEngine {
                     const baseMessage = customTemplate && customTemplate.trim() !== ''
                         ? customTemplate
                         : `🟢 <b>${this.escapeHTML(bot.name)} Online</b>`;
-                    const finalMessage = `${baseMessage}\n\n<pre>Titan Desktop v${appVersion}</pre>`;
+                    const finalMessage = `${baseMessage}\n\n<pre>Runtime TelegramBot Desktop v${appVersion}</pre>`;
                     await client.sendMessage(finalMessage);
                 } catch (e) {
                     TitanLogger.log(`❌ Failed to send startup message for ${bot.name}: ${e}`);
@@ -598,8 +598,21 @@ export class BotEngine {
             .replace(/>/g, '&gt;');
     }
 
+    /**
+     * Rende un URL del feed sicuro dentro l'href dei digest.
+     * Stessa regola di TelegramClient.escapeUrl: i caratteri che chiuderebbero l'attributo
+     * (`'` `"` `<` `>`) vengono percent-encodati e gli schemi non http/https scartati,
+     * altrimenti chi controlla il feed può iniettare HTML nel messaggio pubblicato.
+     */
     private escapeUrl(url: string): string {
-        return url.replace(/&(?!amp;)/g, '&amp;');
+        if (!/^https?:\/\//i.test(url.trim())) return '';
+        return url
+            .replace(/%(?![0-9A-Fa-f]{2})/g, '%25')
+            .replace(/'/g, '%27')
+            .replace(/"/g, '%22')
+            .replace(/</g, '%3C')
+            .replace(/>/g, '%3E')
+            .replace(/&(?!amp;)/g, '&amp;');
     }
 }
 
