@@ -2,7 +2,7 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** in corso — Fase 1 chiusa (12/08), il push è l'unica voce rimasta. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** in corso — **Fase 1 chiusa e pushata** (12/08). Prossimo passo: Fase 2 (manuali), che non dipende da nessuna decisione aperta e si può fare subito. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
 
 > **Come si legge.** Le fasi sono in ordine di dipendenza, non di importanza: invertirle rompe qualcosa. Le voci marcate ⛔ sono blocchi veri — se le salti, un utente reale ne subisce le conseguenze.
 
@@ -33,7 +33,7 @@
 
 ---
 
-## FASE 1 — Chiudere il lavoro già fatto ✅ (salvo il push)
+## FASE 1 — Chiudere il lavoro già fatto ✅ CHIUSA
 
 Committata il 12 agosto 2026. `npx tsc --noEmit`, `npx vite build` e `scripts/check-locales.mjs` passano puliti sul working tree finale, e nessuno dei tre commit lascia uno stato intermedio rotto (verificato: il commit 1 non referenzia chiavi o file introdotti dopo).
 
@@ -42,7 +42,7 @@ Committata il 12 agosto 2026. `npx tsc --noEmit`, `npx vite build` e `scripts/ch
 - [x] Commit 1 — correzioni di sicurezza e bug → `c4313f3`
 - [x] Commit 2 — licenza MIT, riorganizzazione documentale, CI → `e0f8447`
 - [x] Commit 3 — credito LLM, donazioni e contatti → `2e21e77`
-- [ ] Push su `origin/main`
+- [x] Push su `origin/main` — 12/08, `a83fc4a..682a28a`
 
 ### Cosa contiene, per memoria
 
