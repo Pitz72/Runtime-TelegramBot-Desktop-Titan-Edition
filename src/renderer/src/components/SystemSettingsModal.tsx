@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Download, FileCode, Globe, Zap, ShieldCheck, Upload, X, RefreshCw, Loader2, CheckCircle2, Sparkles, BookOpen } from 'lucide-react';
+import { Database, Download, FileCode, Globe, Zap, ShieldCheck, Upload, X, RefreshCw, Loader2, CheckCircle2, Sparkles, BookOpen, Heart, Mail } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
 import { flagsList } from './IntroScreen';
 import { useToast } from './ui/Toast';
 import type { Updater } from '../hooks/useUpdater';
 import { GuideModal } from './GuideModal';
 import { openManual } from '../lib/docs';
+import { DONATE_URL, CONTACT_URL, openLink } from '../lib/links';
 
 interface Props { onClose: () => void; updater?: Updater; }
 
@@ -204,6 +205,44 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
                                     >
                                         <Download size={15} />
                                         {t('quickGuide.manualBtn')}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Crediti — paternità del progetto */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
+                                    <Sparkles size={13} />
+                                    {t('credits.title')}
+                                </div>
+                                <p className="text-xs text-on-surface-variant leading-relaxed whitespace-pre-line">
+                                    {t('credits.body')}
+                                </p>
+                                <p className="text-nano text-outline-variant/40">{t('app.copyright')}</p>
+                            </div>
+
+                            {/* Sostegno al progetto — donazione libera e contatti */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
+                                    <Heart size={13} />
+                                    {t('support.sectionTitle')}
+                                </div>
+                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('support.sectionDesc')}</p>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => openLink(DONATE_URL)}
+                                        title={t('support.donateTitle')}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border bg-tertiary/5 hover:bg-tertiary/10 hover:border-tertiary/30 transition-all text-tertiary text-sm font-bold"
+                                    >
+                                        <Heart size={15} />
+                                        {t('support.donateBtn')}
+                                    </button>
+                                    <button
+                                        onClick={() => openLink(CONTACT_URL)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border hover:border-outline-variant/40 transition-all text-on-surface-variant text-sm font-bold"
+                                    >
+                                        <Mail size={15} />
+                                        {t('support.contactBtn')}
                                     </button>
                                 </div>
                             </div>

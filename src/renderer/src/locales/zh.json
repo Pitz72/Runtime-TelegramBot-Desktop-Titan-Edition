@@ -267,5 +267,17 @@
         "sectionTitle": "更新",
         "sectionDesc": "手动检查 Titan Edition 是否有新版本可用。",
         "newBadge": "有新版本 v{{version}} 可用"
+    },
+    "credits": {
+        "title": "致谢",
+        "body": "本程序在编写过程中大量使用了大语言模型：Google Gemini 2.5 至 3.1，以及 Anthropic Claude Sonnet 4.6 至 Opus 5。大部分代码出自它们之手。\n\n其余的一切均属于 Simone Pizzi：构思、愿景、设计方向、对每一处细节的精心打磨，以及对缺陷锲而不舍的追查。模型负责写代码，所有决策均出自 Simone Pizzi。",
+        "short": "借助大语言模型开发 · 构思与设计方向由 Simone Pizzi 主导"
+    },
+    "support": {
+        "donateBtn": "支持本项目",
+        "donateTitle": "通过 PayPal 自愿捐赠",
+        "sectionTitle": "支持本项目",
+        "sectionDesc": "Titan 免费且开放源代码。如果它对您有帮助，欢迎自愿捐赠，或通过联系页面与我取得联系。",
+        "contactBtn": "联系方式"
     }
 }

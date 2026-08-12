@@ -267,5 +267,17 @@
         "sectionTitle": "Aggiornamenti",
         "sectionDesc": "Controlla manualmente se è disponibile una nuova versione di Titan Edition.",
         "newBadge": "Nuova versione v{{version}} disponibile"
+    },
+    "credits": {
+        "title": "Crediti",
+        "body": "Questo programma è stato scritto facendo un uso massiccio di modelli linguistici: Google Gemini, dalla 2.5 alla 3.1, e Anthropic Claude, da Sonnet 4.6 a Opus 5. Gran parte del codice l'hanno prodotta loro.\n\nTutto il resto è di Simone Pizzi: il concetto, la visione, la direzione progettuale, la definizione minuziosa di ogni dettaglio e la caccia ostinata ai bug. I modelli hanno scritto il codice, le decisioni sono state tutte sue.",
+        "short": "Sviluppato con l'ausilio di LLM · concezione e direzione di Simone Pizzi"
+    },
+    "support": {
+        "donateBtn": "Sostieni il progetto",
+        "donateTitle": "Offri una donazione libera via PayPal",
+        "sectionTitle": "Sostieni il progetto",
+        "sectionDesc": "Titan è gratuito e a sorgente aperto. Se ti è utile, puoi lasciare una donazione libera o scrivermi dalla pagina dei contatti.",
+        "contactBtn": "Contatti"
     }
 }

@@ -129,6 +129,17 @@ npm run build       # build completa + installer
 
 ---
 
+## Sostenere il progetto
+
+Titan è gratuito e a sorgente aperto, e resterà così. Se ti è utile e vuoi contribuire alle spese di sviluppo, o se semplicemente vuoi scrivermi — segnalazioni, domande, proposte di collaborazione — trovi tutto qui:
+
+### 👉 **[simonepizzi.runtimeradio.it/contatti](https://simonepizzi.runtimeradio.it/contatti)**
+
+Per una donazione diretta: **[paypal.me/runtimeradio](https://www.paypal.com/paypalme/runtimeradio)**
+
+Entrambi i collegamenti sono raggiungibili anche dall'applicazione, dalla schermata iniziale e da Impostazioni di Sistema → Generale.
+
+---
 
 ## Privacy
 
@@ -136,6 +147,17 @@ L'applicazione funziona in locale. Contatta esclusivamente i server dei feed con
 
 ---
 
+## Come è stato scritto
+
+Questo programma è stato scritto facendo un **uso massiccio di modelli linguistici di grandi dimensioni**: Google **Gemini**, dalla 2.5 alla 3.1, e Anthropic **Claude**, da Sonnet 4.6 a Opus 5. Gran parte del codice che leggi l'hanno prodotta loro, ed è giusto che sia dichiarato apertamente.
+
+Tutto il resto è di **Simone Pizzi**: il concetto, la visione, la direzione progettuale, la definizione minuziosa di ogni dettaglio funzionale e la caccia ostinata ai bug. Ogni comportamento del programma — dal filtro di cutoff iper-pessimista alla coda persistente delle quiet hours, dalla deduplica scoped per tipo di contenuto al modo in cui si presenta un aggiornamento — è una decisione progettuale presa, verificata sul campo e corretta a mano fino a farla funzionare.
+
+I modelli hanno scritto il codice. Le decisioni, dalla prima all'ultima, sono state sue.
+
+Questo vale anche per la documentazione: manuali, guide e note tecniche sono stati redatti con lo stesso metodo, e revisionati riga per riga.
+
+---
 
 ## Licenza
 

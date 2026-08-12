@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation, Language } from '../locales/I18nContext';
 import { FlagIT, FlagFR, FlagDE, FlagES, FlagPT, FlagRU, FlagCN, FlagGB } from './ui/Flags';
-import { ChevronRight, Loader2, Sparkles, BookOpen, Download } from 'lucide-react';
+import { ChevronRight, Loader2, Sparkles, BookOpen, Download, Heart } from 'lucide-react';
 import logo from '../assets/logo.png';
 import type { UpdateStatus } from '../hooks/useUpdater';
 import { GuideModal } from './GuideModal';
 import { openManual } from '../lib/docs';
+import { DONATE_URL, openLink } from '../lib/links';
 
 interface Props {
     onComplete: () => void;
@@ -52,8 +53,13 @@ export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, cur
                     {t('app.title')} <span className="text-primary drop-glow-primary">Titan Edition</span>
                 </h1>
 
-                <p className="text-outline-variant/60 text-sm font-body mb-3">
+                <p className="text-outline-variant/60 text-sm font-body mb-1">
                     {t('app.copyright') || '© 2026 Simone Pizzi per Runtime Radio'}
+                </p>
+
+                {/* Paternità del progetto — il testo esteso è in Impostazioni di Sistema → Crediti */}
+                <p className="text-nano text-outline-variant/35 font-body mb-3 text-center max-w-md">
+                    {t('credits.short')}
                 </p>
 
                 {/* Versione + stato controllo aggiornamenti */}
@@ -138,6 +144,14 @@ export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, cur
                     >
                         <Download size={14} />
                         {t('quickGuide.manualBtn')}
+                    </button>
+                    <button
+                        onClick={() => openLink(DONATE_URL)}
+                        title={t('support.donateTitle')}
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full ghost-border text-outline-variant/70 hover:text-tertiary hover:border-tertiary/40 hover:bg-tertiary/5 transition-all text-xs font-body"
+                    >
+                        <Heart size={14} />
+                        {t('support.donateBtn')}
                     </button>
                 </div>
 
