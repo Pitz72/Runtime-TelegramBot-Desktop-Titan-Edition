@@ -9,13 +9,42 @@ on:
         default: 'true'
         type: choice
         options: ['true', 'false']
+  pull_request:
+    branches: [main]
+
+# NOTA: Node 20 e non oltre. better-sqlite3 non ha prebuild per Node 22/24:
+# node-gyp fallisce e sul runner Windows Visual Studio non viene rilevato.
+# Il warning "Node 20 deprecato" nelle Actions riguarda il runtime delle action
+# (checkout/setup-node/cache), lo gestisce GitHub e NON si risolve cambiando node-version.
 
 jobs:
-  # Windows: build locale, non fa parte del CI per ora
-  # Mac: in sospeso — in attesa di firma dal collega
+  # Verifica dei contributi: gira su ogni pull request verso main.
+  # Non produce installer, controlla solo che il progetto compili pulito.
+  verify:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-dev
+      - name: Install dependencies
+        run: npm ci
+      - name: Type check
+        run: npx tsc --noEmit
+      - name: Build bundles
+        run: npx vite build
+      - name: Check locale key parity
+        run: node scripts/check-locales.mjs
 
   build-linux:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -47,6 +76,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -1,133 +1,146 @@
 <div align="center">
   <img src="src/renderer/src/assets/logo.png" alt="Runtime TelegramBot Logo" width="120" />
-  
-  # Runtime TelegramBot
-  ### Titan Edition
-  
-  **La Piattaforma Definitiva per l'Automazione Multi-Canale RSS & YouTube su Telegram**
 
-  ![Version](https://img.shields.io/badge/Version-2.1.6-3b82f6?style=for-the-badge)
+  # Runtime TelegramBot Desktop
+  ### Titan Edition
+
+  **Automazione multi-canale di feed RSS, podcast e YouTube su Telegram.**
+
+  ![Version](https://img.shields.io/badge/Version-2.1.7-3b82f6?style=for-the-badge)
+  ![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)
   ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20Linux-emerald?style=for-the-badge)
   ![Stack](https://img.shields.io/badge/Stack-Electron%20%7C%20React%20%7C%20SQLite-475569?style=for-the-badge)
   ![Lang](https://img.shields.io/badge/Languages-8%20Supported-purple?style=for-the-badge)
-
-  *Da un semplice script Python a un ecosistema Desktop Enterprise per il Broadcast Management.*
 </div>
 
 ---
 
-## Panoramica del Progetto
+## Che cos'è
 
-**Runtime TelegramBot** (Titan Edition) è un'applicazione desktop cross-platform progettata per monitorare feed RSS, Podcast e canali YouTube, pubblicando automaticamente i nuovi contenuti su canali Telegram. Supporta la gestione simultanea di più bot e più canali da un'unica interfaccia.
+Un'applicazione desktop che sorveglia feed RSS, podcast e canali YouTube e pubblica automaticamente i nuovi contenuti su canali Telegram. Gestisce più bot e più canali contemporaneamente da un'unica interfaccia, gira interamente sulla tua macchina e non parla con nessun server che non siano i feed, Telegram e YouTube.
 
-Il progetto nasce per superare i limiti di un precedente bot Python da terminale, offrendo un'interfaccia grafica moderna (Titan Blue), un'architettura asincrona robusta e standard di sicurezza hardware-bound per la protezione delle credenziali.
+Nasce nel 2025 come script Python da terminale per i canali di [Runtime Radio](https://runtimeradio.com) e diventa applicazione Electron nel corso del 2026. È stato distribuito come prodotto commerciale fino all'agosto 2026, quando è stato ritirato dalla vendita e aperto sotto licenza MIT.
+
+> **Stato del progetto.** Funzionalmente completo e in produzione. Non ci sono sviluppi pianificati: viene mantenuto per correzioni. Le pull request sono benvenute — vedi [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
 ## Funzionalità
 
-### Core
-- **Gestione Multi-Bot e Multi-Canale** — Orchestrazione simultanea di infiniti bot Telegram. Dashboard con toggle `ALL BOTS / THIS BOT` per il log in tempo reale.
-- **Motore YouTube Zero-Config** — Scraping nativo via InnerTube. Nessuna API Key di Google Cloud richiesta. Cache 5 minuti, filtro Anti-Premiere integrato.
-- **Sicurezza Hardware-Bound** — Token cifrati in SQLite con strategia a due livelli: `safeStorage` OS (primario) + AES-256-GCM machine-key (fallback). Portabilità sicura via formato `.rtb`.
-- **Architettura Producer-Consumer** — Fetch feed e invio Telegram su binari separati. Gestione fluida di FloodWait e rate-limit.
-- **Quiet Hours** — Fasce orarie di silenzio configurabili per bot. I contenuti si accumulano e vengono smaltiti alla ripresa.
-- **Template Smart Chips** — Editor visivo per formattare i messaggi Telegram con variabili dinamiche (`{{title}}`, `{{link}}`, `{{summary}}`, ecc.). 4 template separati: Avvio, News, Podcast, YouTube.
-- **Validatore Template** — 9 controlli in tempo reale: tag non bilanciati, chip sconosciuti, href non sicuri, template vuoto, ecc.
-- **Retry Queue** — Invii falliti riaccodati automaticamente fino a 3 tentativi prima di essere scartati.
+### Nucleo
+- **Multi-bot e multi-canale** — orchestrazione simultanea di più bot Telegram, con log in tempo reale filtrabile per bot.
+- **YouTube senza API key** — accesso via InnerTube, nessuna chiave Google Cloud. Cache di 5 minuti e filtro anti-premiere integrato.
+- **Token cifrati** — `safeStorage` del sistema operativo come primario, AES-256-GCM con chiave macchina come fallback. Portabilità tramite il formato `.rtb`.
+- **Architettura producer-consumer** — scaricamento dei feed e invio su Telegram su binari separati, con gestione di FloodWait e rate-limit.
+- **Quiet Hours** — fasce di silenzio per bot. I contenuti si accumulano in una coda persistente su disco e vengono smaltiti alla ripresa, anche dopo un riavvio.
+- **Template** — editor visuale per i messaggi Telegram con variabili (`{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`) e validatore in tempo reale. Quattro modelli separati: avvio, news, podcast, YouTube.
+- **Retry queue** — gli invii falliti vengono riaccodati fino a 3 tentativi.
 
-### Feature Avanzate
-- **F4 — Filtro Keyword** — Filtra gli articoli per parole chiave include/exclude per ogni singolo feed. Badge ambra "filtro attivo" visibile nella UI.
-- **F5 — Scheduler Per-Feed** — Intervallo di fetch individuale per ogni feed (5 min → 24 h). Indipendente dall'intervallo globale del bot.
-- **F6 — Statistiche & Analytics** — Contatori oggi/7gg/totale con breakdown per feed ordinato per volume.
-- **F7 — Preview Template** — Anteprima inline del template con dati campione, senza uscire dall'editor.
-- **F8 — Import OPML** — Importazione bulk di feed da file OPML standard. Nessuna dipendenza esterna, validazione anti-SSRF.
-- **F9 — Digest Mode** — Accumula gli articoli di un feed per un intervallo configurabile (1h → 7gg) e li invia in un unico messaggio riepilogativo.
-- **Performance Mode** — Disabilita effetti GPU-heavy (scanline, backdrop-blur, glow, animazioni). Persistente, efficace senza riavvio.
-- **Auto-Updater nativo** — Verifica nuove versioni all'avvio via GitHub Releases, scarica in background e installa su richiesta con un click. Al primo avvio dopo un aggiornamento mostra una schermata con le novità.
-- **Documentazione in-app** — Guida rapida integrata consultabile a schermo nella lingua corrente e download del manuale d'uso completo in PDF (8 lingue), da schermata iniziale e Impostazioni.
+### Avanzate
+- **Filtro per parole chiave** — include/exclude per singolo feed.
+- **Scheduler per feed** — intervallo di controllo individuale, da 5 minuti a 24 ore, indipendente da quello del bot.
+- **Statistiche** — contatori giornalieri, settimanali e totali con dettaglio per feed.
+- **Anteprima template** — resa inline con dati campione.
+- **Import OPML** — importazione in blocco, senza dipendenze esterne, con validazione anti-SSRF.
+- **Digest** — accumula i contenuti di un feed per un intervallo configurabile (da 1 ora a 7 giorni) e li invia in un unico messaggio.
+- **Performance Mode** — disattiva scanline, blur, glow e animazioni sulle macchine lente.
+- **Aggiornamento automatico** — controllo all'avvio, download e installazione su conferma, con schermata delle novità al primo riavvio.
+- **Documentazione integrata** — guida rapida a schermo nella lingua corrente e manuale completo in PDF.
 
-### Internazionalizzazione
-Interfaccia tradotta in 8 lingue con cambio istantaneo:
-🇮🇹 Italiano | 🇬🇧 English | 🇫🇷 Français | 🇩🇪 Deutsch | 🇪🇸 Español | 🇵🇹 Português | 🇷🇺 Русский | 🇨🇳 中文
+### Lingue
+🇮🇹 Italiano · 🇬🇧 English · 🇫🇷 Français · 🇩🇪 Deutsch · 🇪🇸 Español · 🇵🇹 Português · 🇷🇺 Русский · 🇨🇳 中文
 
 ---
 
-## Stack Tecnologico
+## Stack
 
 | Livello | Tecnologia |
 | :--- | :--- |
-| **Framework** | Electron 32.3.3 + Node.js 20+ |
-| **Frontend** | React 18.3.1 + Vite 5.4.21 |
-| **Styling** | TailwindCSS + Lucide React + Inter |
-| **Database** | SQLite via `better-sqlite3` (WAL mode, schema v12) |
+| **Framework** | Electron 32 + Node.js 20 |
+| **Frontend** | React 18 + Vite 5 |
+| **Stile** | TailwindCSS + Lucide React |
+| **Database** | SQLite via `better-sqlite3` (WAL, schema v12) |
 | **Telegram** | Telegraf v4 |
-| **Build** | electron-builder 25 (NSIS, AppImage/deb) |
-| **CI/CD** | GitHub Actions (Windows, Linux) |
+| **YouTube** | `youtubei.js` (InnerTube) |
+| **Build** | electron-builder 25 — NSIS, AppImage, deb |
+| **CI** | GitHub Actions (Windows, Linux) |
 
 ---
 
 ## Installazione
 
-### Utenti Finali
+### Utenti
 
-Scarica l'installer dalla [pagina Releases](https://github.com/Ecosystem-Runtime/runtime-telegrambot-releases/releases/latest) e lancia l'eseguibile per il tuo sistema operativo:
+Scarica l'installer dalla [pagina delle release](https://github.com/Ecosystem-Runtime/runtime-telegrambot-releases/releases/latest):
 
-- **Windows** — `.exe` (NSIS Installer)
-- **Linux** — `.AppImage` (eseguibile diretto) o `.deb` (Ubuntu/Debian). Potrebbe essere necessario `libsecret-1-0`.
+- **Windows** — `.exe` (installer NSIS). Non essendo firmato, SmartScreen mostrerà un avviso al primo avvio: *Ulteriori informazioni* → *Esegui comunque*.
+- **Linux** — `.AppImage` (da rendere eseguibile con `chmod +x`) oppure `.deb` per Ubuntu, Debian e derivate. Potrebbero servire `libsecret-1-0` e `libfuse2`.
 
-> Piattaforme supportate: **Windows e Linux**.
+Piattaforme con installer precompilato: **Windows e Linux**.
+
+**macOS non ha un installer ufficiale.** Non è un limite tecnico — il codice è cross-platform e Electron gira su macOS senza modifiche — ma distribuire un `.dmg` che non faccia comparire l'avviso di Gatekeeper richiede un certificato Apple a pagamento, e non ha senso mantenerlo per un progetto senza entrate. Chi usa macOS può **compilare l'applicazione dal sorgente** seguendo le istruzioni per sviluppatori qui sotto: servono Node 20 e Xcode Command Line Tools, e `npm run build` produce l'app. La documentazione, i manuali e le guide descrivono solo Windows e Linux.
 
 ### Sviluppatori
 
 ```bash
-# Clona la repository
 git clone https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition.git
 cd Runtime-TelegramBot-Desktop-Titan-Edition
-
-# Installa le dipendenze
 npm install
 
-# Avvia in modalità sviluppo (HMR attivo)
-npm run dev
-
-# Build produzione
-npm run build
+npx tsc --noEmit    # type check
+npx vite build      # build dei bundle
+npm run build       # build completa + installer
 ```
+
+> ⚠️ **Non usare `npm run dev`**: il dev server corrompe `dist-electron/main/index.cjs`. È un bug noto e diagnosticato — la spiegazione, insieme alle altre trappole del progetto, è in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-## Struttura della Repository
+## Struttura
 
 ```
-Runtime-TelegramBot-Desktop-Titan-Edition/
 ├── src/
-│   ├── main/          # Core Engine, SQLite, IPC, Encryption, BotEngine
-│   ├── renderer/      # Dashboard React, componenti UI, i18n, guide
-│   ├── preload/       # Bridge IPC sicuro
-│   └── shared/        # Tipi TypeScript condivisi
-├── docs/              # Documentazione tecnica, guide, changelog
-├── build/             # Configurazione build (entitlements macOS)
-├── .github/workflows/ # CI/CD GitHub Actions
-└── builds/            # Output installer (generati da npm run build)
+│   ├── main/                 # motore, SQLite, IPC, cifratura, logger
+│   ├── renderer/             # interfaccia React, i18n, guide in-app
+│   ├── preload/              # bridge IPC
+│   └── shared/               # tipi condivisi
+├── docs/                     # documentazione tecnica, guide, changelog
+│   ├── storico/              # materiale d'epoca, non più aggiornato
+│   └── idee/                 # progetti analizzati e mai realizzati
+├── Manuale Utente Avanzato/  # manuale in 8 lingue + sorgenti Typst
+├── branding/                 # banner e asset grafici
+├── build/  ·  resources/     # icone e risorse di packaging
+└── .github/workflows/        # CI
 ```
 
 ---
 
-## Sicurezza — Gestione Token
+## Documentazione
 
-I token Telegram sono cifrati nel database SQLite con una strategia a due livelli:
-
-1. **safeStorage** (primario) — usa il keychain nativo dell'OS (DPAPI su Windows, macOS Keychain, libsecret su Linux). Output prefissato `ss:`.
-2. **AES-256-GCM** (fallback) — usato su Linux senza libsecret. La chiave è un buffer random 32-byte generato al primo avvio e salvato in `userData/.machine-key`. Output prefissato `mk:`.
-
-I token sono macchina-specifici: chi migra il database tra macchine diverse dovrà re-inserirli.
+| | |
+| :--- | :--- |
+| [Indice della documentazione](docs/README.md) | Punto di partenza |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Come compilare e contribuire, e cosa non toccare |
+| [SECURITY.md](SECURITY.md) | Modello di sicurezza e segnalazione vulnerabilità |
+| [docs/architettura.md](docs/architettura.md) | Whitepaper architetturale |
+| [docs/database.md](docs/database.md) | Schema SQLite e migrazioni |
+| [CHANGELOG.md](CHANGELOG.md) | Storia delle versioni |
+| [Manuale Utente Avanzato](Manuale%20Utente%20Avanzato/) | Manuale completo, 8 lingue |
 
 ---
 
-## Crediti e Licenza
 
-Sviluppato da **Simone Pizzi** per **[Runtime Radio](https://runtimeradio.com)**.  
-Progettazione architetturale e sviluppo realizzati con l'ausilio di **Claude** (Anthropic).
+## Privacy
 
-*Copyright © 2026 Runtime Radio. Tutti i diritti riservati.*
+L'applicazione funziona in locale. Contatta esclusivamente i server dei feed configurati, `api.telegram.org`, gli endpoint di YouTube e GitHub per il controllo degli aggiornamenti. Nessuna telemetria, nessun analytics, nessun account. I token restano cifrati sulla tua macchina e non lasciano mai il tuo disco.
+
+---
+
+
+## Licenza
+
+Rilasciato sotto licenza **MIT** — vedi [LICENSE](LICENSE).
+
+Sviluppato da **Simone Pizzi** per **[Runtime Radio](https://runtimeradio.com)**.
+
+Fino ad agosto 2026 il progetto è stato distribuito commercialmente sotto una licenza proprietaria, conservata a titolo storico in [`docs/storico/EULA-v1-proprietaria.txt`](docs/storico/EULA-v1-proprietaria.txt). Quella licenza non si applica più: il software è ora liberamente utilizzabile, modificabile e ridistribuibile secondo i termini MIT.

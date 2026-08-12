@@ -1,0 +1,63 @@
+name: Segnalazione bug
+description: Qualcosa non funziona come dovrebbe / Report a bug
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la segnalazione. Italiano o inglese, indifferentemente.
+
+        ⚠️ **Vulnerabilità di sicurezza: non aprire una issue.** Scrivi a info@runtimeradio.it — vedi [SECURITY.md](../blob/main/SECURITY.md).
+
+  - type: textarea
+    id: cosa
+    attributes:
+      label: Cosa succede
+      description: Cosa ti aspettavi e cosa è successo invece.
+    validations:
+      required: true
+
+  - type: textarea
+    id: riproduzione
+    attributes:
+      label: Come riprodurlo
+      placeholder: |
+        1. Apro …
+        2. Clicco su …
+        3. Osservo …
+    validations:
+      required: true
+
+  - type: input
+    id: versione
+    attributes:
+      label: Versione dell'applicazione
+      description: La trovi nell'intestazione della dashboard, accanto al nome.
+      placeholder: "2.1.7"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Sistema operativo
+      options:
+        - Windows
+        - Linux (AppImage)
+        - Linux (.deb)
+        - Altro
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: |
+        Le righe rilevanti dalla console della dashboard, oppure il file in
+        `%APPDATA%\runtime-telegram-bot-titan-edition\logs\` (Windows) /
+        `~/.config/runtime-telegram-bot-titan-edition/logs/` (Linux).
+
+        I token dei bot vengono redatti automaticamente dai log, ma dai comunque
+        un'occhiata prima di incollare: potrebbero esserci URL di feed privati.
+      render: text

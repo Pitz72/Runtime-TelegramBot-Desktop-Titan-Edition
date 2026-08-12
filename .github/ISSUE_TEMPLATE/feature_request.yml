@@ -1,0 +1,33 @@
+name: Proposta
+description: Suggerisci una funzionalità o un miglioramento / Suggest a feature
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Il progetto è funzionalmente completo e mantenuto per correzioni: le proposte sono
+        benvenute, ma quelle grosse hanno più probabilità di essere accolte se arrivano
+        insieme a una pull request. Vedi [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md)
+        per cosa è dentro e cosa è fuori perimetro.
+
+  - type: textarea
+    id: problema
+    attributes:
+      label: Quale problema risolve
+      description: Descrivi la situazione concreta, non solo la soluzione che hai in mente.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Come lo risolveresti
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contributo
+    attributes:
+      label: Disponibilità
+      options:
+        - label: Sarei disposto a implementarlo io con una pull request

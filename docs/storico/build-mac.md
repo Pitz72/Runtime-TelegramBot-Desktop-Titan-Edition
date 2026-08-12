@@ -204,7 +204,7 @@ npm install
 
 ## Struttura del Progetto
 
-Vedi il [README.md](../README.md) principale per la struttura aggiornata del progetto.
+Vedi il [README.md](../../README.md) principale per la struttura aggiornata del progetto.
 
 ---
 

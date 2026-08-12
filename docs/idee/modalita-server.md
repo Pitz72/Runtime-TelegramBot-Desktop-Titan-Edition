@@ -1,12 +1,16 @@
-# Progetto Server — Runtime TelegramBot Headless Mode
+# Modalità server — Runtime TelegramBot headless
 
-**Stato:** ⛔ RIMANDATO A TEMPO INDETERMINATO — da rivalutare quando le strategie saranno definite  
-**Origine:** `docs/analisi-tecnica.md` — sezione "Ad alto impatto operativo"  
-**Aggiornamento:** 18 Aprile 2026
+**Stato:** 💡 idea analizzata, mai iniziata
+**Origine:** [`docs/storico/analisi-tecnica.md`](../storico/analisi-tecnica.md) — sezione "Ad alto impatto operativo"
+**Analisi originale:** 18 aprile 2026
+
+> **Nota di agosto 2026.** È l'unico progetto mai formalizzato e mai realizzato: tutto il resto della documentazione di progetto è concluso e archiviato in [`docs/storico/`](../storico/). Con l'apertura del sorgente questo documento cambia natura — da lavoro rimandato a **proposta aperta a chi voglia prenderla in mano**. L'analisi sotto è integra: le motivazioni tecniche restano valide, quelle commerciali (pubblico target, modello di distribuzione) non lo sono più.
+>
+> Un vincolo tecnico è cambiato in meglio: il porting Linux, indicato qui come possibile prerequisito, è stato completato nella v1.10.2. macOS invece è uscito definitivamente dal perimetro nel luglio 2026.
 
 ---
 
-## Decisione Ufficiale (18 Aprile 2026)
+## Decisione dell'epoca (18 aprile 2026)
 
 Tutto il lavoro relativo alla modalità server è **rimandato a tempo indeterminato**. Prima di qualsiasi sviluppo in questa direzione sarà necessario definire le strategie reali: pubblico target, modello di distribuzione, architettura (prodotto separato vs monorepo), e se il desktop porting (Linux/macOS) è prerequisito. Nessuna data né versione assegnata.
 

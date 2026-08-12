@@ -2,6 +2,27 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
+## Non ancora rilasciato — apertura del sorgente
+
+Lavoro svolto il 12 agosto 2026, in vista del passaggio a open source. Non è ancora stata pubblicata alcuna release: le correzioni qui sotto arriveranno agli utenti con la prossima build.
+
+**Sicurezza**
+- I token dei bot vengono redatti dai file di log, dalla console dell'applicazione e dai log esportati. Un log allegato a una segnalazione di bug non può più esporre il token.
+- **Istanza singola**: avviare due volte l'applicazione non apre più due motori sullo stesso database. Prima era possibile che lo stesso contenuto venisse pubblicato due volte sul canale.
+- Gli URL provenienti dai feed vengono percent-encodati nei caratteri che potrebbero chiudere l'attributo `href`: un feed non può più iniettare HTML nel messaggio pubblicato, né sostituire il link annunciato con uno diverso.
+- Validazione anti-SSRF estesa: IPv6 privati e link-local, indirizzi IPv4 in forma decimale ed esadecimale, IPv4-mapped IPv6, intervallo CGNAT, domini `.local`/`.internal`. Aggiunta la risoluzione DNS prima del fetch, che blocca i domini pubblici che puntano a indirizzi di rete privata.
+- Gli URL aperti dal renderer nel browser di sistema sono filtrati per schema (solo `http`/`https`).
+
+**Correzioni**
+- Il salvataggio delle impostazioni di un bot non fallisce più in silenzio: l'errore viene mostrato. Capitava concretamente quando il token non era decifrabile sulla macchina corrente.
+- Completate le 15 stringhe dell'interfaccia di aggiornamento mancanti in tedesco, spagnolo, francese, russo e cinese: quel flusso usciva in inglese in 5 lingue su 8.
+- Il messaggio di avvio inviato su Telegram usa il nome corretto del prodotto.
+
+**Progetto**
+- Licenza **MIT** al posto dell'EULA proprietaria, archiviata in `docs/storico/`.
+- Aggiunti `CONTRIBUTING.md`, `SECURITY.md`, i template delle issue e un controllo di parità delle traduzioni (`scripts/check-locales.mjs`), eseguito in CI su ogni pull request insieme a type check e build.
+- `docs/` riorganizzata: tutto il materiale concluso in `docs/storico/`, nuovo indice, nuova documentazione di database e build. Rimossi i residui di configurazione macOS.
+
 - [v2.1.7 (Corrente)](docs/changelogs/CHANGELOG_v2.1.7.md) — Rifiniture: nome prodotto uniforme «Runtime TelegramBot Desktop Titan Edition» ovunque (via «Titan Desktop»), icona nella barra applicazioni Windows (icona finestra .ico), schermata «Novità» affidabile anche aggiornando da versioni precedenti, banner aggiornato.
 - [v2.1.6 (Archivio)](docs/changelogs/CHANGELOG_v2.1.6.md) — Documentazione in-app: guida rapida a schermo nella lingua corrente, download del manuale d'uso completo in PDF, e nuova schermata «Novità» al primo avvio dopo un aggiornamento. Consolidamento branding Titan. Rilascio commerciale v2.
 - [v2.1.5 (Archivio)](docs/changelogs/CHANGELOG_v2.1.5.md) — Scansione RSS parallela (pool di concorrenza, Fix B), UX aggiornamenti ridisegnata con conferma download/riavvio, fix accavallamento righe log nella console.
@@ -43,6 +64,8 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 
 Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.7.md](docs/changelogs/CHANGELOG_v2.1.7.md).
 
-## Stato progetto e roadmap verso v2.0.0
+## Storia dello sviluppo
 
-Consulta [docs/STATO-PROGETTO.md](docs/STATO-PROGETTO.md) per il quadro completo: tutto il completato, le feature F1-F9 + Performance Mode + #11 autoUpdater (completato in v1.10.3).
+Il quadro completo del lavoro fino alla serie 2.0 — feature F1-F9, Performance Mode, auto-updater — è in [docs/storico/STATO-PROGETTO.md](docs/storico/STATO-PROGETTO.md), documento d'epoca non più aggiornato.
+
+Per la documentazione attuale: [docs/README.md](docs/README.md).

@@ -45,5 +45,5 @@ La pausa inter-feed diventa **5 s** quando il feed corrente *o* quello successiv
 
 ## Riferimenti
 
-- Relazione architetturale YouTube: [docs/relazione-youtube.md](../relazione-youtube.md) (motivazioni della scelta Innertube vs Atom/API v3).
+- Relazione architetturale YouTube: [docs/storico/relazione-youtube.md](../storico/relazione-youtube.md) (motivazioni della scelta Innertube vs Atom/API v3).
 - Log diagnostico: `titan-log-2026-05-18.txt`.

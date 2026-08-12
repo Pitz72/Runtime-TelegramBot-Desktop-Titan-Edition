@@ -38,16 +38,8 @@ nsis:
   uninstallDisplayName: ${productName}
   createDesktopShortcut: true
 
-# === macOS ===
-mac:
-  target: dmg
-  icon: resources/icon.png
-  category: public.app-category.utilities
-  hardenedRuntime: true
-  gatekeeperAssess: false
-  entitlements: build/entitlements.mac.plist
-  entitlementsInherit: build/entitlements.mac.plist
-  artifactName: RuntimeTelegramBot-TitanEdition-${version}.${ext}
+# macOS non è supportato: il target è stato rimosso nel luglio 2026.
+# Le piattaforme di distribuzione sono Windows e Linux.
 
 # === Linux ===
 linux:

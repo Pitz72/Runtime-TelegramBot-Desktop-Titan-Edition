@@ -1,12 +1,29 @@
 {
     "name": "titan-desktop",
     "version": "2.1.7",
-    "description": "Desktop Application for Runtime Radio Telegram Bot",
+    "description": "Applicazione desktop per pubblicare automaticamente feed RSS, podcast e canali YouTube su Telegram",
     "author": {
-        "name": "Runtime Radio",
+        "name": "Simone Pizzi",
         "email": "info@runtimeradio.it"
     },
+    "license": "MIT",
     "homepage": "https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition/issues"
+    },
+    "keywords": [
+        "telegram",
+        "telegram-bot",
+        "rss",
+        "podcast",
+        "youtube",
+        "electron",
+        "automation"
+    ],
     "private": true,
     "type": "module",
     "main": "dist-electron/main/index.cjs",
