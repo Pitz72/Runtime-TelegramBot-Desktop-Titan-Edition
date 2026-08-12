@@ -1,7 +1,7 @@
 #import "lib/manuale-template.typ": *
 
 // Versione del software ed etichetta d'edizione: un solo punto di verità.
-#let VERSIONE  = "2.1.5"
+#let VERSIONE  = "2.1.8"
 #let AUTORE    = "Simone Pizzi"
 #let PRODUZIONE = "Ecosystem Runtime"
 #let EDIZIONE  = T.edition-name + " · 2026"

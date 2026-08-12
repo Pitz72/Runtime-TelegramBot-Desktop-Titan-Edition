@@ -13,7 +13,7 @@ Titan Edition è leggero e funziona su Windows e Linux:
 ### 2.2 Installazione
 L'installazione è semplice.
 
-1. Scarica il file fornito dal tuo amministratore o dalla pagina delle release ufficiale.
+1. Scarica l'installer dalla pagina delle release del progetto. In alternativa puoi compilarlo tu dal codice sorgente.
 2. **Su Windows:** avvia il file `.exe` e segui le istruzioni a schermo. Il programma crea da solo un collegamento sul desktop.
 3. **Su Linux:** con il pacchetto `.deb` fai doppio clic e lascia fare al gestore pacchetti; con l'`.AppImage` rendi il file eseguibile (clic destro → Proprietà → Permessi → Consenti l'esecuzione) e avvialo con un doppio clic.
 
@@ -32,5 +32,21 @@ Al primissimo avvio, dopo la sequenza animata di boot e la scelta della lingua, 
 4.  **Data di Partenza (Start Date):** un parametro importante. Di default è la data di oggi: Titan leggerà comunque i tuoi feed, ma **ignorerà e scarterà** ogni notizia o video pubblicato prima di questa data. Serve a evitare che, al primo avvio, il bot inondi il canale di notizie vecchie di settimane.
 
 Completati i quattro passaggi, clicca su **Lancia Titan**: ti ritroverai nella plancia di comando principale.
+
+### 2.4 La schermata di benvenuto: lingua, guida e manuale
+La schermata con le otto bandiere non è solo del primo avvio: torna a ogni accensione, e da lì scegli la lingua dell'interfaccia, che cambia all'istante. Il tasto **Lancia Titan** ti porta dentro.
+
+Sotto quel tasto ci sono tre scorciatoie:
+
+-   **Guida Rapida** apre a schermo un riassunto di poche pagine, nella lingua scelta: come ottenere il token da @BotFather, i quattro passaggi del wizard, come aggiungere una sorgente, come personalizzare i messaggi e come accendere il motore. È pensata per chi vuole partire subito, senza leggere questo manuale.
+-   **Scarica Manuale (PDF)** apre nel browser di sistema il manuale completo — quello che stai leggendo — nella tua lingua. Il file non è dentro l'applicazione: viene prelevato dalla rete al momento, quindi serve una connessione attiva.
+-   **Sostieni il progetto** apre la pagina per una donazione libera. Titan è gratuito e a sorgente aperto: la donazione è facoltativa e non sblocca nulla.
+
+Le due voci di documentazione le ritrovi anche nelle Impostazioni di Sistema, alla scheda **Generale** (Capitolo 8.2).
+
+### 2.5 Dopo un aggiornamento: la schermata «Novità»
+Quando Titan si è aggiornato, al primo avvio della nuova versione compare una schermata a tutto campo che elenca che cosa è cambiato: correzioni, funzioni nuove, comportamenti modificati. Il numero di versione è in evidenza, l'elenco è nella tua lingua, e il tasto **Continua** la chiude.
+
+Compare una volta sola per versione: chiusa quella, non la rivedi finché non arriva l'aggiornamento successivo. Se una versione non porta un elenco proprio, al suo posto trovi una riga generica che segnala correzioni e miglioramenti di stabilità.
 
 ---

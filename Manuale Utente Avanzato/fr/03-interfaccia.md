@@ -20,7 +20,7 @@ La console des journaux, en bas à droite, est le reflet direct du moteur asynch
 Les messages sont codés par couleur pour une lecture rapide :
 
 -   🟢 **Vert (`Sent` / `Found New Item`) :** un nouvel élément a été trouvé et envoyé à Telegram.
--   🟡 **Jaune/orange (`Skipped` / `FloodWait`) :** le moteur a ignoré un élément (par exemple parce qu'il est antérieur à la *Date limite*) ou Telegram a demandé une pause anti-spam, que le bot gère tout seul.
+-   🟡 **Jaune/orange (`Skipped` / `FloodWait`) :** le moteur a ignoré un élément (par exemple parce qu'il est antérieur à la *Date de début*) ou Telegram a demandé une pause anti-spam, que le bot gère tout seul.
 -   🔴 **Rouge (`Error` / `Failed`) :** une erreur critique, comme une connexion interrompue, un jeton API erroné ou un changement dans les serveurs de YouTube.
 -   ⚪ **Gris/blanc (`Fetching` / `No updates`) :** administration courante. Le bot lit la source mais n'a rien trouvé de neuf depuis le dernier contrôle.
 

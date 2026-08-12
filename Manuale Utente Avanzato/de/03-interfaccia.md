@@ -20,7 +20,7 @@ Die Protokollkonsole, unten rechts, ist das direkte Spiegelbild der asynchronen 
 Die Meldungen sind zum schnellen Lesen farblich codiert:
 
 -   🟢 **Grün (`Sent` / `Found New Item`):** ein neues Element wurde gefunden und an Telegram gesendet.
--   🟡 **Gelb/Orange (`Skipped` / `FloodWait`):** die Engine hat ein Element übersprungen (etwa weil es vor dem *Stichtag* liegt) oder Telegram hat eine Anti-Spam-Pause verlangt, die der Bot selbst handhabt.
+-   🟡 **Gelb/Orange (`Skipped` / `FloodWait`):** die Engine hat ein Element übersprungen (etwa weil es vor dem *Startdatum* liegt) oder Telegram hat eine Anti-Spam-Pause verlangt, die der Bot selbst handhabt.
 -   🔴 **Rot (`Error` / `Failed`):** ein kritischer Fehler, etwa eine unterbrochene Verbindung, ein falscher API-Token oder eine Änderung an den YouTube-Servern.
 -   ⚪ **Grau/Weiß (`Fetching` / `No updates`):** normaler Betrieb. Der Bot liest die Quelle, hat aber seit der letzten Prüfung nichts Neues gefunden.
 

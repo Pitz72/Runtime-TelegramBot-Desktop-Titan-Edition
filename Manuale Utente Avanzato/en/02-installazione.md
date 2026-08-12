@@ -13,7 +13,7 @@ Titan Edition is lightweight and runs on Windows and Linux:
 ### 2.2 Installation
 Installation is straightforward.
 
-1. Download the file provided by your administrator or from the official releases page.
+1. Download the installer from the project's releases page. Alternatively you can build it yourself from the source code.
 2. **On Windows:** run the `.exe` file and follow the on-screen instructions. The program creates a desktop shortcut for you.
 3. **On Linux:** with the `.deb` package, double-click and let the package manager do the work; with the `.AppImage`, make the file executable (right-click → Properties → Permissions → Allow executing) and start it with a double-click.
 
@@ -30,5 +30,22 @@ On the very first launch, after the animated boot sequence and the language choi
 4.  **Start From Date:** an important setting. It defaults to today's date: Titan will still read your feeds, but it will **ignore and discard** any story or video published before this date. It keeps the bot from flooding the channel with weeks-old news on its first run.
 
 Once the four steps are done, click **Launch Titan**: you will land in the main command console.
+
+### 2.4 The welcome screen: language, guide and manual
+The screen with the eight flags is not just for the first run: it comes back at every start, and it is where you pick the interface language, which switches instantly. The **Launch Titan** button takes you in.
+
+Below that button there are three shortcuts:
+
+-   **Quick Guide** opens a few-page summary on screen, in the language you picked: how to get the token from @BotFather, the four steps of the wizard, how to add a source, how to customise the messages and how to start the engine. It is meant for anyone who wants to get going at once, without reading this manual.
+-   **Download Manual (PDF)** opens the complete manual — the one you are reading — in the system browser, in your language. The file is not inside the application: it is fetched from the network on the spot, so an active connection is needed.
+-   **Support the project** opens the page for a voluntary donation. Titan is free and open source: the donation is optional and unlocks nothing.
+
+You will find the two documentation entries again in System Settings, on the **General** tab (Chapter 8.2).
+
+### 2.5 After an update: the "What's New" screen
+When Titan has updated itself, the first launch of the new version shows a full-screen page listing what changed: fixes, new features, altered behaviours. The version number is prominent, the list is in your language, and the **Continue** button closes it.
+
+It appears once per version: once closed, you will not see it again until the next update arrives. If a version carries no list of its own, a generic line takes its place, reporting fixes and stability improvements.
+
 
 ![The Setup Wizard guides you through configuring the first bot in four steps.](screenshots/02-setup-wizard.png)

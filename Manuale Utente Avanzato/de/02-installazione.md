@@ -13,7 +13,7 @@ Titan Edition ist schlank und läuft unter Windows und Linux:
 ### 2.2 Installation
 Die Installation ist einfach.
 
-1. Laden Sie die Datei herunter, die Ihnen Ihr Administrator bereitstellt, oder von der offiziellen Releases-Seite.
+1. Laden Sie das Installationsprogramm von der Releases-Seite des Projekts herunter. Alternativ können Sie es selbst aus dem Quellcode bauen.
 2. **Unter Windows:** Starten Sie die Datei `.exe` und folgen Sie den Anweisungen auf dem Bildschirm. Das Programm legt selbst eine Verknüpfung auf dem Desktop an.
 3. **Unter Linux:** Mit dem Paket `.deb` doppelklicken Sie und überlassen den Rest der Paketverwaltung; beim `.AppImage` machen Sie die Datei ausführbar (Rechtsklick → Eigenschaften → Berechtigungen → Ausführen erlauben) und öffnen sie mit einem Doppelklick.
 
@@ -32,5 +32,22 @@ Beim allerersten Start, nach der animierten Boot-Sequenz und der Sprachwahl, emp
 4.  **Startdatum (Start Date):** ein wichtiger Parameter. Standardmäßig ist es das heutige Datum: Titan liest Ihre Feeds trotzdem, **ignoriert und verwirft** jedoch jede Nachricht oder jedes Video, das vor diesem Datum veröffentlicht wurde. Das verhindert, dass der Bot beim ersten Start den Kanal mit wochenalten Nachrichten überschwemmt.
 
 Nach Abschluss der vier Schritte klicken Sie auf **Titan Starten**: Sie landen auf der Hauptschaltzentrale.
+
+### 2.4 Der Begrüßungsbildschirm: Sprache, Anleitung und Handbuch
+Der Bildschirm mit den acht Flaggen gehört nicht nur zum ersten Start: Er kehrt bei jedem Start zurück, und dort wählen Sie die Sprache der Oberfläche, die sofort wechselt. Die Schaltfläche **Titan Starten** führt Sie hinein.
+
+Unter dieser Schaltfläche liegen drei Verknüpfungen:
+
+-   **Kurzanleitung** öffnet auf dem Bildschirm eine Zusammenfassung von wenigen Seiten, in der gewählten Sprache: wie man den Token von @BotFather erhält, die vier Schritte des Assistenten, wie man eine Quelle hinzufügt, wie man die Nachrichten anpasst und wie man den Motor startet. Sie richtet sich an alle, die sofort loslegen wollen, ohne dieses Handbuch zu lesen.
+-   **Handbuch herunterladen (PDF)** öffnet im Systembrowser das vollständige Handbuch — das, welches Sie gerade lesen — in Ihrer Sprache. Die Datei steckt nicht in der Anwendung: Sie wird im selben Moment aus dem Netz geholt, eine aktive Verbindung ist also nötig.
+-   **Projekt unterstützen** öffnet die Seite für eine freiwillige Spende. Titan ist kostenlos und quelloffen: Die Spende ist freiwillig und schaltet nichts frei.
+
+Die beiden Einträge zur Dokumentation finden Sie auch in den Systemeinstellungen, in der Registerkarte **Allgemein** (Kapitel 8.2).
+
+### 2.5 Nach einem Update: der Bildschirm „Neuigkeiten“
+Wenn sich Titan aktualisiert hat, zeigt der erste Start der neuen Version eine bildschirmfüllende Seite mit dem, was sich geändert hat: Korrekturen, neue Funktionen, geänderte Verhaltensweisen. Die Versionsnummer steht im Vordergrund, die Liste ist in Ihrer Sprache, und die Schaltfläche **Weiter** schließt sie.
+
+Sie erscheint einmal pro Version: einmal geschlossen, sehen Sie sie erst beim nächsten Update wieder. Bringt eine Version keine eigene Liste mit, tritt an ihre Stelle eine allgemeine Zeile, die Korrekturen und Stabilitätsverbesserungen meldet.
+
 
 ---

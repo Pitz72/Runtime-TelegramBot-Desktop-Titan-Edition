@@ -3,7 +3,7 @@
 Die Einstellungen jedes Bots öffnen sich über das Schieberegler-Symbol (🎚️) neben seinem Namen, in der linken Spalte. Das Fenster hat zwei Registerkarten: **Allgemein** (die Parameter des Bots) und **Vorlagen** (das Aussehen der Nachrichten).
 
 ### 6.1 Überprüfungsintervall und Benachrichtigungen
-In der Registerkarte **Allgemein** gibt es neben den Daten, die Sie bereits kennen (Name, Token, Kanal-ID, Stichtag), zwei Einstellungen, die das Verhalten des Bots bestimmen:
+In der Registerkarte **Allgemein** gibt es neben den Daten, die Sie bereits kennen (Name, Token, Kanal-ID, Startdatum), zwei Einstellungen, die das Verhalten des Bots bestimmen:
 
 -   **Überprüfungsintervall.** Ein Schieberegler von 1 bis 120 Minuten (standardmäßig 15), der festlegt, wie oft der Bot die Feeds prüft. Es ist der Grundrhythmus; braucht eine einzelne Quelle einen anderen Takt, geben Sie ihn ihr im Feed Manager (Kapitel 5).
 -   **Benachrichtigungen.** Ein Schalter: Ist er eingeschaltet, blendet Titan bei jeder erfolgreichen Veröffentlichung einen Systemhinweis ein (eine Desktop-Benachrichtigung). Wenn Sie sehr aktive Kanäle betreiben und nicht bei jedem Beitrag benachrichtigt werden möchten, schalten Sie ihn aus.
@@ -49,7 +49,7 @@ Zwei Werkzeuge helfen Ihnen, Fehler zu vermeiden:
 Am unteren Ende der Registerkarte **Allgemein** gibt es einen roten Abschnitt, die *Gefahrenzone*. Die Schaltfläche **Verlauf Löschen** ist mächtig und destruktiv: Sie löscht das Gedächtnis des Bots, also alles, was er bereits veröffentlicht hat.
 
 -   *Wann es hilft.* Wenn Sie versehentlich viele Nachrichten aus dem Kanal gelöscht haben und möchten, dass der Bot die neuesten Meldungen erneut veröffentlicht, um die Pinnwand wiederherzustellen.
--   *Wie man es ohne Desaster verwendet.* Wenn Sie den Verlauf löschen und Play drücken, betrachtet der Bot alles, was er in den Feeds findet, als „neu“ und sendet es im Block, wodurch der Kanal überschwemmt wird. Um das zu vermeiden, setzen Sie nach dem Löschen den **Stichtag** (in derselben Registerkarte) auf das heutige Datum zurück: So vergisst der Bot die Vergangenheit, veröffentlicht aber nur von heute an.
+-   *Wie man es ohne Desaster verwendet.* Wenn Sie den Verlauf löschen und Play drücken, betrachtet der Bot alles, was er in den Feeds findet, als „neu“ und sendet es im Block, wodurch der Kanal überschwemmt wird. Um das zu vermeiden, setzen Sie nach dem Löschen den **Startdatum** (in derselben Registerkarte) auf das heutige Datum zurück: So vergisst der Bot die Vergangenheit, veröffentlicht aber nur von heute an.
 
 Beim Löschen des Verlaufs kehren auch die Statistikzähler auf null zurück (Kapitel 3). Neben der Gefahrenzone finden Sie auch den Export des Bots im Format `.rtb`, den wir in Kapitel 7 behandeln.
 

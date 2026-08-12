@@ -11,7 +11,15 @@ Un dettaglio già incontrato nel Capitolo 3: la console dei log resta comunque i
 
 ![La scheda Generale delle Preferenze di Sistema, con la scelta della lingua e il tasto di verifica aggiornamenti.](screenshots/08-system-general.png)
 
-### 8.2 Performance Mode
+### 8.2 Documentazione integrata
+Sempre nella scheda **Generale**, la sezione **Documentazione** raccoglie i due testi che accompagnano il programma, gli stessi che trovi sulla schermata di benvenuto (Capitolo 2.4).
+
+-   **Guida Rapida** apre a schermo, nella lingua corrente, il riassunto essenziale per configurare il primo bot senza uscire dall'applicazione.
+-   **Scarica Manuale (PDF)** apre nel browser di sistema il manuale completo nella tua lingua. Il PDF non è incluso nell'installazione: viene prelevato dalla rete al momento, quindi serve una connessione attiva. Se cambi lingua e premi di nuovo il pulsante, scarichi l'edizione corrispondente.
+
+Nella stessa scheda ci sono anche i **Crediti** del progetto e la sezione per **sostenerlo**, con il collegamento alla donazione e a quello dei contatti.
+
+### 8.3 Performance Mode
 Titan ha un'estetica ricca: vetro smerigliato, bagliori, righe da vecchio monitor (le *scanline*), transizioni animate. Sono gradevoli, ma su un computer datato o su una macchina virtuale possono appesantire la grafica.
 
 La scheda **Performance** ha un interruttore che spegne in un colpo solo gli effetti più pesanti: scanline, sfocature (*blur*), bagliori (*glow*) e animazioni. L'interfaccia diventa più spoglia ma più reattiva, e l'effetto è immediato: non serve riavviare. Accendilo se noti scatti o rallentamenti, lascialo spento se la grafica gira liscia.

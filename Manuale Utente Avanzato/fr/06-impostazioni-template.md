@@ -3,7 +3,7 @@
 Les paramètres de chaque bot s'ouvrent depuis l'icône à curseurs (🎚️) à côté de son nom, dans la colonne de gauche. La fenêtre a deux onglets : **Général** (les paramètres du bot) et **Modèles** (l'aspect des messages).
 
 ### 6.1 Intervalle de contrôle et notifications
-Dans l'onglet **Général**, outre les données que vous connaissez déjà (Nom, Jeton, ID du Canal, Date limite), deux réglages déterminent le comportement du bot :
+Dans l'onglet **Général**, outre les données que vous connaissez déjà (Nom, Jeton, ID du Canal, Date de début), deux réglages déterminent le comportement du bot :
 
 -   **Intervalle de contrôle.** Un curseur de 1 à 120 minutes (15 par défaut) qui fixe la fréquence à laquelle le bot va vérifier les flux. C'est le rythme de base ; si une source particulière a besoin d'une autre cadence, vous la lui donnez depuis le Feed Manager (Chapitre 5).
 -   **Notifications.** Un interrupteur : quand il est allumé, Titan fait apparaître un avis système (une notification du bureau) à chaque publication réussie. Si vous gérez des canaux très actifs et ne voulez pas être averti à chaque post, éteignez-le.
@@ -49,7 +49,7 @@ Deux outils vous aident à ne pas vous tromper :
 Au bas de l'onglet **Général** se trouve une section rouge, la *Zone de Danger*. Le bouton **Effacer l'historique** est puissant et destructeur : il efface la mémoire du bot, c'est-à-dire tout ce qu'il a déjà publié.
 
 -   *Quand cela sert.* Si vous avez supprimé par erreur de nombreux messages du canal et voulez que le bot republie les dernières nouvelles pour reconstituer le fil.
--   *Comment l'utiliser sans dégâts.* Si vous effacez l'historique et appuyez sur Play, le bot considère comme « nouveau » tout ce qu'il trouve dans les flux et l'envoie en bloc, inondant le canal. Pour l'éviter, après l'effacement, ramenez la **Date limite** (dans le même onglet) à la date du jour : ainsi le bot oublie le passé mais ne publie qu'à partir d'aujourd'hui.
+-   *Comment l'utiliser sans dégâts.* Si vous effacez l'historique et appuyez sur Play, le bot considère comme « nouveau » tout ce qu'il trouve dans les flux et l'envoie en bloc, inondant le canal. Pour l'éviter, après l'effacement, ramenez la **Date de début** (dans le même onglet) à la date du jour : ainsi le bot oublie le passé mais ne publie qu'à partir d'aujourd'hui.
 
 En effaçant l'historique, les compteurs de statistiques reviennent eux aussi à zéro (Chapitre 3). À côté de la Zone de Danger, vous trouvez aussi l'exportation du bot au format `.rtb`, que nous voyons au Chapitre 7.
 

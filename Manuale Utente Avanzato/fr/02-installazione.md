@@ -13,7 +13,7 @@ Titan Edition est léger et fonctionne sur Windows et Linux :
 ### 2.2 Installation
 L'installation est simple.
 
-1. Téléchargez le fichier fourni par votre administrateur ou depuis la page officielle des versions.
+1. Téléchargez l'installateur depuis la page des versions du projet. Vous pouvez aussi le compiler vous-même à partir du code source.
 2. **Sous Windows :** lancez le fichier `.exe` et suivez les instructions à l'écran. Le programme crée lui-même un raccourci sur le bureau.
 3. **Sous Linux :** avec le paquet `.deb`, double-cliquez et laissez faire le gestionnaire de paquets ; avec l'`.AppImage`, rendez le fichier exécutable (clic droit → Propriétés → Permissions → Autoriser l'exécution) et lancez-le d'un double-clic.
 
@@ -32,5 +32,22 @@ Au tout premier démarrage, après la séquence animée de boot et le choix de l
 4.  **Date de début (Start Date) :** un paramètre important. Par défaut, c'est la date du jour : Titan lira quand même vos flux, mais **ignorera et écartera** toute nouvelle ou vidéo publiée avant cette date. Cela évite qu'au premier démarrage le bot n'inonde le canal de nouvelles vieilles de plusieurs semaines.
 
 Une fois les quatre étapes terminées, cliquez sur **Lancer Titan** : vous vous retrouverez sur le tableau de bord principal.
+
+### 2.4 L'écran d'accueil : langue, guide et manuel
+L'écran aux huit drapeaux n'est pas réservé au premier démarrage : il revient à chaque lancement, et c'est là que vous choisissez la langue de l'interface, qui change à l'instant. Le bouton **Lancer Titan** vous fait entrer.
+
+Sous ce bouton se trouvent trois raccourcis :
+
+-   **Guide Rapide** ouvre à l'écran un résumé de quelques pages, dans la langue choisie : comment obtenir le jeton auprès de @BotFather, les quatre étapes de l'assistant, comment ajouter une source, comment personnaliser les messages et comment démarrer le moteur. Il s'adresse à qui veut partir tout de suite, sans lire ce manuel.
+-   **Télécharger le Manuel (PDF)** ouvre dans le navigateur du système le manuel complet — celui que vous lisez — dans votre langue. Le fichier n'est pas dans l'application : il est récupéré sur le réseau au moment voulu, une connexion active est donc nécessaire.
+-   **Soutenir le projet** ouvre la page d'un don libre. Titan est gratuit et à code ouvert : le don est facultatif et ne débloque rien.
+
+Vous retrouvez les deux entrées de documentation dans les Paramètres Système, à l'onglet **Général** (Chapitre 8.2).
+
+### 2.5 Après une mise à jour : l'écran « Nouveautés »
+Quand Titan s'est mis à jour, le premier démarrage de la nouvelle version affiche une page pleine écran qui énumère ce qui a changé : corrections, nouvelles fonctions, comportements modifiés. Le numéro de version est mis en évidence, la liste est dans votre langue, et le bouton **Continuer** la referme.
+
+Elle apparaît une seule fois par version : une fois fermée, vous ne la revoyez pas avant la mise à jour suivante. Si une version n'apporte pas sa propre liste, une ligne générique prend sa place, signalant des corrections et des améliorations de stabilité.
+
 
 ---

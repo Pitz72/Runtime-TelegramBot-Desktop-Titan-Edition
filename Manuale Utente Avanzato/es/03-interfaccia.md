@@ -20,7 +20,7 @@ La consola de los registros, abajo a la derecha, es el reflejo directo del motor
 Los mensajes están codificados por colores para una lectura rápida:
 
 -   🟢 **Verde (`Sent` / `Found New Item`):** se ha encontrado y enviado a Telegram un elemento nuevo.
--   🟡 **Amarillo/naranja (`Skipped` / `FloodWait`):** el motor ha ignorado un elemento (por ejemplo por ser anterior a la *Fecha de Corte*) o Telegram ha pedido una pausa anti-spam, que el bot gestiona solo.
+-   🟡 **Amarillo/naranja (`Skipped` / `FloodWait`):** el motor ha ignorado un elemento (por ejemplo por ser anterior a la *Fecha de Inicio*) o Telegram ha pedido una pausa anti-spam, que el bot gestiona solo.
 -   🔴 **Rojo (`Error` / `Failed`):** un error crítico, como una conexión interrumpida, un Token API erróneo o un cambio en los servidores de YouTube.
 -   ⚪ **Gris/blanco (`Fetching` / `No updates`):** administración rutinaria. El bot está leyendo la fuente pero no ha encontrado nada nuevo desde la última revisión.
 

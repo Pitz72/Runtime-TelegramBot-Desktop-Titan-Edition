@@ -73,7 +73,7 @@
         "channelPlaceholder": "ex. @omeucanal ou -10012345678",
         "intervalLabel": "Intervalo de Verificação",
         "intervalHint": "Minutos entre verificações dos feeds",
-        "startDateLabel": "Data de Corte",
+        "startDateLabel": "Data de Início",
         "startDateHint": "Ignorar artigos anteriores a esta data",
         "activeLabel": "Bot Ativo",
         "activeHint": "Se desativado, o bot não verifica nada",

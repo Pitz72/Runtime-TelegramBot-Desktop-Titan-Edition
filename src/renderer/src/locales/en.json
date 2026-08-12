@@ -73,7 +73,7 @@
         "channelPlaceholder": "e.g. @mychannel or -10012345678",
         "intervalLabel": "Check Interval",
         "intervalHint": "Minutes between feeds checks",
-        "startDateLabel": "Cutoff Date",
+        "startDateLabel": "Start From Date",
         "startDateHint": "Ignore articles published before this date",
         "activeLabel": "Bot Active",
         "activeHint": "If disabled, the bot will not check anything",

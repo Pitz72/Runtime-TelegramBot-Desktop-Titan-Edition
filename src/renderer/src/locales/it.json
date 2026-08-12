@@ -73,7 +73,7 @@
         "channelPlaceholder": "es. @miocanale oppure -10012345678",
         "intervalLabel": "Intervallo di Check",
         "intervalHint": "Minuti tra un controllo e l'altro sui feed",
-        "startDateLabel": "Data di Filtro (Cutoff)",
+        "startDateLabel": "Data di Partenza",
         "startDateHint": "Ignora articoli precedenti a questa data",
         "activeLabel": "Bot Attivo",
         "activeHint": "Se disattivato, il bot non controllerà nulla",

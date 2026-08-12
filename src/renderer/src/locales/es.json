@@ -73,7 +73,7 @@
         "channelPlaceholder": "ej. @micanal o -10012345678",
         "intervalLabel": "Intervalo de Revisión",
         "intervalHint": "Minutos entre revisiones",
-        "startDateLabel": "Fecha de Corte",
+        "startDateLabel": "Fecha de Inicio",
         "startDateHint": "Ignorar artículos antes de esta fecha",
         "activeLabel": "Bot Activo",
         "activeHint": "Si está desactivado, el bot no revisará nada",

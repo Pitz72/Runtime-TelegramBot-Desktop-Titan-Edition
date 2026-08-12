@@ -3,7 +3,7 @@
 ### 4.1 Mehrere Bots anlegen
 Titan ist mehrkanalig: Sie können mehrere Bots aus demselben Fenster verwalten, jeden mit seinem Kanal. Angenommen, Sie betreiben ein Radio: Sie brauchen einen Telegram-Kanal für die geschriebenen Nachrichten (News), einen für die Audiofolgen (Podcast) und vielleicht einen dritten für die Kulissen (YouTube). Sie müssen das Programm nicht dreimal installieren.
 
-Oben in der Bot-Spalte, rechts, gibt es eine kleine Befehlsgruppe. Das **+** öffnet ein schnelles Formular: Geben Sie Name, Token, Kanal-ID und Stichtag ein, speichern Sie, und das neue Profil erscheint in der Liste. Neben dem **+** finden Sie auch die Schaltfläche, um einen Bot aus einer `.rtb`-Datei zu **importieren** (Kapitel 7), und die mit Schiebereglern (🎚️), um seine **Einstellungen** zu öffnen (Kapitel 6).
+Oben in der Bot-Spalte, rechts, gibt es eine kleine Befehlsgruppe. Das **+** öffnet ein schnelles Formular: Geben Sie Name, Token, Kanal-ID und Startdatum ein, speichern Sie, und das neue Profil erscheint in der Liste. Neben dem **+** finden Sie auch die Schaltfläche, um einen Bot aus einer `.rtb`-Datei zu **importieren** (Kapitel 7), und die mit Schiebereglern (🎚️), um seine **Einstellungen** zu öffnen (Kapitel 6).
 
 Jedes Profil lebt für sich: Feeds, Zeiten und Vorlagen sind getrennt. Wenn Sie Play drücken, orchestriert Titan alle aktiven Bots in einem einzigen Arbeitszyklus und bedient sie reihum.
 

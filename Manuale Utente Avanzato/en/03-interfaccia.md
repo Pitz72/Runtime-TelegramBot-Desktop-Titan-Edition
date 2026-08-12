@@ -18,7 +18,7 @@ The log console, at the bottom right, is a direct mirror of the asynchronous eng
 Messages are colour-coded for quick reading:
 
 -   🟢 **Green (`Sent` / `Found New Item`):** a new item was found and sent to Telegram.
--   🟡 **Yellow/orange (`Skipped` / `FloodWait`):** the engine ignored an item (for example because it predates the *Cutoff Date*) or Telegram asked for an anti-spam pause, which the bot handles on its own.
+-   🟡 **Yellow/orange (`Skipped` / `FloodWait`):** the engine ignored an item (for example because it predates the *Start From Date*) or Telegram asked for an anti-spam pause, which the bot handles on its own.
 -   🔴 **Red (`Error` / `Failed`):** a critical error, such as a dropped connection, a wrong API Token or a change in YouTube's servers.
 -   ⚪ **Grey/white (`Fetching` / `No updates`):** routine business. The bot is reading the source but has found nothing new since the last check.
 

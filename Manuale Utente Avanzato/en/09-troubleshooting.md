@@ -8,4 +8,6 @@ Here are the most common problems and how to get out of them, in problem-and-sol
 
 **The bot reports "Bad Request: chat not found".** The Channel ID is wrong, or, more often, you forgot to add the bot to the channel's **Administrators**. Fix it: open the Telegram channel settings, add the bot as an administrator and give it permission to send messages. The error disappears (see also Chapter 4).
 
+**I double-click the icon and no second window opens: the one already there comes back to the front.** That is intended. Titan allows a single instance at a time: if the program is already running, the second launch opens nothing and merely brings the existing window forward, restoring it if it was minimised. The reason is concrete: two instances would open the same database and run two independent engines over the same feeds, ending up publishing the same item twice on the channel.
+
 **The bot publishes the news but the image shows up as a small square instead of a large preview.** This is Telegram's normal behaviour when the RSS source contains no large image, only a thumbnail. Titan looks for the image at the highest resolution it can find, going so far as to dig into the article text, but if the source does not have a suitable one, Telegram falls back to the thumbnail. To fix it you have to act on the site that publishes the feed, not on the bot.

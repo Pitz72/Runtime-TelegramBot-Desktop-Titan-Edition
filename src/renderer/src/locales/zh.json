@@ -73,7 +73,7 @@
         "channelPlaceholder": "例如 @mychannel 或 -10012345678",
         "intervalLabel": "检查间隔",
         "intervalHint": "Feed 检查之间的分钟数",
-        "startDateLabel": "截止日期",
+        "startDateLabel": "开始日期",
         "startDateHint": "忽略此日期之前的文章",
         "activeLabel": "机器人已激活",
         "activeHint": "如果禁用，机器人将不检查任何内容",

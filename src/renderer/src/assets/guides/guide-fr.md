@@ -16,7 +16,7 @@ Lancez Runtime TelegramBot Desktop Titan Edition. Si c'est votre première fois,
 *   **Nom du Bot :** Choisissez un nom pour le reconnaître (ex. *Canal d'Actualités*).
 *   **Bot Token :** Collez le Token fourni par @BotFather.
 *   **ID du Canal :** Entrez le nom de votre canal (ex. `@moncanal`). Si c'est un canal privé, entrez l'ID numérique (ex. `-100123456789`).
-*   **Date limite :** Choisissez une date. Le bot **ignorera** tous les articles et vidéos publiés avant cette date, évitant d'inonder votre canal d'anciens contenus.
+*   **Date de début :** Choisissez une date. Le bot **ignorera** tous les articles et vidéos publiés avant cette date, évitant d'inonder votre canal d'anciens contenus.
 
 ## 3. Ajouter des Sources (Gestionnaire de Flux)
 Une fois dans le Tableau de Bord :
@@ -48,4 +48,13 @@ Vous avez saisi le token et ajouté les flux ? Vous êtes prêt.
 *   **Erreurs YouTube :** Si vous recevez des erreurs « rouges » sur les chaînes YouTube, pas de panique. Google met souvent à jour ses serveurs. Désactivez temporairement le flux YouTube depuis le bouton dédié dans l'interface et attendez notre mise à jour logicielle.
 *   **Changement de PC :** Devez-vous déplacer le bot vers un autre ordinateur ? Ne copiez pas les fichiers ! Utilisez la fonction **Exporter (.rtb)** dans les paramètres. Cela générera un fichier sécurisé à importer dans le nouveau PC, en gardant vos mots de passe cryptés.
 
-*Pour une assistance avancée, reportez-vous au Manuel d'Utilisation Pro au format PDF.*
+---
+
+**Runtime TelegramBot Desktop · Titan Edition** est un logiciel libre, publié sous licence **MIT** : vous pouvez l'utiliser, l'étudier, le modifier et le redistribuer.
+
+La majeure partie du code a été écrite avec des modèles de langage (Google Gemini, Anthropic Claude). La conception, la direction du projet et la vérification sont de Simone Pizzi.
+
+Pour le traitement complet, utilisez le bouton **Télécharger le Manuel (PDF)**.
+
+Contact : simonepizzi.runtimeradio.it/contatti
+Don libre : paypal.me/runtimeradio

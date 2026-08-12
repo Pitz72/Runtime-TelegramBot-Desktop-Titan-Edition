@@ -73,7 +73,7 @@
         "channelPlaceholder": "напр. @mychannel или -10012345678",
         "intervalLabel": "Интервал проверки",
         "intervalHint": "Минуты между проверками фидов",
-        "startDateLabel": "Дата отсечения",
+        "startDateLabel": "Дата начала",
         "startDateHint": "Игнорировать статьи до этой даты",
         "activeLabel": "Бот Активен",
         "activeHint": "Если отключено, бот ничего не проверяет",

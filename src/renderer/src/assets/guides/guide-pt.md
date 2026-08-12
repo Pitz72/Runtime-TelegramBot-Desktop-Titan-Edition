@@ -16,7 +16,7 @@ Inicie o Runtime TelegramBot Desktop Titan Edition. Se for a primeira vez, apare
 *   **Nome do Bot:** Escolha um nome para o reconhecer (ex., *Canal de Notícias*).
 *   **Bot Token:** Cole o Token fornecido pelo @BotFather.
 *   **ID do Canal:** Introduza o nome do seu canal (ex., `@meucanal`). Se for um canal privado, introduza o ID numérico (ex., `-100123456789`).
-*   **Data de Corte:** Escolha uma data. O bot **ignorará** todos os artigos e vídeos publicados antes desta data, evitando inundar o seu canal com conteúdo antigo.
+*   **Data de Início:** Escolha uma data. O bot **ignorará** todos os artigos e vídeos publicados antes desta data, evitando inundar o seu canal com conteúdo antigo.
 
 ## 3. Adicionar Fontes (Gestor de Feed)
 Depois de entrar no Painel:
@@ -48,4 +48,13 @@ Já introduziu o token e adicionou os feeds? Está pronto.
 *   **Erros do YouTube:** Se receber erros «vermelhos» em canais do YouTube, não entre em pânico. O Google atualiza frequentemente os seus servidores. Desligue temporariamente o feed do YouTube a partir do botão dedicado na interface e aguarde a nossa atualização de software.
 *   **Troca de PC:** Precisa de mover o bot para outro computador? Não copie os ficheiros! Use a função **Exportar (.rtb)** nas definições. Isto gera um ficheiro seguro para importar no novo PC, mantendo as suas palavras-passe encriptadas.
 
-*Para assistência avançada, consulte o Manual do Utilizador Pro em formato PDF.*
+---
+
+**Runtime TelegramBot Desktop · Titan Edition** é software livre, publicado sob licença **MIT**: pode utilizá-lo, estudá-lo, modificá-lo e redistribuí-lo.
+
+A maior parte do código foi escrita com modelos de linguagem (Google Gemini, Anthropic Claude). A conceção, a direção do projeto e a verificação são de Simone Pizzi.
+
+Para o tratamento completo use o botão **Descarregar Manual (PDF)**.
+
+Contactos: simonepizzi.runtimeradio.it/contatti
+Donativo livre: paypal.me/runtimeradio

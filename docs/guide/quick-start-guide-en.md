@@ -22,7 +22,7 @@ On first launch, click **"+ New Bot"** and fill in the fields:
 - **Name** — a name to identify the bot in the interface (e.g. *News Channel*).
 - **Token** — the API Token provided by @BotFather.
 - **Channel ID** — the channel name (e.g. `@mychannel`) or the numeric ID for private channels (e.g. `-100123456789`).
-- **Cutoff Date** — the bot will ignore all content published before this date. Useful to avoid flooding the channel with old articles.
+- **Start From Date** — the bot will ignore all content published before this date. Useful to avoid flooding the channel with old articles.
 
 ---
 
@@ -108,4 +108,11 @@ To move a bot to another computer without losing the configuration:
 
 ---
 
-*For the full guide, refer to the User Manual available in PDF format.*
+**Runtime TelegramBot Desktop · Titan Edition** is free software, released under the **MIT Licence**: you may use it, study it, modify it and redistribute it.
+
+Most of the code was written with language models (Google Gemini, Anthropic Claude). The concept, the design direction and the verification are Simone Pizzi's.
+
+For the full treatment see the **Advanced User Manual** in PDF, available in eight languages.
+
+Contact: simonepizzi.runtimeradio.it/contatti
+Voluntary donation: paypal.me/runtimeradio

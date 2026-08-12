@@ -86,7 +86,9 @@
 
   #place(center + horizon, dy: 34mm)[
     #align(center)[
-      #text(font: font-display, size: 30pt, weight: 800, tracking: 1.5pt, fill: c.paper)[RUNTIME TELEGRAMBOT]
+      // Corpo ridotto rispetto a "TITAN EDITION": il nome canonico include "DESKTOP"
+      // e a 30pt sfonderebbe la larghezza della pagina.
+      #text(font: font-display, size: 21pt, weight: 800, tracking: 1.5pt, fill: c.paper)[RUNTIME TELEGRAMBOT DESKTOP]
       #v(1mm)
       #text(font: font-display, size: 30pt, weight: 800, tracking: 6pt, fill: brandGrad-h)[TITAN EDITION]
       #v(6mm)
@@ -124,7 +126,7 @@
       #v(9mm)
       #text(font: font-display, size: 9.5pt, weight: 600, tracking: 3.5pt, fill: c.blue)[#T.tagline]
       #v(6mm)
-      #text(font: font-display, size: 30pt, weight: 800, tracking: .3pt, fill: c.ink)[Runtime TelegramBot]
+      #text(font: font-display, size: 26pt, weight: 800, tracking: .3pt, fill: c.ink)[Runtime TelegramBot Desktop]
       #v(1mm)
       #text(font: font-display, size: 20pt, weight: 700, fill: c.blue)[Titan Edition]
       #v(3.5mm)
@@ -158,7 +160,7 @@
       #v(6mm)
       #set par(justify: false, leading: .9em)
       #set text(font: font-body, size: 9.5pt, fill: c.ink-soft)
-      #text(font: font-display, size: 12pt, weight: 600, fill: c.ink)[Runtime TelegramBot · Titan Edition — #T.manual-title]
+      #text(font: font-display, size: 12pt, weight: 600, fill: c.ink)[Runtime TelegramBot Desktop · Titan Edition — #T.manual-title]
       #v(2.5mm)
       #text(size: 9pt)[#edizione · #T.aligned-to #versione]
       #v(3mm)
@@ -228,7 +230,7 @@
 // CONFIGURAZIONE DOCUMENTO
 // =============================================================================
 #let conf(titolo: "Manuale Utente Avanzato", autore: "Simone Pizzi", doc) = {
-  set document(title: "Runtime TelegramBot · Titan Edition — " + titolo, author: autore)
+  set document(title: "Runtime TelegramBot Desktop · Titan Edition — " + titolo, author: autore)
 
   set page(
     width: 210mm, height: 297mm,               // A4 (edizione digitale)
@@ -241,7 +243,7 @@
       if corrente != none {
         set text(font: font-body, size: 8pt, fill: c.muted)
         grid(columns: (1fr, auto),
-          align(left)[Runtime TelegramBot · Titan Edition],
+          align(left)[Runtime TelegramBot Desktop · Titan Edition],
           align(right)[#corrente.body])
         v(-0.4em)
         line(length: 100%, stroke: 0.4pt + c.rule)

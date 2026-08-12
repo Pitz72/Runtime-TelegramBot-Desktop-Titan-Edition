@@ -2,7 +2,7 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** in corso — **Fase 1 chiusa e pushata** (12/08). Prossimo passo: Fase 2 (manuali), che non dipende da nessuna decisione aperta e si può fare subito. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** in corso — **Fase 1 chiusa e pushata**, **Fase 2 eseguita con una riserva e due voci aperte** (12/08). Prossimo passo: sciogliere la riserva sulla Fase 2 (revisione della prosa nuova + gli 8 leggimi), poi le decisioni aperte che sbloccano la Fase 3. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
 
 > **Come si legge.** Le fasi sono in ordine di dipendenza, non di importanza: invertirle rompe qualcosa. Le voci marcate ⛔ sono blocchi veri — se le salti, un utente reale ne subisce le conseguenze.
 
@@ -59,41 +59,52 @@ Committata il 12 agosto 2026. `npx tsc --noEmit`, `npx vite build` e `scripts/ch
 
 ---
 
-## FASE 2 — Manuali e documentazione (sessione dedicata)
+## FASE 2 — Manuali e documentazione — ESEGUITA IL 12/08, CON UNA RISERVA
 
-La toolchain è installata e collaudata end-to-end: Typst 0.14.2, pandoc 3.9, PowerShell 7.6, Pillow 12.2. Il manuale italiano è già stato ricompilato con successo e i capitoli si rigenerano identici.
+⚠️ **La riserva, prima di tutto.** Le sezioni nuove (2.4, 2.5, 8.2, la voce «istanza singola» del cap. 9, i piedi delle 16 guide brevi) sono **testo scritto ex novo direttamente in 8 lingue**, non traduzioni di un originale già revisionato. **Non sono passate dal protocollo di revisione severa** usato a luglio (vedi `GitHub/ProtocolloManuale` e la memoria `sessione-2026-07-07-revisione-globale`). Meccanicamente i PDF sono corretti e verificati; la qualità della prosa in DE/RU/ZH/PT/ES/FR non è stata controllata da nessuno. **Prima di pubblicare gli 8 PDF serve una passata di revisione dedicata.**
 
-### 2.1 — Vignette (fa da sola quasi tutto il lavoro sul peso)
+La toolchain è installata e collaudata end-to-end: Typst 0.14.2, pandoc 3.9, PowerShell 7.6, Pillow 12.2.
 
-- [ ] Ricampionare le 9 vignette a 2000px, qualità 82, progressive
-- [ ] Confronto a video di una pagina prima/dopo per ogni capitolo
+### 2.1 — Vignette ✅
+
+- [x] Ricampionare le 9 vignette a 2000px, qualità 82, progressive — **28,78 → 5,70 MB (−80%)**, 299 DPI a 170 mm di larghezza
+- [x] Confronto a video di una pagina prima/dopo per ogni capitolo — confrontato il ritaglio al 100% contro l'originale ridotto a 2000px senza ricompressione, su tutte e 9. Indistinguibili, retini a mezzatinta compresi
 
 Misurato su una copia: vignette **28,8 → 5,5 MB**, PDF italiano **32,0 → 8,8 MB**, tutti e 8 **258 → ~70 MB**. Confronto visivo già fatto su una pagina: indistinguibile. Sono illustrazioni al tratto, il caso in cui il JPEG rende meglio, e a 2000px su A4 si resta sopra i 300 DPI.
 
-### 2.2 — Sorgenti dei manuali
+### 2.2 — Sorgenti dei manuali ✅
 
-⛔ **`typst/lib/strings.typ` — il colophon contiene l'EULA.** Tutti e 8 i PDF oggi pubblicati dicono «Tutti i diritti riservati» e «Nessuna parte di questo documento può essere riprodotta, distribuita o trasmessa senza il previo consenso scritto dell'autore». È lo stesso problema del vecchio `LICENSE.txt`, in forma di manuale: non si può aprire il progetto lasciandoli in circolazione.
+Il colophon conteneva l'EULA: tutti e 8 i PDF pubblicati dicevano «Tutti i diritti riservati» e vietavano la riproduzione. **Risolto.**
 
-- [ ] `strings.typ` × 8 lingue — `rights` → MIT; `repro` → riscritta per licenza libera; `credits` → più il credito LLM
-- [ ] `lib/manuale-template.typ` — nome canonico «Runtime TelegramBot **Desktop** · Titan Edition» (4 occorrenze, oggi senza «Desktop»)
-- [ ] `manuale.typ` — `VERSIONE` da `2.1.5` alla versione che si rilascia
-- [ ] Capitolo 02 × 7 lingue — «Data di Partenza (Start Date)» → l'etichetta reale dell'app, «Data di Filtro (Cutoff)» e corrispettivi. L'inglese è già corretto
-- [ ] Contenuto mancante: guida rapida in-app, download del manuale PDF e schermata «Novità» (funzioni della 2.1.6) **non sono documentate da nessuna parte nel manuale**. Va scritto ex novo in 8 lingue — è l'unica parte non meccanica di tutta la fase
-- [ ] Valutare una riga sull'istanza singola nel capitolo 09 (troubleshooting)
-- [ ] Verificare che nessun capitolo dia per scontata l'esistenza di un acquisto o di una licenza commerciale (una prima passata dice di no: i sorgenti non contengono riferimenti a licenza, prezzo o Gumroad)
+- [x] `strings.typ` × 8 lingue — `rights` → MIT; `repro` → riscritta per licenza libera; `credits` → più il credito LLM. Aggiunto «Desktop» anche in `trademark`
+- [x] `lib/manuale-template.typ` — nome canonico «Runtime TelegramBot **Desktop** · Titan Edition» in **5** punti, non 4: copertina, frontespizio, colophon, titolo del documento PDF, intestazione corrente. Copertina 30 → 21 pt e frontespizio 30 → 26 pt, altrimenti il nome più lungo sfondava la pagina
+- [x] `manuale.typ` — `VERSIONE` = `2.1.8`
+- [x] ~~Capitolo 02 × 7 lingue~~ — **la voce era basata su una premessa sbagliata.** Il capitolo 02 documenta il *Setup Wizard* e riportava fedelmente la sua etichetta (`setup.step4Label`). L'incoerenza era **dentro l'applicazione**: il wizard diceva «Data di Partenza», le impostazioni bot «Data di Filtro (Cutoff)». Su decisione dell'utente si è unificato su **«Data di Partenza»**: cambiato `botModal.startDateLabel` nelle 8 lingue e allineati i capitoli 03/04/06 in tutte e 8. Il capitolo 02 non andava toccato
+- [x] Contenuto mancante — scritto ex novo in 8 lingue: **§2.4** schermata di benvenuto (guida rapida, download PDF, donazione), **§2.5** schermata «Novità» dopo un aggiornamento, **§8.2** documentazione integrata nelle impostazioni. Performance Mode è slittata da 8.2 a 8.3. ⚠️ *Questa è la prosa non revisionata di cui sopra*
+- [x] Riga sull'istanza singola nel capitolo 09 — aggiunta in tutte e 8 le lingue
+- [x] Nessun capitolo dà per scontato un acquisto. Trovato e corretto un residuo: «Scarica il file fornito dal tuo amministratore» → «Scarica l'installer dalla pagina delle release del progetto. In alternativa puoi compilarlo tu dal codice sorgente»
 
-### 2.3 — Guide brevi (24 file markdown, nessuna ricompilazione)
+### 2.3 — Guide brevi — PARZIALE
 
-- [ ] 8 guide in-app — `src/renderer/src/assets/guides/guide-*.md`
-- [ ] 8 guide rapide — `docs/guide/quick-start-guide-*.md`
-- [ ] 8 leggimi — `docs/guide/*.txt`
-- [ ] In ciascuna: riga di credito LLM/paternità, licenza MIT, contatti e donazione. Rimuovere ogni residuo di inquadramento commerciale
+- [x] 8 guide in-app — `src/renderer/src/assets/guides/guide-*.md`
+- [x] 8 guide rapide — `docs/guide/quick-start-guide-*.md`
+- [ ] ⛔ **8 leggimi — `docs/guide/*.txt`: NON FATTI.** Sono ancora quelli del pacchetto commerciale e cominciano con «Grazie per aver acquistato». Il testo sostitutivo è stato scritto ma **non applicato**, per scelta, a fine sessione. **Da rifare da zero o da recuperare in una sessione dedicata: sono l'ultimo residuo esplicito della fase di vendita**
+- [x] Nelle 16 fatte: piede con licenza MIT, credito LLM e paternità, contatti e donazione; tolto il rimando al «Manuale d'Uso **Pro**»; allineata l'etichetta della data di partenza
 
-### 2.4 — Compilazione e verifica
+### 2.4 — Compilazione e verifica ✅
 
-- [ ] `pwsh typst/build.ps1 -All`
-- [ ] Verifica programmatica su tutti e 8 i PDF: assenza di «riservati» e delle formule di divieto, nome prodotto corretto, versione giusta, credito LLM presente, licenza MIT citata
-- [ ] Verifica **a video** di copertina, frontespizio e colophon per ognuna delle 8 lingue, più una pagina con vignetta
+- [x] `pwsh typst/build.ps1 -All` — 8 PDF su 8, nessun errore
+- [x] Verifica programmatica su tutti e 8: nessuna formula di riserva dei diritti in nessuna lingua, nome prodotto canonico, versione 2.1.8, licenza MIT citata, credito LLM presente. **Tutti superati**
+- [x] Verifica a video di copertina, frontespizio e colophon per tutte e 8 le lingue, più una pagina con vignetta. Il nome più lungo entra ovunque
+- **Peso: 258 → 72,4 MB** (9,0 MB a lingua, 9,4 per il cinese)
+
+⚠️ **Gli 8 PDF ricompilati NON sono stati committati**, di proposito: andranno rifatti dopo la revisione della prosa, e committarli due volte lascerebbe 144 MB nella storia di una repo che sta per diventare pubblica. In `HEAD` restano quindi i **vecchi** PDF da 32 MB, con il colophon EULA. Si rigenerano in qualsiasi momento con `pwsh typst/build.ps1 -All`. **Vanno committati una volta sola, alla fine**, e la decisione aperta «PDF nel repo o allegati di release» va sciolta prima. I sorgenti (vignette ricampionate incluse) sono invece committati.
+
+#### Difetti tipografici visti e non corretti
+
+- **PT**: nel colophon, «modificá-los» spezzato a fine riga produce un doppio trattino («modificá-» + «-los»). Va sistemato a mano nel testo o disattivando la sillabazione su quel blocco
+- **PT e RU**: il titolo nel colophon va a capo con sillabazione («Avan-çado», «поль-зователя»). Tollerabile, ma non elegante
+- Colonna giustificata stretta: la sillabazione è aggressiva in italiano («per inte-ro», «copy-right»). Preesistente, accentuata dal testo più lungo
 
 ---
 
@@ -109,7 +120,8 @@ Misurato su una copia: vignette **28,8 → 5,5 MB**, PDF italiano **32,0 → 8,8
 - [ ] Tutti i link nella documentazione che puntano a `Ecosystem-Runtime`
 - [ ] `version` a `2.1.8` in `package.json`
 - [ ] ⛔ **Entry `2.1.8` in `src/renderer/src/lib/releaseNotes.ts`** — se manca, la schermata «Novità» mostra il testo generico invece dell'elenco
-- [ ] `CHANGELOG.md` — la sezione «Non ancora rilasciato» diventa `v2.1.8`, più `docs/changelogs/CHANGELOG_v2.1.8.md`
+- [ ] `CHANGELOG.md` — la sezione «Non ancora rilasciato» diventa `v2.1.8`, più `docs/changelogs/CHANGELOG_v2.1.8.md`. **Da citare fra le novità: il campo della data ora si chiama «Data di Partenza» anche nelle impostazioni del bot** (prima era «Data di Filtro (Cutoff)»); è una stringa visibile che cambia sotto agli occhi degli utenti esistenti
+- [ ] I manuali sono già compilati alla versione **2.1.8**: se la versione che si rilascia cambia, `typst/manuale.typ` va aggiornato e gli 8 PDF ricompilati
 - [ ] Build e **pubblicazione sulla vecchia repo ponte** (serve il secret `RELEASE_TOKEN` riconfigurato sulla repo nuova): è lì che le installazioni esistenti vanno a cercare l'aggiornamento
 
 ---
@@ -174,4 +186,5 @@ Documentate nell'audit del 12/08 (`docs/storico/AUDIT-2026-08-12-pre-opensource.
 - **N+1 nell'import `.rtb`** — una `SELECT` per ogni feed disattivato, invece di usare `lastInsertRowid`
 - **Redirect HTTP non ri-validati anti-SSRF** — scelta deliberata: bloccarli romperebbe i feed che fanno `http`→`https`. Dichiarato in `SECURITY.md`
 - **Scansione ancora seriale tra bot** — parallela solo sui feed RSS dentro lo stesso bot
+- **Il parser markdown di `GuideModal.tsx` non gestisce il corsivo `*testo*`** — mostra gli asterischi letteralmente. Nelle guide in-app ci sono 4 righe per lingua che ne fanno uso (es. «(es. *Canale News*)»), quindi l'utente vede gli asterischi a schermo. Lo stesso parser rende i link `[testo](url)` come testo non cliccabile, scartando l'indirizzo: per questo il piede delle guide in-app riporta gli URL in chiaro. Trovato il 12/08, non corretto
 - **`productName` non si tocca mai.** Da quella stringa deriva la cartella `userData`: cambiarla azzera bot, feed, storico e token di ogni utente esistente. Scritto in `CONTRIBUTING.md` e in `docs/database.md`

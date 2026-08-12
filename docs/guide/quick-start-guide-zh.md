@@ -22,7 +22,7 @@
 - **名称** — 用于在界面中识别机器人的名称（例如 *新闻频道*）。
 - **令牌** — @BotFather 提供的 API 令牌。
 - **Channel ID** — 频道名称（例如 `@我的频道`）或私有频道的数字 ID（例如 `-100123456789`）。
-- **截止日期** — 机器人将忽略此日期之前发布的所有内容。有助于避免用旧文章刷屏频道。
+- **开始日期** — 机器人将忽略此日期之前发布的所有内容。有助于避免用旧文章刷屏频道。
 
 ---
 
@@ -108,4 +108,11 @@ Telegram 支持的 HTML 标签：`<b>`、`<i>`、`<code>`、`<a href="...">`。
 
 ---
 
-*完整指南请参阅 PDF 格式的用户手册。*
+**Runtime TelegramBot Desktop · Titan Edition** 是自由软件，依据 **MIT 许可证** 发布：您可以使用、研究、修改并再分发它。
+
+大部分代码借助语言模型编写（Google Gemini、Anthropic Claude）。构思、项目主导与核验均出自 Simone Pizzi。
+
+完整内容请参阅 PDF 格式的 **高级用户手册**，共有八种语言版本。
+
+联系方式：simonepizzi.runtimeradio.it/contatti
+自愿捐赠：paypal.me/runtimeradio

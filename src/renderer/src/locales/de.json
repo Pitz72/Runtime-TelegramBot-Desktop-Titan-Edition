@@ -73,7 +73,7 @@
         "channelPlaceholder": "z. B. @meinkanal oder -10012345678",
         "intervalLabel": "Überprüfungsintervall",
         "intervalHint": "Minuten zwischen Feed-Überprüfungen",
-        "startDateLabel": "Stichtag",
+        "startDateLabel": "Startdatum",
         "startDateHint": "Artikel vor diesem Datum ignorieren",
         "activeLabel": "Bot Aktiv",
         "activeHint": "Wenn deaktiviert, überprüft der Bot nichts",

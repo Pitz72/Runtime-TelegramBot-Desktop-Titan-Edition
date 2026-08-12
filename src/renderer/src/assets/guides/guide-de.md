@@ -16,7 +16,7 @@ Starten Sie Runtime TelegramBot Desktop Titan Edition. Wenn dies Ihr erstes Mal 
 *   **Bot-Name:** Wählen Sie einen Namen, um ihn zu erkennen (z. B. *News-Kanal*).
 *   **Bot Token:** Fügen Sie den von @BotFather bereitgestellten Token ein.
 *   **Channel ID:** Geben Sie den Namen Ihres Kanals ein (z. B. `@meinkanal`). Wenn es ein privater Kanal ist, geben Sie die numerische ID (z. B. `-100123456789`).
-*   **Stichtag:** Wählen Sie ein Datum. Der Bot **ignoriert** alle Artikel und Videos, die vor diesem Datum veröffentlicht wurden, um zu vermeiden, dass Ihr Kanal mit alten Inhalten überflutet wird.
+*   **Startdatum:** Wählen Sie ein Datum. Der Bot **ignoriert** alle Artikel und Videos, die vor diesem Datum veröffentlicht wurden, um zu vermeiden, dass Ihr Kanal mit alten Inhalten überflutet wird.
 
 ## 3. Quellen hinzufügen (Feed-Manager)
 Sobald Sie sich im Dashboard befinden:
@@ -48,4 +48,13 @@ Haben Sie den Token eingegeben und die Feeds hinzugefügt? Sie sind bereit.
 *   **YouTube-Fehler:** Wenn Sie „rote“ Fehler auf YouTube-Kanälen erhalten, geraten Sie nicht in Panik. Google aktualisiert häufig seine Server. Schalten Sie den YouTube-Feed vorübergehend über die entsprechende Schaltfläche in der Oberfläche ab und warten Sie auf unser Software-Update.
 *   **PC-Wechsel:** Müssen Sie den Bot auf einen anderen Computer übertragen? Kopieren Sie die Dateien nicht! Verwenden Sie die Funktion **Exportieren (.rtb)** in den Einstellungen. Dadurch wird eine sichere Datei generiert, die in den neuen PC importiert werden kann, wobei Ihre Passwörter verschlüsselt bleiben.
 
-*Für erweiterte Hilfe lesen Sie bitte das Pro-Benutzerhandbuch im PDF-Format.*
+---
+
+**Runtime TelegramBot Desktop · Titan Edition** ist freie Software, veröffentlicht unter der **MIT-Lizenz**: Sie dürfen sie verwenden, untersuchen, verändern und weitergeben.
+
+Der Großteil des Codes wurde mit Sprachmodellen geschrieben (Google Gemini, Anthropic Claude). Konzept, Projektleitung und Überprüfung stammen von Simone Pizzi.
+
+Für die vollständige Darstellung nutzen Sie die Schaltfläche **Handbuch herunterladen (PDF)**.
+
+Kontakt: simonepizzi.runtimeradio.it/contatti
+Freiwillige Spende: paypal.me/runtimeradio

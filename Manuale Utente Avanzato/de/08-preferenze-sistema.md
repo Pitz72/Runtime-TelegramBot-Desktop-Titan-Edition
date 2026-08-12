@@ -11,7 +11,15 @@ Ein bereits in Kapitel 3 erwähntes Detail: Die Protokollkonsole bleibt in jedem
 
 ![Die Registerkarte Allgemein der Systempräferenzen, mit der Sprachwahl und der Schaltfläche zur Updateprüfung.](screenshots/08-system-general.png)
 
-### 8.2 Performance-Modus
+### 8.2 Integrierte Dokumentation
+Ebenfalls in der Registerkarte **Allgemein** versammelt der Abschnitt **Dokumentation** die beiden Texte, die dem Programm beiliegen — dieselben, die Sie auf dem Begrüßungsbildschirm finden (Kapitel 2.4).
+
+-   **Kurzanleitung** öffnet auf dem Bildschirm, in der aktuellen Sprache, die knappe Zusammenfassung, um den ersten Bot einzurichten, ohne die Anwendung zu verlassen.
+-   **Handbuch herunterladen (PDF)** öffnet im Systembrowser das vollständige Handbuch in Ihrer Sprache. Das PDF gehört nicht zur Installation: Es wird im selben Moment aus dem Netz geholt, eine aktive Verbindung ist also nötig. Wechseln Sie die Sprache und drücken die Schaltfläche erneut, erhalten Sie die passende Ausgabe.
+
+In derselben Registerkarte stehen auch die **Credits** des Projekts und der Abschnitt, um es zu **unterstützen**, mit dem Link zur Spende und dem zur Kontaktseite.
+
+### 8.3 Performance-Modus
 Titan hat eine reiche Ästhetik: Milchglas, Leuchten, Zeilen alter Monitore (die *Scanlines*), animierte Übergänge. Sie sind ansprechend, können aber auf einem älteren Computer oder einer virtuellen Maschine die Grafik belasten.
 
 Die Registerkarte **Performance** hat einen Schalter, der die schwersten Effekte auf einen Schlag abschaltet: Scanlines, Unschärfen (*Blur*), Leuchten (*Glow*) und Animationen. Die Oberfläche wird schlichter, aber reaktiver, und der Effekt ist sofort spürbar: Ein Neustart ist nicht nötig. Schalten Sie ihn ein, wenn Sie Ruckeln oder Verlangsamungen bemerken, lassen Sie ihn aus, wenn die Grafik flüssig läuft.

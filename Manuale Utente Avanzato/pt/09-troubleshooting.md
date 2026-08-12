@@ -8,6 +8,8 @@ Aqui encontra os problemas mais comuns e como sair deles, no formato problema e 
 
 **O bot assinala «Bad Request: chat not found».** O Channel ID está errado ou, mais frequentemente, esqueceu-se de adicionar o bot aos **Administradores** do canal. Resolva: abra-o nas definições do canal do Telegram, adicione o bot como administrador e dê-lhe permissão para enviar mensagens. O erro desaparece (veja também o Capítulo 4).
 
+**Faço duplo clique no ícone e não se abre uma segunda janela: volta para a frente a que já lá estava.** É intencional. O Titan admite uma só instância de cada vez: se o programa já está em execução, o segundo arranque não abre nada e limita-se a trazer para a frente a janela existente, restaurando-a se estivesse minimizada. A razão é concreta: duas instâncias abririam a mesma base de dados e poriam a trabalhar dois motores independentes sobre os mesmos feeds, com o resultado de publicar duas vezes o mesmo conteúdo no canal.
+
 **O bot publica as notícias mas a imagem aparece como um quadradinho pequeno em vez de uma pré-visualização grande.** É o comportamento normal do Telegram quando a fonte RSS não contém uma imagem grande, mas apenas uma miniatura. O Titan procura a imagem na resolução mais alta que consegue encontrar, chegando a escavar no texto do artigo, mas se a fonte não tiver uma adequada, o Telegram recorre à miniatura. Para o corrigir é preciso intervir no site que publica o feed, não no bot.
 
 ---

@@ -73,7 +73,7 @@
         "channelPlaceholder": "ex. @moncanal ou -10012345678",
         "intervalLabel": "Intervalle de contrôle",
         "intervalHint": "Minutes entre les vérifications des flux",
-        "startDateLabel": "Date limite",
+        "startDateLabel": "Date de début",
         "startDateHint": "Ignorer les articles publiés avant cette date",
         "activeLabel": "Bot Actif",
         "activeHint": "S'il est désactivé, le bot ne vérifiera rien",
