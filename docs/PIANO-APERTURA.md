@@ -88,7 +88,7 @@ Il colophon conteneva l'EULA: tutti e 8 i PDF pubblicati dicevano «Tutti i diri
 
 - [x] 8 guide in-app — `src/renderer/src/assets/guides/guide-*.md`
 - [x] 8 guide rapide — `docs/guide/quick-start-guide-*.md`
-- [ ] ⛔ **8 leggimi — `docs/guide/*.txt`: NON FATTI.** Sono ancora quelli del pacchetto commerciale e cominciano con «Grazie per aver acquistato». Il testo sostitutivo è stato scritto ma **non applicato**, per scelta, a fine sessione. **Da rifare da zero o da recuperare in una sessione dedicata: sono l'ultimo residuo esplicito della fase di vendita**
+- [ ] ⛔ **8 leggimi — `docs/guide/*.txt`: NON FATTI.** Sono ancora quelli del pacchetto commerciale e cominciano con «Grazie per aver acquistato». **Da riscrivere da zero**: la bozza preparata il 12/08 non è stata applicata ed è andata persa con la sessione. Sono l'ultimo residuo esplicito della fase di vendita. Cosa devono contenere: licenza MIT e sorgente pubblico, istruzioni di installazione per Windows/Linux (macOS solo da sorgente), avviso SmartScreen riformulato senza «sicuro al 100%», nota che l'auto-update non vale per deb/rpm/pacman, rimando alla guida in-app e al manuale PDF, credito LLM e paternità, contatti e donazione. UTF-8 senza BOM, terminazioni CRLF
 - [x] Nelle 16 fatte: piede con licenza MIT, credito LLM e paternità, contatti e donazione; tolto il rimando al «Manuale d'Uso **Pro**»; allineata l'etichetta della data di partenza
 
 ### 2.4 — Compilazione e verifica ✅
