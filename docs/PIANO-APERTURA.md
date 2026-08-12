@@ -2,7 +2,7 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** in corso. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** in corso — Fase 1 chiusa (12/08), il push è l'unica voce rimasta. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
 
 > **Come si legge.** Le fasi sono in ordine di dipendenza, non di importanza: invertirle rompe qualcosa. Le voci marcate ⛔ sono blocchi veri — se le salti, un utente reale ne subisce le conseguenze.
 
@@ -33,15 +33,15 @@
 
 ---
 
-## FASE 1 — Chiudere il lavoro già fatto
+## FASE 1 — Chiudere il lavoro già fatto ✅ (salvo il push)
 
-Tutto quanto segue è **già scritto e verificato nel working tree**, ma non committato. `npx tsc --noEmit`, `npx vite build` e `scripts/check-locales.mjs` passano puliti.
+Committata il 12 agosto 2026. `npx tsc --noEmit`, `npx vite build` e `scripts/check-locales.mjs` passano puliti sul working tree finale, e nessuno dei tre commit lascia uno stato intermedio rotto (verificato: il commit 1 non referenzia chiavi o file introdotti dopo).
 
-- [ ] Rivedere il diff completo
-- [ ] `git rm --cached .claude/settings.local.json` — è tracciato ma già in `.gitignore`, e in una repo pubblica non ci deve stare (contenuto innocuo, solo permessi locali)
-- [ ] Commit 1 — correzioni di sicurezza e bug
-- [ ] Commit 2 — licenza MIT, riorganizzazione documentale, CI
-- [ ] Commit 3 — credito LLM, donazioni e contatti
+- [x] Rivedere il diff completo
+- [x] `git rm --cached .claude/settings.local.json` — è tracciato ma già in `.gitignore`, e in una repo pubblica non ci deve stare (contenuto innocuo, solo permessi locali)
+- [x] Commit 1 — correzioni di sicurezza e bug → `c4313f3`
+- [x] Commit 2 — licenza MIT, riorganizzazione documentale, CI → `e0f8447`
+- [x] Commit 3 — credito LLM, donazioni e contatti → `2e21e77`
 - [ ] Push su `origin/main`
 
 ### Cosa contiene, per memoria
