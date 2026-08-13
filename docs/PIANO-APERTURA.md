@@ -29,7 +29,7 @@
 
 - [ ] **Come spostare la repo su `Pitz72`**: trasferimento nativo GitHub (preserva storia, tag, issue, stelle e lascia un redirect) oppure repo nuova con push della storia (perde redirect, issue e stelle). *Serve prima della Fase 4.*
 - [ ] **Nome della repo di destinazione**: mantenere `Runtime-TelegramBot-Desktop-Titan-Edition` o accorciarlo. Se cambia, cambiano tutti i link nella documentazione e in `docs.ts`.
-- [ ] **Dove vivono i 2 manuali PDF** dopo la migrazione: committati nella repo (come oggi sulla ponte) oppure come allegati di una release. Incide sul peso del repository.
+- [x] ~~**Dove vivono i 2 manuali PDF**~~ — **sciolta il 13/08: committati nella repo.** Pesano 9,0 MB l'uno invece dei 32 di prima, e tenerli versionati accanto ai sorgenti Typst evita che PDF e sorgente divergano. Nulla vieta di allegarli **anche** alla release.
 - [ ] **Quanto tempo lasciare alla finestra di migrazione** prima di cancellare la ponte.
 - [ ] **Se pubblicare una v2.1.8 anche sulla ponte** con i soli fix, o aspettare di avere anche i manuali rifatti e fare una sola release.
 
@@ -102,7 +102,7 @@ Il colophon conteneva l'EULA: tutti e 8 i PDF pubblicati dicevano «Tutti i diri
 - [x] Verifica a video di copertina, frontespizio e colophon per tutte e 8 le lingue, più una pagina con vignetta. Il nome più lungo entra ovunque
 - **Peso: 258 → 72,4 MB** (9,0 MB a lingua, 9,4 per il cinese)
 
-⚠️ **Gli 8 PDF ricompilati NON sono stati committati**, di proposito: andranno rifatti dopo la revisione della prosa, e committarli due volte lascerebbe 144 MB nella storia di una repo che sta per diventare pubblica. In `HEAD` restano quindi i **vecchi** PDF da 32 MB, con il colophon EULA. Si rigenerano in qualsiasi momento con `pwsh typst/build.ps1 -All` (che dalla Fase 2-bis produce 2 PDF, non 8). **Vanno committati una volta sola, alla fine**, e la decisione aperta «PDF nel repo o allegati di release» va sciolta prima. I sorgenti (vignette ricampionate incluse) sono invece committati.
+⚠️ **Gli 8 PDF ricompilati non furono committati** il 12/08, di proposito: andavano rifatti dopo la revisione della prosa, e committarli due volte avrebbe lasciato 144 MB nella storia. ✅ **Chiuso il 13/08**: fatta la revisione e ridotte le lingue a due, i 2 PDF definitivi sono in `HEAD` (vedi Fase 2-quinquies). Si rigenerano in qualsiasi momento con `pwsh typst/build.ps1 -All`.
 
 #### Difetti tipografici visti e non corretti
 
@@ -147,7 +147,7 @@ Questa fase **scioglie la riserva della Fase 2**: la prosa nuova non revisionata
 
 **Verifiche** — `npx tsc --noEmit`, `npx vite build`, `node scripts/check-locales.mjs` (237 chiavi × 2) e `pwsh typst/build.ps1 -All` passano tutti puliti. I due PDF sono stati ricompilati: 33 pagine, 9,4 MB ciascuno, colophon MIT, versione 2.1.8, nessuna formula di riserva dei diritti.
 
-⚠️ **I 2 PDF restano NON committati**, coerentemente con la Fase 2: si committano una volta sola, alla fine, dopo la revisione della prosa e dopo aver sciolto la decisione «PDF nel repo o allegati di release». In `HEAD` restano quindi i **vecchi** IT/EN da 32 MB col colophon EULA.
+✅ **I 2 PDF sono stati committati il 13/08** (vedi Fase 2-quinquies), una volta sola come previsto, sciolta la decisione sulla loro collocazione. In `HEAD` non ci sono più i vecchi da 32 MB col colophon EULA.
 
 ---
 
@@ -206,7 +206,7 @@ Stessa cura, con l'italiano come riferimento assoluto. Baseline anch'essa buona:
 
 ### Stato
 
-Entrambi i PDF sono ricompilati ma **non committati**, coerentemente con la Fase 2.
+Entrambi i PDF sono stati ricompilati e **committati il 13/08** (Fase 2-quinquies): 9,0 MB l'uno, al posto dei 32 col colophon EULA.
 
 ---
 
@@ -242,6 +242,34 @@ Tolto il residuo di voce commerciale: «in meno di 3 minuti», «Vuoi che i tuoi
 **Corsivo nelle guide in-app.** Il parser di `GuideModal.tsx` gestisce `**grassetto**`, `` `codice` `` e i link, **ma non il corsivo**: tre passaggi per lingua uscivano a schermo con gli asterischi in chiaro (`*Canale News*`). Risolti dal lato testo — caporali in italiano, virgolette in inglese — senza toccare il codice. Verificato: zero corsivi residui.
 
 **Verifiche:** `npx tsc --noEmit`, `npx vite build` e `check-locales` puliti dopo le modifiche.
+
+---
+
+## FASE 2-QUINQUIES — Peso del repository ✅ ESEGUITA IL 13/08
+
+Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi occupano spazio perché non toglierli.
+
+**La prima risposta è che la regola era scaduta.** Il piano diceva di non committare i PDF *perché andavano rifatti dopo la revisione della prosa*. Finita la revisione, quel motivo non esisteva più: restava solo la decisione aperta sulla loro collocazione, ora sciolta.
+
+**Misurato prima di toccare.** `HEAD` pesava **95,8 MB su 261 file**, così ripartiti:
+
+| | |
+| :--- | :--- |
+| 64,0 MB | i **due vecchi PDF IT/EN da 32 MB**, quelli col colophon EULA |
+| 18,6 MB | `docs/storico/manuali-v1.7/` — 8 manuali v1.7 + 4 whitepaper commerciali |
+| 5,7 MB | le vignette, che servono: sono sorgenti del manuale |
+
+**Fatto**
+- [x] Committati i 2 PDF nuovi: **64,0 → 18,0 MB**. Colophon MIT, 33 pagine, revisionati
+- [x] Rimossa `docs/storico/manuali-v1.7/` — **18,6 MB** di rendering di un testo che resta per intero in `docs/storico/manuale-v1.7.md`, che è la memoria vera. Sei delle otto lingue non esistono più nel progetto. `docs/storico/README.md` spiega cosa c'era e come ripescarlo dalla storia
+
+**Risultato: `HEAD` da 95,8 a 30,9 MB, −65 MB.**
+
+### La storia git resta com'è, ed è una scelta
+
+I blob vecchi restano nel pack: `.git` sta sui 250 MB, di cui ~69 MB di PDF (i due da 31,5 MB — IT e RU — pesano da soli 63). Ripulirli davvero vuol dire riscrivere la storia con `git filter-repo` e **fare force-push**, il che cambia lo SHA di tutti i 123 commit.
+
+**Non fatto, di proposito.** Chi clona scarica comunque il pack intero, quindi il beneficio è reale, ma il prezzo lo è altrettanto: rompe ogni clone esistente, invalida i 40 tag di release, e va deciso **prima** di scegliere come spostare la repo su `Pitz72` (il trasferimento nativo preserva la storia — quella che c'è). È una decisione da Fase 4, non un ripensamento da fine sessione.
 
 ---
 

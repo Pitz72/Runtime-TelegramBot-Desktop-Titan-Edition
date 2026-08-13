@@ -30,7 +30,7 @@ Se cerchi lo stato attuale, il punto di partenza è [`docs/README.md`](../README
 | Documento | Sostituito da |
 | :--- | :--- |
 | [manuale-v1.7.md](manuale-v1.7.md) | La cartella [`Manuale Utente Avanzato/`](../../Manuale%20Utente%20Avanzato/), riscritta e tradotta in 8 lingue |
-| [manuali-v1.7/](manuali-v1.7/) | Gli stessi manuali in PDF, versione 1.7.x, più i whitepaper commerciali |
+| ~~manuali-v1.7/~~ | **Rimossa il 13/08/2026.** Conteneva gli stessi manuali impaginati in PDF (versione 1.7.x, otto lingue) più quattro whitepaper commerciali: 18,6 MB di rendering di un testo che è già qui accanto, per intero, in [manuale-v1.7.md](manuale-v1.7.md). Sei di quelle otto lingue non esistono più nel progetto. Chi volesse i file può ripescarli dalla storia git: `git log --diff-filter=D -- 'docs/storico/manuali-v1.7/*'` |
 | [design/](design/) | Mockup di interfacce mai spedite |
 
 ## Fase commerciale
