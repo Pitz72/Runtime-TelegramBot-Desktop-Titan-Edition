@@ -81,7 +81,7 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
 
     return (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="glass-panel w-full max-w-4xl rounded-xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="glass-panel w-full max-w-5xl rounded-xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
 
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-outline-variant/15 bg-surface-container-high/50">
@@ -114,10 +114,12 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
                     ))}
                 </div>
 
-                {/* Content */}
-                <div className="p-6">
+                {/* Content — altezza fissa: il modale non cambia misura cambiando scheda.
+                    Il max-h è la valvola per finestre basse, dove 28rem non ci starebbero. */}
+                <div className="px-6 py-5 h-[30rem] max-h-[calc(100vh-15rem)] overflow-y-auto">
                     {activeTab === 'general' && (
-                        <div className="max-w-md space-y-8">
+                        <div className="grid grid-cols-2 gap-x-10 gap-y-6 items-start">
+                          <div className="space-y-6">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
                                     <Globe size={13}  />
@@ -209,6 +211,9 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
                                 </div>
                             </div>
 
+                          </div>
+
+                          <div className="space-y-6">
                             {/* Crediti — paternità del progetto */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
@@ -246,6 +251,7 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
                                     </button>
                                 </div>
                             </div>
+                          </div>
                         </div>
                     )}
 
