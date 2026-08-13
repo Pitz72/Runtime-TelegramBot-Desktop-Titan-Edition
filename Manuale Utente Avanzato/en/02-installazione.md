@@ -4,19 +4,29 @@
 Titan Edition runs on Windows and Linux:
 
 -   **Windows:** Windows 10 or later (64-bit).
--   **Linux:** Ubuntu 22.04+, Debian and derivatives via the `.deb` package; on other distributions use the `.AppImage` format, self-contained and requiring no installation.
+-   **Linux:** a 64-bit distribution, on an x64 or an arm64 processor. The available formats are listed in the paragraph that follows.
 
-*Note (Linux).* On some recent Ubuntu versions the `.AppImage` needs the `libfuse2` package; if it won't start, install it (`sudo apt install libfuse2`) or use the `.deb`.
+*Note (Linux).* On some recent Ubuntu versions the `.AppImage` needs the `libfuse2` package; if it won't start, install it (`sudo apt install libfuse2`) or pick another format.
 
 *Note (VPS servers).* Titan can also run on a Virtual Private Server with no dedicated graphics card. If the interface fails to appear at launch, a safety mechanism forces it after about ten seconds (see Chapter 9).
 
 ### 2.2 Installation
 
-1. Download the installer from the project's releases page. Alternatively you can build it yourself from the source code.
-2. **On Windows:** run the `.exe` file and follow the on-screen instructions. The program creates a desktop shortcut for you.
-3. **On Linux:** with the `.deb` package, double-click and let the package manager do the work; with the `.AppImage`, make the file executable (right-click → Properties → Permissions → Allow executing) and start it with a double-click.
+1. Download the file that suits your system from the project's releases page. Alternatively you can build it yourself from the source code.
+2. **On Windows** there are two files. `Setup-….exe` is the installer: run it, follow the on-screen instructions, and the program creates a desktop shortcut for you. `Portable-….exe` is a single executable that installs nothing: copy it wherever you like, a USB stick included, and run it.
+3. **On Linux** pick the format that suits your distribution, in the x64 or the arm64 build according to your processor.
 
-Once installed, you will never have to download anything by hand again: Titan checks on its own whether a newer version exists and, when it finds one, tells you through a dedicated screen that asks whether to download it and, once the download is done, whether to restart to install it.
+There are five Linux formats:
+
+-   **.deb:** Ubuntu 22.04+, Debian and derivatives. Double-click and let the package manager do the work.
+-   **.rpm:** Fedora, RHEL, openSUSE. Install it with `sudo dnf install ./filename.rpm`.
+-   **.pacman:** Arch and derivatives. Install it with `sudo pacman -U filename.pacman`.
+-   **.AppImage:** every other distribution. Make the file executable (right-click → Properties → Permissions → Allow executing) and start it with a double-click.
+-   **.tar.gz:** a plain archive with no desktop integration. Unpack it and run the executable inside.
+
+Once installed, Titan checks on its own whether a newer version exists and, when it finds one, tells you through a dedicated screen that asks whether to download it and, once the download is done, whether to restart to install it.
+
+How automatic that update is, though, depends on the format you chose. The Windows installer and the `.AppImage` replace themselves. The `.deb` and `.rpm` packages install with administrator privileges, so the system asks for your password; if the install does not succeed, download the new package and install it as you did the first time. The portable build, the `.pacman` package and the `.tar.gz` archive do not update themselves: the notice still arrives, but you download the file.
 
 ![The update-available notice: Titan asks for confirmation before downloading and before restarting.](screenshots/11-update-available.png)
 

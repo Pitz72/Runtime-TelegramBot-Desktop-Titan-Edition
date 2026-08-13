@@ -64,8 +64,8 @@ L'italiano è la lingua sorgente: interfaccia, guide e manuale nascono lì e ven
 | **Database** | SQLite via `better-sqlite3` (WAL, schema v12) |
 | **Telegram** | Telegraf v4 |
 | **YouTube** | `youtubei.js` (InnerTube) |
-| **Build** | electron-builder 25 — NSIS, AppImage, deb |
-| **CI** | GitHub Actions (Windows, Linux) |
+| **Build** | electron-builder 25 — NSIS, portable, AppImage, deb, rpm, pacman, tar.gz |
+| **CI** | GitHub Actions (Windows x64, Linux x64 e arm64) |
 
 ---
 
@@ -75,10 +75,12 @@ L'italiano è la lingua sorgente: interfaccia, guide e manuale nascono lì e ven
 
 Scarica l'installer dalla [pagina delle release](https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/releases/latest):
 
-- **Windows** — `.exe` (installer NSIS). Non essendo firmato, SmartScreen mostrerà un avviso al primo avvio: *Ulteriori informazioni* → *Esegui comunque*.
-- **Linux** — `.AppImage` (da rendere eseguibile con `chmod +x`) oppure `.deb` per Ubuntu, Debian e derivate. Potrebbero servire `libsecret-1-0` e `libfuse2`.
+- **Windows** — `Setup-*.exe`, l'installer NSIS. C'è anche una versione **portable**, un eseguibile unico che non installa niente e non si aggiorna da solo. Non essendo firmati, SmartScreen mostrerà un avviso al primo avvio: *Ulteriori informazioni* → *Esegui comunque*.
+- **Linux** — `.AppImage` (da rendere eseguibile con `chmod +x`), `.deb` per Ubuntu, Debian e derivate, `.rpm` per Fedora, RHEL e openSUSE, `.pacman` per Arch, oppure l'archivio `.tar.gz`. Ogni file esiste in versione **x64** e **arm64**. Potrebbero servire `libsecret-1-0` e `libfuse2`.
 
-Piattaforme con installer precompilato: **Windows e Linux**.
+Piattaforme con installer precompilato: **Windows x64** e **Linux x64 e arm64**.
+
+Si aggiornano da soli l'installer Windows e l'AppImage; `.deb` e `.rpm` ci provano ma chiedono la password di amministratore. Il portable, il `.pacman` e il `.tar.gz` vanno riscaricati a mano.
 
 **macOS non ha un installer ufficiale.** Non è un limite tecnico — il codice è cross-platform e Electron gira su macOS senza modifiche — ma distribuire un `.dmg` che non faccia comparire l'avviso di Gatekeeper richiede un certificato Apple a pagamento, e non ha senso mantenerlo per un progetto senza entrate. Chi usa macOS può **compilare l'applicazione dal sorgente** seguendo le istruzioni per sviluppatori qui sotto: servono Node 20 e Xcode Command Line Tools, e `npm run build` produce l'app. La documentazione, i manuali e le guide descrivono solo Windows e Linux.
 

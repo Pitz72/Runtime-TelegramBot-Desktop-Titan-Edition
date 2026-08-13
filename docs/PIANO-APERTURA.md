@@ -2,7 +2,7 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. **FASE 3 CHIUSA** (13/08): link migrati, `MANUAL_BASE` non serve più i PDF con l'EULA, versione 2.1.8 con note di rilascio e changelog, CI che pubblica sulla repo stessa. **La release `v2.1.8` è pubblica**, e l'utente ci ha aggiornato sopra da un'installazione reale: l'auto-update funziona. 🆕 **FASE 6 aperta**: quattro rifiniture della schermata iniziale segnalate dall'utente. ▶️ **Prossima sessione: FASE 6** (rifiniture, corta), **FASE 4.3** (matrice di build) **oppure FASE 5** (dismissione commerciale, ora sbloccata: `MANUAL_BASE` non punta più alla ponte). Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. **FASE 3 CHIUSA** (13/08): link migrati, `MANUAL_BASE` non serve più i PDF con l'EULA, versione 2.1.8 con note di rilascio e changelog, CI che pubblica sulla repo stessa. **La release `v2.1.8` è pubblica**, e l'utente ci ha aggiornato sopra da un'installazione reale: l'auto-update funziona. **FASE 4.3 ESEGUITA** (13/08): matrice di build completa — Windows installer e portable, Linux AppImage/deb/rpm/pacman/tar.gz su **x64 e arm64** — collaudata su branch con **run verde su tutti e tre i runner**, e documentazione dell'auto-updater corretta perché la voce del piano era sbagliata. 🆕 **FASE 6 aperta**: quattro rifiniture della schermata iniziale segnalate dall'utente. ▶️ **Prossima sessione: FASE 6** (rifiniture, corta) **oppure FASE 5** (dismissione commerciale, sbloccata: `MANUAL_BASE` non punta più alla ponte). Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
 
 > **Le fasi 4.1–4.2 sono state eseguite prima della 3.** Non è un'inversione: la Fase 3 lo prescrive da sempre nel suo primo rigo ⛔. La numerazione riflette l'importanza, non l'ordine di esecuzione.
 
@@ -232,7 +232,7 @@ Erano ancora quelli del pacchetto commerciale. Cominciavano con «Grazie per ave
 - Credito LLM e paternità, contatti, donazione, «Titan è gratuito e resta gratuito»
 - 109 righe ciascuno, **UTF-8 senza BOM, CRLF puro** (verificato: 109 CRLF, 0 LF isolati)
 
-⚠️ Il piano prevedeva la nota «l'auto-update non vale per deb/rpm/pacman». Oggi `electron-builder.yml` produce **solo AppImage e deb**: rpm e pacman sono decisi ma non ancora configurati (Fase 3). I leggimi descrivono quel che si distribuisce davvero. **Vanno riaperti quando si aggiungono i target.**
+⚠️ ~~Il piano prevedeva la nota «l'auto-update non vale per deb/rpm/pacman». Oggi `electron-builder.yml` produce **solo AppImage e deb**: rpm e pacman sono decisi ma non ancora configurati (Fase 3). I leggimi descrivono quel che si distribuisce davvero. **Vanno riaperti quando si aggiungono i target.**~~ — **riaperti e riscritti in Fase 4.3**, ora che i target ci sono tutti. E la nota prevista era comunque sbagliata: deb e rpm si aggiornano, chiedendo la password. Vedi la Fase 4.3.
 
 ### Le 4 guide rapide — errori di fatto trovati
 
@@ -321,6 +321,8 @@ Verifiche superate sul working tree finale: `npx tsc --noEmit`, `npx vite build`
 
 **Il corpo della release è stato corretto mentre lo si spostava.** Il vecchio testo prometteva: *«The app updates automatically — existing users will be notified in-app.»* Falso per il `.deb`, che non si auto-aggiorna: è un limite di `electron-updater`. Su una release pubblica quella riga sarebbe stata il primo malinteso ad arrivare nelle issue. Ora la distinzione fra Windows/AppImage e `.deb` è scritta nel corpo. La voce corrispondente resta aperta in Fase 4.3, che riguarda la documentazione.
 
+> ⚠️ **Corretto in Fase 4.3:** «il `.deb`, che non si auto-aggiorna» **era sbagliato**, e la correzione è arrivata leggendo il codice invece che ricordandolo. Con `electron-updater` 6.8 il `.deb` si aggiorna, chiedendo la password di amministratore. Il testo della release e la documentazione dicono ora la cosa giusta.
+
 ⚠️ **Il banner in `branding/` è ancora quello della v2.1.7**, e `build-banner.py` ha `VERSION = "2.1.7"`. Non è referenziato dal `README` né dall'applicazione, quindi non si vede da nessuna parte: è rimasto indietro di proposito, per non rigenerare un asset grafico dentro una fase che non lo prevedeva.
 
 ⚠️ **`.secrets/RELEASE_TOKEN.txt` è ancora sul disco.** È morto (HTTP 401) e non serve più a niente. L'audit del 12/08 diceva di toglierlo dal disco quando il flusso di release fosse cambiato: il flusso è cambiato adesso. Non è stato cancellato in questa sessione perché cancellare file di credenziali non è un passo da infilare di straforo in fondo a una fase.
@@ -372,15 +374,47 @@ Il primo tentativo ha sbagliato bersaglio e va ricordato, perché l'errore è ri
 - [x] **Nessun workflow è partito con la pubblicazione**: `build.yml` è `workflow_dispatch` e basta, quindi non c'è stato nessun tentativo di release con un secret assente
 - [x] Verifica finale dei segreti, **rifatta su tutti e 129 i commit della storia riscritta** (non sui 119 del 12/08): 1073 blob di testo analizzati contro token Telegram, `ghp_`, `github_pat_`, `gho_`, `ghs_`, `AKIA`, chiavi PEM, `sk-`, `xox*`, `AIza`. **Zero riscontri.** Nessun `.env`, `.db`, `.pem` o file di credenziali è mai stato tracciato
 
-### 4.3 CI — matrice di build completa
-- [ ] Windows x64 — NSIS installer + portable
-- [ ] Linux x64 — AppImage, deb, **rpm**, pacman, tar.gz (installare `rpm` e `fakeroot` sul runner)
-- [ ] Linux arm64 — runner arm64, gratuiti sulle repo pubbliche. La parte delicata è `better-sqlite3` compilato per arm64
-- [ ] Publish verso la repo stessa con `GITHUB_TOKEN`
-- [ ] Mantenere Node 20: `better-sqlite3` non ha prebuild per 22/24 e la build Windows si rompe. È già successo
-- [ ] Mantenere il job `verify` su pull request
-- [ ] ⚠️ **Documentare che l'auto-updater funziona solo su Windows e AppImage.** `deb`, `rpm` e `pacman` non si auto-aggiornano: è un limite di electron-updater. Senza dirlo, è il primo malinteso che arriverà nelle issue
-- [ ] Nessun target macOS
+### 4.3 CI — matrice di build completa ✅ ESEGUITA IL 13/08
+
+Collaudata su un branch (`ci/build-matrix`) con due build di prova a `publish_release=false`, prima di toccare `main`. **Seconda run verde su tutti e tre i runner**, 12 artefatti.
+
+- [x] Windows x64 — NSIS installer + portable
+- [x] Linux x64 — AppImage, deb, **rpm**, pacman, tar.gz
+- [x] Linux arm64 — runner `ubuntu-24.04-arm`, gratuito sulle repo pubbliche. ~~La parte delicata è `better-sqlite3` compilato per arm64~~ — **non lo è stata:** `@electron/rebuild` ha trovato il prebuild (`preparing`/`finished` in un decimo di secondo, `buildFromSource=false`). Nessuna compilazione, nessun intoppo
+- [x] Publish verso la repo stessa con `GITHUB_TOKEN` — già fatto in Fase 3, invariato
+- [x] Mantenere Node 20 — invariato, con la nota del perché in cima al workflow
+- [x] Mantenere il job `verify` su pull request — invariato
+- [x] Nessun target macOS
+- [x] **La build resta manuale.** Nessun trigger su `push`, come da regola dell'utente: verificato di nuovo dopo la riscrittura
+
+**Il nome degli artefatti Linux ora contiene `${arch}`.** Senza, x64 e arm64 produrrebbero file omonimi che si sovrascrivono a vicenda nel momento in cui il job di release li raccoglie in una cartella sola. I nomi veri, misurati sulla run: `-x86_64.AppImage` e `-arm64.AppImage`, `-amd64.deb` e `-arm64.deb`, `-x86_64.rpm` e `-aarch64.rpm`, `-x64.tar.gz` e `-arm64.tar.gz`. La mappatura arch→nome la decide electron-builder per estensione, e non è uniforme.
+
+#### Due cose imparate, che si sarebbero pagate in produzione
+
+🔧 **fpm.** deb, rpm e pacman li impacchetta fpm, e quello che electron-builder scarica da sé è **fermo alla 1.9.3** ed esiste **solo per x86_64**: non conosce il formato `pacman` (aggiunto in fpm 1.11) e su arm64 non esiste proprio. La CI installa un fpm di sistema e lo impone con `USE_SYSTEM_FPM`, su entrambi i runner.
+
+🔧 **bsdtar.** Con il fpm giusto, la prima run è comunque caduta sull'ultimo target: `pacman`, `exit code 127` su `bsdtar -czf .MTREE`. fpm si appoggia a `bsdtar` per il manifesto del pacchetto Arch, e sui runner Ubuntu `bsdtar` non c'è: sta in `libarchive-tools`. Tutto il resto — AppImage, tar.gz, deb, rpm, su **entrambe** le architetture — era già passato al primo colpo.
+
+#### Verifiche sugli artefatti, non solo sul log
+
+I 12 file sono stati scaricati e aperti, non contati da lontano.
+
+- **Il `.pacman` dichiara l'architettura giusta.** Il dubbio era fondato: electron-builder passa a fpm `--architecture amd64` anche per il target pacman, e Arch vuole `x86_64`. Il `.PKGINFO` estratto dice però `arch = x86_64` sul pacchetto x64 e `arch = aarch64` su quello arm64: **è il fpm di sistema a normalizzare**, quindi installarlo non serviva solo a poter costruire il formato, serviva anche a costruirlo bene
+- **`latest.yml` elenca il solo `Setup-2.1.8.exe`**, non il portable: l'auto-update non può proporre un file che non si sa installare
+- **`latest-linux.yml` e `latest-linux-arm64.yml` elencano AppImage, deb e rpm** ciascuno con la propria architettura, e non si sovrascrivono a vicenda perché il nome del manifesto arm64 è diverso
+- Il `.blockmap` separato esiste per l'installer Windows; per l'AppImage no, perché lì la mappa è dentro il file — infatti `blockMapSize` è nel manifesto
+
+#### ⚠️ L'auto-updater: la voce del piano era sbagliata
+
+La voce diceva: *«Documentare che l'auto-updater funziona solo su Windows e AppImage. `deb`, `rpm` e `pacman` non si auto-aggiornano: è un limite di electron-updater.»* **Era vera per le versioni vecchie di electron-updater, non per la 6.8 che il progetto usa.** Verificato leggendo il codice in `node_modules`, non a memoria:
+
+- `FpmTarget.supportsAutoUpdate()` ritorna vero per **deb e rpm**, e per quei due scrive `app-update.yml` e un file `package-type` dentro il pacchetto;
+- `electron-updater/out/main.js` legge `package-type` e istanzia `DebUpdater` o `RpmUpdater`, che scaricano il pacchetto nuovo e lo installano da root, chiedendo la password con `pkexec`, `gksudo` o `sudo`;
+- **la prova sta già nella release 2.1.8 pubblicata**: il suo `latest-linux.yml` elenca il `.deb` accanto all'`.AppImage`. Il meccanismo è acceso da prima di questa fase.
+
+Quindi la documentazione dice ora ciò che è vero: installer Windows e AppImage si sostituiscono da soli; **deb e rpm si aggiornano ma chiedono la password di amministratore**, ed è una funzione recente e meno collaudata; **portable, pacman e tar.gz non si aggiornano da soli**. Il portable non compare nemmeno in `latest.yml` — `NsisTarget` scrive le informazioni di aggiornamento solo se il target non è portable (`isWriteUpdateInfo: !this.isPortable`), e la run lo conferma: `latest.yml` elenca il solo `Setup-2.1.8.exe`.
+
+Aggiornati: `README.md`, `docs/build.md`, i 2 «leggimi», il corpo della release in `build.yml` e il **capitolo 2 del Manuale Utente Avanzato** in italiano e inglese, con i 2 PDF ricompilati (33 pagine ciascuno come prima, colophon MIT, versione 2.1.8). Il manuale conosceva due formati su cinque e una sola architettura, e prometteva «non dovrai più scaricare nulla a mano»: falso per portable, pacman e tar.gz.
 
 ---
 
