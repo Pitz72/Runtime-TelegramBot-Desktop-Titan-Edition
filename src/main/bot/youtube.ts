@@ -158,7 +158,7 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             channel = await yt.getChannel(targetId);
         } catch (e) {
             // Se fallisce, proviamo a cercarlo (spesso utile per handle nuovi o URL strani)
-            TitanLogger.log(`[YouTube] Direct getChannel failed for "${targetId}", trying search...`);
+            TitanLogger.log(`[YouTube] Direct getChannel failed for "${targetId}", trying search...`, 'warn');
             const search = await yt.search(targetId, { type: 'channel' });
             if (search.channels && search.channels.length > 0) {
                 channel = await yt.getChannel(search.channels[0].id);
@@ -194,7 +194,7 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             // come "server-side, non fixabile") confermano che è rate-limiting YouTube:
             // creare nuove istanze Innertube subito dopo un 0 *amplifica* il blocco invece di
             // risolverlo. Manteniamo la sessione viva e lasciamo che il prossimo poll riprovi.
-            TitanLogger.log(`[YouTube] WARNING: No videos returned for channel "${targetId}". Probabile rate-limit YouTube — sessione mantenuta, riprova al prossimo ciclo.`);
+            TitanLogger.log(`[YouTube] WARNING: No videos returned for channel "${targetId}". Probabile rate-limit YouTube — sessione mantenuta, riprova al prossimo ciclo.`, 'warn');
             return [];
         }
 
@@ -270,7 +270,7 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             // il video venga ignorato dal filtro cutoffDate invece di causare spam.
             if (!date) {
                 date = new Date(Date.UTC(2000, 0, 1)); // UTC puro — coerente con il threshold in engine.ts
-                if (rawDateText) TitanLogger.log(`[YouTube] WARN: data non parsabile per "${v.title?.text}": "${rawDateText}" → fallback 2000`);
+                if (rawDateText) TitanLogger.log(`[YouTube] WARN: data non parsabile per "${v.title?.text}": "${rawDateText}" → fallback 2000`, 'warn');
             }
             TitanLogger.log(`[YouTube] Item: "${v.title?.text}" | dateText: "${rawDateText}" | date: ${date.toISOString().slice(0, 10)}`);
 
@@ -290,7 +290,7 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             } else {
                 // Fallback grezzo — logghiamo per diagnostica
                 videoId = v.id || v.video_id || '';
-                if (videoId) TitanLogger.log(`[YouTube] WARN: ID non standard per "${v.title?.text}": "${videoId}"`);
+                if (videoId) TitanLogger.log(`[YouTube] WARN: ID non standard per "${v.title?.text}": "${videoId}"`, 'warn');
             }
             if (!videoId) {
                 TitanLogger.log(`[YouTube] Skipping item with no video ID (type: ${v.type || 'unknown'})`);
@@ -324,12 +324,12 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
         return items;
     } catch (error) {
         consecutiveErrors++;
-        TitanLogger.log(`[YouTube] Error fetching videos (${consecutiveErrors} consecutivi): ${error}`);
+        TitanLogger.log(`[YouTube] Error fetching videos (${consecutiveErrors} consecutivi): ${error}`, 'error');
         // NON ricreare l'istanza Innertube a ogni errore: i nuovi handshake ravvicinati
         // amplificano il blocco antibot (issue #1158). Manteniamo sessione e cache intatte;
         // resettiamo solo dopo errori ripetuti, quando la sessione è plausibilmente compromessa.
         if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS_BEFORE_RESET) {
-            TitanLogger.log(`[YouTube] ${consecutiveErrors} errori consecutivi — reset sessione Innertube.`);
+            TitanLogger.log(`[YouTube] ${consecutiveErrors} errori consecutivi — reset sessione Innertube.`, 'warn');
             resetYouTubeSession();
             consecutiveErrors = 0;
         }

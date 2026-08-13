@@ -21,17 +21,24 @@ function redactTokens(message: string): string {
 }
 
 /**
- * Rileva il livello semantico di un messaggio dagli emoji/keyword — fix #23.
+ * Rileva il livello semantico di un messaggio dai **marcatori** — fix #23.
  * Ordine: error > warn > success > info.
  *
- * Resta la via di ripiego per le decine di righe che il motore emette senza evento
- * strutturato (errori, avvisi, diagnostica). Le righe con un `ScanEvent` non passano
- * di qui: il loro livello è dichiarato, non indovinato — Fase 7.
+ * Resta la via di ripiego per le righe che il motore emette senza dichiarare nulla.
+ * Le righe con un `ScanEvent` non passano di qui (Fase 7), e nemmeno quelle che
+ * dichiarano il proprio livello.
+ *
+ * ⚠️ Guarda SOLO gli emoji, mai le parole del messaggio. La versione precedente cercava
+ * anche `Error`/`error`/`Fallito` in tutta la stringa, e nelle righe di diagnostica il
+ * titolo del contenuto è *dentro* la stringa: due video innocui — «97. Checked Errors» e
+ * «91. Digital transformation by trial and error» — finivano in rosso nel diario a ogni
+ * giro di scansione. Su un log reale erano 10 falsi allarmi contro 1 errore vero.
+ * Chi ha un guasto da segnalare senza emoji lo dichiara con il parametro `level`.
  */
 function detectLevel(message: string): LogLevel {
-    if (message.includes('❌') || message.includes('Error') || message.includes('Fallito') || message.includes('error')) return 'error';
-    if (message.includes('⚠️') || message.includes('SKIP') || message.includes('⏳')) return 'warn';
-    if (message.includes('✅') || message.includes('🆕') || message.includes('🚀') || message.includes('Found New Item')) return 'success';
+    if (message.includes('❌')) return 'error';
+    if (message.includes('⚠️') || message.includes('⏳')) return 'warn';
+    if (message.includes('✅') || message.includes('🆕') || message.includes('🚀')) return 'success';
     return 'info';
 }
 
@@ -119,11 +126,16 @@ class Logger {
     }
 
     /**
-     * @param event evento strutturato, se la riga è una voce del diario di scansione.
-     *              Il file su disco riceve comunque la riga di testo per intero: il diario
-     *              dirada l'interfaccia, non la registrazione.
+     * @param meta o un evento strutturato, se la riga è una voce del diario di scansione,
+     *             o un `LogLevel` dichiarato, per le righe di guasto che non hanno un
+     *             evento ma non devono nemmeno essere indovinate da `detectLevel`.
+     *             Il file su disco riceve comunque la riga di testo per intero: il diario
+     *             dirada l'interfaccia, non la registrazione.
      */
-    public async log(message: string, event?: ScanEvent) {
+    public async log(message: string, meta?: ScanEvent | LogLevel) {
+        // Discriminazione per forma: il livello è una stringa, l'evento un oggetto.
+        const event = typeof meta === 'object' ? meta : undefined;
+        const declaredLevel = typeof meta === 'string' ? meta : undefined;
         const timestamp = new Date().toLocaleTimeString();
         const formattedMessage = `[${timestamp}] ${redactTokens(message)}`;
 
@@ -140,7 +152,7 @@ class Logger {
         // 3. IPC Buffer — strutturato con id + level (fix #22/#23) + evento (Fase 7)
         const entry: LogEntry = {
             id: ++_logId,
-            level: event ? levelForEvent(event) : detectLevel(message),
+            level: event ? levelForEvent(event) : declaredLevel ?? detectLevel(message),
             message: formattedMessage,
             ...(event ? { event } : {}),
         };
