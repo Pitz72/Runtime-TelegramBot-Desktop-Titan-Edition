@@ -281,7 +281,9 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 
 ---
 
-## FASE 3 — La build 2.1.8, che fa da traghetto
+## FASE 3 — La build 2.1.8, la prima da progetto aperto
+
+> Si chiamava «*la build che fa da traghetto*». Il traghetto non c'è più: non aveva nessuno da traghettare. Quel che resta è una release normale sulla repo pubblica.
 
 ✅ **Il blocco è caduto il 13/08.** Diceva: *«va costruita solo dopo che la repo di destinazione esiste (Fase 4.1–4.2), perché il suo `app-update.yml` viene generato dalla configurazione di publish e deve già puntare alla destinazione nuova»*. La destinazione ora esiste ed è pubblica: **`https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition`**. La fase è eseguibile per intero.
 
@@ -303,8 +305,8 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 - [ ] Tutti i link nella documentazione che puntano a `Ecosystem-Runtime`
 - [ ] `version` a `2.1.8` in `package.json`
 - [ ] ⛔ **Entry `2.1.8` in `src/renderer/src/lib/releaseNotes.ts`** — se manca, la schermata «Novità» mostra il testo generico invece dell'elenco
-- [ ] `CHANGELOG.md` — la sezione «Non ancora rilasciato» diventa `v2.1.8`, più `docs/changelogs/CHANGELOG_v2.1.8.md`. **Da citare fra le novità: il campo della data ora si chiama «Data di Partenza» anche nelle impostazioni del bot** (prima era «Data di Filtro (Cutoff)»); è una stringa visibile che cambia sotto agli occhi degli utenti esistenti
-- [ ] I manuali sono già impostati sulla versione **2.1.8**: se la versione che si rilascia cambia, `typst/manuale.typ` va aggiornato. In ogni caso i 2 PDF vanno ricompilati, perché `strings.typ` è cambiato con la Fase 2-bis
+- [ ] `CHANGELOG.md` — la sezione «Non ancora rilasciato» diventa `v2.1.8`, più `docs/changelogs/CHANGELOG_v2.1.8.md`. **Da citare fra le novità: il campo della data ora si chiama «Data di Partenza» anche nelle impostazioni del bot** (prima era «Data di Filtro (Cutoff)»). La motivazione originale — «è una stringa visibile che cambia sotto agli occhi degli utenti esistenti» — non regge più, visto che utenti esistenti non ce ne sono; ma va scritta lo stesso, perché è la prima release pubblica e il changelog è documentazione, non un avviso
+- [x] ~~I 2 PDF vanno ricompilati, perché `strings.typ` è cambiato con la Fase 2-bis~~ — **non serve, verificato il 13/08.** I PDF in `HEAD` sono stati committati (`f26acac`) *dopo* l'ultima modifica a `strings.typ` (`026f67f`), quindi la incorporano già, e `manuale.typ` è già su `VERSIONE = "2.1.8"`. Si ricompilano **solo se** la versione che si rilascia non è la 2.1.8, con `pwsh typst/build.ps1 -All`
 - [x] ~~Build e **pubblicazione sulla vecchia repo ponte** (serve il secret `RELEASE_TOKEN`)~~ — **cancellato il 13/08.** Non ci sono installazioni esistenti da raggiungere. La release va sulla repo pubblica e basta
 - [ ] Build e pubblicazione **sulla repo pubblica**, col `GITHUB_TOKEN` integrato. In `build.yml` va tolto il passo `Publish release to bridge repo`, che punta a `Ecosystem-Runtime/runtime-telegrambot-releases` e usa `secrets.RELEASE_TOKEN`
 
