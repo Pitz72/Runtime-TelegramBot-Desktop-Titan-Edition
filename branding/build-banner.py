@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-# Genera il banner premium di Titan Edition (SVG) — logo, versione, slogan.
+# Genera il banner premium di Titan Edition (SVG) — logo, licenza, slogan.
 # Palette Titan Blue; motivo visuale ad anelli orbitali (eco del logo) al posto
 # dello spettro/equalizzatore di RLMP. Logo PNG incorporato in base64.
 #
+# Il banner NON porta il numero di versione, né nel disegno né nel nome del
+# file: serve da hero del sito, da immagine promozionale e da anteprima delle
+# condivisioni social, e stamparci dentro la versione voleva dire rifarlo — e
+# ridistribuirlo su tre usi — a ogni rilascio. Al suo posto, nello stesso
+# spazio, la licenza: è il dato che su questo progetto non scade più.
+#
 # Uso:  python build-banner.py
-import base64, pathlib
+import base64, pathlib, shutil, subprocess
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOGO = ROOT / "src" / "renderer" / "src" / "assets" / "logo.png"
-VERSION = "2.1.7"
-OUT = pathlib.Path(__file__).resolve().parent / f"banner-titan-v{VERSION}.svg"
+OUT = pathlib.Path(__file__).resolve().parent / "banner-titan.svg"
 W, H = 2520, 1080
 
 # Ancore layout
@@ -29,7 +34,7 @@ def orbital_rings():
     return "\n    ".join(rings)
 
 def build_svg(logo_uri):
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="Runtime TelegramBot Desktop Titan Edition v{VERSION}">
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="Runtime TelegramBot Desktop Titan Edition — software libero, licenza MIT, per Windows e Linux">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="{W}" y2="{H}" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#070b18"/>
@@ -107,11 +112,11 @@ def build_svg(logo_uri):
   <text x="{TX - 8}" y="506" font-family="Segoe UI Black, Segoe UI, Helvetica, Arial, sans-serif" font-size="180" font-weight="900" letter-spacing="2" fill="url(#titleLight)">TITAN</text>
   <text x="{TX}" y="624" font-family="Segoe UI Black, Segoe UI, Helvetica, Arial, sans-serif" font-size="108" font-weight="900" letter-spacing="14" fill="url(#titanBlue)">EDITION</text>
 
-  <!-- Badge versione -->
+  <!-- Badge licenza (al posto della versione: non scade) -->
   <g>
-    <rect x="{TX}" y="672" width="188" height="52" rx="26" fill="none" stroke="#2b3a52" stroke-width="1.5"/>
+    <rect x="{TX}" y="672" width="356" height="52" rx="26" fill="none" stroke="#2b3a52" stroke-width="1.5"/>
     <circle cx="{TX + 30}" cy="698" r="6" fill="#4ade80"/>
-    <text x="{TX + 52}" y="707" font-family="Consolas, Menlo, monospace" font-size="26" font-weight="700" letter-spacing="2" fill="#c7d4ea">v {VERSION}</text>
+    <text x="{TX + 52}" y="707" font-family="Consolas, Menlo, monospace" font-size="26" font-weight="700" letter-spacing="2" fill="#c7d4ea">OPEN SOURCE &#183; MIT</text>
   </g>
 
   <!-- Slogan -->
@@ -126,10 +131,37 @@ def build_svg(logo_uri):
 </svg>
 '''
 
+def rasterize(svg_text):
+    """SVG -> PNG a misura piena + JPG. Questi tre sono i master del banner.
+
+    Il PNG e' anche la sorgente da cui il sito Ecosystem deriva le proprie
+    copie (`scripts/optimize-titan-images.js` legge questo file da qui): il
+    webp a 1920 lo fa quello script, e non va rifatto anche qui, o si finisce
+    con due copie che divergono. Se manca uno degli strumenti si esce con un
+    avviso — lo scopo dello script resta l'SVG, il resto e' comodita'.
+    """
+    try:
+        import resvg_py
+    except ImportError:
+        print("! resvg-py assente: generato il solo SVG  (pip install resvg-py)")
+        return
+    png = OUT.with_suffix(".png")
+    png.write_bytes(bytes(resvg_py.svg_to_bytes(svg_text)))
+    print("OK", png.name, f"{png.stat().st_size//1024} KB")
+
+    if not shutil.which("magick"):
+        print("! ImageMagick assente: niente JPG")
+        return
+    jpg = OUT.with_suffix(".jpg")
+    subprocess.run(["magick", str(png), "-quality", "92", str(jpg)], check=True)
+    print("OK", jpg.name, f"{jpg.stat().st_size//1024} KB")
+
 def main():
     logo_uri = "data:image/png;base64," + base64.b64encode(LOGO.read_bytes()).decode()
-    OUT.write_text(build_svg(logo_uri), encoding="utf-8")
-    print("OK", OUT, f"{OUT.stat().st_size//1024} KB")
+    svg_text = build_svg(logo_uri)
+    OUT.write_text(svg_text, encoding="utf-8")
+    print("OK", OUT.name, f"{OUT.stat().st_size//1024} KB")
+    rasterize(svg_text)
 
 if __name__ == "__main__":
     main()
