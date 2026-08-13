@@ -43,8 +43,10 @@ export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, cur
             >
                 <img src={logo} alt="Titan Logo" className="w-28 h-28 mb-6 drop-shadow-2xl" style={{ filter: 'drop-shadow(0 0 24px rgba(173,198,255,0.25))' }} />
 
-                <h1 className="font-headline text-4xl font-black tracking-tight mb-2 text-on-surface">
-                    {t('app.title')} <span className="text-primary drop-glow-primary">Titan Edition</span>
+                {/* Le due parti del nome canonico stanno su due righe: «Titan Edition» non si spezza mai */}
+                <h1 className="font-headline text-4xl font-black tracking-tight mb-2 text-on-surface text-center">
+                    {t('app.title')}
+                    <span className="block text-primary drop-glow-primary">Titan Edition</span>
                 </h1>
 
                 <p className="text-outline-variant/60 text-sm font-body mb-1">
@@ -52,7 +54,7 @@ export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, cur
                 </p>
 
                 {/* Paternità del progetto — il testo esteso è in Impostazioni di Sistema → Crediti */}
-                <p className="text-nano text-outline-variant/35 font-body mb-3 text-center max-w-md">
+                <p className="text-xs text-on-surface-variant/70 font-body mb-3 text-center max-w-md">
                     {t('credits.short')}
                 </p>
 
@@ -81,7 +83,8 @@ export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, cur
                         {t('systemSettings.langSection.title') || 'Interface Language'}
                     </h3>
 
-                    <div className="grid grid-cols-4 gap-4">
+                    {/* Centrato sul numero reale di lingue: niente colonne fisse */}
+                    <div className="flex flex-wrap justify-center gap-4">
                         {flagsList.map((lang) => {
                             const Flag = lang.component;
                             const isActive = locale === lang.id;
@@ -90,7 +93,7 @@ export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, cur
                                 <button
                                     key={lang.id}
                                     onClick={() => setLocale(lang.id)}
-                                    className={`relative flex flex-col items-center p-3 rounded-xl border transition-all duration-300 ${
+                                    className={`relative w-32 flex flex-col items-center p-3 rounded-xl border transition-all duration-300 ${
                                         isActive
                                             ? 'bg-primary/15 border-primary/40 text-on-surface'
                                             : 'bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60 hover:bg-surface-container hover:text-on-surface-variant hover:border-outline-variant/25'
@@ -148,8 +151,6 @@ export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, cur
                         {t('support.donateBtn')}
                     </button>
                 </div>
-
-                <p className="text-nano text-outline-variant/25 mt-8">INIT_SEQ · TITAN_DESKTOP_RUNTIME</p>
             </motion.div>
 
             {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
