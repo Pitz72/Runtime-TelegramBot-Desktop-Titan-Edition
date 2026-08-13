@@ -33,8 +33,11 @@
 - [x] ~~**Nome della repo di destinazione**~~ — **sciolta il 13/08: invariato**, `Runtime-TelegramBot-Desktop-Titan-Edition`. Combacia col nome canonico del prodotto usato nei manuali e nel colophon dei 2 PDF appena committati, e non allunga la lista dei link da migrare in Fase 3.
 - [x] ~~**Riscrivere la storia git**~~ — **sciolta ed eseguita il 13/08.** Era classificata «decisione da Fase 4» sul presupposto che riscrivere rompesse i cloni esistenti e i 40 tag. Con 0 fork su una repo privata mono-sviluppatore i cloni esistenti erano uno solo, e i tag si ricreano nel push. Vedi la Fase 4.1 qui sotto.
 - [x] ~~**Dove vivono i 2 manuali PDF**~~ — **sciolta il 13/08: committati nella repo.** Pesano 9,0 MB l'uno invece dei 32 di prima, e tenerli versionati accanto ai sorgenti Typst evita che PDF e sorgente divergano. Nulla vieta di allegarli **anche** alla release.
-- [ ] **Quanto tempo lasciare alla finestra di migrazione** prima di cancellare la ponte.
-- [ ] **Se pubblicare una v2.1.8 anche sulla ponte** con i soli fix, o aspettare di avere anche i manuali rifatti e fare una sola release.
+- [x] ~~**Quanto tempo lasciare alla finestra di migrazione**~~ e ~~**se pubblicare una v2.1.8 anche sulla ponte**~~ — **entrambe sciolte il 13/08: nessuna finestra, nessuna release sulla ponte. Il traghetto non si fa.**
+
+  Le due domande poggiavano su un presupposto mai verificato: che ci fosse qualcuno da traghettare. **Non c'è.** Dichiarazione dell'utente, che è l'unico a conoscere le vendite Gumroad: *nessuno ha mai comprato né installato il software, tranne lui.* I numeri della ponte concordano — una sola release, 3 download dell'`.exe`, 14 letture di `latest.yml` in cinque settimane, e **`latest-linux.yml` a zero**, cioè nessuna installazione Linux ha mai cercato un aggiornamento nella storia del prodotto.
+
+  Il traghetto esisteva per non lasciare un cliente pagante bloccato alla 2.1.7. Senza clienti paganti è una macchina costruita per nessuno: si porta dietro un token da rigenerare, un passo di publish cross-organizzazione e una finestra di attesa prima di poter cancellare la ponte. Tutto per aggiornare il computer dell'autore, che può scaricare l'installer a mano.
 
 ---
 
@@ -284,20 +287,17 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 
 **Da sapere prima di cominciare**
 
-⚠️ **La questione del token va decisa all'inizio della Fase 3, non alla fine.** La repo nuova non ha secret, e il `RELEASE_TOKEN` conservato in `.secrets/` **è scaduto** (verificato: 401). Ci sono due strade, e la seconda non era stata considerata:
+✅ **Niente traghetto, quindi niente token.** Sciolta la decisione sulla ponte (vedi sopra), il passo «pubblicazione sulla vecchia repo ponte» sparisce, e con lui sparisce il `RELEASE_TOKEN`: serviva **solo** perché GitHub Actions scrivesse su una repo di un'altra organizzazione. La 2.1.8 esce sulla repo pubblica e basta, col `GITHUB_TOKEN` integrato. Nessun secret da creare, nessuna scadenza da ricordare.
 
-1. **Rigenerare il token.** Un nuovo PAT con permesso di scrittura su `Ecosystem-Runtime/runtime-telegrambot-releases`, da mettere fra i secret della repo nuova. Il workflow resta com'è: costruisce *e* pubblica. Va creato a mano da interfaccia web, perché GitHub non ha API per generare PAT
-2. **Non usare nessun token.** Verificato il 13/08: il login `gh` locale (`Pitz72`) ha già **`admin` e `push` sulla ponte**. Quindi CI costruisce e carica gli artefatti col solo `GITHUB_TOKEN` integrato, e la release sulla ponte si crea da qui con `gh run download` + `gh release create -R Ecosystem-Runtime/runtime-telegrambot-releases`. Nessun secret da gestire, nessuna credenziale da rigenerare, e la ponte va cancellata comunque in Fase 5 — mettere in piedi un token per una release sola è lavoro che muore col suo scopo
+🔴 **Da fare per prima, perché è già in mano al pubblico.** La cartella `manuals/` della ponte contiene **gli 8 PDF vecchi da 33 MB col colophon EULA**, ed è pubblica. `MANUAL_BASE` punta lì, quindi oggi il pulsante «Scarica manuale» consegna un documento che dice «Tutti i diritti riservati» e vieta la riproduzione, per un progetto MIT. È lo stesso materiale che la Fase 4.1 ha appena cancellato dalla storia git — cancellarlo di là e lasciarlo servito di qua non ha senso.
 
-La 2 costa una modifica a `build.yml` (il passo «Publish release to bridge repo» diventa un upload di artefatti) e un comando in più a mano. La 1 costa un token da generare e una scadenza da ricordare. **Scegliere prima di toccare `build.yml`.**
-
-- Il valore del token sta in `.secrets/RELEASE_TOKEN.txt`, che è ignorato da git e non è mai finito nella storia — ma è quello scaduto
 - Il `git clone` del README **è già stato spostato** su `Pitz72` (commit `c4c1f4a`): era l'unico link che, su una pagina pubblica, dava errore a chi lo copiava. Tutti gli altri restano da migrare qui
-- Il link alla **pagina delle release punta alla ponte di proposito** e ci deve restare fino alla Fase 5: è lì che le installazioni esistenti cercano l'aggiornamento
+- Il link alla **pagina delle release** punta ancora alla ponte: va spostato anche quello, perché la 2.1.8 non uscirà lì
 
 - [ ] `electron-builder.yml` → `publish` verso la repo nuova
-- [ ] ⛔ **`src/renderer/src/lib/docs.ts` — `MANUAL_BASE`** oggi è un URL fisso alla ponte. Se non lo sposti, il pulsante «Scarica manuale» si rompe anche per chi *ha* aggiornato, nel momento in cui cancelli la ponte
-- [ ] ⛔ I 2 PDF (IT, EN) caricati nella nuova posizione **prima** che la 2.1.8 esca, altrimenti il punto sopra punta nel vuoto
+- [ ] 🔴 **`src/renderer/src/lib/docs.ts` — `MANUAL_BASE`** oggi punta a `manuals/` sulla ponte, cioè ai PDF con l'EULA. Va spostato sulla repo pubblica
+- [x] ~~⛔ I 2 PDF (IT, EN) caricati nella nuova posizione **prima** che la 2.1.8 esca~~ — **già soddisfatto senza fare nulla.** I PDF sono committati nella repo dalla Fase 2-quinquies, e da quando la repo è pubblica sono raggiungibili in `raw`: verificato il 13/08, **HTTP 200** e peso giusto (9.395.852 e 9.392.133 byte). Non c'è niente da caricare da nessuna parte; basta che `MANUAL_BASE` diventi:
+  `https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/raw/main/Manuale%20Utente%20Avanzato/typst/`
 - [ ] `package.json` — `homepage`, `repository`, `bugs` verso la destinazione nuova
 - [ ] `src/renderer/src/lib/links.ts` — `SOURCE_URL` aggiornato
 - [ ] Tutti i link nella documentazione che puntano a `Ecosystem-Runtime`
@@ -305,7 +305,8 @@ La 2 costa una modifica a `build.yml` (il passo «Publish release to bridge repo
 - [ ] ⛔ **Entry `2.1.8` in `src/renderer/src/lib/releaseNotes.ts`** — se manca, la schermata «Novità» mostra il testo generico invece dell'elenco
 - [ ] `CHANGELOG.md` — la sezione «Non ancora rilasciato» diventa `v2.1.8`, più `docs/changelogs/CHANGELOG_v2.1.8.md`. **Da citare fra le novità: il campo della data ora si chiama «Data di Partenza» anche nelle impostazioni del bot** (prima era «Data di Filtro (Cutoff)»); è una stringa visibile che cambia sotto agli occhi degli utenti esistenti
 - [ ] I manuali sono già impostati sulla versione **2.1.8**: se la versione che si rilascia cambia, `typst/manuale.typ` va aggiornato. In ogni caso i 2 PDF vanno ricompilati, perché `strings.typ` è cambiato con la Fase 2-bis
-- [ ] Build e **pubblicazione sulla vecchia repo ponte** (serve il secret `RELEASE_TOKEN` riconfigurato sulla repo nuova): è lì che le installazioni esistenti vanno a cercare l'aggiornamento
+- [x] ~~Build e **pubblicazione sulla vecchia repo ponte** (serve il secret `RELEASE_TOKEN`)~~ — **cancellato il 13/08.** Non ci sono installazioni esistenti da raggiungere. La release va sulla repo pubblica e basta
+- [ ] Build e pubblicazione **sulla repo pubblica**, col `GITHUB_TOKEN` integrato. In `build.yml` va tolto il passo `Publish release to bridge repo`, che punta a `Ecosystem-Runtime/runtime-telegrambot-releases` e usa `secrets.RELEASE_TOKEN`
 
 ---
 
@@ -321,7 +322,7 @@ La 2 costa una modifica a `build.yml` (il passo «Publish release to bridge repo
 - [x] Spostata la repo su `Pitz72` e verificata con un clone pulito
 - [x] ~~Decidere che fare del branch `claude/heuristic-swanson-148248`~~ — **cancellato, e la decisione l'hanno presa i fatti:** `git rev-list --count main..claude/heuristic-swanson-148248` dà **0**. Il branch era interamente contenuto in `main`, quindi non conteneva una riga di lavoro che non fosse già pubblicata. Non è stato portato sulla repo nuova; resta nel backup e nella vecchia repo
 - [x] Verificato che i **40 tag** siano arrivati, e che ognuno risolva a un commit valido
-- [ ] ⚠️ **`RELEASE_TOKEN` non è stato ricreato, e quello vecchio è morto.** I secret non si trasferiscono e la repo nuova ne ha zero. Il token conservato in `.secrets/RELEASE_TOKEN.txt` è stato verificato il 13/08 contro `api.github.com`: **HTTP 401**, quindi scaduto o revocato (è un fine-grained `github_pat_`, non un classico, e i fine-grained scadono). Non è stato installato: un secret morto è peggio di un secret assente, perché il workflow fallirebbe a build finita invece che subito. **Vedi però la nota sotto: forse non serve affatto**
+- [x] ~~Riconfigurare `RELEASE_TOKEN`~~ — **non serve più, e comunque quello vecchio è morto.** Il token in `.secrets/RELEASE_TOKEN.txt` è stato verificato contro `api.github.com`: **HTTP 401** anche su `/rate_limit`, quindi scaduto o revocato (è un fine-grained `github_pat_`, e i fine-grained scadono; per questo non compariva nell'elenco dei token *classici*). Non è stato installato: un secret morto è peggio di un secret assente, perché il workflow fallirebbe a build finita invece che subito. **Poi la decisione sulla ponte ha tolto il problema alla radice**: senza release cross-organizzazione, il `GITHUB_TOKEN` integrato basta
 
 #### Cosa è stato tolto dalla storia
 
@@ -371,7 +372,10 @@ Il primo tentativo ha sbagliato bersaglio e va ricordato, perché l'errore è ri
 - [ ] **Gumroad** — rimuovere il prodotto da `pizzisimone.gumroad.com/l/telegrambot`
 - [ ] **Sito Ecosystem** (`GitHub/SITI-WEB/ECOSYSTEM`) — sostituire acquisto e prezzo con il link alla repo pubblica; sistemare la landing di Titan, `products-manifest.json`, i locale it/en e l'URL offuscato in base64 del manuale
 - [ ] Verificare che nessun materiale promozionale prometta ancora un prodotto a pagamento
-- [ ] ⛔ **Solo dopo la finestra di migrazione: cancellare `Ecosystem-Runtime/runtime-telegrambot-releases`.** Chi non ha aperto l'app in quella finestra resta alla 2.1.7 per sempre: dopo la cancellazione non esiste redirect per gli asset di release
+- [ ] **Cancellare `Ecosystem-Runtime/runtime-telegrambot-releases`.** Nessuna finestra da aspettare
+  > Il ⛔ originale diceva: *«Solo dopo la finestra di migrazione. Chi non ha aperto l'app in quella finestra resta alla 2.1.7 per sempre: dopo la cancellazione non esiste redirect per gli asset di release.»* Vero in generale, vuoto in questo caso: non esiste nessun «chi». L'unica installazione al mondo è quella dell'autore, che scarica l'installer a mano.
+  >
+  > 🔴 **C'è però un motivo per farlo presto invece che tardi.** La cartella `manuals/` di quella repo serve pubblicamente **gli 8 PDF vecchi da 33 MB col colophon EULA** — «Tutti i diritti riservati», riproduzione vietata. Finché sta su, il progetto MIT ha un suo documento ufficiale scaricabile che dice il contrario. Va fatto **subito dopo** aver spostato `MANUAL_BASE` in Fase 3, non alla fine di tutto.
 
 ---
 
