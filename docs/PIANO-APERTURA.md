@@ -420,10 +420,16 @@ Aggiornati: `README.md`, `docs/build.md`, i 2 «leggimi», il corpo della releas
 
 ## FASE 5 — Dismissione della fase commerciale
 
-- [ ] **Gumroad** — rimuovere il prodotto da `pizzisimone.gumroad.com/l/telegrambot`
-- [ ] **Sito Ecosystem** (`GitHub/SITI-WEB/ECOSYSTEM`) — sostituire acquisto e prezzo con il link alla repo pubblica; sistemare la landing di Titan, `products-manifest.json`, i locale it/en e l'URL offuscato in base64 del manuale
-- [ ] Verificare che nessun materiale promozionale prometta ancora un prodotto a pagamento
-- [ ] **Cancellare `Ecosystem-Runtime/runtime-telegrambot-releases`.** Nessuna finestra da aspettare
+**Eseguita il 13 agosto 2026.** Sito `ecosystem.runtimeradio.com` aggiornato e in produzione (release `v0.6.5`, commit `26cdd2c`), Gumroad chiuso. **Resta aperta una sola voce, per decisione dell'utente: la cancellazione della repo ponte.**
+
+- [x] **Gumroad** — prodotto rimosso dall'utente. Verificato: `pizzisimone.gumroad.com/l/telegrambot` e `/EARLYBIRD` rispondono **HTTP 404**, mentre `feeddownloaderpro` e `livemachinepro` restano **200**. La dismissione ha colpito solo Titan
+- [x] **Sito Ecosystem** — fatto, con un vincolo che il piano non prevedeva: **le chiavi i18n commerciali (`buy`, `price_note`, `lifetime_updates`) sono condivise con FeedDownloader Pro e Live Machine Pro**, che restano a pagamento. Non si potevano riscrivere. Aggiunte chiavi nuove (`price_free`, `download_github`, `spec_license_mit`, …) e un flag `openSource` su `Product`, su cui i componenti condivisi ramificano. Le 4 CTA Gumroad della landing puntano a GitHub Releases; il blocco prezzo (€19.98 barrato → €9.99) è diventato blocco download; l'URL base64 del manuale ora punta ai PDF della repo pubblica
+- [x] Verificare che nessun materiale promozionale prometta ancora un prodotto a pagamento — verificato **sulla pagina in produzione**, non sul sorgente: zero occorrenze di €9.99, €19.98, «Acquista», «Gumroad», «Lifetime», «Pagamento unico» dentro la landing di Titan, e zero link a Gumroad. Controprova di non-regressione: gli altri due prodotti hanno ancora 4 link Gumroad ciascuno e il loro prezzo
+  > Due bugie trovate **oltre** l'elenco del piano, perché stavano in posti che il piano non nominava: la card **bundle** a €15.99 mostrava le icone di *tutti* i prodotti, Titan compreso — un software libero dentro un pacchetto a pagamento (ora filtra `!openSource`, e `BUNDLE_VALUE` €19.98 torna a coincidere coi due prodotti a pagamento rimasti); e il **JSON-LD** dichiarava `operatingSystem: "Windows, macOS, Linux"` per un prodotto senza macOS dal 6 luglio. Aggiunti `os` e `license` al manifest
+  >
+  > Sistemato anche `public/updates/titan-version.json`: endpoint pubblico senza consumatori noti nel codice, dava versione 2.1.7 e `downloadUrl` verso Gumroad
+- [ ] ⛔ **Cancellare `Ecosystem-Runtime/runtime-telegrambot-releases` — NON FATTO, per decisione esplicita dell'utente il 13/08.** La repo resta pubblica, con la release v2.1.7 e gli 8 PDF col colophon EULA nella cartella `manuals/`. Conseguenza da tenere presente: il progetto MIT ha ancora 8 documenti ufficiali scaricabili che dichiarano «Tutti i diritti riservati» e vietano la riproduzione
+  > **Il motivo tecnico per cancellarla è però decaduto:** il pulsante «Scarica manuale» del sito e `MANUAL_BASE` dell'app non puntano più là, quindi la ponte non serve più a nessuno dei due e la sua permanenza non rompe nulla. Se un giorno si cancella, non c'è niente da preparare prima: `electron-builder.yml` pubblica su `Pitz72` e i PDF nuovi rispondono HTTP 200. Permessi verificati: `ADMIN`
   > Il ⛔ originale diceva: *«Solo dopo la finestra di migrazione. Chi non ha aperto l'app in quella finestra resta alla 2.1.7 per sempre: dopo la cancellazione non esiste redirect per gli asset di release.»* Vero in generale, vuoto in questo caso: non esiste nessun «chi». L'unica installazione al mondo è quella dell'autore, che scarica l'installer a mano.
   >
   > 🔴 **C'è però un motivo per farlo presto invece che tardi.** La cartella `manuals/` di quella repo serve pubblicamente **gli 8 PDF vecchi da 33 MB col colophon EULA** — «Tutti i diritti riservati», riproduzione vietata. Finché sta su, il progetto MIT ha un suo documento ufficiale scaricabile che dice il contrario. Va fatto **subito dopo** aver spostato `MANUAL_BASE` in Fase 3, non alla fine di tutto.
@@ -486,7 +492,7 @@ Oggi esportano la stessa cosa, quindi **diradare il pannello dirada anche l'espo
 
 - [ ] Installare l'ultimo installer su una macchina pulita e verificare: primo avvio, creazione di un bot, pubblicazione reale su un canale
 - [x] ~~Verificare l'aggiornamento automatico da 2.1.7 a 2.1.8 su un'installazione reale — è il punto che, se sbagliato, non si può correggere a posteriori~~ — **verificato il 13/08 dall'utente, su installazione reale.** Ha aggiornato dalla release appena pubblicata su GitHub, e la schermata «Novità» è comparsa con l'elenco della 2.1.8. Il punto più delicato dell'apertura è passato, ed è passato al primo colpo
-- [ ] Verificare che il pulsante «Scarica manuale» funzioni **dopo** la cancellazione della ponte
+- [x] ~~Verificare che il pulsante «Scarica manuale» funzioni **dopo** la cancellazione della ponte~~ — **la dipendenza dalla ponte non esiste più**, quindi la verifica non dipende più da una cancellazione che l'utente ha deciso di non fare. I due PDF nella repo pubblica rispondono **HTTP 200** (ricontrollato il 13/08 in Fase 5), e sia `MANUAL_BASE` dell'app sia il pulsante del sito puntano là. Resta da provare il pulsante **dentro l'applicazione installata**, non solo l'URL
 - [ ] Verificare i pulsanti di donazione e contatti dalla schermata iniziale e dalle impostazioni
 - [ ] Clone pulito della repo pubblica → `npm install` → `npm run build`: deve funzionare senza nulla di locale
 - [ ] Spostare questo file in `docs/storico/`
