@@ -10,7 +10,7 @@ Gira sul tuo computer: i tuoi dati e i tuoi token restano lì.
 È software libero, rilasciato sotto licenza MIT: puoi usarlo,
 studiarlo, modificarlo e ridistribuirlo, anche a fini commerciali.
 Il codice sorgente è pubblico:
-https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition
+https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition
 
 
 --- INSTALLAZIONE -----------------------------------------------
@@ -95,7 +95,7 @@ per questa documentazione.
 --- CONTATTI ----------------------------------------------------
 
 Segnalazioni e richieste
-  https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition/issues
+  https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/issues
 
 Contatti
   https://simonepizzi.runtimeradio.it/contatti

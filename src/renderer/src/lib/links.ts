@@ -12,7 +12,7 @@ export const DONATE_URL = 'https://www.paypal.com/paypalme/runtimeradio';
 export const CONTACT_URL = 'https://simonepizzi.runtimeradio.it/contatti';
 
 /** Codice sorgente del progetto. */
-export const SOURCE_URL = 'https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition';
+export const SOURCE_URL = 'https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition';
 
 export function openLink(url: string): void {
     window.api.openExternal(url);

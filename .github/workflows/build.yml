@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_release:
-        description: 'Publish release to bridge repo after build'
+        description: 'Publish the release on this repository after the build'
         required: false
         default: 'true'
         type: choice
@@ -105,6 +105,10 @@ jobs:
     needs: [build-linux, build-windows]
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.publish_release == 'true' }}
+    # La release esce su questa stessa repository: basta il GITHUB_TOKEN che
+    # Actions genera da sé, e serve solo il permesso di scrittura sui contenuti.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -124,17 +128,16 @@ jobs:
           name: windows-artifacts
           path: artifacts/windows
 
-      - name: Publish release to bridge repo
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          repository: Ecosystem-Runtime/runtime-telegrambot-releases
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ steps.version.outputs.tag }}
-          name: "Titan Edition ${{ steps.version.outputs.tag }}"
+          name: "Runtime TelegramBot Desktop · Titan Edition ${{ steps.version.outputs.tag }}"
           body: |
-            ## Runtime TelegramBot — Titan Edition ${{ steps.version.outputs.tag }}
+            ## Runtime TelegramBot Desktop · Titan Edition ${{ steps.version.outputs.tag }}
 
-            Download the installer for your platform:
+            Free software, MIT licensed. Download the installer for your platform:
 
             | Platform | File |
             |----------|------|
@@ -142,8 +145,12 @@ jobs:
             | **Linux (AppImage)** | `*.AppImage` |
             | **Linux (deb)** | `*.deb` |
 
-            > Supported platforms: Windows and Linux.
-            > The app updates automatically — existing users will be notified in-app.
+            > Supported platforms: Windows and Linux. macOS has no official
+            > installer — build it from source.
+            >
+            > Automatic updates work on **Windows** and on the **AppImage**.
+            > The `.deb` package does not self-update: install the new one by
+            > hand, or use your distribution's package manager.
           files: |
             artifacts/linux/*.AppImage
             artifacts/linux/*.deb

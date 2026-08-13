@@ -27,7 +27,7 @@ Tre conseguenze pratiche per chi contribuisce:
 Serve **Node.js 20** (non 22, non 24 — vedi sotto) e gli strumenti di compilazione nativi della propria piattaforma, perché `better-sqlite3` viene ricompilato in fase di installazione.
 
 ```bash
-git clone https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition.git
+git clone https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition.git
 cd Runtime-TelegramBot-Desktop-Titan-Edition
 npm install
 ```

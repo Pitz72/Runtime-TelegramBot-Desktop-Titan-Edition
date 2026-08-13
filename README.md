@@ -6,7 +6,7 @@
 
   **Automazione multi-canale di feed RSS, podcast e YouTube su Telegram.**
 
-  ![Version](https://img.shields.io/badge/Version-2.1.7-3b82f6?style=for-the-badge)
+  ![Version](https://img.shields.io/badge/Version-2.1.8-3b82f6?style=for-the-badge)
   ![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)
   ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20Linux-emerald?style=for-the-badge)
   ![Stack](https://img.shields.io/badge/Stack-Electron%20%7C%20React%20%7C%20SQLite-475569?style=for-the-badge)
@@ -73,7 +73,7 @@ L'italiano è la lingua sorgente: interfaccia, guide e manuale nascono lì e ven
 
 ### Utenti
 
-Scarica l'installer dalla [pagina delle release](https://github.com/Ecosystem-Runtime/runtime-telegrambot-releases/releases/latest):
+Scarica l'installer dalla [pagina delle release](https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/releases/latest):
 
 - **Windows** — `.exe` (installer NSIS). Non essendo firmato, SmartScreen mostrerà un avviso al primo avvio: *Ulteriori informazioni* → *Esegui comunque*.
 - **Linux** — `.AppImage` (da rendere eseguibile con `chmod +x`) oppure `.deb` per Ubuntu, Debian e derivate. Potrebbero servire `libsecret-1-0` e `libfuse2`.

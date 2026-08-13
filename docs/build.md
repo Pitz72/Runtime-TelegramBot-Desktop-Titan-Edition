@@ -77,7 +77,7 @@ sudo dpkg -r runtime-telegram-bot-titan-edition   # per disinstallare
 
 **Verifica delle pull request** — automatica su ogni PR verso `main`: `npm ci`, `tsc --noEmit`, `vite build`. Serve a garantire che nessun contributo rompa la compilazione.
 
-**Build e release** — solo manuale (`workflow_dispatch`), mai su push. Costruisce su runner nativi Ubuntu e Windows e, se `publish_release` è `true`, pubblica sulla repository ponte delle release.
+**Build e release** — solo manuale (`workflow_dispatch`), mai su push. Costruisce su runner nativi Ubuntu e Windows e, se `publish_release` è `true`, pubblica la release sulla repository stessa.
 
 ```bash
 gh workflow run build.yml -f publish_release=true
@@ -90,7 +90,9 @@ gh workflow run build.yml -f publish_release=true
 3. **Aggiungere l'entry della nuova versione in `src/renderer/src/lib/releaseNotes.ts`** — se manca, la schermata «Novità» mostra il testo generico invece dell'elenco delle modifiche.
 4. `gh workflow run build.yml -f publish_release=true`.
 
-Gli artefatti e il manifesto `latest.yml` finiscono su [`Ecosystem-Runtime/runtime-telegrambot-releases`](https://github.com/Ecosystem-Runtime/runtime-telegrambot-releases), da cui `electron-updater` scarica gli aggiornamenti (configurato in `electron-builder.yml`, sezione `publish`). La pubblicazione usa il secret `RELEASE_TOKEN`.
+Gli artefatti e il manifesto `latest.yml` finiscono nelle [release di questa stessa repository](https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/releases), da cui `electron-updater` scarica gli aggiornamenti (configurato in `electron-builder.yml`, sezione `publish`). La pubblicazione usa il `GITHUB_TOKEN` che GitHub Actions genera da sé: non serve nessun secret da configurare a mano.
+
+Fino alla v2.1.7 le release uscivano su una repository ponte separata, perché il sorgente era privato e serviva un posto pubblico da cui scaricare gli aggiornamenti. Aperto il sorgente, la ponte non ha più ragione di esistere.
 
 Gli installer **non sono firmati**: non esiste un certificato di code signing. Su Windows SmartScreen mostra un avviso alla prima esecuzione.
 

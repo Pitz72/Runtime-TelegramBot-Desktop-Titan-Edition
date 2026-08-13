@@ -51,9 +51,9 @@ linux:
   category: Utility
   artifactName: RuntimeTelegramBot-TitanEdition-${version}.${ext}
 
-# === Auto-Update (bridge repo pubblico su Ecosystem-Runtime) ===
+# === Auto-Update (release sulla repo pubblica del progetto) ===
 publish:
   provider: github
-  owner: Ecosystem-Runtime
-  repo: runtime-telegrambot-releases
+  owner: Pitz72
+  repo: Runtime-TelegramBot-Desktop-Titan-Edition
   private: false

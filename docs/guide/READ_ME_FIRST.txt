@@ -11,7 +11,7 @@ stay there.
 It is free software, released under the MIT Licence: you may use
 it, study it, modify it and redistribute it, including for
 commercial purposes. The source code is public:
-https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition
+https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition
 
 
 --- INSTALLATION ------------------------------------------------
@@ -95,7 +95,7 @@ documentation.
 --- CONTACT -----------------------------------------------------
 
 Bug reports and requests
-  https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition/issues
+  https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/issues
 
 Contact
   https://simonepizzi.runtimeradio.it/contatti
