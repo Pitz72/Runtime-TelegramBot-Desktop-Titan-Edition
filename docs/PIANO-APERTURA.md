@@ -283,7 +283,15 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 ✅ **Il blocco è caduto il 13/08.** Diceva: *«va costruita solo dopo che la repo di destinazione esiste (Fase 4.1–4.2), perché il suo `app-update.yml` viene generato dalla configurazione di publish e deve già puntare alla destinazione nuova»*. La destinazione ora esiste ed è pubblica: **`https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition`**. La fase è eseguibile per intero.
 
 **Da sapere prima di cominciare**
-- La repo nuova **non ha secret**: `RELEASE_TOKEN` va ricreato a mano prima di poter pubblicare la release-traghetto sulla ponte. Il valore sta in `.secrets/RELEASE_TOKEN.txt`, che è ignorato da git e non è mai finito nella storia
+
+⚠️ **La questione del token va decisa all'inizio della Fase 3, non alla fine.** La repo nuova non ha secret, e il `RELEASE_TOKEN` conservato in `.secrets/` **è scaduto** (verificato: 401). Ci sono due strade, e la seconda non era stata considerata:
+
+1. **Rigenerare il token.** Un nuovo PAT con permesso di scrittura su `Ecosystem-Runtime/runtime-telegrambot-releases`, da mettere fra i secret della repo nuova. Il workflow resta com'è: costruisce *e* pubblica. Va creato a mano da interfaccia web, perché GitHub non ha API per generare PAT
+2. **Non usare nessun token.** Verificato il 13/08: il login `gh` locale (`Pitz72`) ha già **`admin` e `push` sulla ponte**. Quindi CI costruisce e carica gli artefatti col solo `GITHUB_TOKEN` integrato, e la release sulla ponte si crea da qui con `gh run download` + `gh release create -R Ecosystem-Runtime/runtime-telegrambot-releases`. Nessun secret da gestire, nessuna credenziale da rigenerare, e la ponte va cancellata comunque in Fase 5 — mettere in piedi un token per una release sola è lavoro che muore col suo scopo
+
+La 2 costa una modifica a `build.yml` (il passo «Publish release to bridge repo» diventa un upload di artefatti) e un comando in più a mano. La 1 costa un token da generare e una scadenza da ricordare. **Scegliere prima di toccare `build.yml`.**
+
+- Il valore del token sta in `.secrets/RELEASE_TOKEN.txt`, che è ignorato da git e non è mai finito nella storia — ma è quello scaduto
 - Il `git clone` del README **è già stato spostato** su `Pitz72` (commit `c4c1f4a`): era l'unico link che, su una pagina pubblica, dava errore a chi lo copiava. Tutti gli altri restano da migrare qui
 - Il link alla **pagina delle release punta alla ponte di proposito** e ci deve restare fino alla Fase 5: è lì che le installazioni esistenti cercano l'aggiornamento
 
@@ -313,7 +321,7 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 - [x] Spostata la repo su `Pitz72` e verificata con un clone pulito
 - [x] ~~Decidere che fare del branch `claude/heuristic-swanson-148248`~~ — **cancellato, e la decisione l'hanno presa i fatti:** `git rev-list --count main..claude/heuristic-swanson-148248` dà **0**. Il branch era interamente contenuto in `main`, quindi non conteneva una riga di lavoro che non fosse già pubblicata. Non è stato portato sulla repo nuova; resta nel backup e nella vecchia repo
 - [x] Verificato che i **40 tag** siano arrivati, e che ognuno risolva a un commit valido
-- [ ] ⚠️ **`RELEASE_TOKEN` non è stato ricreato.** I secret non si trasferiscono e la repo nuova ne ha zero. Serve prima della release-traghetto della Fase 3; dopo si usa il `GITHUB_TOKEN` integrato
+- [ ] ⚠️ **`RELEASE_TOKEN` non è stato ricreato, e quello vecchio è morto.** I secret non si trasferiscono e la repo nuova ne ha zero. Il token conservato in `.secrets/RELEASE_TOKEN.txt` è stato verificato il 13/08 contro `api.github.com`: **HTTP 401**, quindi scaduto o revocato (è un fine-grained `github_pat_`, non un classico, e i fine-grained scadono). Non è stato installato: un secret morto è peggio di un secret assente, perché il workflow fallirebbe a build finita invece che subito. **Vedi però la nota sotto: forse non serve affatto**
 
 #### Cosa è stato tolto dalla storia
 
