@@ -6,6 +6,18 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.2.1': {
+        it: [
+            'Nel diario non compaiono più errori che non sono errori: bastava la parola «error» nel titolo di un video.',
+            'Il livello di una riga si legge ora dai marcatori del programma, mai dal testo che arriva dai feed.',
+            'Le segnalazioni del lettore YouTube dichiarano se sono errori o avvisi, così restano visibili nel diario.',
+        ],
+        en: [
+            'The diary no longer shows errors that aren’t errors: the word “error” in a video title was enough.',
+            'A line’s level now comes from the program’s own markers, never from text coming out of the feeds.',
+            'The YouTube reader’s warnings declare whether they are errors or warnings, so they stay in the diary.',
+        ],
+    },
     '2.2.0': {
         it: [
             'Il pannello dei log è ora un diario di scansione: racconta cosa fa il programma, non cosa scrive.',
