@@ -46,10 +46,31 @@
     "logs": {
         "title": "System Logs // All Channels",
         "export": "Export",
-        "exportTitle": "Export logs to .txt file",
+        "exportTitle": "Export the full day's log to a .txt file",
+        "exportDone": "Today's log exported",
+        "exportEmpty": "No log for today: the file is created when the engine writes its first line.",
+        "exportFailed": "Log export failed:",
         "clear": "Clear",
         "filterAll": "All Bots",
         "filterBot": "This Bot"
+    },
+    "journal": {
+        "title": "Scan journal",
+        "viewJournal": "Journal",
+        "viewConsole": "Console",
+        "empty": "Waiting for the first round",
+        "reading": "Reading",
+        "engineStart": "Engine started",
+        "engineStop": "Engine stopped",
+        "scanStart": "Scan started · {n} bots",
+        "sourceStart": "Reading source",
+        "itemFound": "Found",
+        "itemDeferred": "Deferred · quiet hours",
+        "itemPublished": "Published",
+        "scanEnd": "Round complete · {n} published",
+        "nextScan": "Next round in {n} min",
+        "error": "Error",
+        "warn": "Warning"
     },
     "botSelector": {
         "title": "Active Bots",

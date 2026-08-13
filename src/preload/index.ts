@@ -93,7 +93,8 @@ const api = {
         ipcRenderer.removeAllListeners('update-error');
         ipcRenderer.on('update-error', (_, info) => callback(info));
     },
-    exportLogs: (logs: string[]) => ipcRenderer.invoke('export-logs', logs),
+    // Fase 7: nessun argomento — il main esporta il file di log della giornata
+    exportLogs: () => ipcRenderer.invoke('export-logs'),
     exportDatabase: () => ipcRenderer.invoke('export-database'),
     importDatabase: () => ipcRenderer.invoke('import-database'),
     exportConfig: () => ipcRenderer.invoke('export-config'),

@@ -46,10 +46,31 @@
     "logs": {
         "title": "System Logs // All Channels",
         "export": "Esporta",
-        "exportTitle": "Esporta log in file .txt",
+        "exportTitle": "Esporta il log completo della giornata in un file .txt",
+        "exportDone": "Log della giornata esportato",
+        "exportEmpty": "Nessun log per oggi: il file nasce alla prima riga scritta dal motore.",
+        "exportFailed": "Esportazione del log non riuscita:",
         "clear": "Pulisci",
         "filterAll": "Tutti",
         "filterBot": "Solo questo"
+    },
+    "journal": {
+        "title": "Diario di scansione",
+        "viewJournal": "Diario",
+        "viewConsole": "Console",
+        "empty": "In attesa del primo giro",
+        "reading": "Lettura",
+        "engineStart": "Motore acceso",
+        "engineStop": "Motore spento",
+        "scanStart": "Scansione avviata · {n} bot",
+        "sourceStart": "Lettura sorgente",
+        "itemFound": "Trovato",
+        "itemDeferred": "Rimandato · ore di silenzio",
+        "itemPublished": "Pubblicato",
+        "scanEnd": "Giro concluso · {n} pubblicati",
+        "nextScan": "Prossimo giro tra {n} min",
+        "error": "Errore",
+        "warn": "Avviso"
     },
     "botSelector": {
         "title": "Bot Attivi",

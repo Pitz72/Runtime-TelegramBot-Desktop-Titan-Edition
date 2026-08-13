@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { app, BrowserWindow } from 'electron';
-import { LogEntry, LogLevel } from '../shared/types';
+import { LogEntry, LogLevel, ScanEvent, ScanEventType } from '../shared/types';
 
 // Counter monotono per ID stabili — fix #22/#23
 let _logId = 0;
@@ -23,12 +23,36 @@ function redactTokens(message: string): string {
 /**
  * Rileva il livello semantico di un messaggio dagli emoji/keyword — fix #23.
  * Ordine: error > warn > success > info.
+ *
+ * Resta la via di ripiego per le decine di righe che il motore emette senza evento
+ * strutturato (errori, avvisi, diagnostica). Le righe con un `ScanEvent` non passano
+ * di qui: il loro livello è dichiarato, non indovinato — Fase 7.
  */
 function detectLevel(message: string): LogLevel {
     if (message.includes('❌') || message.includes('Error') || message.includes('Fallito') || message.includes('error')) return 'error';
     if (message.includes('⚠️') || message.includes('SKIP') || message.includes('⏳')) return 'warn';
     if (message.includes('✅') || message.includes('🆕') || message.includes('🚀') || message.includes('Found New Item')) return 'success';
     return 'info';
+}
+
+/** Livello di ogni tipo di evento del diario — dichiarato, non dedotto (Fase 7). */
+const EVENT_LEVELS: Record<ScanEventType, LogLevel> = {
+    'engine-start': 'success',
+    'engine-stop': 'info',
+    'scan-start': 'info',
+    'source-start': 'info',
+    'item-found': 'success',
+    'item-deferred': 'warn',
+    'item-published': 'success',
+    'scan-end': 'success',
+    'next-scan': 'info',
+};
+
+function levelForEvent(event: ScanEvent): LogLevel {
+    // Un giro chiuso senza pubblicare nulla è un esito normale, non un successo:
+    // dipingerlo di verde direbbe che è successo qualcosa quando non è successo niente.
+    if (event.type === 'scan-end' && !event.count) return 'info';
+    return EVENT_LEVELS[event.type];
 }
 
 class Logger {
@@ -89,7 +113,17 @@ class Logger {
         });
     }
 
-    public async log(message: string) {
+    /** Percorso del file di log della giornata — l'esportazione legge questo, non la memoria. */
+    public getLogFilePath(): string {
+        return this.logFilePath;
+    }
+
+    /**
+     * @param event evento strutturato, se la riga è una voce del diario di scansione.
+     *              Il file su disco riceve comunque la riga di testo per intero: il diario
+     *              dirada l'interfaccia, non la registrazione.
+     */
+    public async log(message: string, event?: ScanEvent) {
         const timestamp = new Date().toLocaleTimeString();
         const formattedMessage = `[${timestamp}] ${redactTokens(message)}`;
 
@@ -103,11 +137,12 @@ class Logger {
             console.error('[Logger] Failed to write to log file:', error);
         }
 
-        // 3. IPC Buffer — strutturato con id + level (fix #22/#23)
+        // 3. IPC Buffer — strutturato con id + level (fix #22/#23) + evento (Fase 7)
         const entry: LogEntry = {
             id: ++_logId,
-            level: detectLevel(message),
+            level: event ? levelForEvent(event) : detectLevel(message),
             message: formattedMessage,
+            ...(event ? { event } : {}),
         };
         this.ipcBuffer.push(entry);
     }

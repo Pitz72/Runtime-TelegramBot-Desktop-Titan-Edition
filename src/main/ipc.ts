@@ -6,6 +6,7 @@ import { getDB, initDB } from './database/schema';
 import { BotManager } from './bot/manager';
 import { fetchFeed, validateFeedUrl } from './bot/parser';
 import { fetchYouTubeVideos } from './bot/youtube';
+import { TitanLogger } from './logger';
 import { writeFile, copyFile, readFile } from 'fs/promises';
 import { join } from 'path';
 
@@ -288,8 +289,22 @@ export function setupIpc() {
     ipcMain.handle('get-bot-status', () => ({ running: getBotEngine().isEngineRunning() }));
 
     // --- LOG EXPORT ---
-    ipcMain.handle('export-logs', async (_, logs: string[]) => {
+    // Fase 7: si esporta il **file** della giornata, non l'array in memoria del renderer.
+    // Due ragioni. La prima è che il diario mostra a schermo solo gli eventi che contano,
+    // e un export costruito su quel che si vede sarebbe monco. La seconda vale comunque:
+    // la memoria contiene solo ciò che è arrivato da quando la finestra è aperta, mentre
+    // il file ha tutta la giornata — ed è quel che serve allegare a una segnalazione.
+    ipcMain.handle('export-logs', async () => {
         try {
+            const sourcePath = TitanLogger.getLogFilePath();
+
+            // Il file nasce alla prima riga scritta: se il motore non è mai partito oggi,
+            // non esiste ancora. Meglio dirlo che salvare un file vuoto.
+            const content = await readFile(sourcePath, 'utf-8').catch(() => null);
+            if (content === null) {
+                return { success: false, error: 'NoLogFile' };
+            }
+
             const { filePath, canceled } = await dialog.showSaveDialog({
                 title: 'Esporta Log',
                 defaultPath: `titan-log-${new Date().toISOString().split('T')[0]}.txt`,
@@ -303,7 +318,6 @@ export function setupIpc() {
                 return { success: false, error: 'Cancelled' };
             }
 
-            const content = logs.join('\n');
             await writeFile(filePath, content, 'utf-8');
             return { success: true, path: filePath };
         } catch (e: any) {

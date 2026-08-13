@@ -471,12 +471,23 @@ Aperta dall'utente il 13 agosto 2026, a fine sessione della Fase 4.3. Osservazio
 
 **La diagnosi è stata verificata nel codice, non dedotta.** Il logger non manda le righe una a una: le accumula e le scarica in blocco **ogni 300 ms** ([logger.ts:55](../src/main/logger.ts)). Con più bot in scansione arrivano N righe insieme, tre volte al secondo, dentro una lista virtualizzata che si auto-scorre. Non è un'animazione che scatta: è la quantità. **Diradare il contenuto attacca la causa, non il sintomo** — l'intuizione dell'utente è corretta.
 
+**Eseguita e verificata il 13 agosto 2026.** Come in Fase 6, non è stata verificata rileggendo il diff: il pannello è stato montato dal vivo con un `window.api` finto, alimentato con lotti di log realistici, e misurato con `getBoundingClientRect` e `getComputedStyle`. L'impalcatura è stata cancellata a fine verifica.
+
 ### 7.1 Il diario di scansione
 
 Sostituire lo scarico grezzo con eventi leggibili: *scansione avviata su questa sorgente*, *trovato questo*, e a fine giro *pubblicati N*.
 
-- [ ] ⛔ **Decisione da prendere prima di scrivere una riga: sostituzione o vista alternativa?** Se il diario *sostituisce* il log a schermo, la console grezza sparisce dall'interfaccia e resta solo nel file. Se è una *vista alternativa* con un interruttore, servono due modalità di rendering e uno stato in più. L'utente non si è ancora espresso
-- [ ] **Il nodo vero: oggi il livello di una riga viene indovinato dagli emoji.** `detectLevel` cerca ✅, ❌, ⚠️ dentro il testo ([logger.ts:27](../src/main/logger.ts)). Un diario strutturato vuole **eventi veri** emessi come tali dal motore — scansione iniziata, elemento trovato, pubblicato — non stringhe da cui si deduce il colore. Qui sta il lavoro della fase; il resto è contorno
+- [x] ⛔ ~~**Decisione da prendere prima di scrivere una riga: sostituzione o vista alternativa?**~~ — **decisa dall'utente, 13/08: vista alternativa con interruttore, e a schermo solo gli eventi che contano.** Il diario è la vista predefinita; le due linguette *Diario* / *Console* stanno nell'intestazione del pannello.
+
+  La scelta è costata molto meno di quanto il piano temesse, perché **non servono due archivi**: `LogEntry` ha guadagnato un campo `event?: ScanEvent`, e le due viste sono due modi di disegnare lo stesso array. Il diario filtra, la console mostra tutto
+
+- [x] **Il nodo vero: oggi il livello di una riga viene indovinato dagli emoji.** ~~`detectLevel` cerca ✅, ❌, ⚠️ dentro il testo~~ — **fatto.** Il motore ora dichiara nove tipi di evento (`engine-start`, `scan-start`, `source-start`, `item-found`, `item-deferred`, `item-published`, `scan-end`, `next-scan`, `engine-stop`) e `TitanLogger.log()` accetta un secondo argomento facoltativo. Il livello di quelle righe viene da una tabella, non da un'euristica.
+
+  ⚠️ **`detectLevel` resta, e deve restare.** Le chiamate a `TitanLogger.log` nel motore sono 62; quelle che sono diventate eventi sono 10. Le altre 52 sono errori, avvisi e diagnostica sparsi ovunque, e nessuna ha una forma strutturata. **Il diario le raccoglie per livello**: una riga senza evento entra comunque se è `error` o `warn`. Filtrarle via per assenza di evento avrebbe nascosto proprio quel che l'utente deve vedere
+
+- [x] **La chiusura del giro non poteva stare a fine `checkLoop`.** `processPublishQueue` è fire-and-forget: quando `checkLoop` finisce, la coda di invio è appena partita. «Pubblicati N» viene emesso nel `finally` del drenaggio, con il conto vero; se non c'è nulla da inviare lo emette `checkLoop`
+
+- [x] **Aggiunta una riga di attività** — «Lettura: *nome sorgente*», sopra l'elenco. È la contromisura alla controindicazione del diradamento: con pochi eventi a schermo il pannello può sembrare fermo mentre lavora. **Si riscrive sul posto invece di accodarsi**, quindi non ricrea il problema che la fase è nata per togliere. *Misurato dal vivo:* nomina le tre sorgenti in successione durante il giro e sparisce alla chiusura
 
 ### 7.2 ⛔ L'esportazione va ripuntata sul file, o si dirada anche quella
 
@@ -487,17 +498,37 @@ I sink del log sono **due e indipendenti**, e la proposta li tocca entrambi senz
 
 Oggi esportano la stessa cosa, quindi **diradare il pannello dirada anche l'esportazione**. L'export va spostato sul file. Ed è un miglioramento comunque, a prescindere da questa fase: oggi esporti solo ciò che è entrato in memoria da quando hai aperto la finestra, mentre il file ha tutta la giornata.
 
-- [ ] Spostare l'esportazione sul file di log su disco
-- [ ] **L'array in memoria non ha un tetto:** cresce finché la finestra resta aperta. Con l'engine acceso a lungo è memoria che sale e non scende. Il diradamento lo risolve di sponda, ma va verificato
+- [x] ~~Spostare l'esportazione sul file di log su disco~~ — **fatto.** `export-logs` non riceve più l'array: legge `TitanLogger.getLogFilePath()`. Il pulsante non è più condizionato a `logs.length > 0` (il file esiste anche a memoria vuota) e l'esito passa dai toast invece che da una riga di log. Caso nuovo gestito: se il motore non è mai partito oggi il file non esiste ancora, e l'utente se lo sente dire invece di salvare un file vuoto
+
+- [x] ⚠️ **«L'array in memoria non ha un tetto» era falso.** Il tetto c'è ed è 5000 righe: `.slice(0, 5000)` in `Dashboard.tsx`, applicato sia ai lotti dal main sia ai log locali. Verificato leggendo il codice. **È la terza voce del piano smentita dalla lettura del codice** — dopo le due della Fase 4.3. Il piano resta una traccia, non una fonte
 
 ### 7.3 Estetica
 
-- [ ] **I successi sono celestini invece che verdi.** In [Dashboard.tsx:361](../src/renderer/src/components/Dashboard.tsx) il livello `success` è dipinto con `text-secondary`. Il token `text-success` **esiste già ed è usato due righe più su nella stessa schermata**, sul badge del bot attivo. Non è lavoro di design: è una parola sbagliata in un ternario
-- [ ] **Registro visivo da terminale sci-fi**, richiesta estetica dell'utente
+- [x] ~~**I successi sono celestini invece che verdi.**~~ — **fatto**, `text-secondary` → `text-success` nella console grezza. *Misurato dal vivo:* la riga «Sent:» è ora `rgb(52, 211, 153)`, verde, non più ciano
+
+- [x] **Registro visivo da terminale sci-fi** — fatto con Framer Motion, che era già una dipendenza. Ogni voce entra con una traslazione di 6px e una dissolvenza da 250 ms; icona per tipo di evento, etichetta in maiuscoletto monospace, ora allineata a destra in cifre tabulari, filo verticale a sinistra. Nessuna dipendenza aggiunta
+
+### 7.4 Due difetti trovati misurando, non previsti dal piano
+
+Entrambi scoperti perché il pannello è stato montato dal vivo. Nessuno dei due si vede rileggendo il codice.
+
+- [x] ⛔ **`cn()` mangia `text-micro` e `text-nano`.** `cn` è `twMerge(clsx(...))`, e **tailwind-merge scambia queste due classi personalizzate per classi di colore**: quando nella stessa chiamata segue un `text-<colore>` condizionale, la classe di corpo viene eliminata senza che nulla lo segnali. *Misurato:* la linguetta «Tutti» aveva `class="px-2 py-0.5 font-bold transition-colors bg-primary/15 text-primary"` — `text-nano` **sparito**, e con lui 9px, maiuscoletto e spaziatura.
+
+  Corretto nelle quattro linguette del pannello e nel diario, tenendo la classe **fuori** da `cn()` con una concatenazione semplice. 🔴 **Restano due punti fuori dal pannello, non toccati per la regola di una fase per sessione:** il badge ONLINE/OFFLINE ([Dashboard.tsx](../src/renderer/src/components/Dashboard.tsx), `text-micro`) e la riga del canale in [BotSelector.tsx:208](../src/renderer/src/components/BotSelector.tsx) (`text-nano`)
+
+- [x] 🔴 **`outline-variant` come colore di testo, di nuovo.** È lo stesso problema chiuso in Fase 6, e stava per rientrare dalla finestra: le prime stesure del diario usavano `text-outline-variant/45` per l'ora e `/50` per la sorgente. *Misurato compositando l'alfa sul fondo:* **1,92:1**. Sostituito con `on-surface-variant`, e il colore inattivo delle linguette (`outline-variant/40`, 1,7:1) è passato a `on-surface-variant/55`.
+
+  **Contrasti finali del pannello, tutti sopra il minimo AA:** etichetta 10,55:1 · titolo del contenuto 14,27:1 · sorgente 7,13:1 · ora 5,43:1 · linguetta attiva 11,9:1 · linguetta inattiva 4,70:1
+
+- [x] **L'intestazione del pannello non ci stava.** Alla larghezza vera dell'area cliente — **884×631**, non 900×670: quelli sono gli ingombri esterni della finestra in [index.ts:66](../src/main/index.ts), la cornice di Windows si mangia il resto — «CONSOLE» ed «ESPORTA» finivano tagliati. Tolta l'etichetta di testo del pannello, che diceva quel che le due linguette dicono già. *Misurato:* i sei controlli stanno su una riga sola con 12px di margine residuo
 
   ⛔ **Non con Remotion, ed è un no tecnico e non di gusto.** Remotion è React che calcola fotogrammi per produrre un file video: serve a fabbricare un MP4, non a disegnare un'interfaccia dal vivo. Un log che scorre in tempo reale è precisamente ciò che non può fare, perché ciò che produce è un filmato deciso in anticipo.
 
   L'effetto si ottiene con quello che il progetto ha già: CSS e **Framer Motion**, che è già una dipendenza. E la prova che sa farlo è in casa — la sequenza di boot della schermata iniziale è esattamente quel registro. **Idea sì, strumento no**, e senza aggiungere dipendenze.
+
+### Quanto dirada davvero
+
+*Misurato dal vivo su un giro finto ma realistico:* **28 righe emesse dal motore, 16 nel diario.** Il rapporto migliora con il numero di feed, perché il rumore cresce per sorgente (fetch, conteggi, «già processati», intervallo non scaduto) mentre i contenuti trovati no. Le 12 righe filtrate restano tutte nel file su disco e sotto la linguetta *Console*.
 
 ---
 

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BotConfig, LogEntry } from '../../../shared/types';
+import { isJournalEntry, JournalRow, ActivityStrip } from './ScanJournal';
 import { BotSelector } from './BotSelector';
 import { FeedManager } from './FeedManager';
 import logo from '../assets/logo.png';
@@ -15,9 +16,26 @@ import { useTranslation } from '../locales/I18nContext';
 import { useToast } from './ui/Toast';
 import type { Updater } from '../hooks/useUpdater';
 
+/**
+ * Le linguette dell'intestazione del pannello (diario/console, tutti/solo questo).
+ *
+ * `text-nano` sta **fuori** da `cn()` di proposito: tailwind-merge lo scambia per una
+ * classe di colore e lo elimina in favore di quella condizionale che segue. Le linguette
+ * perdevano corpo, maiuscoletto e spaziatura senza che nulla lo segnalasse.
+ *
+ * Il colore inattivo era `outline-variant/40`, cioè il blu pieno #3b82f6: 1,7:1 su fondo
+ * scuro. Con `on-surface-variant/55` sta a 4,65:1, sopra il minimo AA.
+ */
+function pillClass(active: boolean, accent: string): string {
+    return `text-nano ${cn(
+        'px-1.5 py-0.5 font-bold transition-colors whitespace-nowrap',
+        active ? accent : 'text-on-surface-variant/55 hover:text-on-surface-variant'
+    )}`;
+}
+
 export function Dashboard({ updater }: { updater?: Updater }) {
     const { t } = useTranslation();
-    const { error } = useToast();
+    const { error, success } = useToast();
     const [selectedBot, setSelectedBot] = useState<BotConfig | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -28,6 +46,10 @@ export function Dashboard({ updater }: { updater?: Updater }) {
     const [stats, setStats] = useState<{ total: number; today: number; week: number } | null>(null);
     const [filterBySelectedBot, setFilterBySelectedBot] = useState(false);
     const [showStatsModal, setShowStatsModal] = useState(false);
+    // Fase 7: il diario è la vista predefinita, la console grezza sta dietro l'interruttore
+    const [rawConsole, setRawConsole] = useState(false);
+    // Sorgente attualmente in lettura: si riscrive sul posto, non si accoda al diario
+    const [activity, setActivity] = useState<string | null>(null);
     const logContainerRef = useRef<HTMLDivElement>(null);
     // ID monotono per i log generati localmente. Negativo decrescente: non collide mai
     // con gli ID del backend (positivi crescenti) né con altri log locali nello stesso ms.
@@ -44,6 +66,15 @@ export function Dashboard({ updater }: { updater?: Updater }) {
         // (useUpdater + UpdateModal), così partono già dall'intro. Qui non serve più nulla.
 
         window.api.onLogsBatch((newLogs: LogEntry[]) => {
+            // La riga di attività si legge dal lotto *prima* di rovesciarlo: l'ultimo
+            // `source-start` del lotto è la sorgente più recente, e un `scan-end` o uno
+            // spegnimento che arrivano dopo la spengono. Nessuna di queste è una voce
+            // del diario: qui si aggiorna uno stato, non si accoda una riga.
+            for (const entry of newLogs) {
+                const type = entry.event?.type;
+                if (type === 'source-start') setActivity(entry.event!.source ?? null);
+                else if (type === 'scan-end' || type === 'engine-stop') setActivity(null);
+            }
             setLogs(prev => [...newLogs.reverse(), ...prev].slice(0, 5000));
         });
         window.api.onYouTubeApiError(() => {
@@ -84,6 +115,11 @@ export function Dashboard({ updater }: { updater?: Updater }) {
         }
     };
 
+    /**
+     * Righe generate dal renderer, non dal motore. Restano nella console grezza: gli eventi
+     * del diario li dichiara il main process, e duplicarli qui significherebbe vedere due
+     * volte l'accensione. Gli errori affiorano comunque nel diario, per livello.
+     */
     const addLocalLog = (message: string) => {
         const timestamp = new Date().toLocaleTimeString();
         const level: LogEntry['level'] =
@@ -98,12 +134,20 @@ export function Dashboard({ updater }: { updater?: Updater }) {
         }, ...prev].slice(0, 5000));
     };
 
+    /**
+     * Fase 7: si esporta il file di log della giornata, non più l'array in memoria.
+     * Non dipende più da quel che è a schermo — quindi il pulsante resta valido anche
+     * quando il diario mostra sei righe invece di seicento.
+     */
     const handleExportLog = async () => {
-        if (logs.length === 0) return;
-        const result = await window.api.exportLogs(logs.map(l => l.message));
+        const result = await window.api.exportLogs();
         if (result.success) {
+            success(t('logs.exportDone'), result.path);
             addLocalLog(`📋 Log esportato: ${result.path}`);
+        } else if (result.error === 'NoLogFile') {
+            error(t('logs.exportEmpty'));
         } else if (result.error !== 'Cancelled') {
+            error(`${t('logs.exportFailed')} ${result.error}`);
             addLocalLog(`❌ Errore export: ${result.error}`);
         }
     };
@@ -113,14 +157,22 @@ export function Dashboard({ updater }: { updater?: Updater }) {
         setFilterBySelectedBot(false);
     }, [selectedBot]);
 
-    const displayedLogs = filterBySelectedBot && selectedBot
-        ? logs.filter(l => l.message.includes(`[${selectedBot.name}]`))
-        : logs;
+    // Il filtro per bot legge il nome dall'evento quando c'è: è un campo, non una sottostringa
+    // pescata dal testo. Per le righe senza evento resta il vecchio confronto sul messaggio.
+    const matchesSelectedBot = (l: LogEntry) =>
+        l.event?.bot ? l.event.bot === selectedBot!.name : l.message.includes(`[${selectedBot!.name}]`);
+
+    const filteredLogs = filterBySelectedBot && selectedBot ? logs.filter(matchesSelectedBot) : logs;
+
+    // Una sola sorgente, due modi di disegnarla: il diario non è un secondo archivio in memoria.
+    const displayedLogs = rawConsole ? filteredLogs : filteredLogs.filter(isJournalEntry);
 
     const logVirtualizer = useVirtualizer({
         count: displayedLogs.length,
         getScrollElement: () => logContainerRef.current,
-        estimateSize: () => 22,
+        // Le voci del diario sono alte due o tre righe, quelle della console una sola.
+        // `measureElement` corregge comunque, ma partire dalla stima giusta evita il salto.
+        estimateSize: () => (rawConsole ? 22 : 46),
         overscan: 15,
     });
 
@@ -187,12 +239,15 @@ export function Dashboard({ updater }: { updater?: Updater }) {
                     <div className="flex items-center gap-3">
                         {selectedBot && (
                             <>
-                                <div className={cn(
-                                    "px-3 py-1 rounded text-micro font-bold border flex items-center gap-2",
+                                {/* `text-micro` fuori da cn(): tailwind-merge lo scambia per una
+                                    classe di colore e lo cancella in favore del ternario che segue.
+                                    Il badge perdeva corpo, maiuscoletto e spaziatura in silenzio. */}
+                                <div className={`text-micro ${cn(
+                                    "px-3 py-1 rounded font-bold border flex items-center gap-2",
                                     isRunning
                                         ? "bg-success/10 border-success/25 text-success"
                                         : "bg-error/10 border-error/20 text-error"
-                                )}>
+                                )}`}>
                                     <div className={cn(
                                         "w-1.5 h-1.5 rounded-full",
                                         isRunning
@@ -278,42 +333,49 @@ export function Dashboard({ updater }: { updater?: Updater }) {
                         <div className="flex-1 bg-surface-container-lowest rounded-xl ghost-border font-mono text-xs overflow-hidden flex flex-col shadow-inner relative scanline-bg">
                             {/* Log header */}
                             <div className="flex justify-between items-center px-4 py-2.5 border-b border-outline-variant/10 bg-surface-container-low/60 relative z-10">
+                                {/* Le due linguette sono il titolo del pannello: dicono già quale
+                                    vista è in mostra. Un'etichetta di testo in più le spingeva
+                                    fuori misura — a metà di una finestra da 900px «CONSOLE» ed
+                                    «ESPORTA» finivano tagliati. */}
                                 <div className="flex items-center gap-3">
-                                    <span className="text-micro text-outline-variant/50">{t('logs.title')}</span>
+                                    {/* Diario ↔ console grezza. Stessi dati, due modi di disegnarli. */}
+                                    <div className="flex items-center bg-surface-container-lowest/80 rounded border border-outline-variant/10 overflow-hidden">
+                                        <button
+                                            onClick={() => setRawConsole(false)}
+                                            className={pillClass(!rawConsole, 'bg-secondary/15 text-secondary')}
+                                        >{t('journal.viewJournal')}</button>
+                                        <button
+                                            onClick={() => setRawConsole(true)}
+                                            className={pillClass(rawConsole, 'bg-secondary/15 text-secondary')}
+                                        >{t('journal.viewConsole')}</button>
+                                    </div>
+
                                     <div className="flex items-center bg-surface-container-lowest/80 rounded border border-outline-variant/10 overflow-hidden">
                                         <button
                                             onClick={() => setFilterBySelectedBot(false)}
-                                            className={cn(
-                                                "px-2 py-0.5 text-nano font-bold transition-colors",
-                                                !filterBySelectedBot
-                                                    ? "bg-primary/15 text-primary"
-                                                    : "text-outline-variant/40 hover:text-outline-variant"
-                                            )}
+                                            className={pillClass(!filterBySelectedBot, 'bg-primary/15 text-primary')}
                                         >{t('logs.filterAll')}</button>
                                         <button
                                             onClick={() => setFilterBySelectedBot(true)}
                                             disabled={!selectedBot}
-                                            className={cn(
-                                                "px-2 py-0.5 text-nano font-bold transition-colors disabled:opacity-30",
-                                                filterBySelectedBot
-                                                    ? "bg-primary/15 text-primary"
-                                                    : "text-outline-variant/40 hover:text-outline-variant"
-                                            )}
+                                            className={pillClass(filterBySelectedBot, 'bg-primary/15 text-primary') + ' disabled:opacity-30'}
                                         >{t('logs.filterBot')}</button>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 relative z-10">
+                                <div className="flex items-center gap-2 relative z-10">
+                                    {/* L'esportazione non dipende più da quel che è in memoria:
+                                        legge il file della giornata, quindi resta sempre offerta. */}
+                                    <button
+                                        onClick={handleExportLog}
+                                        className="text-outline-variant/40 hover:text-primary text-nano transition-colors flex items-center gap-1"
+                                        title={t('logs.exportTitle')}
+                                    >
+                                        <Download size={11} />
+                                        {t('logs.export')}
+                                    </button>
                                     {logs.length > 0 && (
                                         <>
-                                            <button
-                                                onClick={handleExportLog}
-                                                className="text-outline-variant/40 hover:text-primary text-nano transition-colors flex items-center gap-1"
-                                                title={t('logs.exportTitle')}
-                                            >
-                                                <Download size={11} />
-                                                {t('logs.export')}
-                                            </button>
                                             <span className="text-outline-variant/20">|</span>
                                             <button
                                                 onClick={() => setLogs([])}
@@ -326,6 +388,9 @@ export function Dashboard({ updater }: { updater?: Updater }) {
                                 </div>
                             </div>
 
+                            {/* Sorgente in lettura adesso — si riscrive sul posto, non si accoda */}
+                            {!rawConsole && <ActivityStrip source={activity} t={t} />}
+
                             {/* Log entries — virtual scroll, fino a 5000 righe senza impatto RAM/DOM */}
                             <div
                                 ref={logContainerRef}
@@ -334,7 +399,9 @@ export function Dashboard({ updater }: { updater?: Updater }) {
                                 {displayedLogs.length === 0 ? (
                                     <div className="h-full flex flex-col items-center justify-center text-outline-variant/20 gap-2">
                                         <span className="text-micro">
-                                            {filterBySelectedBot ? `— ${selectedBot?.name} —` : t('status.awaiting')}
+                                            {filterBySelectedBot
+                                                ? `— ${selectedBot?.name} —`
+                                                : rawConsole ? t('status.awaiting') : t('journal.empty')}
                                         </span>
                                     </div>
                                 ) : (
@@ -354,14 +421,23 @@ export function Dashboard({ updater }: { updater?: Updater }) {
                                                         transform: `translateY(${vRow.start}px)`,
                                                         paddingBottom: '2px',
                                                     }}
-                                                    className="break-words font-medium opacity-75 hover:opacity-100 transition-opacity leading-relaxed"
+                                                    className={rawConsole
+                                                        ? "break-words font-medium opacity-75 hover:opacity-100 transition-opacity leading-relaxed"
+                                                        : undefined}
                                                 >
-                                                    <span className={
-                                                        log.level === 'error'   ? "text-error"
-                                                        : log.level === 'success' ? "text-secondary"
-                                                        : log.level === 'warn'    ? "text-tertiary"
-                                                        : "text-on-surface-variant"
-                                                    }>{log.message}</span>
+                                                    {rawConsole ? (
+                                                        <span className={
+                                                            log.level === 'error'   ? "text-error"
+                                                            // Il verde dei successi era `text-secondary`, cioè il ciano:
+                                                            // refuso, non scelta — `text-success` esiste ed è già in uso
+                                                            // sul badge del bot attivo, poche righe più su.
+                                                            : log.level === 'success' ? "text-success"
+                                                            : log.level === 'warn'    ? "text-tertiary"
+                                                            : "text-on-surface-variant"
+                                                        }>{log.message}</span>
+                                                    ) : (
+                                                        <JournalRow entry={log} t={t} />
+                                                    )}
                                                 </div>
                                             );
                                         })}

@@ -67,6 +67,8 @@ export class BotEngine {
     private publishQueue: PublishJob[] = [];
     private isPublishing: boolean = false;
     private hasNotifiedYoutubeError: boolean = false;
+    /** Contenuti pubblicati nel giro in corso — è il numero della riga «pubblicati N» (Fase 7) */
+    private publishedInScan: number = 0;
 
     constructor() { }
 
@@ -110,7 +112,7 @@ export class BotEngine {
             }
         }
 
-        TitanLogger.log("🚀 Engine Started - Multi-Bot Mode");
+        TitanLogger.log("🚀 Engine Started - Multi-Bot Mode", { type: 'engine-start' });
 
         // Immediate check, then schedule next
         await this.checkLoop();
@@ -135,7 +137,7 @@ export class BotEngine {
         // Invalida la cache YouTube alla fermata — fix #19
         clearYouTubeCache();
 
-        TitanLogger.log("🛑 Engine Stopped");
+        TitanLogger.log("🛑 Engine Stopped", { type: 'engine-stop' });
     }
 
     /** Remove cached client and pending jobs when a bot is deleted */
@@ -171,7 +173,10 @@ export class BotEngine {
         if (!this.isRunning) return;
         const interval = this.getMinInterval();
         const minutes = interval / 60000;
-        TitanLogger.log(`⏳ Next check in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}...`);
+        TitanLogger.log(
+            `⏳ Next check in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}...`,
+            { type: 'next-scan', count: minutes }
+        );
         this.timeoutId = setTimeout(() => {
             // .catch + .finally: un errore non gestito in checkLoop non deve interrompere
             // il loop di scheduling (né propagarsi come unhandledRejection). Il prossimo
@@ -186,7 +191,10 @@ export class BotEngine {
         if (!this.isRunning) return;
 
         const bots = BotManager.getBots();
-        TitanLogger.log(`🔄 Checking ${bots.length} bots...`);
+        // Il contatore riparte a ogni giro: se un drenaggio precedente è ancora in corso
+        // (coda lunga, invii lenti) il suo residuo confluisce nel riepilogo di questo giro.
+        this.publishedInScan = 0;
+        TitanLogger.log(`🔄 Checking ${bots.length} bots...`, { type: 'scan-start', count: bots.length });
 
         for (const bot of bots) {
             if (!this.isRunning) break;
@@ -294,7 +302,19 @@ export class BotEngine {
                 this.isPublishing = false;
                 TitanLogger.log(`❌ Errore non gestito in processPublishQueue: ${e}`);
             });
+        } else if (!this.isPublishing) {
+            // Nessun contenuto da inviare: il giro finisce qui, e va detto. Se invece la coda
+            // c'è, il riepilogo lo emette processPublishQueue quando ha finito di svuotarla —
+            // altrimenti direbbe «pubblicati 0» mentre sta ancora pubblicando.
+            this.emitScanEnd();
         }
+    }
+
+    /** Riga di chiusura del giro: «pubblicati N» — Fase 7. */
+    private emitScanEnd() {
+        if (!this.isRunning) return;
+        const count = this.publishedInScan;
+        TitanLogger.log(`🏁 Scan complete — ${count} published`, { type: 'scan-end', count });
     }
 
     /**
@@ -323,7 +343,9 @@ export class BotEngine {
             if (cutoffDate.getTime() > Date.now()) {
                 TitanLogger.log(`  ⚠️ ${tag} ATTENZIONE: la start_date del bot (${bot.start_date}) è nel futuro — nessun item verrà pubblicato finché la data non viene raggiunta.`);
             }
-            TitanLogger.log(`  📡 ${tag} Fetching: ${feed.name}`);
+            TitanLogger.log(`  📡 ${tag} Fetching: ${feed.name}`, {
+                type: 'source-start', bot: bot.name, source: feed.name
+            });
 
             let items;
             if (feed.type === 'youtube') {
@@ -386,19 +408,25 @@ export class BotEngine {
                 if (feed.digest_interval) {
                     BotManager.addToDigestQueue(bot.id, feed.id, item);
                     BotManager.markProcessed(bot.id, feed.id, item.id, item.title, feed.type === 'youtube' ? 'youtube' : 'rss');
-                    TitanLogger.log(`  📋 ${tag} Buffered for digest: ${item.title}`);
+                    TitanLogger.log(`  📋 ${tag} Buffered for digest: ${item.title}`, {
+                        type: 'item-found', bot: bot.name, source: feed.name, title: item.title
+                    });
                     newCount++;
                     continue;
                 }
 
                 if (!this.isTimeAllowed(bot.send_from, bot.send_until)) {
                     const added = BotManager.addToPendingQueue(bot.id, feed.id, item);
-                    if (added) TitanLogger.log(`  🌙 ${tag} Quiet hours — salvato in coda persistente: ${item.title}`);
+                    if (added) TitanLogger.log(`  🌙 ${tag} Quiet hours — salvato in coda persistente: ${item.title}`, {
+                        type: 'item-deferred', bot: bot.name, source: feed.name, title: item.title
+                    });
                     deferredCount++;
                     continue;
                 }
 
-                TitanLogger.log(`  🆕 ${tag} Added to queue: ${item.title}`);
+                TitanLogger.log(`  🆕 ${tag} Added to queue: ${item.title}`, {
+                    type: 'item-found', bot: bot.name, source: feed.name, title: item.title
+                });
                 this.publishQueue.push({ bot, feed, item, retryCount: 0 });
                 newCount++;
             }
@@ -525,7 +553,10 @@ export class BotEngine {
 
                     if (success) {
                         BotManager.markProcessed(bot.id, feed.id, item.id, item.title, feed.type === 'youtube' ? 'youtube' : 'rss');
-                        TitanLogger.log(`  ✅ ${tag} Sent: ${item.title}`);
+                        this.publishedInScan++;
+                        TitanLogger.log(`  ✅ ${tag} Sent: ${item.title}`, {
+                            type: 'item-published', bot: bot.name, source: feed.name, title: item.title
+                        });
 
                         if (bot.notifications_enabled && Notification.isSupported()) {
                             new Notification({
@@ -550,6 +581,9 @@ export class BotEngine {
             }
         } finally {
             this.isPublishing = false;
+            // La coda è vuota (o il motore è stato fermato): il giro si chiude qui, con il
+            // conto reale dei contenuti finiti sul canale. `emitScanEnd` tace a motore fermo.
+            this.emitScanEnd();
         }
     }
 
