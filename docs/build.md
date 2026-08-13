@@ -23,17 +23,19 @@ Servono gli strumenti di compilazione C++: **Visual Studio Build Tools** con il 
 ```bash
 # Ubuntu / Debian
 sudo apt update
-sudo apt install -y build-essential python3 git libsecret-1-dev libfuse2 dpkg fakeroot rpm zstd
+sudo apt install -y build-essential python3 git libsecret-1-dev libfuse2 dpkg fakeroot rpm zstd libarchive-tools
 
 # Fedora
 sudo dnf groupinstall -y "Development Tools"
-sudo dnf install -y python3 git libsecret-devel fuse fuse-libs dpkg fakeroot rpm-build zstd
+sudo dnf install -y python3 git libsecret-devel fuse fuse-libs dpkg fakeroot rpm-build zstd bsdtar
 
 # Arch
-sudo pacman -S --needed base-devel python git libsecret fuse2 dpkg fakeroot rpm-tools zstd
+sudo pacman -S --needed base-devel python git libsecret fuse2 dpkg fakeroot rpm-tools zstd libarchive
 ```
 
 `libsecret` serve al portachiavi di sistema usato per cifrare i token (senza, l'applicazione ricade sulla chiave macchina AES-256-GCM e funziona comunque). `libfuse2` serve a eseguire l'AppImage. `dpkg`, `fakeroot`, `rpm` e `zstd` servono solo a generare i pacchetti: `.deb`, `.rpm` e `.pacman`.
+
+`libarchive-tools` porta **`bsdtar`**, che fpm invoca per costruire il `.MTREE` del pacchetto `pacman`. Senza, e solo su quel target, la build muore con `exit code 127` — cioè comando non trovato. È stato il solo intoppo della matrice al primo collaudo.
 
 #### fpm, e perché ne serve uno di sistema
 

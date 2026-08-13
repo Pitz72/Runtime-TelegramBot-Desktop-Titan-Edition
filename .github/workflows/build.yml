@@ -70,10 +70,12 @@ jobs:
         with:
           path: ~/.cache/electron
           key: electron-linux-${{ matrix.arch }}-${{ hashFiles('package-lock.json') }}
+      # libarchive-tools porta bsdtar, che fpm invoca per costruire il .MTREE
+      # del pacchetto pacman. Senza, il target pacman fallisce con exit 127.
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libsecret-1-dev libfuse2 rpm fakeroot zstd ruby ruby-dev
+          sudo apt-get install -y libsecret-1-dev libfuse2 rpm fakeroot zstd libarchive-tools ruby ruby-dev
       # fpm impacchetta deb, rpm e pacman. Quello che electron-builder scarica da
       # sé è fermo alla 1.9.3 ed esiste solo per x86_64: non sa produrre pacman
       # (aggiunto in fpm 1.11) e su arm64 non esiste proprio. Si installa un fpm
@@ -167,7 +169,7 @@ jobs:
             |----------|------|--------------|
             | **Windows** (installer) | `Setup-*.exe` | yes |
             | **Windows** (portable) | `Portable-*.exe` | no |
-            | **Linux** AppImage | `*-x64.AppImage`, `*-arm64.AppImage` | yes |
+            | **Linux** AppImage | `*-x86_64.AppImage`, `*-arm64.AppImage` | yes |
             | **Linux** Debian/Ubuntu | `*-amd64.deb`, `*-arm64.deb` | yes, asks for the administrator password |
             | **Linux** Fedora/RHEL/openSUSE | `*-x86_64.rpm`, `*-aarch64.rpm` | yes, asks for the administrator password |
             | **Linux** Arch | `*.pacman` | no |
