@@ -2,7 +2,7 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. **FASE 3 CHIUSA** (13/08): link migrati, `MANUAL_BASE` non serve più i PDF con l'EULA, versione 2.1.8 con note di rilascio e changelog, CI che pubblica sulla repo stessa. **La release `v2.1.8` è pubblica**, e l'utente ci ha aggiornato sopra da un'installazione reale: l'auto-update funziona. **FASE 4.3 ESEGUITA** (13/08): matrice di build completa — Windows installer e portable, Linux AppImage/deb/rpm/pacman/tar.gz su **x64 e arm64** — collaudata su branch con **run verde su tutti e tre i runner**, e documentazione dell'auto-updater corretta perché la voce del piano era sbagliata. 🆕 **FASE 6 aperta**: quattro rifiniture della schermata iniziale segnalate dall'utente. ▶️ **Prossima sessione: FASE 6** (rifiniture, corta) **oppure FASE 5** (dismissione commerciale, sbloccata: `MANUAL_BASE` non punta più alla ponte). Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. **FASE 3 CHIUSA** (13/08): link migrati, `MANUAL_BASE` non serve più i PDF con l'EULA, versione 2.1.8 con note di rilascio e changelog, CI che pubblica sulla repo stessa. **La release `v2.1.8` è pubblica**, e l'utente ci ha aggiornato sopra da un'installazione reale: l'auto-update funziona. **FASE 4.3 ESEGUITA** (13/08): matrice di build completa — Windows installer e portable, Linux AppImage/deb/rpm/pacman/tar.gz su **x64 e arm64** — collaudata su branch con **run verde su tutti e tre i runner**, e documentazione dell'auto-updater corretta perché la voce del piano era sbagliata. 🆕 **FASI 6 e 7 aperte**: quattro rifiniture della schermata iniziale, e il pannello dei log da trasformare in diario di scansione. ▶️ **Prossima sessione: FASE 5** (dismissione commerciale, sbloccata: `MANUAL_BASE` non punta più alla ponte), **FASE 6** (rifiniture, corta) **oppure FASE 7**. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
 
 > **Le fasi 4.1–4.2 sono state eseguite prima della 3.** Non è un'inversione: la Fase 3 lo prescrive da sempre nel suo primo rigo ⛔. La numerazione riflette l'importanza, non l'ordine di esecuzione.
 
@@ -443,6 +443,42 @@ Il giudizio dell'utente sul resto della schermata è: **va bene così.** Non c'�
 - [ ] **3. Le bandiere non sono centrate — ed è un residuo delle otto lingue.** Il contenitore ([riga 84](../src/renderer/src/components/IntroScreen.tsx)) è `grid grid-cols-4`: era pensato per otto bandiere su due file da quattro. Con due lingue restano incollate a sinistra, e il vuoto a destra lascia intendere che *prima ci fosse dell'altro* — che è esattamente quel che è successo, ma non è quel che deve trasparire. Passare a un layout centrato sul numero reale di lingue, non su quattro colonne fisse
 
 - [ ] **4. `INIT_SEQ · TITAN_DESKTOP_RUNTIME` — a che serve?** ([riga 152](../src/renderer/src/components/IntroScreen.tsx)) A niente: è decorazione, un vezzo da finto terminale rimasto dal design «Titan Glass» delle origini, scritto a `text-outline-variant/25`. Non è una chiave di traduzione, non è uno stato, non è diagnostica. **Proposta: toglierla.** Se invece piace come firma grafica, va deciso che è quello e basta
+
+---
+
+## FASE 7 — Il pannello dei log: da scarico grezzo a diario di scansione
+
+Aperta dall'utente il 13 agosto 2026, a fine sessione della Fase 4.3. Osservazione di partenza: con l'engine acceso, la colonna di destra della Dashboard «va a singhiozzoni».
+
+**La diagnosi è stata verificata nel codice, non dedotta.** Il logger non manda le righe una a una: le accumula e le scarica in blocco **ogni 300 ms** ([logger.ts:55](../src/main/logger.ts)). Con più bot in scansione arrivano N righe insieme, tre volte al secondo, dentro una lista virtualizzata che si auto-scorre. Non è un'animazione che scatta: è la quantità. **Diradare il contenuto attacca la causa, non il sintomo** — l'intuizione dell'utente è corretta.
+
+### 7.1 Il diario di scansione
+
+Sostituire lo scarico grezzo con eventi leggibili: *scansione avviata su questa sorgente*, *trovato questo*, e a fine giro *pubblicati N*.
+
+- [ ] ⛔ **Decisione da prendere prima di scrivere una riga: sostituzione o vista alternativa?** Se il diario *sostituisce* il log a schermo, la console grezza sparisce dall'interfaccia e resta solo nel file. Se è una *vista alternativa* con un interruttore, servono due modalità di rendering e uno stato in più. L'utente non si è ancora espresso
+- [ ] **Il nodo vero: oggi il livello di una riga viene indovinato dagli emoji.** `detectLevel` cerca ✅, ❌, ⚠️ dentro il testo ([logger.ts:27](../src/main/logger.ts)). Un diario strutturato vuole **eventi veri** emessi come tali dal motore — scansione iniziata, elemento trovato, pubblicato — non stringhe da cui si deduce il colore. Qui sta il lavoro della fase; il resto è contorno
+
+### 7.2 ⛔ L'esportazione va ripuntata sul file, o si dirada anche quella
+
+I sink del log sono **due e indipendenti**, e la proposta li tocca entrambi senza volerlo:
+
+- il **file su disco** `userData/logs/titan-<data>.log`, scritto riga per riga, ripulito dopo 7 giorni. Completo, e indipendente dall'interfaccia;
+- l'**array in memoria del renderer**, che è quello che il pulsante *Esporta* usa davvero: `exportLogs(logs.map(l => l.message))` ([Dashboard.tsx:103](../src/renderer/src/components/Dashboard.tsx)).
+
+Oggi esportano la stessa cosa, quindi **diradare il pannello dirada anche l'esportazione**. L'export va spostato sul file. Ed è un miglioramento comunque, a prescindere da questa fase: oggi esporti solo ciò che è entrato in memoria da quando hai aperto la finestra, mentre il file ha tutta la giornata.
+
+- [ ] Spostare l'esportazione sul file di log su disco
+- [ ] **L'array in memoria non ha un tetto:** cresce finché la finestra resta aperta. Con l'engine acceso a lungo è memoria che sale e non scende. Il diradamento lo risolve di sponda, ma va verificato
+
+### 7.3 Estetica
+
+- [ ] **I successi sono celestini invece che verdi.** In [Dashboard.tsx:361](../src/renderer/src/components/Dashboard.tsx) il livello `success` è dipinto con `text-secondary`. Il token `text-success` **esiste già ed è usato due righe più su nella stessa schermata**, sul badge del bot attivo. Non è lavoro di design: è una parola sbagliata in un ternario
+- [ ] **Registro visivo da terminale sci-fi**, richiesta estetica dell'utente
+
+  ⛔ **Non con Remotion, ed è un no tecnico e non di gusto.** Remotion è React che calcola fotogrammi per produrre un file video: serve a fabbricare un MP4, non a disegnare un'interfaccia dal vivo. Un log che scorre in tempo reale è precisamente ciò che non può fare, perché ciò che produce è un filmato deciso in anticipo.
+
+  L'effetto si ottiene con quello che il progetto ha già: CSS e **Framer Motion**, che è già una dipendenza. E la prova che sa farlo è in casa — la sequenza di boot della schermata iniziale è esattamente quel registro. **Idea sì, strumento no**, e senza aggiungere dipendenze.
 
 ---
 
