@@ -2,7 +2,9 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. Prossimo passo: le decisioni aperte qui sotto, che sbloccano la Fase 3. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. ▶️ **Prossima sessione: FASE 3**, ora sbloccata. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+
+> **Le fasi 4.1–4.2 sono state eseguite prima della 3.** Non è un'inversione: la Fase 3 lo prescrive da sempre nel suo primo rigo ⛔. La numerazione riflette l'importanza, non l'ordine di esecuzione.
 
 > **Una fase per sessione.** Regola dell'utente, 13/08: ogni fase si esegue in una sola sessione, e se ne serve più d'una va bene. Due fasi nella stessa sessione, no.
 
@@ -27,8 +29,9 @@
 
 ## Decisioni ancora aperte
 
-- [ ] **Come spostare la repo su `Pitz72`**: trasferimento nativo GitHub (preserva storia, tag, issue, stelle e lascia un redirect) oppure repo nuova con push della storia (perde redirect, issue e stelle). *Serve prima della Fase 4.*
-- [ ] **Nome della repo di destinazione**: mantenere `Runtime-TelegramBot-Desktop-Titan-Edition` o accorciarlo. Se cambia, cambiano tutti i link nella documentazione e in `docs.ts`.
+- [x] ~~**Come spostare la repo su `Pitz72`**~~ — **sciolta il 13/08: repo nuova con push della storia.** La domanda dava per scontato un compromesso che non esisteva. Misurato prima di decidere: la repo di partenza era **privata, 0 stelle, 0 fork, 0 issue** (aperte o chiuse). Il trasferimento nativo esiste per preservare esattamente quelle cose, e il redirect di una repo privata non è mai stato visibile a nessuno. Non c'era nulla da perdere, e in cambio si è potuto scegliere *quale* storia pubblicare.
+- [x] ~~**Nome della repo di destinazione**~~ — **sciolta il 13/08: invariato**, `Runtime-TelegramBot-Desktop-Titan-Edition`. Combacia col nome canonico del prodotto usato nei manuali e nel colophon dei 2 PDF appena committati, e non allunga la lista dei link da migrare in Fase 3.
+- [x] ~~**Riscrivere la storia git**~~ — **sciolta ed eseguita il 13/08.** Era classificata «decisione da Fase 4» sul presupposto che riscrivere rompesse i cloni esistenti e i 40 tag. Con 0 fork su una repo privata mono-sviluppatore i cloni esistenti erano uno solo, e i tag si ricreano nel push. Vedi la Fase 4.1 qui sotto.
 - [x] ~~**Dove vivono i 2 manuali PDF**~~ — **sciolta il 13/08: committati nella repo.** Pesano 9,0 MB l'uno invece dei 32 di prima, e tenerli versionati accanto ai sorgenti Typst evita che PDF e sorgente divergano. Nulla vieta di allegarli **anche** alla release.
 - [ ] **Quanto tempo lasciare alla finestra di migrazione** prima di cancellare la ponte.
 - [ ] **Se pubblicare una v2.1.8 anche sulla ponte** con i soli fix, o aspettare di avere anche i manuali rifatti e fare una sola release.
@@ -265,17 +268,24 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 
 **Risultato: `HEAD` da 95,8 a 30,9 MB, −65 MB.**
 
-### La storia git resta com'è, ed è una scelta
+### ~~La storia git resta com'è, ed è una scelta~~ — superata il 13/08
 
-I blob vecchi restano nel pack: `.git` sta sui 250 MB, di cui ~69 MB di PDF (i due da 31,5 MB — IT e RU — pesano da soli 63). Ripulirli davvero vuol dire riscrivere la storia con `git filter-repo` e **fare force-push**, il che cambia lo SHA di tutti i 123 commit.
-
-**Non fatto, di proposito.** Chi clona scarica comunque il pack intero, quindi il beneficio è reale, ma il prezzo lo è altrettanto: rompe ogni clone esistente, invalida i 40 tag di release, e va deciso **prima** di scegliere come spostare la repo su `Pitz72` (il trasferimento nativo preserva la storia — quella che c'è). È una decisione da Fase 4, non un ripensamento da fine sessione.
+> Il testo originale diceva: *«I blob vecchi restano nel pack… Non fatto, di proposito. Rompe ogni clone esistente, invalida i 40 tag di release… È una decisione da Fase 4, non un ripensamento da fine sessione.»*
+>
+> **Era una decisione da Fase 4, e in Fase 4 è stata presa: la storia è stata riscritta.** Il ragionamento reggeva solo finché «rompe ogni clone esistente» significava qualcosa: con 0 fork su una repo privata, l'unico clone esistente era quello dell'autore. E scegliendo la repo nuova invece del trasferimento nativo, non è servito nessun force-push. Vedi Fase 4.1.
+>
+> Una cifra va corretta, perché era misurata male: il pack **locale** stava sui 250 MB, ma quello **del server** — l'unico che conta, perché è ciò che scarica chi clona — stava a 120,7 MB. Il locale era gonfiato da oggetti sciolti delle sessioni precedenti.
 
 ---
 
 ## FASE 3 — La build 2.1.8, che fa da traghetto
 
-⛔ **Va costruita solo dopo che la repo di destinazione esiste** (Fase 4.1–4.2), perché il suo `app-update.yml` viene generato dalla configurazione di publish e deve già puntare alla destinazione nuova.
+✅ **Il blocco è caduto il 13/08.** Diceva: *«va costruita solo dopo che la repo di destinazione esiste (Fase 4.1–4.2), perché il suo `app-update.yml` viene generato dalla configurazione di publish e deve già puntare alla destinazione nuova»*. La destinazione ora esiste ed è pubblica: **`https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition`**. La fase è eseguibile per intero.
+
+**Da sapere prima di cominciare**
+- La repo nuova **non ha secret**: `RELEASE_TOKEN` va ricreato a mano prima di poter pubblicare la release-traghetto sulla ponte. Il valore sta in `.secrets/RELEASE_TOKEN.txt`, che è ignorato da git e non è mai finito nella storia
+- Il `git clone` del README **è già stato spostato** su `Pitz72` (commit `c4c1f4a`): era l'unico link che, su una pagina pubblica, dava errore a chi lo copiava. Tutti gli altri restano da migrare qui
+- Il link alla **pagina delle release punta alla ponte di proposito** e ci deve restare fino alla Fase 5: è lì che le installazioni esistenti cercano l'aggiornamento
 
 - [ ] `electron-builder.yml` → `publish` verso la repo nuova
 - [ ] ⛔ **`src/renderer/src/lib/docs.ts` — `MANUAL_BASE`** oggi è un URL fisso alla ponte. Se non lo sposti, il pulsante «Scarica manuale» si rompe anche per chi *ha* aggiornato, nel momento in cui cancelli la ponte
@@ -293,19 +303,48 @@ I blob vecchi restano nel pack: `.git` sta sui 250 MB, di cui ~69 MB di PDF (i d
 
 ## FASE 4 — GitHub
 
-### 4.1 Trasferimento
-- [ ] Decidere il metodo (vedi decisioni aperte)
-- [ ] Spostare la repo su `Pitz72`
-- [ ] Riconfigurare i secret di Actions: **non si trasferiscono**. Serve solo `RELEASE_TOKEN`, e solo per la release-traghetto; dopo si usa il `GITHUB_TOKEN` integrato
-- [ ] Decidere che fare del branch `claude/heuristic-swanson-148248` (lavoro antibot YouTube della 2.0.3): tenere o cancellare
-- [ ] Verificare che i 40 tag siano arrivati
+### 4.1 Trasferimento ✅ ESEGUITA IL 13/08
 
-### 4.2 Pubblicazione
-- [ ] Rendere il repository **pubblico**
-- [ ] Descrizione, argomenti (`telegram-bot`, `rss`, `electron`, `youtube`, `automation`), sito
-- [ ] Verificare che GitHub riconosca la licenza MIT
-- [ ] Abilitare le issue e verificare che i template compaiano
-- [ ] Verifica finale: nessun segreto nella storia. **Già eseguita il 12/08 su tutti e 119 i commit** — token Telegram, `ghp_`, `github_pat_`, `gho_`, `AKIA`, chiavi PEM, `sk-`: zero riscontri. Nessun `.env`, `.db` o file di credenziali mai tracciato. Da ripetere solo se nel frattempo si committa altro
+**Destinazione:** `https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition`
+
+- [x] Metodo: **repo nuova con push della storia** (vedi decisioni sciolte)
+- [x] **Backup completo prima di toccare qualsiasi cosa** — `git clone --mirror` in `_backup-git-2026-08-13.git`, fuori dalla cartella del progetto: 129 commit, 40 tag, entrambi i branch, 121 MB. Non va cancellato finché la Fase 5 non è chiusa
+- [x] **Storia riscritta** con `git filter-repo`, su una *copia* del backup
+- [x] Spostata la repo su `Pitz72` e verificata con un clone pulito
+- [x] ~~Decidere che fare del branch `claude/heuristic-swanson-148248`~~ — **cancellato, e la decisione l'hanno presa i fatti:** `git rev-list --count main..claude/heuristic-swanson-148248` dà **0**. Il branch era interamente contenuto in `main`, quindi non conteneva una riga di lavoro che non fosse già pubblicata. Non è stato portato sulla repo nuova; resta nel backup e nella vecchia repo
+- [x] Verificato che i **40 tag** siano arrivati, e che ognuno risolva a un commit valido
+- [ ] ⚠️ **`RELEASE_TOKEN` non è stato ricreato.** I secret non si trasferiscono e la repo nuova ne ha zero. Serve prima della release-traghetto della Fase 3; dopo si usa il `GITHUB_TOKEN` integrato
+
+#### Cosa è stato tolto dalla storia
+
+Il primo tentativo ha sbagliato bersaglio e va ricordato, perché l'errore è ripetibile. Filtrare per **percorso** (`docs/storico/manuali-v1.7/`) sembrava funzionare, ma quei PDF erano stati *spostati* lì da `docs/guide/`: i blob sopravvivevano intatti sotto il percorso di partenza. Un secondo inciampo: `git ls-tree` **mette fra virgolette i percorsi non-ASCII**, quindi un test su `.pdf` in coda al nome falliva su tutti i file con `—`, cirillico o CJK — otto manuali su otto. Il filtro definitivo lavora sull'**identità del blob**, che nessun rinomino può cambiare.
+
+| Cosa | Blob | Peso non compresso |
+| :--- | ---: | ---: |
+| PDF da 32 MB col colophon EULA (8 lingue × 2 versioni) | 16 | 512,6 MB |
+| Manuali v1.7 (8 lingue) | 8 | 18,2 MB |
+| Whitepaper commerciali | 4 | 0,5 MB |
+| **Totale** | **28** | **532,2 MB** |
+
+**Risultato: il pack che scarica chi clona passa da 120,7 a 50,5 MB.**
+
+#### Verifiche fatte, tutte superate
+
+- **`HEAD` è identico all'originale**: stessi 249 file, **stessi blob SHA**, confrontati uno per uno contro `fd17433`. Non è cambiato un byte di ciò che si vede oggi nella repo
+- **129 commit**, con autori, date e messaggi identici; **40 tag**, tutti risolvibili
+- `git fsck --strict` pulito
+- Nella storia sopravvivono **2 soli PDF**: i due manuali attuali da 9,0 MB
+- **Clone pulito da GitHub** riscaricato da zero e riconfrontato col backup: identico
+- La **vecchia repo su `Ecosystem-Runtime` è intatta e ancora privata**. È la seconda rete di sicurezza dopo il backup locale
+
+### 4.2 Pubblicazione ✅ ESEGUITA IL 13/08
+
+- [x] Repository **pubblico**
+- [x] Descrizione, sito, e 8 argomenti: `telegram-bot`, `rss`, `electron`, `youtube`, `automation`, `typescript`, `react`, `open-source`
+- [x] GitHub riconosce la licenza: **MIT**
+- [x] Issue abilitate; i due template (`bug_report.yml`, `feature_request.yml`) sono al loro posto
+- [x] **Nessun workflow è partito con la pubblicazione**: `build.yml` è `workflow_dispatch` e basta, quindi non c'è stato nessun tentativo di release con un secret assente
+- [x] Verifica finale dei segreti, **rifatta su tutti e 129 i commit della storia riscritta** (non sui 119 del 12/08): 1073 blob di testo analizzati contro token Telegram, `ghp_`, `github_pat_`, `gho_`, `ghs_`, `AKIA`, chiavi PEM, `sk-`, `xox*`, `AIza`. **Zero riscontri.** Nessun `.env`, `.db`, `.pem` o file di credenziali è mai stato tracciato
 
 ### 4.3 CI — matrice di build completa
 - [ ] Windows x64 — NSIS installer + portable
