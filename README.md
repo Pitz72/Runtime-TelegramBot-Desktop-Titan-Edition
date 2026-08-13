@@ -85,7 +85,7 @@ Piattaforme con installer precompilato: **Windows e Linux**.
 ### Sviluppatori
 
 ```bash
-git clone https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition.git
+git clone https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition.git
 cd Runtime-TelegramBot-Desktop-Titan-Edition
 npm install
 
