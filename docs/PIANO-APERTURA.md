@@ -2,7 +2,7 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. ▶️ **Prossima sessione: FASE 3**, ora sbloccata. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. **FASE 3 ESEGUITA** (13/08): tutti i link migrati, `MANUAL_BASE` non serve più i PDF con l'EULA, versione a 2.1.8 con note di rilascio e changelog, CI che pubblica sulla repo stessa. Resta da lanciare la build. ▶️ **Prossima sessione: FASE 4.3** (matrice di build) **oppure FASE 5** (dismissione commerciale, ora sbloccata: `MANUAL_BASE` non punta più alla ponte). Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
 
 > **Le fasi 4.1–4.2 sono state eseguite prima della 3.** Non è un'inversione: la Fase 3 lo prescrive da sempre nel suo primo rigo ⛔. La numerazione riflette l'importanza, non l'ordine di esecuzione.
 
@@ -281,7 +281,7 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 
 ---
 
-## FASE 3 — La build 2.1.8, la prima da progetto aperto
+## FASE 3 — La build 2.1.8, la prima da progetto aperto ✅ ESEGUITA IL 13/08 (resta da lanciare la build)
 
 > Si chiamava «*la build che fa da traghetto*». Il traghetto non c'è più: non aveva nessuno da traghettare. Quel che resta è una release normale sulla repo pubblica.
 
@@ -296,19 +296,33 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 - Il `git clone` del README **è già stato spostato** su `Pitz72` (commit `c4c1f4a`): era l'unico link che, su una pagina pubblica, dava errore a chi lo copiava. Tutti gli altri restano da migrare qui
 - Il link alla **pagina delle release** punta ancora alla ponte: va spostato anche quello, perché la 2.1.8 non uscirà lì
 
-- [ ] `electron-builder.yml` → `publish` verso la repo nuova
-- [ ] 🔴 **`src/renderer/src/lib/docs.ts` — `MANUAL_BASE`** oggi punta a `manuals/` sulla ponte, cioè ai PDF con l'EULA. Va spostato sulla repo pubblica
+- [x] `electron-builder.yml` → `publish` verso la repo nuova — `owner: Pitz72`, `repo: Runtime-TelegramBot-Desktop-Titan-Edition`. È da qui che electron-builder genera `app-update.yml` dentro l'installer
+- [x] 🔴 **`src/renderer/src/lib/docs.ts` — `MANUAL_BASE`** oggi punta a `manuals/` sulla ponte, cioè ai PDF con l'EULA. Va spostato sulla repo pubblica — **fatto.** Ora punta a `raw/main/Manuale%20Utente%20Avanzato/typst/`. I due nomi di file in `MANUAL_FILES` combaciavano già con quelli committati, quindi è bastato cambiare la base. Riverificato prima di toccare il codice: **HTTP 200** su entrambi
 - [x] ~~⛔ I 2 PDF (IT, EN) caricati nella nuova posizione **prima** che la 2.1.8 esca~~ — **già soddisfatto senza fare nulla.** I PDF sono committati nella repo dalla Fase 2-quinquies, e da quando la repo è pubblica sono raggiungibili in `raw`: verificato il 13/08, **HTTP 200** e peso giusto (9.395.852 e 9.392.133 byte). Non c'è niente da caricare da nessuna parte; basta che `MANUAL_BASE` diventi:
   `https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/raw/main/Manuale%20Utente%20Avanzato/typst/`
-- [ ] `package.json` — `homepage`, `repository`, `bugs` verso la destinazione nuova
-- [ ] `src/renderer/src/lib/links.ts` — `SOURCE_URL` aggiornato
-- [ ] Tutti i link nella documentazione che puntano a `Ecosystem-Runtime`
-- [ ] `version` a `2.1.8` in `package.json`
-- [ ] ⛔ **Entry `2.1.8` in `src/renderer/src/lib/releaseNotes.ts`** — se manca, la schermata «Novità» mostra il testo generico invece dell'elenco
-- [ ] `CHANGELOG.md` — la sezione «Non ancora rilasciato» diventa `v2.1.8`, più `docs/changelogs/CHANGELOG_v2.1.8.md`. **Da citare fra le novità: il campo della data ora si chiama «Data di Partenza» anche nelle impostazioni del bot** (prima era «Data di Filtro (Cutoff)»). La motivazione originale — «è una stringa visibile che cambia sotto agli occhi degli utenti esistenti» — non regge più, visto che utenti esistenti non ce ne sono; ma va scritta lo stesso, perché è la prima release pubblica e il changelog è documentazione, non un avviso
+- [x] `package.json` — `homepage`, `repository`, `bugs` verso la destinazione nuova
+- [x] `src/renderer/src/lib/links.ts` — `SOURCE_URL` aggiornato
+- [x] Tutti i link nella documentazione che puntano a `Ecosystem-Runtime` — `README.md` (pagina delle release), `CONTRIBUTING.md`, `docs/build.md` e i 2 «leggimi». **Gli archivi non sono stati toccati**, per la stessa regola della Fase 2-bis: `docs/storico/` e `docs/changelogs/` registrano che *all'epoca* la ponte esisteva, ed è vero
+- [x] `version` a `2.1.8` in `package.json` — e in `package-lock.json`, nel badge del `README` e nel segnaposto di `bug_report.yml`
+- [x] ⛔ **Entry `2.1.8` in `src/renderer/src/lib/releaseNotes.ts`** — se manca, la schermata «Novità» mostra il testo generico invece dell'elenco. **Fatta**, cinque voci per lingua
+- [x] `CHANGELOG.md` — la sezione «Non ancora rilasciato» diventa `v2.1.8`, più `docs/changelogs/CHANGELOG_v2.1.8.md`. **Da citare fra le novità: il campo della data ora si chiama «Data di Partenza» anche nelle impostazioni del bot** (prima era «Data di Filtro (Cutoff)»). La motivazione originale — «è una stringa visibile che cambia sotto agli occhi degli utenti esistenti» — non regge più, visto che utenti esistenti non ce ne sono; ma va scritta lo stesso, perché è la prima release pubblica e il changelog è documentazione, non un avviso. **Fatto**, ha un paragrafo suo
 - [x] ~~I 2 PDF vanno ricompilati, perché `strings.typ` è cambiato con la Fase 2-bis~~ — **non serve, verificato il 13/08.** I PDF in `HEAD` sono stati committati (`f26acac`) *dopo* l'ultima modifica a `strings.typ` (`026f67f`), quindi la incorporano già, e `manuale.typ` è già su `VERSIONE = "2.1.8"`. Si ricompilano **solo se** la versione che si rilascia non è la 2.1.8, con `pwsh typst/build.ps1 -All`
 - [x] ~~Build e **pubblicazione sulla vecchia repo ponte** (serve il secret `RELEASE_TOKEN`)~~ — **cancellato il 13/08.** Non ci sono installazioni esistenti da raggiungere. La release va sulla repo pubblica e basta
-- [ ] Build e pubblicazione **sulla repo pubblica**, col `GITHUB_TOKEN` integrato. In `build.yml` va tolto il passo `Publish release to bridge repo`, che punta a `Ecosystem-Runtime/runtime-telegrambot-releases` e usa `secrets.RELEASE_TOKEN`
+- [x] **`build.yml` riscritto per la repo pubblica.** Il passo `Publish release to bridge repo` non esiste più: niente `repository:`, niente `secrets.RELEASE_TOKEN`. Al suo posto `Publish release`, col `GITHUB_TOKEN` integrato e `permissions: contents: write` sul job — senza quel permesso il token è di sola lettura e la pubblicazione fallirebbe a build finita. Nel repository non resta un solo riferimento vivo a `RELEASE_TOKEN`
+- [ ] ▶️ **Lanciare la build e pubblicare la release.** È l'unico passo rimasto, e va fatto a mano:
+  ```bash
+  gh workflow run build.yml -f publish_release=true
+  ```
+
+### Fatto in Fase 3, per memoria
+
+Verifiche superate sul working tree finale: `npx tsc --noEmit`, `npx vite build`, `node scripts/check-locales.mjs` (237 chiavi × 2). In più `build.yml` ed `electron-builder.yml` sono stati riletti con un parser YAML, non solo a occhio.
+
+**Il corpo della release è stato corretto mentre lo si spostava.** Il vecchio testo prometteva: *«The app updates automatically — existing users will be notified in-app.»* Falso per il `.deb`, che non si auto-aggiorna: è un limite di `electron-updater`. Su una release pubblica quella riga sarebbe stata il primo malinteso ad arrivare nelle issue. Ora la distinzione fra Windows/AppImage e `.deb` è scritta nel corpo. La voce corrispondente resta aperta in Fase 4.3, che riguarda la documentazione.
+
+⚠️ **Il banner in `branding/` è ancora quello della v2.1.7**, e `build-banner.py` ha `VERSION = "2.1.7"`. Non è referenziato dal `README` né dall'applicazione, quindi non si vede da nessuna parte: è rimasto indietro di proposito, per non rigenerare un asset grafico dentro una fase che non lo prevedeva.
+
+⚠️ **`.secrets/RELEASE_TOKEN.txt` è ancora sul disco.** È morto (HTTP 401) e non serve più a niente. L'audit del 12/08 diceva di toglierlo dal disco quando il flusso di release fosse cambiato: il flusso è cambiato adesso. Non è stato cancellato in questa sessione perché cancellare file di credenziali non è un passo da infilare di straforo in fondo a una fase.
 
 ---
 
