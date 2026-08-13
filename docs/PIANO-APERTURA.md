@@ -2,7 +2,7 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. **FASE 3 ESEGUITA** (13/08): tutti i link migrati, `MANUAL_BASE` non serve più i PDF con l'EULA, versione a 2.1.8 con note di rilascio e changelog, CI che pubblica sulla repo stessa. Resta da lanciare la build. ▶️ **Prossima sessione: FASE 4.3** (matrice di build) **oppure FASE 5** (dismissione commerciale, ora sbloccata: `MANUAL_BASE` non punta più alla ponte). Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. **FASI 4.1 e 4.2 ESEGUITE** (13/08): la repo vive su `Pitz72`, è **pubblica**, con storia riscritta e ripulita. **FASE 3 CHIUSA** (13/08): link migrati, `MANUAL_BASE` non serve più i PDF con l'EULA, versione 2.1.8 con note di rilascio e changelog, CI che pubblica sulla repo stessa. **La release `v2.1.8` è pubblica**, e l'utente ci ha aggiornato sopra da un'installazione reale: l'auto-update funziona. 🆕 **FASE 6 aperta**: quattro rifiniture della schermata iniziale segnalate dall'utente. ▶️ **Prossima sessione: FASE 6** (rifiniture, corta), **FASE 4.3** (matrice di build) **oppure FASE 5** (dismissione commerciale, ora sbloccata: `MANUAL_BASE` non punta più alla ponte). Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
 
 > **Le fasi 4.1–4.2 sono state eseguite prima della 3.** Non è un'inversione: la Fase 3 lo prescrive da sempre nel suo primo rigo ⛔. La numerazione riflette l'importanza, non l'ordine di esecuzione.
 
@@ -309,10 +309,11 @@ Domanda dell'utente: perché i PDF non erano ancora committati, e se i vecchi oc
 - [x] ~~I 2 PDF vanno ricompilati, perché `strings.typ` è cambiato con la Fase 2-bis~~ — **non serve, verificato il 13/08.** I PDF in `HEAD` sono stati committati (`f26acac`) *dopo* l'ultima modifica a `strings.typ` (`026f67f`), quindi la incorporano già, e `manuale.typ` è già su `VERSIONE = "2.1.8"`. Si ricompilano **solo se** la versione che si rilascia non è la 2.1.8, con `pwsh typst/build.ps1 -All`
 - [x] ~~Build e **pubblicazione sulla vecchia repo ponte** (serve il secret `RELEASE_TOKEN`)~~ — **cancellato il 13/08.** Non ci sono installazioni esistenti da raggiungere. La release va sulla repo pubblica e basta
 - [x] **`build.yml` riscritto per la repo pubblica.** Il passo `Publish release to bridge repo` non esiste più: niente `repository:`, niente `secrets.RELEASE_TOKEN`. Al suo posto `Publish release`, col `GITHUB_TOKEN` integrato e `permissions: contents: write` sul job — senza quel permesso il token è di sola lettura e la pubblicazione fallirebbe a build finita. Nel repository non resta un solo riferimento vivo a `RELEASE_TOKEN`
-- [ ] ▶️ **Lanciare la build e pubblicare la release.** È l'unico passo rimasto, e va fatto a mano:
-  ```bash
-  gh workflow run build.yml -f publish_release=true
-  ```
+- [x] ▶️ **Lanciare la build e pubblicare la release** — **fatta il 13/08**, `gh workflow run build.yml -f publish_release=true`. [Run 31671220306](https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/actions/runs/31671220306): **success**. La release `v2.1.8` è pubblica e non è una bozza, con 5 asset — `Setup-2.1.8.exe` (83,8 MB), `2.1.8.AppImage` (114,1 MB), `2.1.8.deb` (78,8 MB), `latest.yml` e `latest-linux.yml`
+
+  ✅ **Il `GITHUB_TOKEN` con `permissions: contents: write` funziona anche con il default della repo su `read`.** Era il dubbio con cui si è entrati nel passo: il timore era che il permesso del job non potesse superare l'impostazione della repository, e che la pubblicazione fallisse *a build finita*. Non è così — l'impostazione è un default, non un tetto. Il default resta `read`, che è il minimo privilegio giusto
+
+  ✅ **La build resta manuale, come richiesto dall'utente.** Verificato: `build.yml` non ha nessun trigger su `push`, quindi sui commit non parte niente. Su `pull_request` gira solo `verify`, che non produce installer e non pubblica. Build e release girano solo su `workflow_dispatch`
 
 ### Fatto in Fase 3, per memoria
 
@@ -395,10 +396,26 @@ Il primo tentativo ha sbagliato bersaglio e va ricordato, perché l'errore è ri
 
 ---
 
+## FASE 6 — Rifiniture della schermata iniziale
+
+Segnalate dall'utente il 13 agosto 2026, subito dopo aver aggiornato alla 2.1.8 scaricata da GitHub. Sono tutte estetiche e stanno tutte in `src/renderer/src/components/IntroScreen.tsx`: **nessuna è bloccante**, ma sono la prima cosa che vede chi apre il programma, e ora il programma lo può aprire chiunque.
+
+Il giudizio dell'utente sul resto della schermata è: **va bene così.** Non c'è mandato per ridisegnarla.
+
+- [ ] **1. «Titan Edition» va portato a capo.** Oggi ([riga 47](../src/renderer/src/components/IntroScreen.tsx)) il titolo è un unico `<h1>` in cui `{t('app.title')}` e lo `<span>` «Titan Edition» stanno sulla stessa riga, quindi il testo va a capo dove capita: nella schermata dell'utente si spezza dopo «Titan», lasciando «Edition» orfano sulla seconda riga. Il nome canonico è composto di due parti, e la seconda deve stare sotto la prima per intero. Serve anche `text-center` sull'`h1`: il centraggio di adesso viene dal genitore, e appena il titolo va su due righe salta
+
+- [ ] **2. Il credito LLM è illeggibile.** «Sviluppato con l'ausilio di LLM · concezione e direzione di Simone Pizzi» ([riga 55](../src/renderer/src/components/IntroScreen.tsx)) è `text-nano` a `text-outline-variant/35`: dimensione minima e 35% di opacità su fondo scuro. È blu su blu. È anche la riga di paternità del progetto, cioè una delle cose che l'apertura del sorgente doveva rendere esplicite — nasconderla è il contrario di quel che serve. Alzare opacità e corpo
+
+- [ ] **3. Le bandiere non sono centrate — ed è un residuo delle otto lingue.** Il contenitore ([riga 84](../src/renderer/src/components/IntroScreen.tsx)) è `grid grid-cols-4`: era pensato per otto bandiere su due file da quattro. Con due lingue restano incollate a sinistra, e il vuoto a destra lascia intendere che *prima ci fosse dell'altro* — che è esattamente quel che è successo, ma non è quel che deve trasparire. Passare a un layout centrato sul numero reale di lingue, non su quattro colonne fisse
+
+- [ ] **4. `INIT_SEQ · TITAN_DESKTOP_RUNTIME` — a che serve?** ([riga 152](../src/renderer/src/components/IntroScreen.tsx)) A niente: è decorazione, un vezzo da finto terminale rimasto dal design «Titan Glass» delle origini, scritto a `text-outline-variant/25`. Non è una chiave di traduzione, non è uno stato, non è diagnostica. **Proposta: toglierla.** Se invece piace come firma grafica, va deciso che è quello e basta
+
+---
+
 ## Verifiche di chiusura
 
 - [ ] Installare l'ultimo installer su una macchina pulita e verificare: primo avvio, creazione di un bot, pubblicazione reale su un canale
-- [ ] Verificare l'aggiornamento automatico da 2.1.7 a 2.1.8 su un'installazione reale — è il punto che, se sbagliato, non si può correggere a posteriori
+- [x] ~~Verificare l'aggiornamento automatico da 2.1.7 a 2.1.8 su un'installazione reale — è il punto che, se sbagliato, non si può correggere a posteriori~~ — **verificato il 13/08 dall'utente, su installazione reale.** Ha aggiornato dalla release appena pubblicata su GitHub, e la schermata «Novità» è comparsa con l'elenco della 2.1.8. Il punto più delicato dell'apertura è passato, ed è passato al primo colpo
 - [ ] Verificare che il pulsante «Scarica manuale» funzioni **dopo** la cancellazione della ponte
 - [ ] Verificare i pulsanti di donazione e contatti dalla schermata iniziale e dalle impostazioni
 - [ ] Clone pulito della repo pubblica → `npm install` → `npm run build`: deve funzionare senza nulla di locale
