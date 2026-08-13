@@ -31,25 +31,39 @@ fileAssociations:
 win:
   executableName: TitanDesktop
   icon: resources/icon.png
-  target: nsis
+  target:
+    - nsis
+    - portable
 nsis:
   artifactName: RuntimeTelegramBot-TitanEdition-Setup-${version}.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: true
+# Eseguibile unico, senza installazione. Non si auto-aggiorna: electron-builder
+# non scrive le informazioni di aggiornamento per il target portable, quindi la
+# versione portable non compare in latest.yml e va riscaricata a mano.
+portable:
+  artifactName: RuntimeTelegramBot-TitanEdition-Portable-${version}.${ext}
 
 # macOS non è supportato: il target è stato rimosso nel luglio 2026.
 # Le piattaforme di distribuzione sono Windows e Linux.
 
 # === Linux ===
+# L'architettura non è dichiarata qui: la sceglie la riga di comando
+# (`--x64` / `--arm64`), perché ogni architettura si compila sul proprio runner.
+# ${arch} nel nome è obbligatorio, altrimenti x64 e arm64 producono file omonimi
+# che si sovrascrivono a vicenda quando la release li raccoglie insieme.
 linux:
   maintainer: Runtime Radio <info@runtimeradio.it>
   icon: resources/icon.png
   target:
     - AppImage
     - deb
+    - rpm
+    - pacman
+    - tar.gz
   category: Utility
-  artifactName: RuntimeTelegramBot-TitanEdition-${version}.${ext}
+  artifactName: RuntimeTelegramBot-TitanEdition-${version}-${arch}.${ext}
 
 # === Auto-Update (release sulla repo pubblica del progetto) ===
 publish:

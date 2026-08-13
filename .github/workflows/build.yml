@@ -12,6 +12,10 @@ on:
   pull_request:
     branches: [main]
 
+# NOTA: nessun trigger su push. La build non parte mai da sola: si lancia a mano
+# con workflow_dispatch. Su pull request gira solo il job `verify`, che compila
+# ma non produce installer e non pubblica niente.
+#
 # NOTA: Node 20 e non oltre. better-sqlite3 non ha prebuild per Node 22/24:
 # node-gyp fallisce e sul runner Windows Visual Studio non viene rilevato.
 # Il warning "Node 20 deprecato" nelle Actions riguarda il runtime delle action
@@ -43,8 +47,18 @@ jobs:
         run: node scripts/check-locales.mjs
 
   build-linux:
-    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' }}
+    strategy:
+      # Un'architettura che non compila non deve portarsi dietro l'altra:
+      # meglio sapere che cosa esattamente è rotto.
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -55,23 +69,35 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/electron
-          key: electron-linux-${{ hashFiles('package-lock.json') }}
+          key: electron-linux-${{ matrix.arch }}-${{ hashFiles('package-lock.json') }}
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libsecret-1-dev libfuse2
+          sudo apt-get install -y libsecret-1-dev libfuse2 rpm fakeroot zstd ruby ruby-dev
+      # fpm impacchetta deb, rpm e pacman. Quello che electron-builder scarica da
+      # sé è fermo alla 1.9.3 ed esiste solo per x86_64: non sa produrre pacman
+      # (aggiunto in fpm 1.11) e su arm64 non esiste proprio. Si installa un fpm
+      # di sistema e lo si impone con USE_SYSTEM_FPM sul passo di build.
+      - name: Install fpm
+        run: sudo gem install --no-document fpm
       - name: Install dependencies
         run: npm ci
       - name: Build
-        run: npx tsc && npx vite build && npx electron-builder --linux --publish never
+        env:
+          USE_SYSTEM_FPM: 'true'
+        run: npx tsc && npx vite build && npx electron-builder --linux --${{ matrix.arch }} --publish never
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-artifacts
+          name: linux-artifacts-${{ matrix.arch }}
           path: |
             Builds/*.AppImage
             Builds/*.deb
-            Builds/latest-linux.yml
+            Builds/*.rpm
+            Builds/*.pacman
+            Builds/*.tar.gz
+            Builds/*.blockmap
+            Builds/latest-linux*.yml
           retention-days: 30
 
   build-windows:
@@ -91,13 +117,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build
-        run: npx tsc && npx vite build && npx electron-builder --windows --publish never
+        run: npx tsc && npx vite build && npx electron-builder --windows --x64 --publish never
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-artifacts
+          name: windows-artifacts-x64
           path: |
             Builds/*.exe
+            Builds/*.blockmap
             Builds/latest.yml
           retention-days: 30
 
@@ -116,17 +143,14 @@ jobs:
         id: version
         run: echo "tag=v$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Download Linux artifacts
+      # I nomi dei file portano l'architettura, quindi le cartelle dei singoli
+      # job si possono fondere in una sola senza collisioni.
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: linux-artifacts
-          path: artifacts/linux
-
-      - name: Download Windows artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-artifacts
-          path: artifacts/windows
+          pattern: '*-artifacts-*'
+          path: artifacts
+          merge-multiple: true
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
@@ -137,23 +161,24 @@ jobs:
           body: |
             ## Runtime TelegramBot Desktop · Titan Edition ${{ steps.version.outputs.tag }}
 
-            Free software, MIT licensed. Download the installer for your platform:
+            Free software, MIT licensed. Download the file for your platform:
 
-            | Platform | File |
-            |----------|------|
-            | **Windows** | `*.exe` |
-            | **Linux (AppImage)** | `*.AppImage` |
-            | **Linux (deb)** | `*.deb` |
+            | Platform | File | Self-updates |
+            |----------|------|--------------|
+            | **Windows** (installer) | `Setup-*.exe` | yes |
+            | **Windows** (portable) | `Portable-*.exe` | no |
+            | **Linux** AppImage | `*-x64.AppImage`, `*-arm64.AppImage` | yes |
+            | **Linux** Debian/Ubuntu | `*-amd64.deb`, `*-arm64.deb` | yes, asks for the administrator password |
+            | **Linux** Fedora/RHEL/openSUSE | `*-x86_64.rpm`, `*-aarch64.rpm` | yes, asks for the administrator password |
+            | **Linux** Arch | `*.pacman` | no |
+            | **Linux** generic archive | `*.tar.gz` | no |
 
-            > Supported platforms: Windows and Linux. macOS has no official
-            > installer — build it from source.
+            > Supported platforms: Windows (x64) and Linux (x64 and arm64).
+            > macOS has no official installer — build it from source.
             >
-            > Automatic updates work on **Windows** and on the **AppImage**.
-            > The `.deb` package does not self-update: install the new one by
-            > hand, or use your distribution's package manager.
-          files: |
-            artifacts/linux/*.AppImage
-            artifacts/linux/*.deb
-            artifacts/linux/latest-linux.yml
-            artifacts/windows/*.exe
-            artifacts/windows/latest.yml
+            > Self-updating on `.deb` and `.rpm` is a recent feature of
+            > electron-updater and it installs the new package as root: if it
+            > does not go through, download the package and install it by hand.
+            > The portable build, the `.pacman` package and the `.tar.gz`
+            > archive never update themselves.
+          files: artifacts/*

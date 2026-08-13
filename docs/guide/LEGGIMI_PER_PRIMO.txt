@@ -16,17 +16,28 @@ https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition
 --- INSTALLAZIONE -----------------------------------------------
 
 Windows 10 o superiore (64 bit)
-  Avvia il file .exe e segui le istruzioni a schermo. Il programma
-  crea da solo un collegamento sul desktop.
+  Setup-...exe      L'installer. Avvialo e segui le istruzioni a
+                    schermo: crea da solo un collegamento sul
+                    desktop.
+  Portable-...exe   Un eseguibile unico che non installa niente.
+                    Copialo dove vuoi e avvialo. Non si aggiorna
+                    da solo.
 
-Linux
+Linux — ogni file esiste per x64 e per arm64: scarica quello
+dell'architettura del tuo computer.
   .deb        Ubuntu 22.04+, Debian e derivate: doppio clic e
               lascia fare al gestore pacchetti.
+  .rpm        Fedora, RHEL, openSUSE:
+                sudo dnf install ./nomefile.rpm
+  .pacman     Arch e derivate:
+                sudo pacman -U nomefile.pacman
   .AppImage   Tutte le altre distribuzioni: rendi il file
               eseguibile (clic destro > Proprietà > Permessi >
               Consenti l'esecuzione) e avvialo con un doppio clic.
               Su alcune versioni recenti di Ubuntu serve prima il
               pacchetto libfuse2:  sudo apt install libfuse2
+  .tar.gz     Archivio senza integrazione col sistema: lo
+              scompatti e avvii l'eseguibile che trovi dentro.
 
 macOS
   Non esiste un installer ufficiale e non è previsto. Il codice è
@@ -63,9 +74,16 @@ recente. Quando la trova te lo dice con una schermata dedicata:
 ti chiede se scaricarla e, a scaricamento finito, se riavviare per
 installarla. Decidi tu a ogni passaggio.
 
-L'aggiornamento automatico vale per la versione Windows e per la
-.AppImage. Con il pacchetto .deb non funziona: lì l'aggiornamento
-passa dal gestore pacchetti o da un nuovo scaricamento a mano.
+L'aggiornamento automatico non chiede altro che le due conferme
+con l'installer Windows e con la .AppImage. Con i pacchetti .deb
+e .rpm l'installazione richiede i privilegi di amministratore, e
+il sistema ti chiederà la password: se non va a buon fine,
+scarica il pacchetto nuovo dalla pagina delle release e
+installalo a mano.
+
+La versione portable, il pacchetto .pacman e l'archivio .tar.gz
+non si aggiornano da soli. Titan ti avvisa lo stesso che esiste
+una versione più recente, ma la scarichi tu.
 
 
 --- DOCUMENTAZIONE ----------------------------------------------
