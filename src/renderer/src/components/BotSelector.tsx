@@ -205,14 +205,22 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
                                     )}>{bot.name}</h3>
                                 </div>
                                 <div className="flex flex-col gap-0.5 mt-1 pl-3">
-                                    <p className={cn(
-                                        "text-nano font-mono flex items-center gap-1 truncate",
-                                        bot.is_active ? "text-outline-variant/60" : "text-outline-variant/30"
-                                    )}>
+                                    {/* `text-nano` fuori da cn(): tailwind-merge lo scambia per una
+                                        classe di colore e lo cancella in favore del ternario che
+                                        segue. Rimetterlo riporta la riga a 9px — quindi il colore
+                                        va sistemato insieme, o la correzione peggiora le cose:
+                                        `outline-variant` è blu pieno e stava a 2,6:1. */}
+                                    <p className={`text-nano font-mono ${cn(
+                                        "flex items-center gap-1 truncate",
+                                        bot.is_active ? "text-on-surface-variant/75" : "text-on-surface-variant/55"
+                                    )}`}>
                                         <Hash size={9} />
                                         {bot.channel_id}
                                     </p>
-                                    <p className="text-nano text-primary/25">
+                                    {/* Era `text-primary/25`: 1,65:1, praticamente invisibile.
+                                        Sta nello stesso blocco di due righe della riga qui sopra —
+                                        lasciarne una leggibile e l'altra no le spezza in due. */}
+                                    <p className="text-nano text-primary/70">
                                         From: {bot.start_date.split('T')[0]}
                                     </p>
                                 </div>
