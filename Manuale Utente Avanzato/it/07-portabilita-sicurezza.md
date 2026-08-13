@@ -1,6 +1,6 @@
-## Capitolo 7: Portabilità e Sicurezza (L'Ecosistema OmniSync)
+## Capitolo 7: Portabilità e Sicurezza
 
-Titan tiene al sicuro il tuo lavoro e ti dà tre modi per salvarlo o spostarlo: il backup completo del database, il formato `.rtb` per un singolo bot e l'esportazione dell'intera configurazione. Vediamoli.
+Titan tiene al sicuro il tuo lavoro e ti dà tre modi per salvarlo o spostarlo: il backup completo del database, il formato `.rtb` per un singolo bot e l'esportazione dell'intera configurazione.
 
 ### 7.1 Backup completo del database
 Clicca sull'icona a ingranaggio (⚙️) in alto a destra per aprire le **Impostazioni di Sistema**, poi vai nella scheda **Dati e Backup**.
@@ -23,7 +23,7 @@ E il token? Qui Titan fa una scelta di sicurezza precisa: il token viaggia nel f
 -   **Sullo stesso computer** (per esempio dopo una reinstallazione) il token viene riletto e ripristinato senza che tu faccia nulla.
 -   **Su un altro computer** il token, per sicurezza, non è decifrabile: arriva vuoto e va reinserito a mano, lo stesso che copi da BotFather. Tutto il resto (feed, template, impostazioni) è già al suo posto.
 
-In pratica il `.rtb` sposta la configurazione in modo comodo, ma il segreto vero non si può rubare copiando un file: resta protetto dalla macchina che l'ha generato.
+Il `.rtb` sposta quindi la configurazione senza esporre il segreto: quello resta legato alla macchina che l'ha generato.
 
 *Nota per Linux.* La cifratura del token si appoggia al portachiavi di sistema (GNOME Keyring, KWallet o un altro servizio Secret Service). Se la tua distribuzione non ne ha uno, Titan non si blocca: usa una cifratura interna, comunque legata alla macchina. Per attivare il portachiavi nativo, installa `libsecret`.
 

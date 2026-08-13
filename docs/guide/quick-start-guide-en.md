@@ -1,6 +1,6 @@
-# Runtime TelegramBot Desktop Titan Edition — Quick Start Guide
+# Runtime TelegramBot Desktop · Titan Edition — Quick Start Guide
 
-Welcome to **Runtime TelegramBot Desktop Titan Edition**. This guide will help you set up your first bot and start publishing content to your Telegram channel in just a few minutes.
+Welcome to **Runtime TelegramBot Desktop · Titan Edition**. This guide will help you set up your first bot and start publishing content to your Telegram channel in just a few minutes.
 
 ---
 
@@ -17,7 +17,7 @@ Before launching the app, you need to create a bot on Telegram:
 
 ## 2. First Launch — Bot Configuration
 
-On first launch, click **"+ New Bot"** and fill in the fields:
+On first launch, click the **+** at the top of the bot column and fill in the fields:
 
 - **Name** — a name to identify the bot in the interface (e.g. *News Channel*).
 - **Token** — the API Token provided by @BotFather.
@@ -28,7 +28,7 @@ On first launch, click **"+ New Bot"** and fill in the fields:
 
 ## 3. Adding Feeds (Feed Manager)
 
-In the bot dashboard, click **"+ Add Feed"**:
+Select the bot on the left, then in the **Feed Sources** panel click **Add Source**:
 
 1. Assign a descriptive **Name** to the feed.
 2. Select the **Type**: News, Podcast, or YouTube.
@@ -39,16 +39,16 @@ In the bot dashboard, click **"+ Add Feed"**:
 
 ### Advanced feed options
 
-- **Keyword Filter** — Filters articles by keywords to include or exclude. Can be enabled in the feed settings. An amber badge indicates the filter is active.
-- **Custom Interval** — Sets an individual fetch interval for the feed (from 5 minutes to 24 hours), independent of the bot's global interval.
-- **Digest Mode** — Instead of publishing each article individually, accumulates content over a configurable interval (1h, 6h, 12h, 24h, 7d) and sends it in a single summary message. A purple badge indicates the mode is active.
-- **OPML Import** — Imports multiple feeds at once from a standard `.opml` file via the OPML button in the Feed Manager.
+- **Keyword filter** — publishes only articles containing certain words, or discards those containing others. An amber badge signals that the filter is active.
+- **Custom interval** — gives this source a check rhythm of its own (from 5 minutes to 24 hours), separate from the bot's.
+- **Digest** — instead of publishing each article as it appears, accumulates content (1 hour, 6, 12, 24 hours or 7 days) and sends it in a single summary message, up to 20 at a time. A purple badge signals that the digest is active.
+- **OPML import** — imports in bulk every source held in an `.opml` file, with the OPML button at the top of the Feed Manager.
 
 ---
 
-## 4. Customizing Messages (Template)
+## 4. Customising Messages (Templates)
 
-Go to bot settings → **Template** tab:
+Go to bot settings → **Templates** tab:
 
 - Use **Smart Chips** to insert dynamic variables: `{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`, etc.
 - Four separate templates are available: Startup, News, Podcast, YouTube.
@@ -73,7 +73,7 @@ To monitor multiple bots simultaneously, use the **ALL BOTS / THIS BOT** toggle 
 
 ## 6. Statistics
 
-Click the **Analytics (📊)** icon in the dashboard to see:
+Click the chart icon next to the **Total** to open **Detailed Statistics**:
 
 - Published article counters: today / last 7 days / total.
 - Breakdown by feed, sorted by publication volume.
@@ -84,9 +84,11 @@ Click the **Analytics (📊)** icon in the dashboard to see:
 
 Accessible from the gear icon in the top right:
 
-- **General** — global check interval, quiet hours, language.
-- **Backup** — database export and restore.
-- **Performance Mode** — disables GPU-heavy effects (scanlines, blur, glow, animations). Useful on machines with limited hardware. Takes effect immediately without restart.
+- **General** — interface language, update check, documentation, credits and donation.
+- **Data & Backup** — database export and restore.
+- **Performance** — turns off the heaviest graphical effects (scanlines, blurs, glows, animations). Useful on slower machines; it takes effect at once, with no restart.
+
+Check interval and quiet hours are not here: they belong to the individual bot, on the **General** tab of its settings.
 
 ---
 
@@ -96,7 +98,7 @@ To move a bot to another computer without losing the configuration:
 
 1. In bot settings → **Export (.rtb)**.
 2. Transfer the file to the new PC.
-3. On the new PC → **Import (.rtb)** and re-enter the token (tokens are machine-specific for security).
+3. On the new PC → **Import (.rtb)** and re-enter the token by hand: for security the token is tied to the computer that created the export and cannot be decrypted elsewhere. Everything else arrives already configured.
 
 ---
 

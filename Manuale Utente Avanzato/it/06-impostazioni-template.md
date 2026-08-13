@@ -20,7 +20,7 @@ Sempre nella scheda **Generale**, la sezione **Fascia Oraria Attiva** ha due cam
 -   *Fuori dalla finestra.* Il motore non si ferma: continua a controllare feed RSS e YouTube tutta la notte, per non perdere nulla. Solo che, invece di inviare subito, mette da parte i contenuti in una coda d'attesa **persistente**, salvata su disco. Se anche spegni il computer, al riavvio la coda è ancora lì.
 -   *Alla riapertura.* Appena l'orologio rientra nella fascia consentita, il bot smaltisce in ordine cronologico tutto ciò che ha accumulato, pubblicando un post ogni 3 secondi fino a esaurire la coda.
 
-Così le tue automazioni rispettano il riposo del pubblico e il contenuto arriva la mattina, quando ha più probabilità di essere letto.
+Così di notte il canale resta muto e il contenuto arriva la mattina, quando ha più probabilità di essere letto.
 
 ### 6.3 Editor template e Smart Chips
 Di default Titan pubblica con un layout pulito ma standard. Se vuoi dare ai messaggi la tua linea editoriale (un'emoji come logo, i link disposti a modo tuo), apri la scheda **Template**.
@@ -46,7 +46,7 @@ Due strumenti ti aiutano a non sbagliare:
 *Link puliti.* Telegram sa nascondere i link lunghi dentro il testo. Invece di «Clicca qui: {{link}}», scrivi `<a href="{{link}}">Leggi l'articolo</a>`: l'utente vedrà solo la frase blu cliccabile.
 
 ### 6.4 La Danger Zone: azzerare lo storico
-In fondo alla scheda **Generale** c'è una sezione rossa, la *Danger Zone*. Il pulsante **Azzera Cronologia** è potente e distruttivo: cancella la memoria del bot, cioè tutto ciò che ha già pubblicato.
+In fondo alla scheda **Generale** c'è una sezione rossa, la *Danger Zone*. Il pulsante **Azzera Cronologia** è distruttivo: cancella la memoria del bot, cioè tutto ciò che ha già pubblicato.
 
 -   *Quando serve.* Se hai cancellato per sbaglio molti messaggi dal canale e vuoi che il bot ripubblichi le ultime notizie per ricostruire la bacheca.
 -   *Come usarlo senza disastri.* Se azzeri la cronologia e premi Play, il bot considera «nuovo» tutto quello che trova nei feed e lo invia in blocco, inondando il canale. Per evitarlo, dopo aver azzerato riporta la **Data di Partenza** (nella stessa scheda) alla data di oggi: così il bot dimentica il passato ma pubblica solo da oggi in avanti.

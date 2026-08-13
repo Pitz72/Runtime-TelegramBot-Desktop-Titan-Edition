@@ -23,7 +23,7 @@ Il **Bot Token** è la «chiave di casa» che permette al software di parlare co
 ### 4.3 Trovare il Channel ID corretto
 Per pubblicare, il bot deve sapere *dove* mandare i messaggi: è il **Channel ID**.
 
--   **Canali pubblici.** È il caso più semplice. Se il canale ha un link tipo `t.me/miocanale`, il Channel ID è `@miocanale`. Non serve nemmeno essere precisi: Titan ripulisce da solo quello che incolli: toglie il prefisso `https://` e `t.me/`, e aggiunge la chiocciola se manca. Così `https://t.me/miocanale`, `t.me/miocanale` e `miocanale` finiscono tutti come `@miocanale`.
+-   **Canali pubblici.** È il caso più semplice. Se il canale ha un link tipo `t.me/miocanale`, il Channel ID è `@miocanale`. Non serve nemmeno essere precisi. Titan ripulisce da solo quello che incolli: toglie il prefisso `https://` e `t.me/`, e aggiunge la chiocciola se manca. Così `https://t.me/miocanale`, `t.me/miocanale` e `miocanale` finiscono tutti come `@miocanale`.
 -   **Canali privati.** Non hanno un nome pubblico: sono identificati da una stringa numerica assegnata da Telegram, che di solito comincia con il segno meno (per esempio `-1002345678912`). Per ricavarla, inoltra un messaggio del canale a un bot di servizio gratuito come `@getidsbot`, che ti risponde con il codice numerico esatto della chat. Questo numero va incollato così com'è.
 
 *Regola d'oro.* Creato il canale e ottenuto l'ID, e **prima di avviare il bot**, entra nelle impostazioni del canale Telegram, apri **Amministratori**, cerca il tuo bot e aggiungilo con il permesso di inviare messaggi. Se il bot non è amministratore (o l'ID è sbagliato) non ha modo di scrivere nel canale: nei log comparirà un errore rosso di Telegram (li vediamo nel Capitolo 9) e nulla verrà pubblicato.

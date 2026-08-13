@@ -7,7 +7,7 @@ Per aggiungere una sorgente:
 
 1. Seleziona il bot a cui vuoi assegnarla.
 2. Clicca su **Aggiungi**.
-3. Dai un **Nome** alla fonte. Non è un'etichetta qualsiasi: è il testo che potrai stampare in cima ai messaggi come firma della notizia (è il campo `{{feedName}}` dei template, Capitolo 6).
+3. Dai un **Nome** alla fonte: è il testo che potrai stampare in cima ai messaggi come firma della notizia (è il campo `{{feedName}}` dei template, Capitolo 6).
 4. Scegli il **Tipo**:
     -   **Podcast:** per i flussi audio (MP3). Titan prova a recuperare l'immagine di copertina, spesso nascosta nei tag *iTunes* usati da servizi come Spreaker o AzuraCast.
     -   **News:** per i classici articoli di blog, siti di informazione o giornali.
@@ -32,7 +32,7 @@ Di solito integrare YouTube in un sistema di automazione è una scocciatura: ric
 Al resto pensa Titan. C'è però un accorgimento utile: il **filtro anti-premiere**. Quando uno YouTuber programma una diretta o un video «in uscita tra due giorni», YouTube lo mostra comunque in cima alla lista. Un bot ingenuo manderebbe subito la notifica, e chi clicca finisce su un video non ancora disponibile. Titan invece controlla lo stato del video: se è segnato come *upcoming* o *premiere*, lo scarta e lo pubblica solo quando diventa davvero visibile.
 
 ### 5.3 Opzioni avanzate del feed
-Quando aggiungi o modifichi una sorgente, sotto ai campi principali trovi tre regolazioni facoltative. Puoi ignorarle (il feed funziona benissimo con i valori predefiniti) oppure usarle per un controllo più fine.
+Quando aggiungi o modifichi una sorgente, sotto ai campi principali trovi tre regolazioni facoltative. Puoi ignorarle (con i valori predefiniti il feed funziona) oppure usarle per un controllo più fine.
 
 -   **Filtro per parole chiave.** Due campi, «includi» ed «escludi», con le parole separate da virgola. Se riempi «includi», Titan pubblica solo i contenuti in cui compare almeno una di quelle parole, nel titolo o nel testo; se riempi «escludi», scarta quelli che ne contengono anche una sola. Un badge ambra sulla sorgente segnala che il filtro è attivo.
 -   **Intervallo personalizzato.** Di norma ogni feed segue il ritmo di controllo del bot. Qui puoi darne uno tutto suo, da 5 minuti a 24 ore: comodo per controllare più spesso un sito molto attivo, o più di rado uno lento. Un badge indica l'intervallo impostato.

@@ -5,11 +5,11 @@ Benvenuto in **Runtime TelegramBot Titan Edition**. Non è un semplice «script�
 
 È pensato per chi gestisce community, testate, stazioni radio o canali YouTube e ha bisogno di distribuire contenuti in modo tempestivo e continuo.
 
-La differenza rispetto ai servizi Cloud commerciali sta in dove gira. Quelli vivono su server altrui, spesso con un abbonamento mensile e un tetto ai messaggi che puoi inviare. Titan gira **in locale**, sul tuo computer o sul tuo server: i tuoi dati e le tue credenziali restano sulla tua macchina, non paghi un canone e nessun piano commerciale ti limita il numero di invii. Restano soltanto i normali limiti anti-spam di Telegram, che Titan gestisce da sé.
+La differenza rispetto ai servizi cloud commerciali sta in dove gira. Quelli vivono su server altrui, spesso con un abbonamento mensile e un tetto ai messaggi che puoi inviare. Titan gira **in locale**, sul tuo computer o sul tuo server: i tuoi dati e le tue credenziali restano sulla tua macchina, non paghi un canone e nessun piano commerciale ti limita il numero di invii. Restano soltanto i normali limiti anti-spam di Telegram, che Titan gestisce da sé.
 
 ![La schermata di benvenuto che accoglie l'utente all'avvio di Titan Edition.](screenshots/01-intro-welcome.png)
 
-### 1.2 L'ecosistema «sotto il cofano»
+### 1.2 Come lavora, sotto il cofano
 Per usarlo al meglio basta afferrare due concetti su come Titan gestisce le informazioni.
 
 -   **Motore asincrono (Producer-Consumer).** Titan tiene separate due attività: una scarica di continuo gli articoli dalle tue sorgenti, l'altra li formatta e li invia a Telegram. Così lo scaricamento non si ferma mai ad aspettare l'invio, e l'invio rispetta le pause che Telegram impone per non farti bloccare come spam, il cosiddetto *FloodWait*.

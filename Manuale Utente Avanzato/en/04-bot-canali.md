@@ -23,7 +23,9 @@ The **Bot Token** is the "house key" that lets the software talk to Telegram's s
 ### 4.3 Finding the correct Channel ID
 To publish, the bot must know *where* to send the messages: that is the **Channel ID**.
 
--   **Public channels.** This is the simplest case. If the channel has a link like `t.me/mychannel`, the Channel ID is `@mychannel`. You do not even need to be precise: Titan cleans up whatever you paste, stripping the `https://` and `t.me/` prefix and adding the at sign if it is missing. So `https://t.me/mychannel`, `t.me/mychannel` and `mychannel` all end up as `@mychannel`.
+-   **Public channels.** This is the simplest case. If the channel has a link like `t.me/mychannel`, the Channel ID is `@mychannel`. You do not even need to be precise. Titan cleans up whatever you paste: it strips the `https://` and `t.me/` prefix and adds the at sign if it is missing. So `https://t.me/mychannel`, `t.me/mychannel` and `mychannel` all end up as `@mychannel`.
 -   **Private channels.** They have no public name: they are identified by a numeric string assigned by Telegram, which usually begins with a minus sign (for example `-1002345678912`). To obtain it, forward a message from the channel to a free service bot such as `@getidsbot`, which replies with the chat's exact numeric code. This number is pasted in as-is.
 
 *Golden rule.* Once the channel is created and the ID obtained, and **before starting the bot**, go into the Telegram channel settings, open **Administrators**, find your bot and add it with permission to send messages. If the bot is not an administrator (or the ID is wrong) it has no way to write in the channel: a red Telegram error will appear in the logs (we look at them in Chapter 9) and nothing will be published.
+
+---

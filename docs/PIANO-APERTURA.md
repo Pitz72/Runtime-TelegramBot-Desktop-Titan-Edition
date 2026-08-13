@@ -2,7 +2,7 @@
 
 **Aperto:** 12 agosto 2026
 **Obiettivo:** ritirare Titan dal mercato, spostare il progetto su `Pitz72` come repository pubblico sotto licenza MIT, con build automatiche per Windows e Linux.
-**Stato:** in corso — **Fase 1 chiusa e pushata** (12/08), **Fase 2 eseguita con una riserva** (12/08), **Fase 2-bis eseguita** (13/08). Prossimo passo: revisionare la prosa nuova rimasta, che ora è solo italiana e inglese, riscrivere i 2 «leggimi» ancora commerciali e ricompilare i 2 PDF; poi le decisioni aperte che sbloccano la Fase 3. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
+**Stato:** **Fase 1 chiusa e pushata** (12/08). **FASE 2 COMPLETA** (13/08): 2-bis lingue, 2-ter revisione dei manuali IT ed EN, 2-quater revisione della documentazione utente. Nessuna riserva aperta, nessun residuo commerciale. Prossimo passo: le decisioni aperte qui sotto, che sbloccano la Fase 3. Questo file si aggiorna a ogni sessione e va spostato in `docs/storico/` quando tutte le voci sono chiuse.
 
 > **Una fase per sessione.** Regola dell'utente, 13/08: ogni fase si esegue in una sola sessione, e se ne serve più d'una va bene. Due fasi nella stessa sessione, no.
 
@@ -61,9 +61,11 @@ Committata il 12 agosto 2026. `npx tsc --noEmit`, `npx vite build` e `scripts/ch
 
 ---
 
-## FASE 2 — Manuali e documentazione — ESEGUITA IL 12/08, CON UNA RISERVA
+## FASE 2 — Manuali e documentazione ✅ COMPLETA (12/08 il grosso, chiusa il 13/08)
 
-⚠️ **La riserva, prima di tutto.** Le sezioni nuove (2.4, 2.5, 8.2, la voce «istanza singola» del cap. 9, i piedi delle 16 guide brevi) sono **testo scritto ex novo direttamente in 8 lingue**, non traduzioni di un originale già revisionato. **Non sono passate dal protocollo di revisione severa** usato a luglio (vedi `GitHub/ProtocolloManuale` e la memoria `sessione-2026-07-07-revisione-globale`). Meccanicamente i PDF sono corretti e verificati; la qualità della prosa in DE/RU/ZH/PT/ES/FR non è stata controllata da nessuno. **Prima di pubblicare gli 8 PDF serve una passata di revisione dedicata.**
+✅ **La riserva è sciolta** dalle Fasi 2-bis, 2-ter e 2-quater (13/08). Il testo qui sotto resta come resoconto di quel che fu.
+
+⚠️ **La riserva, com'era.** Le sezioni nuove (2.4, 2.5, 8.2, la voce «istanza singola» del cap. 9, i piedi delle 16 guide brevi) sono **testo scritto ex novo direttamente in 8 lingue**, non traduzioni di un originale già revisionato. **Non sono passate dal protocollo di revisione severa** usato a luglio (vedi `GitHub/ProtocolloManuale` e la memoria `sessione-2026-07-07-revisione-globale`). Meccanicamente i PDF sono corretti e verificati; la qualità della prosa in DE/RU/ZH/PT/ES/FR non è stata controllata da nessuno. **Prima di pubblicare gli 8 PDF serve una passata di revisione dedicata.**
 
 La toolchain è installata e collaudata end-to-end: Typst 0.14.2, pandoc 3.9, PowerShell 7.6, Pillow 12.2.
 
@@ -86,17 +88,17 @@ Il colophon conteneva l'EULA: tutti e 8 i PDF pubblicati dicevano «Tutti i diri
 - [x] Riga sull'istanza singola nel capitolo 09 — aggiunta in tutte e 8 le lingue
 - [x] Nessun capitolo dà per scontato un acquisto. Trovato e corretto un residuo: «Scarica il file fornito dal tuo amministratore» → «Scarica l'installer dalla pagina delle release del progetto. In alternativa puoi compilarlo tu dal codice sorgente»
 
-### 2.3 — Guide brevi — PARZIALE
+### 2.3 — Guide brevi ✅ (completata il 13/08)
 
 - [x] 8 guide in-app — `src/renderer/src/assets/guides/guide-*.md`
 - [x] 8 guide rapide — `docs/guide/quick-start-guide-*.md`
-- [ ] ⛔ **8 leggimi — `docs/guide/*.txt`: NON FATTI.** Sono ancora quelli del pacchetto commerciale e cominciano con «Grazie per aver acquistato». **Da riscrivere da zero**: la bozza preparata il 12/08 non è stata applicata ed è andata persa con la sessione. Sono l'ultimo residuo esplicito della fase di vendita. Cosa devono contenere: licenza MIT e sorgente pubblico, istruzioni di installazione per Windows/Linux (macOS solo da sorgente), avviso SmartScreen riformulato senza «sicuro al 100%», nota che l'auto-update non vale per deb/rpm/pacman, rimando alla guida in-app e al manuale PDF, credito LLM e paternità, contatti e donazione. UTF-8 senza BOM, terminazioni CRLF
+- [x] **I 2 leggimi (`LEGGIMI_PER_PRIMO.txt`, `READ_ME_FIRST.txt`) riscritti da zero il 13/08.** Gli altri 6 non esistono più. Voce originale, per memoria: ⛔ **NON FATTI.** Sono ancora quelli del pacchetto commerciale e cominciano con «Grazie per aver acquistato». **Da riscrivere da zero**: la bozza preparata il 12/08 non è stata applicata ed è andata persa con la sessione. Sono l'ultimo residuo esplicito della fase di vendita. Cosa devono contenere: licenza MIT e sorgente pubblico, istruzioni di installazione per Windows/Linux (macOS solo da sorgente), avviso SmartScreen riformulato senza «sicuro al 100%», nota che l'auto-update non vale per deb/rpm/pacman, rimando alla guida in-app e al manuale PDF, credito LLM e paternità, contatti e donazione. UTF-8 senza BOM, terminazioni CRLF
 - [x] Nelle 16 fatte: piede con licenza MIT, credito LLM e paternità, contatti e donazione; tolto il rimando al «Manuale d'Uso **Pro**»; allineata l'etichetta della data di partenza
 
 ### 2.4 — Compilazione e verifica ✅
 
-- [x] `pwsh typst/build.ps1 -All` — 8 PDF su 8, nessun errore
-- [x] Verifica programmatica su tutti e 8: nessuna formula di riserva dei diritti in nessuna lingua, nome prodotto canonico, versione 2.1.8, licenza MIT citata, credito LLM presente. **Tutti superati**
+- [x] `pwsh typst/build.ps1 -All` — 8 PDF su 8, nessun errore. **Rifatto il 13/08 dopo le Fasi 2-bis e 2-ter: 2 PDF su 2, 33 pagine ciascuno**
+- [x] Verifica programmatica: nessuna formula di riserva dei diritti, nome prodotto canonico, versione 2.1.8, licenza MIT citata, credito LLM presente. **Tutti superati**, sia sugli 8 del 12/08 sia sui 2 del 13/08
 - [x] Verifica a video di copertina, frontespizio e colophon per tutte e 8 le lingue, più una pagina con vignetta. Il nome più lungo entra ovunque
 - **Peso: 258 → 72,4 MB** (9,0 MB a lingua, 9,4 per il cinese)
 
@@ -146,6 +148,100 @@ Questa fase **scioglie la riserva della Fase 2**: la prosa nuova non revisionata
 **Verifiche** — `npx tsc --noEmit`, `npx vite build`, `node scripts/check-locales.mjs` (237 chiavi × 2) e `pwsh typst/build.ps1 -All` passano tutti puliti. I due PDF sono stati ricompilati: 33 pagine, 9,4 MB ciascuno, colophon MIT, versione 2.1.8, nessuna formula di riserva dei diritti.
 
 ⚠️ **I 2 PDF restano NON committati**, coerentemente con la Fase 2: si committano una volta sola, alla fine, dopo la revisione della prosa e dopo aver sciolto la decisione «PDF nel repo o allegati di release». In `HEAD` restano quindi i **vecchi** IT/EN da 32 MB col colophon EULA.
+
+---
+
+## FASE 2-TER — Revisione severa dei manuali ✅ ESEGUITA IL 13/08
+
+Prima l'italiano, poi l'inglese con l'italiano come riferimento assoluto di traduzione. **Scioglie la riserva della Fase 2 su entrambe le lingue.**
+
+### Italiano
+
+Pipeline di [[manuale-registro-stile]]: `prosa-italiana` → `humanizer` come passata finale. Nove capitoli, 5022 parole.
+
+**Stato di partenza, misurato** — la disciplina di luglio aveva tenuto: 0 avverbi in *-mente*, 2 soli trattini lunghi, 0 `...` al posto di `…`, caporali coerenti.
+
+**Verifica dei fatti contro il codice** (una revisione severa controlla anche i numeri). Tutti confermati: digest 60/360/720/1440/10080 min = «1 ora, 6, 12, 24 ore o 7 giorni»; `slice(0, 20)` = «fino a 20 contenuti»; `INTERVAL_PRESETS` 5→1440 = «da 5 minuti a 24 ore»; slider bot `min=1 max=120`; `summary` tagliato a 300 caratteri; pausa di 3 s fra gli invii; statistiche ogni 30 s. Tutte le etichette citate combaciano con `it.json`.
+
+**Corretto — prosa e lessico**
+- «L'installazione è semplice» → tolta: annuncia invece di fare, e l'elenco sotto lo dimostra
+- «Titan Edition è leggero» → «gira su»: claim non sostenuto in un capitolo di requisiti che non dà cifre
+- «un parametro importante» e «ignorerà **e scarterà**» → tolti: valutazione vuota e dittologia
+- «Non è un'etichetta qualsiasi: è…» → parallelismo negativo tolto (ne resta uno solo, in apertura di manuale, dove lavora)
+- «funziona **benissimo**», «è **potente** e distruttivo», «riassunto **essenziale**» → intensificatori vuoti
+- «Vediamoli.» → signposting tolto
+- «schermata a tutto campo» → «a piena pagina»: *a tutto campo* in italiano non vuol dire *a schermo intero*
+- «con il collegamento alla donazione e a quello dei contatti» → accordo rotto, riscritto
+- Doppio due punti nella stessa frase (cap. 4.3), «ti accoglie» ripetuto, «Cloud» maiuscolo
+- L'unica coppia di trattini lunghi del manuale, sciolta senza perdere il senso
+
+**Corretto — titoli inflazionati** (toccano l'indice; rispecchiati anche in inglese, vedi sotto)
+- Cap. 7 «Portabilità e Sicurezza **(L'Ecosistema OmniSync)**» → «Portabilità e Sicurezza». *OmniSync* non esiste nel software, è vocabolario solo documentale, e il capitolo descrive tre meccanismi, non un ecosistema. Il nome resta dov'è definito, in 7.2
+- §1.2 «L'ecosistema «sotto il cofano»» → «Come lavora, sotto il cofano»
+
+**Corretto — tipografia del template** (bug vero, non di prosa)
+`lib/strings.typ`: `rule-label` e `repro` avevano apostrofi **dritti**. Sono stringhe letterali Typst, quindi lo smartquote non le tocca e finivano dritte nel PDF («REGOLA D'ORO», «L'unico obbligo»). L'apostrofo curvo va scritto a mano nel sorgente. Corretto sul blocco `it`.
+
+**Non toccato, di proposito:** le liste `- **Etichetta.** spiegazione`, i grassetti sulle etichette d'interfaccia e le emoji dei colori di log. Sono convenzioni da manuale di riferimento: la regola humanizer che le vieta è tarata su saggistica e blog, e appiattirle toglierebbe la scansionabilità che il registro chiede.
+
+**Verificato sul PDF, non sui `.md`** (lezione di luglio). 33 pagine, 9,4 MB: 112 apostrofi curvi, 1 dritto e 4 virgolette dritte, tutti dentro campioni di codice. 1 trattino lungo, nel separatore del colophon. 0 avverbi in *-mente*. Colophon MIT, versione 2.1.8, nessuna formula di riserva dei diritti.
+
+### Inglese
+
+Stessa cura, con l'italiano come riferimento assoluto. Baseline anch'essa buona: **zero grafie americane** (l'inglese è britannico), zero lessico-LLM, zero filler, zero copula evitata.
+
+**Bug di contenuto, il più grave della sessione.** §7.3 diceva che l'esportazione globale è **«in JSON format»**. Il codice salva `titan-bots-backup-*.rtb` ([ipc.ts:394](../src/main/ipc.ts)). L'errore era stato corretto sull'italiano a luglio e **mai riportato sull'inglese**: è rimasto sbagliato per un mese in tutti i PDF pubblicati.
+
+**Divergenze strutturali dall'italiano, tutte sanate**
+- Cap. 2: l'immagine del Setup Wizard era **orfana in fondo al capitolo**, dopo la §2.5. Riportata sotto il titolo 2.3, dove serve
+- Cap. 3: l'immagine della console log stava in coda alla §3.2. Spostata prima dell'elenco dei colori, accanto a ciò che descrive
+- §8.1: i due paragrafi erano in ordine invertito rispetto all'italiano
+- Nessun file inglese aveva il separatore `---` di fine capitolo
+
+**Prosa** — rispecchiate tutte le correzioni italiane: «is lightweight», «Installation is straightforward», «an important setting», «ignore **and** discard», «It is more than a label: it is…», «works **fine**», «**powerful** and destructive», «**essential** summary», «Let's look at them», «Cloud» maiuscolo, l'accordo rotto in §8.2, i due titoli inflazionati (cap. 7 e §1.2) e la coppia di trattini lunghi. In più, specifici dell'inglese: un terzo trattino lungo in §7.1 e la coda in *-ing* di §4.3 («cleans up whatever you paste, **stripping**… and **adding**…»), riscritta con i due punti come in italiano.
+
+**Fedeltà verificata a macchina:** confronto blocco per blocco fra i nove capitoli italiani e inglesi — titoli, paragrafi, immagini, elenchi puntati e numerati con il conteggio delle voci. **Le nove sequenze combaciano una a una.**
+
+**Verificato sul PDF:** 33 pagine, come l'italiano. 23 coppie di virgolette curve bilanciate, 33 apostrofi curvi, **zero apostrofi dritti**; le 4 virgolette dritte residue stanno nei campioni di codice. 1 trattino lungo, nel separatore del colophon. Nessuna grafia americana. Colophon MIT, versione 2.1.8, nessuna riserva dei diritti.
+
+### Stato
+
+Entrambi i PDF sono ricompilati ma **non committati**, coerentemente con la Fase 2.
+
+---
+
+## FASE 2-QUATER — Revisione della documentazione utente ✅ ESEGUITA IL 13/08
+
+Sei file, due lingue: i 2 «leggimi» del pacchetto, le 2 guide rapide di `docs/guide/` e le 2 guide in-app. Riferimento: il Manuale Utente Avanzato, appena revisionato. **Chiude la voce 2.3 e con essa la Fase 2.**
+
+### I 2 «leggimi» — riscritti da zero
+
+Erano ancora quelli del pacchetto commerciale. Cominciavano con «Grazie per aver acquistato Runtime TelegramBot Titan Edition. Hai appena sbloccato l'automazione multi-canale definitiva». Rifatti su tutti i punti previsti:
+
+- Licenza MIT e URL del sorgente pubblico
+- Installazione Windows (.exe), Linux (.deb e .AppImage, con la nota su `libfuse2`), macOS **solo da sorgente** e senza installer previsto
+- **SmartScreen riformulato.** Il vecchio testo diceva «Il file che hai scaricato è SICURO al 100% e privo di malware»: un'affermazione che chi la scrive non può garantire e che chi la legge non ha modo di verificare. Ora spiega che l'avviso riguarda il *certificato di firma*, non il contenuto, e indica la via di verifica vera: il sorgente è pubblico e compilabile
+- **Aggiornamento automatico:** vale per Windows e `.AppImage`, **non per il `.deb`**. Corretta anche la descrizione del flusso: il vecchio testo parlava di un «Toast», ma dalla 2.1.5 è una schermata dedicata che chiede conferma prima di scaricare e prima di riavviare
+- Rimando alla guida in-app e al manuale PDF, con la precisazione che il PDF non è nell'installazione ma viene preso dalla rete
+- Credito LLM e paternità, contatti, donazione, «Titan è gratuito e resta gratuito»
+- 109 righe ciascuno, **UTF-8 senza BOM, CRLF puro** (verificato: 109 CRLF, 0 LF isolati)
+
+⚠️ Il piano prevedeva la nota «l'auto-update non vale per deb/rpm/pacman». Oggi `electron-builder.yml` produce **solo AppImage e deb**: rpm e pacman sono decisi ma non ancora configurati (Fase 3). I leggimi descrivono quel che si distribuisce davvero. **Vanno riaperti quando si aggiungono i target.**
+
+### Le 4 guide rapide — errori di fatto trovati
+
+- **Impostazioni di Sistema, in entrambe le quick-start:** dicevano «Generale — intervallo di check globale, quiet hours, lingua». Falso: intervallo di controllo e fasce di silenzio sono impostazioni **del singolo bot**. Riscritte con il contenuto reale della scheda, più una riga che dice dove stanno davvero
+- **Guide in-app, §4:** «Clicca sull'icona **Impostazioni (⚙️)**» per aprire le impostazioni del bot. Falso: l'ingranaggio apre le impostazioni **di sistema**; quelle del bot stanno sull'icona a cursori (🎚️)
+- **Guide in-app, «Cambio PC»:** «un file sicuro da importare nel nuovo PC, mantenendo le tue password crittografate». Falso e fuorviante: il token **non** sopravvive al trasferimento, ed è il punto centrale del capitolo 7.2. Riscritto
+- Etichette stantie: «+ Aggiungi Feed» e «+ Aggiungi Sorgente» → **Aggiungi**; «Analytics (📊)» → l'icona a grafico che apre **Statistiche Dettagliate**; «Backup» → **Dati e Backup**; «Digest Mode / Filtro Keyword / Intervallo Personalizzato» → i nomi usati dal manuale
+
+### Le 4 guide rapide — prosa
+
+Tolto il residuo di voce commerciale: «in meno di 3 minuti», «Vuoi che i tuoi post siano formattati in modo perfetto?», «Sei pronto.», «la comoda pulsantiera», «niente panico», «attendi un **nostro** aggiornamento software» (non c'è più un «noi» commerciale: il sorgente è pubblico). **Da 4 punti esclamativi per lingua a zero.** Nome del prodotto uniformato alla forma canonica nei titoli. Grafie americane corrette: *Customizing*, *recognize*, *center*.
+
+**Corsivo nelle guide in-app.** Il parser di `GuideModal.tsx` gestisce `**grassetto**`, `` `codice` `` e i link, **ma non il corsivo**: tre passaggi per lingua uscivano a schermo con gli asterischi in chiaro (`*Canale News*`). Risolti dal lato testo — caporali in italiano, virgolette in inglese — senza toccare il codice. Verificato: zero corsivi residui.
+
+**Verifiche:** `npx tsc --noEmit`, `npx vite build` e `check-locales` puliti dopo le modifiche.
 
 ---
 

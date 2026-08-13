@@ -20,7 +20,7 @@ Still in the **General** tab, the **Active Hours** section has two fields: **Fro
 -   *Outside the window.* The engine does not stop: it keeps checking RSS and YouTube feeds all night, so as not to miss anything. Only, instead of sending right away, it sets the content aside in a **persistent** waiting queue, saved to disk. Even if you switch the computer off, the queue is still there when you restart.
 -   *When it reopens.* As soon as the clock re-enters the allowed window, the bot works through everything it has accumulated in chronological order, publishing one post every 3 seconds until the queue is empty.
 
-This way your automations respect the audience's rest and the content arrives in the morning, when it has the best chance of being read.
+This way the channel stays quiet at night and the content arrives in the morning, when it has the best chance of being read.
 
 ### 6.3 Template editor and Smart Chips
 By default Titan publishes with a clean but standard layout. If you want to give the messages your own editorial line (an emoji as a logo, the links laid out your way), open the **Templates** tab.
@@ -46,9 +46,11 @@ Two tools help you avoid mistakes:
 *Clean links.* Telegram can hide long links inside the text. Instead of "Click here: {{link}}", write `<a href="{{link}}">Read the article</a>`: the user will see only the blue clickable phrase.
 
 ### 6.4 The Danger Zone: resetting the history
-At the bottom of the **General** tab there is a red section, the *Danger Zone*. The **Clear History** button is powerful and destructive: it wipes the bot's memory, that is, everything it has already published.
+At the bottom of the **General** tab there is a red section, the *Danger Zone*. The **Clear History** button is destructive: it wipes the bot's memory, that is, everything it has already published.
 
 -   *When it helps.* If you have accidentally deleted many messages from the channel and want the bot to republish the latest stories to rebuild the board.
 -   *How to use it without disaster.* If you clear the history and press Play, the bot treats everything it finds in the feeds as "new" and sends it in bulk, flooding the channel. To avoid this, after clearing, set the **Start From Date** (in the same tab) back to today: that way the bot forgets the past but publishes only from today onwards.
 
 Clearing the history also resets the statistics counters to zero (Chapter 3). Next to the Danger Zone you will also find the bot export in `.rtb` format, which we cover in Chapter 7.
+
+---

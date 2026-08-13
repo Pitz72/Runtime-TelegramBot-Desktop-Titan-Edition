@@ -7,7 +7,7 @@ To add a source:
 
 1. Select the bot you want to assign it to.
 2. Click **Add Source**.
-3. Give the source a **Name**. It is more than a label: it is the text you can stamp at the top of your messages as the story's byline (it is the `{{feedName}}` field in templates, Chapter 6).
+3. Give the source a **Name**: it is the text you can stamp at the top of your messages as the story's byline (it is the `{{feedName}}` field in templates, Chapter 6).
 4. Choose the **Type**:
     -   **Podcast:** for audio streams (MP3). Titan tries to recover the cover image, often hidden in the *iTunes* tags used by services such as Spreaker or AzuraCast.
     -   **News:** for the classic articles of blogs, news sites or newspapers.
@@ -32,7 +32,7 @@ Integrating YouTube into an automation system is usually a hassle: it calls for 
 Titan takes care of the rest. There is one useful safeguard, though: the **anti-premiere filter**. When a YouTuber schedules a live stream or a video "coming in two days", YouTube shows it at the top of the list anyway. A naive bot would fire the notification right away, and whoever clicks lands on a video that is not available yet. Titan instead checks the video's status: if it is marked as *upcoming* or *premiere*, it discards it and publishes it only when it truly becomes visible.
 
 ### 5.3 Advanced feed options
-When you add or edit a source, below the main fields you will find three optional settings. You can ignore them (the feed works fine with the default values) or use them for finer control.
+When you add or edit a source, below the main fields you will find three optional settings. You can ignore them (the feed works with the default values) or use them for finer control.
 
 -   **Keyword filter.** Two fields, "include" and "exclude", with words separated by commas. If you fill in "include", Titan publishes only content in which at least one of those words appears, in the title or the body; if you fill in "exclude", it discards anything that contains even one of them. An amber badge on the source signals that the filter is active.
 -   **Custom interval.** Normally each feed follows the bot's check rhythm. Here you can give it one of its own, from 5 minutes to 24 hours: handy for checking a very active site more often, or a slow one less often. A badge shows the interval set.
@@ -40,3 +40,5 @@ When you add or edit a source, below the main fields you will find three optiona
 
 ### 5.4 Importing several feeds at once (OPML)
 If you already have a list of feeds in an RSS reader, you do not have to re-enter them by hand. The **OPML** button, at the top of the Feed Manager, imports in bulk all the sources contained in a standard `.opml` file, the format RSS readers use to export their lists. When it is done, Titan tells you how many feeds it added.
+
+---

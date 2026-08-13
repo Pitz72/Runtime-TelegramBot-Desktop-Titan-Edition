@@ -1,7 +1,7 @@
 ## Capitolo 3: L'Interfaccia Utente (Dashboard)
 
 ### 3.1 Anatomia della console
-Finito il Setup Wizard, e a ogni avvio successivo, ti accoglie la plancia di comando di Titan: un'interfaccia dall'aspetto vetrato, divisa a metà (il layout 50/50).
+Dopo il Setup Wizard, e a ogni avvio successivo, ti trovi davanti la plancia di comando di Titan: un'interfaccia dall'aspetto vetrato, divisa a metà (il layout 50/50).
 
 -   **Metà sinistra (configurazione).** Ospita il **Bot Selector** (la barra laterale da cui scorri e selezioni il profilo bot da visualizzare) e il **Feed Manager**, cioè la lista delle sorgenti associate al bot selezionato. È qui che dici al software cosa deve cercare.
 -   **Metà destra (operatività).** La zona di esecuzione: il pulsante **Ignition** (il grande tasto Play centrale che accende e spegne il motore), i contatori degli invii e la console nera dei **System Logs**, che riga per riga mostra cosa sta facendo il bot in tempo reale.

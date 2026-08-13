@@ -1,6 +1,6 @@
-# Runtime TelegramBot Desktop Titan Edition — Quick Start Guide
+# Runtime TelegramBot Desktop · Titan Edition — Guida rapida
 
-Benvenuto in **Runtime TelegramBot Desktop Titan Edition**. Questa guida ti permette di configurare il tuo primo bot e iniziare a pubblicare contenuti sul tuo canale Telegram in pochi minuti.
+Benvenuto in **Runtime TelegramBot Desktop · Titan Edition**. Questa guida ti permette di configurare il tuo primo bot e iniziare a pubblicare contenuti sul tuo canale Telegram in pochi minuti.
 
 ---
 
@@ -17,7 +17,7 @@ Prima di avviare l'app, devi creare un bot su Telegram:
 
 ## 2. Primo Avvio — Configurazione Bot
 
-Al primo avvio, clicca **«+ Nuovo Bot»** e compila i campi:
+Al primo avvio, clicca il **+** in cima alla colonna dei bot e compila i campi:
 
 - **Nome** — un nome per riconoscere il bot nell'interfaccia (es. *Canale News*).
 - **Token** — il Token API fornito da @BotFather.
@@ -28,7 +28,7 @@ Al primo avvio, clicca **«+ Nuovo Bot»** e compila i campi:
 
 ## 3. Aggiungere Feed (Feed Manager)
 
-Nella dashboard del bot, clicca **«+ Aggiungi Feed»**:
+Seleziona il bot a sinistra, poi nel pannello **Sorgenti Feed** clicca **Aggiungi**:
 
 1. Assegna un **Nome** descrittivo al feed.
 2. Seleziona il **Tipo**: News, Podcast o YouTube.
@@ -39,10 +39,10 @@ Nella dashboard del bot, clicca **«+ Aggiungi Feed»**:
 
 ### Opzioni avanzate per feed
 
-- **Filtro Keyword** — Filtra gli articoli per parole chiave da includere o escludere. Attivabile nelle impostazioni del feed. Un badge ambra indica il filtro attivo.
-- **Intervallo Personalizzato** — Imposta un intervallo di fetch individuale per il feed (da 5 minuti a 24 ore), indipendente dall'intervallo globale del bot.
-- **Digest Mode** — Invece di pubblicare ogni articolo singolarmente, accumula i contenuti per un intervallo configurabile (1h, 6h, 12h, 24h, 7gg) e li invia in un unico messaggio riepilogativo. Un badge viola indica la modalità attiva.
-- **Import OPML** — Importa più feed contemporaneamente da un file `.opml` standard tramite il pulsante OPML nel Feed Manager.
+- **Filtro per parole chiave** — pubblica solo gli articoli che contengono certe parole, o scarta quelli che ne contengono altre. Un badge ambra segnala il filtro attivo.
+- **Intervallo personalizzato** — dà a questa sorgente un ritmo di controllo tutto suo (da 5 minuti a 24 ore), staccato da quello del bot.
+- **Digest** — invece di pubblicare ogni articolo appena esce, accumula i contenuti (1 ora, 6, 12, 24 ore o 7 giorni) e li manda in un unico messaggio riepilogativo, fino a 20 per volta. Un badge viola segnala il digest attivo.
+- **Import OPML** — importa in blocco tutte le sorgenti contenute in un file `.opml`, con il pulsante OPML in cima al Feed Manager.
 
 ---
 
@@ -51,7 +51,7 @@ Nella dashboard del bot, clicca **«+ Aggiungi Feed»**:
 Vai nelle impostazioni del bot → scheda **Template**:
 
 - Usa i **Smart Chips** per inserire variabili dinamiche: `{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`, ecc.
-- Sono disponibili 4 template separati: Avvio, News, Podcast, YouTube.
+- Sono disponibili quattro template separati: Avvio, News, Podcast, YouTube.
 - Il **Validatore** segnala in tempo reale eventuali errori (tag non bilanciati, chip sconosciuti, link non sicuri).
 - Il pulsante **Anteprima** mostra come apparirà il messaggio con dati campione, senza uscire dall'editor.
 
@@ -73,7 +73,7 @@ Per monitorare più bot contemporaneamente, usa il toggle **ALL BOTS / THIS BOT*
 
 ## 6. Statistiche
 
-Clicca l'icona **Analytics (📊)** nella dashboard per vedere:
+Clicca l'icona a grafico accanto al **Totale** per aprire **Statistiche Dettagliate**:
 
 - Contatori articoli pubblicati: oggi / ultimi 7 giorni / totale.
 - Breakdown per feed, ordinato per volume di pubblicazione.
@@ -84,9 +84,11 @@ Clicca l'icona **Analytics (📊)** nella dashboard per vedere:
 
 Accessibili dall'icona ingranaggio in alto a destra:
 
-- **Generale** — intervallo di check globale, quiet hours, lingua.
-- **Backup** — esportazione e ripristino del database.
-- **Performance Mode** — disabilita effetti GPU-heavy (scanline, blur, glow, animazioni). Utile su macchine con hardware limitato. Efficace immediatamente senza riavvio.
+- **Generale** — lingua dell'interfaccia, verifica aggiornamenti, documentazione, crediti e donazione.
+- **Dati e Backup** — esportazione e ripristino del database.
+- **Performance** — spegne gli effetti grafici più pesanti (scanline, sfocature, bagliori, animazioni). Utile su macchine lente; ha effetto subito, senza riavviare.
+
+Intervallo di controllo e fasce orarie di silenzio non stanno qui: sono impostazioni del singolo bot, alla scheda **Generale** delle sue impostazioni.
 
 ---
 
@@ -96,7 +98,7 @@ Per spostare un bot su un altro computer senza perdere la configurazione:
 
 1. Nelle impostazioni del bot → **Esporta (.rtb)**.
 2. Trasferisci il file sul nuovo PC.
-3. Nel nuovo PC → **Importa (.rtb)** e reinserisci il token (i token sono macchina-specifici per sicurezza).
+3. Nel nuovo PC → **Importa (.rtb)** e reinserisci il token a mano: per sicurezza il token è legato al computer che ha creato l'esportazione e altrove non è decifrabile. Tutto il resto arriva già configurato.
 
 ---
 

@@ -14,10 +14,10 @@ Un dettaglio già incontrato nel Capitolo 3: la console dei log resta comunque i
 ### 8.2 Documentazione integrata
 Sempre nella scheda **Generale**, la sezione **Documentazione** raccoglie i due testi che accompagnano il programma, gli stessi che trovi sulla schermata di benvenuto (Capitolo 2.4).
 
--   **Guida Rapida** apre a schermo, nella lingua corrente, il riassunto essenziale per configurare il primo bot senza uscire dall'applicazione.
+-   **Guida Rapida** apre a schermo, nella lingua corrente, il riassunto per configurare il primo bot senza uscire dall'applicazione.
 -   **Scarica Manuale (PDF)** apre nel browser di sistema il manuale completo nella tua lingua. Il PDF non è incluso nell'installazione: viene prelevato dalla rete al momento, quindi serve una connessione attiva. Se cambi lingua e premi di nuovo il pulsante, scarichi l'edizione corrispondente.
 
-Nella stessa scheda ci sono anche i **Crediti** del progetto e la sezione per **sostenerlo**, con il collegamento alla donazione e a quello dei contatti.
+Nella stessa scheda ci sono anche i **Crediti** del progetto e la sezione per **sostenerlo**, con i collegamenti alla donazione e alla pagina dei contatti.
 
 ### 8.3 Performance Mode
 Titan ha un'estetica ricca: vetro smerigliato, bagliori, righe da vecchio monitor (le *scanline*), transizioni animate. Sono gradevoli, ma su un computer datato o su una macchina virtuale possono appesantire la grafica.

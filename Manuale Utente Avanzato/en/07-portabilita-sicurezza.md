@@ -1,11 +1,11 @@
-## Chapter 7: Portability and Security (The OmniSync Ecosystem)
+## Chapter 7: Portability and Security
 
-Titan keeps your work safe and gives you three ways to save or move it: the full database backup, the `.rtb` format for a single bot and the export of the entire configuration. Let's look at them.
+Titan keeps your work safe and gives you three ways to save or move it: the full database backup, the `.rtb` format for a single bot and the export of the entire configuration.
 
 ### 7.1 Full database backup
 Click the gear icon (⚙️) at the top right to open the **System Settings**, then go to the **Data & Backup** tab.
 
-The **Export DB** button creates a complete clone of the `titan.db` database: everything is in there — the bot profiles, the feeds and the whole historical memory of publications. With **Import DB** you select a previously saved file and Titan restarts on its own, restoring the exact situation of that moment.
+The **Export DB** button creates a complete clone of the `titan.db` database: the bot profiles, the feeds and the whole historical memory of publications are all in there. With **Import DB** you select a previously saved file and Titan restarts on its own, restoring the exact situation of that moment.
 
 ![The Data & Backup tab: export and import of the database and the configuration.](screenshots/09-system-backup.png)
 
@@ -23,9 +23,11 @@ And the token? Here Titan makes a deliberate security choice: the token travels 
 -   **On the same computer** (for example after a reinstall) the token is re-read and restored without you doing anything.
 -   **On another computer** the token, for security, cannot be decrypted: it arrives empty and must be re-entered by hand, the same one you copy from BotFather. Everything else (feeds, templates, settings) is already in place.
 
-In practice the `.rtb` moves the configuration conveniently, but the real secret cannot be stolen by copying a file: it stays protected by the machine that generated it.
+The `.rtb` therefore moves the configuration without exposing the secret: that stays tied to the machine that generated it.
 
 *Note (Linux).* Token encryption relies on the system keychain (GNOME Keyring, KWallet or another Secret Service). If your distribution does not have one, Titan does not stall: it uses internal encryption, still tied to the machine. To enable the native keychain, install `libsecret`.
 
 ### 7.3 Exporting all bots at once (configuration)
-If you want to move not one bot but the whole setup, go back to the **Data & Backup** tab: next to the database you will find the export of the **configuration** in JSON format. It works like the `.rtb`, but on all bots at once: it carries the profiles, feeds and templates of each, again without the history. The same token rule seen above applies: it restores itself on the same computer, elsewhere it must be re-entered.
+If you want to move not one bot but the whole setup, go back to the **Data & Backup** tab: next to the database you will find the export of the whole **configuration** as a single `.rtb` file. It works like the one for a single bot, but covers them all at once: it carries the profiles, feeds and templates of each, again without the history. The same token rule seen above applies: it restores itself on the same computer, elsewhere it must be re-entered.
+
+---

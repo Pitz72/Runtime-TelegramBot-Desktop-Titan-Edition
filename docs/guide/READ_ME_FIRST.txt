@@ -1,57 +1,109 @@
-*****************************************************************
-*                                                               *
-*           RUNTIME TELEGRAMBOT: TITAN EDITION                  *
-*               Welcome Aboard!                                 *
-*                                                               *
-*****************************************************************
+=================================================================
+  RUNTIME TELEGRAMBOT DESKTOP · TITAN EDITION
+  Read me first
+=================================================================
 
-Thank you for purchasing Runtime TelegramBot Titan Edition.
-You have just unlocked the ultimate multi-channel automation, 
-with no limits, no subscriptions, and full control over 
-your data.
+Titan publishes to your Telegram channel on its own: whatever
+appears on the RSS feeds, podcasts and YouTube channels you point
+it at. It runs on your computer, so your data and your tokens
+stay there.
 
-=== WHAT IS INCLUDED IN THIS PACKAGE ===
-1. The Titan Edition installation executable (Setup.exe for Windows or .AppImage for Linux).
-2. The "Documentation" folder containing the Pro User Manuals (in Italian and English) and the Quick Start Guide.
+It is free software, released under the MIT Licence: you may use
+it, study it, modify it and redistribute it, including for
+commercial purposes. The source code is public:
+https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition
 
-=== QUICK INSTALLATION INSTRUCTIONS ===
-Run the installation file. The software will install the interface 
-and automatically create a shortcut to launch it.
-On the first launch, a Setup Wizard will guide you step by step.
 
-*** ATTENTION WINDOWS USERS (SMARTSCREEN) ***
-Titan Edition is independent software, distributed without
-intermediaries. On the first launch of the ".exe" file, Windows Defender
-might show a blue screen stating:
-"Windows protected your PC - Unknown Publisher".
+--- INSTALLATION ------------------------------------------------
 
-This is a standard Windows security procedure for software
-distributed outside the Microsoft Store.
-The file you downloaded is 100% SAFE and malware-free.
+Windows 10 or later (64-bit)
+  Run the .exe file and follow the on-screen instructions. The
+  program creates a desktop shortcut for you.
 
-To proceed with the installation:
-1. Click on the small text "More info".
-2. Click on the button that will appear in the bottom right corner "Run anyway".
+Linux
+  .deb        Ubuntu 22.04+, Debian and derivatives: double-click
+              and let the package manager do the work.
+  .AppImage   Every other distribution: make the file executable
+              (right-click > Properties > Permissions > Allow
+              executing) and start it with a double-click. Some
+              recent Ubuntu versions need the libfuse2 package
+              first:  sudo apt install libfuse2
 
-The message will disappear forever.
+macOS
+  There is no official installer and none is planned. The code is
+  cross-platform and does build and run on macOS: anyone using it
+  there starts from source (Node 20 and the Xcode Command Line
+  Tools are required).
 
-=== SOFTWARE UPDATES ===
-You will never have to manually check for new versions. 
-Titan is equipped with a smart system that checks for
-updates on startup. If a newer version is available,
-you will see an alert (Toast) appear within the application.
+On the first launch, a four-step wizard walks you through setting
+up your first bot.
 
-=== SUPPORT AND DOCUMENTATION ===
-Before starting the software, we invite you to read the "Quick Start Guide" 
-to understand how to obtain the Telegram Token necessary for operation.
-For advanced technical questions (e.g., Template Formatting or Backup), consult 
-the attached "Advanced User Manual".
 
-For technical support or bug reports, you can write to us at:
-info@runtimeradio.it
+--- SMARTSCREEN NOTICE (WINDOWS ONLY) ---------------------------
 
-Thanks again for your support of the independent ecosystem.
-Happy automation!
+The first time you run the .exe, Windows may show the blue screen
+"Windows protected your PC — Unknown publisher".
 
-- Simone Pizzi (Runtime Radio)
-https://ecosystem.runtimeradio.com
+This is not an antivirus alert. Windows shows it for any program
+not signed with a paid commercial certificate, which this project
+does not have. The warning is about that certificate, not about
+what is inside the file.
+
+If you would rather verify than trust, the source code is public
+and buildable: you can produce the executable yourself from
+source, with the same commands our continuous integration uses.
+
+To carry on: click "More info", then "Run anyway".
+
+
+--- UPDATES -----------------------------------------------------
+
+Titan checks on its own, at every launch, whether a newer version
+exists. When it finds one it tells you through a dedicated screen:
+it asks whether to download it and, once the download is done,
+whether to restart to install it. You decide at each step.
+
+Automatic updating applies to the Windows build and to the
+.AppImage. It does not work with the .deb package: there, updates
+go through the package manager or a fresh manual download.
+
+
+--- DOCUMENTATION -----------------------------------------------
+
+Quick Guide — it is inside the program. Open it from the welcome
+screen or from System Settings > General. It covers how to get the
+token from @BotFather, the four setup steps, how to add a source
+and how to start the engine.
+
+Advanced User Manual — nine chapters as a PDF, in Italian and
+English. You download it from the same two places, with the
+"Download Manual (PDF)" button. It is not part of the
+installation: it is fetched from the network on the spot, so an
+active connection is needed.
+
+
+--- HOW THIS WAS WRITTEN ----------------------------------------
+
+Most of the code was written with language models (Google Gemini,
+Anthropic Claude). The concept, the vision, the design direction,
+the meticulous definition of every detail and the stubborn hunt
+for bugs are Simone Pizzi's: the models wrote the code, the
+decisions were all his. The same method applies to this
+documentation.
+
+
+--- CONTACT -----------------------------------------------------
+
+Bug reports and requests
+  https://github.com/Ecosystem-Runtime/Runtime-TelegramBot-Desktop-Titan-Edition/issues
+
+Contact
+  https://simonepizzi.runtimeradio.it/contatti
+
+Voluntary donation
+  https://paypal.me/runtimeradio
+
+Titan is free and stays free. The donation is optional and
+unlocks nothing.
+
+  Simone Pizzi — Runtime Radio
