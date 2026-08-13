@@ -9,10 +9,10 @@ export const GUIDES: Record<Language, string> = {
     it: guideIt,
 };
 
-// I manuali PDF completi sono ospitati sulla repo pubblica di release.
-// URL raw sul branch main → si aprono nel browser di sistema.
+// I manuali PDF completi sono versionati nella repo pubblica, accanto ai loro
+// sorgenti Typst. URL raw sul branch main → si aprono nel browser di sistema.
 const MANUAL_BASE =
-    'https://github.com/Ecosystem-Runtime/runtime-telegrambot-releases/raw/main/manuals/';
+    'https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition/raw/main/Manuale%20Utente%20Avanzato/typst/';
 
 const MANUAL_FILES: Record<Language, string> = {
     it: 'Manuale-Utente-Avanzato-Titan-IT.pdf',
