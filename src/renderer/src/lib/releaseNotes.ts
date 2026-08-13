@@ -6,6 +6,22 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.1.9': {
+        it: [
+            'La schermata iniziale porta «Titan Edition» su una riga sua, senza spezzarlo.',
+            'Il credito agli LLM e a chi ha diretto il progetto ora si legge davvero.',
+            'Le bandiere delle lingue sono centrate, non più allineate a sinistra.',
+            'Le Impostazioni di Sistema non escono più dallo schermo: scheda «Generale» su due colonne.',
+            'Le tre schede delle impostazioni hanno tutte la stessa misura.',
+        ],
+        en: [
+            'The intro screen keeps “Titan Edition” whole on a line of its own.',
+            'The credit to the LLMs and to whoever directed the project is now actually readable.',
+            'The language flags are centred instead of hugging the left edge.',
+            'System Settings no longer runs off the screen: the General tab is on two columns.',
+            'All three settings tabs are now the same size.',
+        ],
+    },
     '2.1.8': {
         it: [
             'Titan è software libero: codice sorgente pubblico, licenza MIT.',

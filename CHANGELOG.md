@@ -2,7 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-- [v2.1.8 (Corrente)](docs/changelogs/CHANGELOG_v2.1.8.md) — **Prima release da progetto aperto.** Licenza MIT e sorgente pubblico su `Pitz72`. Audit di sicurezza: token redatti dai log, istanza singola, URL dei feed blindati negli `href`, anti-SSRF esteso con risoluzione DNS. Il campo della data si chiama «Data di Partenza» anche nelle impostazioni del bot. Lingue da otto a due (italiano e inglese). Manuali, guide e «leggimi» rivisti e ripuliti dai residui commerciali. Le release escono ora sulla repository del progetto, non più sulla ponte.
+- [v2.1.9 (Corrente)](docs/changelogs/CHANGELOG_v2.1.9.md) — Sola interfaccia, nessun cambiamento al motore. Schermata iniziale: «Titan Edition» non si spezza più a metà, il credito agli LLM e alla direzione del progetto passa da 2,0:1 a 7,13:1 di contrasto, bandiere centrate, scritta decorativa `INIT_SEQ` rimossa. Impostazioni di Sistema: la scheda «Generale» va su due colonne e il modale non esce più dallo schermo; le tre schede hanno tutte la stessa misura.
+- [v2.1.8 (Archivio)](docs/changelogs/CHANGELOG_v2.1.8.md) — **Prima release da progetto aperto.** Licenza MIT e sorgente pubblico su `Pitz72`. Audit di sicurezza: token redatti dai log, istanza singola, URL dei feed blindati negli `href`, anti-SSRF esteso con risoluzione DNS. Il campo della data si chiama «Data di Partenza» anche nelle impostazioni del bot. Lingue da otto a due (italiano e inglese). Manuali, guide e «leggimi» rivisti e ripuliti dai residui commerciali. Le release escono ora sulla repository del progetto, non più sulla ponte.
 - [v2.1.7 (Archivio)](docs/changelogs/CHANGELOG_v2.1.7.md) — Rifiniture: nome prodotto uniforme «Runtime TelegramBot Desktop Titan Edition» ovunque (via «Titan Desktop»), icona nella barra applicazioni Windows (icona finestra .ico), schermata «Novità» affidabile anche aggiornando da versioni precedenti, banner aggiornato.
 - [v2.1.6 (Archivio)](docs/changelogs/CHANGELOG_v2.1.6.md) — Documentazione in-app: guida rapida a schermo nella lingua corrente, download del manuale d'uso completo in PDF, e nuova schermata «Novità» al primo avvio dopo un aggiornamento. Consolidamento branding Titan. Rilascio commerciale v2.
 - [v2.1.5 (Archivio)](docs/changelogs/CHANGELOG_v2.1.5.md) — Scansione RSS parallela (pool di concorrenza, Fix B), UX aggiornamenti ridisegnata con conferma download/riavvio, fix accavallamento righe log nella console.
@@ -40,9 +41,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v2.1.8
+## Versione Attuale: v2.1.9
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.8.md](docs/changelogs/CHANGELOG_v2.1.8.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.9.md](docs/changelogs/CHANGELOG_v2.1.9.md).
 
 ## Storia dello sviluppo
 

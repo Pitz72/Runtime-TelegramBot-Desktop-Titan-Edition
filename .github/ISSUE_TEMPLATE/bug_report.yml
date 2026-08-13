@@ -33,7 +33,7 @@ body:
     attributes:
       label: Versione dell'applicazione
       description: La trovi nell'intestazione della dashboard, accanto al nome.
-      placeholder: "2.1.8"
+      placeholder: "2.1.9"
     validations:
       required: true
 
