@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/renderer/src/assets/logo.png" alt="Runtime TelegramBot Logo" width="120" />
+  <img src="branding/banner-titan.png" alt="Runtime TelegramBot Desktop Titan Edition — software libero, licenza MIT, per Windows e Linux" width="100%" />
 
   # Runtime TelegramBot Desktop
   ### Titan Edition
