@@ -2,38 +2,8 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
-## Non ancora rilasciato — apertura del sorgente
-
-Lavoro svolto il 12 agosto 2026, in vista del passaggio a open source. Non è ancora stata pubblicata alcuna release: le correzioni qui sotto arriveranno agli utenti con la prossima build.
-
-**Sicurezza**
-- I token dei bot vengono redatti dai file di log, dalla console dell'applicazione e dai log esportati. Un log allegato a una segnalazione di bug non può più esporre il token.
-- **Istanza singola**: avviare due volte l'applicazione non apre più due motori sullo stesso database. Prima era possibile che lo stesso contenuto venisse pubblicato due volte sul canale.
-- Gli URL provenienti dai feed vengono percent-encodati nei caratteri che potrebbero chiudere l'attributo `href`: un feed non può più iniettare HTML nel messaggio pubblicato, né sostituire il link annunciato con uno diverso.
-- Validazione anti-SSRF estesa: IPv6 privati e link-local, indirizzi IPv4 in forma decimale ed esadecimale, IPv4-mapped IPv6, intervallo CGNAT, domini `.local`/`.internal`. Aggiunta la risoluzione DNS prima del fetch, che blocca i domini pubblici che puntano a indirizzi di rete privata.
-- Gli URL aperti dal renderer nel browser di sistema sono filtrati per schema (solo `http`/`https`).
-
-**Correzioni**
-- Il salvataggio delle impostazioni di un bot non fallisce più in silenzio: l'errore viene mostrato. Capitava concretamente quando il token non era decifrabile sulla macchina corrente.
-- Completate le 15 stringhe dell'interfaccia di aggiornamento mancanti in tedesco, spagnolo, francese, russo e cinese: quel flusso usciva in inglese in 5 lingue su 8.
-- Il messaggio di avvio inviato su Telegram usa il nome corretto del prodotto.
-
-**Lingue: da otto a due**
-
-Titan parla ora **italiano e inglese**. Francese, tedesco, spagnolo, portoghese, russo e cinese sono stati ritirati: interfaccia, guida in-app, guida rapida, file «leggimi» e manuale PDF.
-
-Il motivo è la manutenzione. Sei lingue che nessuno nel progetto sa rileggere sono sei modi di pubblicare testo sbagliato senza accorgersene, e l'ultima revisione seria di quelle traduzioni risale a luglio. Meglio due lingue verificate che otto di cui sei sulla fiducia.
-
-- Chi aveva selezionato una delle sei lingue ritirate trova l'interfaccia **in inglese** al primo avvio della nuova versione, non in italiano. La preferenza viene riscritta.
-- I sei manuali PDF corrispondenti non vengono più pubblicati. Restano l'italiano e l'inglese.
-- La schermata iniziale mostra due bandiere invece di otto.
-
-**Progetto**
-- Licenza **MIT** al posto dell'EULA proprietaria, archiviata in `docs/storico/`.
-- Aggiunti `CONTRIBUTING.md`, `SECURITY.md`, i template delle issue e un controllo di parità delle traduzioni (`scripts/check-locales.mjs`), eseguito in CI su ogni pull request insieme a type check e build.
-- `docs/` riorganizzata: tutto il materiale concluso in `docs/storico/`, nuovo indice, nuova documentazione di database e build. Rimossi i residui di configurazione macOS.
-
-- [v2.1.7 (Corrente)](docs/changelogs/CHANGELOG_v2.1.7.md) — Rifiniture: nome prodotto uniforme «Runtime TelegramBot Desktop Titan Edition» ovunque (via «Titan Desktop»), icona nella barra applicazioni Windows (icona finestra .ico), schermata «Novità» affidabile anche aggiornando da versioni precedenti, banner aggiornato.
+- [v2.1.8 (Corrente)](docs/changelogs/CHANGELOG_v2.1.8.md) — **Prima release da progetto aperto.** Licenza MIT e sorgente pubblico su `Pitz72`. Audit di sicurezza: token redatti dai log, istanza singola, URL dei feed blindati negli `href`, anti-SSRF esteso con risoluzione DNS. Il campo della data si chiama «Data di Partenza» anche nelle impostazioni del bot. Lingue da otto a due (italiano e inglese). Manuali, guide e «leggimi» rivisti e ripuliti dai residui commerciali. Le release escono ora sulla repository del progetto, non più sulla ponte.
+- [v2.1.7 (Archivio)](docs/changelogs/CHANGELOG_v2.1.7.md) — Rifiniture: nome prodotto uniforme «Runtime TelegramBot Desktop Titan Edition» ovunque (via «Titan Desktop»), icona nella barra applicazioni Windows (icona finestra .ico), schermata «Novità» affidabile anche aggiornando da versioni precedenti, banner aggiornato.
 - [v2.1.6 (Archivio)](docs/changelogs/CHANGELOG_v2.1.6.md) — Documentazione in-app: guida rapida a schermo nella lingua corrente, download del manuale d'uso completo in PDF, e nuova schermata «Novità» al primo avvio dopo un aggiornamento. Consolidamento branding Titan. Rilascio commerciale v2.
 - [v2.1.5 (Archivio)](docs/changelogs/CHANGELOG_v2.1.5.md) — Scansione RSS parallela (pool di concorrenza, Fix B), UX aggiornamenti ridisegnata con conferma download/riavvio, fix accavallamento righe log nella console.
 - [v2.1.4 (Archivio)](docs/changelogs/CHANGELOG_v2.1.4.md) — Fix link Spreaker (deriva la pagina episodio dal guid api.spreaker.com), chiusura DB pulita su before-quit con checkpoint WAL (G3), HTML stripping robusto in cleanSummary (M6), perf: botExists() al posto di getBots().some() nei loop caldi (niente più decifratura di massa dei token).
@@ -70,9 +40,9 @@ Il motivo è la manutenzione. Sei lingue che nessuno nel progetto sa rileggere s
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v2.1.7
+## Versione Attuale: v2.1.8
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.7.md](docs/changelogs/CHANGELOG_v2.1.7.md).
+Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.8.md](docs/changelogs/CHANGELOG_v2.1.8.md).
 
 ## Storia dello sviluppo
 

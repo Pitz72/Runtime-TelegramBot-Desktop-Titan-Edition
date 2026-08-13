@@ -6,6 +6,22 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.1.8': {
+        it: [
+            'Titan è software libero: codice sorgente pubblico, licenza MIT.',
+            'I token dei bot non compaiono più nei log, nemmeno in quelli esportati.',
+            'Avviare l’applicazione due volte non pubblica più i contenuti in doppio.',
+            'Il campo della data si chiama «Data di Partenza» anche nelle impostazioni del bot.',
+            'Interfaccia, guide e manuale in italiano e inglese.',
+        ],
+        en: [
+            'Titan is free software: public source code under the MIT licence.',
+            'Bot tokens no longer appear in the logs, not even in exported ones.',
+            'Starting the app twice no longer publishes everything twice.',
+            'The date field is called “Start From Date” in the bot settings too.',
+            'Interface, guides and manual in Italian and English.',
+        ],
+    },
     '2.1.7': {
         it: [
             'Nome del prodotto uniforme in tutta l’applicazione.',
