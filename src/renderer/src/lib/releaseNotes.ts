@@ -6,6 +6,24 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.2.0': {
+        it: [
+            'Il pannello dei log è ora un diario di scansione: racconta cosa fa il programma, non cosa scrive.',
+            'La console di prima resta, dietro l’interruttore Diario/Console nell’intestazione del pannello.',
+            'Il motore dichiara i suoi eventi: il livello di una riga non si deduce più dal testo.',
+            'Una riga di attività nomina il feed in lettura, così il pannello non sembra fermo mentre lavora.',
+            'L’esportazione porta con sé l’intera giornata, non solo ciò che era a schermo.',
+            'L’indirizzo del canale e la data, nella scelta del bot, tornano leggibili.',
+        ],
+        en: [
+            'The log panel is now a scan diary: it tells you what the program is doing, not what it writes.',
+            'The old console is still there, behind the Diary/Console switch in the panel header.',
+            'The engine declares its own events: a line’s level is no longer guessed from its text.',
+            'An activity line names the feed being read, so the panel no longer looks stalled while working.',
+            'Exporting now carries the whole day, not just what happened to be on screen.',
+            'The channel address and date in the bot picker are readable again.',
+        ],
+    },
     '2.1.9': {
         it: [
             'La schermata iniziale porta «Titan Edition» su una riga sua, senza spezzarlo.',

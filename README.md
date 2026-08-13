@@ -6,7 +6,7 @@
 
   **Automazione multi-canale di feed RSS, podcast e YouTube su Telegram.**
 
-  ![Version](https://img.shields.io/badge/Version-2.1.9-3b82f6?style=for-the-badge)
+  ![Version](https://img.shields.io/badge/Version-2.2.0-3b82f6?style=for-the-badge)
   ![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)
   ![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20Linux-emerald?style=for-the-badge)
   ![Stack](https://img.shields.io/badge/Stack-Electron%20%7C%20React%20%7C%20SQLite-475569?style=for-the-badge)

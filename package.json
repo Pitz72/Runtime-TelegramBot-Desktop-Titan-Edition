@@ -1,6 +1,6 @@
 {
     "name": "titan-desktop",
-    "version": "2.1.9",
+    "version": "2.2.0",
     "description": "Applicazione desktop per pubblicare automaticamente feed RSS, podcast e canali YouTube su Telegram",
     "author": {
         "name": "Simone Pizzi",
