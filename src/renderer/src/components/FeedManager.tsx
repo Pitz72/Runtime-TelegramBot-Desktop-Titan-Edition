@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Plus, Trash2, Rss, FileText, Globe, Play,
     Pencil, Zap, Loader2, Filter, Clock,
-    Upload, BookOpen
+    Upload, BookOpen, Search, X
 } from 'lucide-react';
 import { FeedConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
@@ -46,11 +46,25 @@ export function FeedManager({ botId }: Props) {
     const [newDigestInterval, setNewDigestInterval] = useState<number | null>(null);
     const [editDigestInterval, setEditDigestInterval] = useState<number | null>(null);
     const [importingOpml, setImportingOpml] = useState(false);
+    const [query, setQuery] = useState('');
     const { toast } = useToast();
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [feedToDelete, setFeedToDelete] = useState<number | null>(null);
 
-    useEffect(() => { if (botId) loadFeeds(); }, [botId]);
+    useEffect(() => { if (botId) loadFeeds(); setQuery(''); }, [botId]);
+
+    // Ricerca locale al singolo canale: nome, URL, tipo e keyword del filtro.
+    // Piu' termini separati da spazio = AND (es. "news tech").
+    const filteredFeeds = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        if (!q) return feeds;
+        const terms = q.split(/\s+/);
+        return feeds.filter(feed => {
+            const kw = parseKeywordFilter(feed.keyword_filter);
+            const haystack = `${feed.name} ${feed.url} ${feed.type} ${kw.include} ${kw.exclude}`.toLowerCase();
+            return terms.every(term => haystack.includes(term));
+        });
+    }, [feeds, query]);
 
     const loadFeeds = async () => {
         setLoading(true);
@@ -195,6 +209,37 @@ export function FeedManager({ botId }: Props) {
                 </div>
             </div>
 
+            {/* Search — filtra i feed del canale corrente */}
+            {feeds.length > 0 && (
+                <div className="px-4 pt-3 border-b border-outline-variant/10 pb-3 bg-surface-container-lowest">
+                    <div className="relative flex items-center">
+                        <Search size={12} className="absolute left-2.5 text-outline-variant/40 pointer-events-none" />
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={e => setQuery(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); setQuery(''); } }}
+                            placeholder={t('feedManager.searchPlaceholder') as string}
+                            className="w-full bg-surface-container border border-outline-variant/15 rounded-lg py-1.5 pl-7 pr-20 text-on-surface text-xs focus:border-primary/40 outline-none transition-colors"
+                        />
+                        {query && (
+                            <>
+                                <span className="absolute right-8 text-nano text-outline-variant/40 pointer-events-none tabular-nums">
+                                    {filteredFeeds.length}/{feeds.length}
+                                </span>
+                                <button
+                                    onClick={() => setQuery('')}
+                                    title={t('feedManager.searchClear') as string}
+                                    className="absolute right-2 p-0.5 text-outline-variant/40 hover:text-on-surface transition-colors rounded"
+                                >
+                                    <X size={12} />
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Scrollable list */}
             <div className="p-4 overflow-y-auto flex-1">
                 {(isAdding || editingFeed) && (
@@ -327,7 +372,7 @@ export function FeedManager({ botId }: Props) {
                 )}
 
                 <div className="space-y-2">
-                    {feeds.map(feed => {
+                    {filteredFeeds.map(feed => {
                         const cfg = typeConfig[feed.type] || typeConfig.news;
                         const Icon = cfg.icon;
                         const isEditing = editingFeed?.id === feed.id;
@@ -401,6 +446,19 @@ export function FeedManager({ botId }: Props) {
                             <Rss size={36} strokeWidth={1} className="mx-auto mb-3 opacity-30" />
                             <p className="text-sm">{t('feedManager.noFeeds')}</p>
                             <p className="text-nano mt-1">{t('feedManager.addPrompt')}</p>
+                        </div>
+                    )}
+
+                    {feeds.length > 0 && filteredFeeds.length === 0 && (
+                        <div className="text-center py-12 text-outline-variant/30">
+                            <Search size={36} strokeWidth={1} className="mx-auto mb-3 opacity-30" />
+                            <p className="text-sm">{t('feedManager.searchNoResults')}</p>
+                            <button
+                                onClick={() => setQuery('')}
+                                className="text-nano mt-2 text-primary/70 hover:text-primary transition-colors"
+                            >
+                                {t('feedManager.searchClear')}
+                            </button>
                         </div>
                     )}
                 </div>
