@@ -6,6 +6,20 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.3.0': {
+        it: [
+            'Il pannello delle sorgenti ha una lente di ricerca: su un canale affollato il feed si trova, non si cerca a scorrimento.',
+            'Si cerca su nome, indirizzo, tipo e parole del filtro; più termini insieme restringono il risultato.',
+            'Un contatore dice quanti feed su quanti, così una ricerca stretta non sembra un canale vuoto.',
+            'La ricerca vale per il canale che si sta guardando e riparte pulita quando si cambia canale.',
+        ],
+        en: [
+            'The sources panel now has a search box: on a crowded channel you find the feed instead of scrolling for it.',
+            'It searches name, address, type and filter keywords; several words together narrow the result.',
+            'A counter tells you how many feeds out of how many, so a narrow search doesn’t look like an empty channel.',
+            'The search belongs to the channel you are looking at, and starts clean when you switch channel.',
+        ],
+    },
     '2.2.1': {
         it: [
             'Nel diario non compaiono più errori che non sono errori: bastava la parola «error» nel titolo di un video.',
