@@ -213,7 +213,7 @@ export function FeedManager({ botId }: Props) {
             {feeds.length > 0 && (
                 <div className="px-4 pt-3 border-b border-outline-variant/10 pb-3 bg-surface-container-lowest">
                     <div className="relative flex items-center">
-                        <Search size={12} className="absolute left-2.5 text-outline-variant/40 pointer-events-none" />
+                        <Search size={12} className="absolute left-2.5 text-outline-variant pointer-events-none" />
                         <input
                             type="text"
                             value={query}
@@ -224,13 +224,13 @@ export function FeedManager({ botId }: Props) {
                         />
                         {query && (
                             <>
-                                <span className="absolute right-8 text-nano text-outline-variant/40 pointer-events-none tabular-nums">
+                                <span className="absolute right-8 text-nano text-on-surface-variant/70 pointer-events-none tabular-nums">
                                     {filteredFeeds.length}/{feeds.length}
                                 </span>
                                 <button
                                     onClick={() => setQuery('')}
                                     title={t('feedManager.searchClear') as string}
-                                    className="absolute right-2 p-0.5 text-outline-variant/40 hover:text-on-surface transition-colors rounded"
+                                    className="absolute right-2 p-0.5 text-on-surface-variant/70 hover:text-on-surface transition-colors rounded"
                                 >
                                     <X size={12} />
                                 </button>
@@ -452,7 +452,7 @@ export function FeedManager({ botId }: Props) {
                     {feeds.length > 0 && filteredFeeds.length === 0 && (
                         <div className="text-center py-12 text-outline-variant/30">
                             <Search size={36} strokeWidth={1} className="mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">{t('feedManager.searchNoResults')}</p>
+                            <p className="text-sm text-on-surface-variant/70">{t('feedManager.searchNoResults')}</p>
                             <button
                                 onClick={() => setQuery('')}
                                 className="text-nano mt-2 text-primary/70 hover:text-primary transition-colors"
