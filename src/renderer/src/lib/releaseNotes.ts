@@ -6,6 +6,18 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.3.1': {
+        it: [
+            'Gli show il cui feed dà lo stesso indirizzo a tutte le puntate tornano a pubblicare: dopo la prima, le successive venivano scartate come già inviate.',
+            'Dove il link non distingue le puntate, l’identificativo si ricava ora dal «guid», il campo che lo standard RSS destina proprio a questo.',
+            'Per tutti gli altri feed non cambia nulla: lo storico di pubblicazione resta valido e nessun contenuto vecchio torna in canale.',
+        ],
+        en: [
+            'Shows whose feed gives every episode the same address publish again: after the first one, the rest were dropped as already sent.',
+            'Where the link does not tell episodes apart, the identifier now comes from the <guid>, the field the RSS standard means for exactly this.',
+            'Nothing changes for every other feed: the publishing history stays valid and no old item goes back to the channel.',
+        ],
+    },
     '2.3.0': {
         it: [
             'Il pannello delle sorgenti ha una lente di ricerca: su un canale affollato il feed si trova, non si cerca a scorrimento.',
