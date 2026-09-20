@@ -215,6 +215,9 @@ export async function fetchFeed(name: string, url: string): Promise<RssItem[]> {
         await assertPublicHost(url);
         const feed = await parser.parseURL(url);
         const items: RssItem[] = [];
+        // <guid> grezzo di ogni item, in parallelo a items: serve solo alla
+        // disambiguazione degli ID più sotto, quindi non entra in RssItem.
+        const guids: string[] = [];
 
         if (!feed.items || feed.items.length === 0) {
             console.warn(`[Parser] Feed ${name} (${url}) non ha elementi.`);
@@ -311,7 +314,30 @@ export async function fetchFeed(name: string, url: string): Promise<RssItem[]> {
                 feedName: name,
                 id: generateId(link)
             });
+            // rss-parser espone <guid> per RSS e <id> per Atom.
+            const rawGuid = typeof entry.guid === 'string' ? entry.guid.trim()
+                : typeof (entry as any).id === 'string' ? (entry as any).id.trim()
+                : '';
+            guids.push(rawGuid);
         }
+
+        // --- ID da <guid> per i feed che riusano lo stesso <link> ---
+        // Alcuni generatori (es. gli Show Extra di runtimeradio.com) mettono in ogni
+        // <item> il link della pagina dello show invece di quello dell'episodio: tutti
+        // gli episodi collassano sullo stesso MD5 e, dopo la prima pubblicazione,
+        // isProcessed() scarta in silenzio ogni puntata successiva.
+        // Il <guid> resta invece univoco, quindi lo usiamo come ID — ma SOLO dove il
+        // link è effettivamente duplicato, così gli ID dei feed normali (e quindi la
+        // history già scritta) restano identici e nulla rischia di essere ripubblicato.
+        const linkCount = new Map<string, number>();
+        for (const item of items) {
+            linkCount.set(item.link, (linkCount.get(item.link) ?? 0) + 1);
+        }
+        items.forEach((item, i) => {
+            if ((linkCount.get(item.link) ?? 0) > 1 && guids[i]) {
+                item.id = generateId(guids[i]);
+            }
+        });
 
         return items.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
 
