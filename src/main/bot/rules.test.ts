@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     buildDigestMessage, classifyTelegramError, DIGEST_TEXT_BUDGET, escapeHtml, escapeUrl,
     isFeedDue, isTimeAllowed, loopIntervalMinutes, parseStartDate, parseUtcTimestamp,
-    passesKeywordFilter, pickUrl, startupMessage, truncate,
+    isMuted, normalizeChannelId, passesKeywordFilter, pickUrl, postingRight, startupMessage, truncate,
 } from './rules';
 
 const at = (h: number, m: number) => new Date(2026, 9, 19, h, m, 0);
@@ -210,5 +210,53 @@ describe('startupMessage', () => {
     it('nessun messaggio da un bot spento o senza token leggibile', () => {
         expect(startupMessage({ ...bot, is_active: false }, '2.4.0')).toBeNull();
         expect(startupMessage({ ...bot, token: '' }, '2.4.0')).toBeNull();
+    });
+});
+
+describe('normalizeChannelId', () => {
+    it('porta ogni forma scritta dall\'utente a quella di Telegram', () => {
+        expect(normalizeChannelId('https://t.me/Canale')).toBe('@Canale');
+        expect(normalizeChannelId(' t.me/Canale ')).toBe('@Canale');
+        expect(normalizeChannelId('Canale')).toBe('@Canale');
+        expect(normalizeChannelId('@Canale')).toBe('@Canale');
+    });
+    it('lascia stare gli ID numerici, anche negativi', () => {
+        expect(normalizeChannelId('-1001234567890')).toBe('-1001234567890');
+        expect(normalizeChannelId('123456')).toBe('123456');
+    });
+});
+
+describe('postingRight', () => {
+    it('in un canale pubblica solo un amministratore con il permesso di pubblicare', () => {
+        expect(postingRight('channel', { status: 'creator' })).toBe('ok');
+        expect(postingRight('channel', { status: 'administrator', can_post_messages: true })).toBe('ok');
+        expect(postingRight('channel', { status: 'administrator', can_post_messages: false })).toBe('noPostRight');
+        expect(postingRight('channel', { status: 'member' })).toBe('notAdmin');
+    });
+    it('fuori dalla chat non pubblica nessuno', () => {
+        expect(postingRight('channel', { status: 'left' })).toBe('notMember');
+        expect(postingRight('supergroup', { status: 'kicked' })).toBe('notMember');
+    });
+    it('in un gruppo basta essere membri, purché non limitati', () => {
+        expect(postingRight('supergroup', { status: 'member' })).toBe('ok');
+        expect(postingRight('group', { status: 'restricted', can_send_messages: false })).toBe('restricted');
+        expect(postingRight('group', { status: 'restricted', can_send_messages: true })).toBe('ok');
+    });
+});
+
+describe('isMuted', () => {
+    it('spento e sempre fanno quel che dicono', () => {
+        expect(isMuted({ mute_mode: 'off' }, at(23, 0))).toBe(false);
+        expect(isMuted({ mute_mode: 'always' }, at(12, 0))).toBe(true);
+        expect(isMuted({}, at(23, 0))).toBe(false);
+    });
+    it('la fascia oraria vale anche a cavallo della mezzanotte', () => {
+        const bot = { mute_mode: 'window', mute_from: '22:00', mute_until: '07:00' };
+        expect(isMuted(bot, at(23, 30))).toBe(true);
+        expect(isMuted(bot, at(3, 0))).toBe(true);
+        expect(isMuted(bot, at(12, 0))).toBe(false);
+    });
+    it('fascia senza orari leggibili: si usa 22:00–07:00', () => {
+        expect(isMuted({ mute_mode: 'window', mute_from: null, mute_until: null }, at(23, 0))).toBe(true);
     });
 });

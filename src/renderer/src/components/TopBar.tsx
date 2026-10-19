@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Square, Settings, BookOpen } from 'lucide-react';
+import { Play, Square, Settings, BookOpen, RefreshCw } from 'lucide-react';
 import logo from '../assets/logo.png';
 import { Button, IconButton } from './ui/Button';
 import { StatusDot } from './ui/Controls';
@@ -14,6 +14,8 @@ interface Props {
     activity: string | null;
     canStart: boolean;
     onToggle: () => void;
+    /** «Controlla adesso»: un giro subito, senza aspettare l'intervallo */
+    onScanNow: () => void;
     onOpenSettings: () => void;
     onOpenGuide: () => void;
 }
@@ -25,7 +27,7 @@ interface Props {
  * colonna del bot selezionato, tra le statistiche di quel bot, e sembrava accenderne uno
  * solo; qui sta dove sta lo stato globale, e dice a parole cosa fa.
  */
-export function TopBar({ running, busy, nextScanAt, activity, canStart, onToggle, onOpenSettings, onOpenGuide }: Props) {
+export function TopBar({ running, busy, nextScanAt, activity, canStart, onToggle, onScanNow, onOpenSettings, onOpenGuide }: Props) {
     const { t, locale } = useTranslation();
 
     const detail = running
@@ -51,9 +53,23 @@ export function TopBar({ running, busy, nextScanAt, activity, canStart, onToggle
                     <StatusDot tone={running ? 'success' : 'neutral'} pulse={running} />
                     {/* Solo lo stato è una regione live: annunciato quando il motore si accende
                         o si spegne, non a ogni sorgente letta (sarebbe un rumore continuo). */}
-                    <span role="status" className="text-sm font-semibold text-fg">{running ? t('engine.running') : t('engine.stopped')}</span>
+                    <span role="status" className="whitespace-nowrap text-sm font-semibold text-fg">{running ? t('engine.running') : t('engine.stopped')}</span>
                     <span className="hidden max-w-[280px] truncate text-sm text-fg-3 lg:inline" title={detail}>{detail}</span>
                 </div>
+
+                {running && (
+                    <Button
+                        variant="ghost"
+                        icon={RefreshCw}
+                        disabled={busy || !!activity}
+                        onClick={onScanNow}
+                        title={activity ? t('engine.scanBusy') : t('engine.scanNowHint')}
+                        aria-label={t('engine.scanNow')}
+                    >
+                        {/* Sotto i 1024 px resta l'icona: il nome per i lettori di schermo è nell'aria-label */}
+                        <span className="hidden lg:inline">{t('engine.scanNow')}</span>
+                    </Button>
+                )}
 
                 <Button
                     variant={running ? 'secondary' : 'primary'}

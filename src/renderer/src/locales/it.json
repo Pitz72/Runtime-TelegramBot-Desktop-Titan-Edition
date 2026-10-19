@@ -49,7 +49,10 @@
         "working": "Scansione in corso",
         "stoppedHint": "Nessuna pubblicazione finché non lo avvii",
         "noBotsHint": "Crea prima un bot",
-        "startFailed": "Il motore non si è avviato:"
+        "startFailed": "Il motore non si è avviato:",
+        "scanNow": "Controlla adesso",
+        "scanNowHint": "Legge subito tutte le sorgenti attive, senza aspettare il loro intervallo",
+        "scanBusy": "Un controllo è già in corso: il prossimo parte appena finisce."
     },
     "bots": {
         "title": "Bot",
@@ -72,7 +75,9 @@
         "window": "Invii dalle {from} alle {until}",
         "settings": "Impostazioni del bot",
         "stats": "Statistiche",
-        "silent": "Avvio silenzioso"
+        "silent": "Avvio silenzioso",
+        "muted": "Senza suono",
+        "mutedWindow": "Senza suono dalle {from} alle {until}"
     },
     "botForm": {
         "newTitle": "Nuovo bot",
@@ -130,7 +135,16 @@
         "deleteConfirmTitle": "Eliminare «{name}»?",
         "deleteConfirmText": "Il bot, le sue sorgenti e la sua cronologia vengono eliminati. Non si può annullare.",
         "deleted": "Bot «{name}» eliminato",
-        "saved": "Impostazioni salvate"
+        "saved": "Impostazioni salvate",
+        "mute": "Pubblicazione senza suono",
+        "muteHint": "Gli iscritti ricevono i messaggi come sempre, ma il telefono non suona e non vibra. Utile di notte, o per i canali che pubblicano spesso.",
+        "muteMode": "Suono delle notifiche",
+        "muteOff": "Con il suono (normale)",
+        "muteAlways": "Sempre senza suono",
+        "muteWindow": "Senza suono in una fascia oraria",
+        "muteSummaryOff": "I messaggi arrivano con il suono.",
+        "muteSummaryAlways": "Tutti i messaggi arrivano senza suono.",
+        "muteSummaryWindow": "Senza suono dalle {from} alle {until}, con il suono nel resto della giornata."
     },
     "stats": {
         "today": "Oggi",
@@ -335,6 +349,21 @@
             "licenseApp": "Licenza di Titan (MIT)",
             "licenseThirdParty": "Licenze di terze parti",
             "licenseMissing": "File di licenza non disponibile in questa installazione."
+        },
+        "desktop": {
+            "title": "Avvio e chiusura",
+            "text": "Per tenere i bot al lavoro anche quando la finestra non c'è.",
+            "openAtLogin": "Avvia Titan con il computer",
+            "openAtLoginHint": "Titan parte all'accensione, nell'area di notifica, senza aprire la finestra.",
+            "openAtLoginUnsupported": "Disponibile nella versione installata di Titan.",
+            "autoStart": "Avvia il motore all'apertura",
+            "autoStartHint": "Appena Titan si apre, il motore parte da solo. Insieme all'avvio con il computer, Titan riprende a pubblicare dopo ogni riavvio.",
+            "close": "Quando chiudi la finestra",
+            "closeHint": "Nell'area di notifica Titan continua a lavorare: lo riapri dalla sua icona, oppure avviandolo di nuovo.",
+            "noTray": "Su questo desktop l'area di notifica non è disponibile.",
+            "closeAsk": "Chiedi, se il motore è acceso",
+            "closeTray": "Continua nell'area di notifica",
+            "closeQuit": "Chiudi Titan"
         }
     },
     "youtubeError": {
@@ -384,5 +413,37 @@
         "sectionTitle": "Sostieni il progetto",
         "sectionDesc": "Titan è gratuito e a sorgente aperto. Se ti è utile, puoi lasciare una donazione libera o scrivermi dalla pagina dei contatti.",
         "contactBtn": "Contatti"
+    },
+    "botCheck": {
+        "title": "Prova il bot",
+        "hint": "Verifica token, canale e permessi con Telegram senza pubblicare nulla. Si può fare anche prima di salvare.",
+        "run": "Prova",
+        "running": "Verifica in corso con Telegram…",
+        "allGood": "Tutto a posto: il bot può pubblicare in questa chat.",
+        "someProblems": "C'è qualcosa da sistemare:",
+        "token": "Token",
+        "chat": "Destinazione",
+        "rights": "Permessi",
+        "tokenOk": "valido, è il bot {username}.",
+        "token_invalid": "non valido. Telegram non riconosce questo bot: ricopia il token da @BotFather.",
+        "token_network": "Telegram non risponde. Controlla la connessione e riprova.",
+        "chatOk": "«{title}» ({kind}).",
+        "chat_notFound": "non trovata. Controlla l'indirizzo; per un canale privato serve l'ID numerico (-100…).",
+        "chat_noAccess": "il bot non riesce a vederla. Aggiungilo al canale o al gruppo.",
+        "chat_network": "Telegram non risponde. Controlla la connessione e riprova.",
+        "chat_skipped": "non verificata, serve prima un token valido.",
+        "rights_ok": "il bot può pubblicare.",
+        "rights_notMember": "il bot non fa parte della chat. Aggiungilo come amministratore.",
+        "rights_notAdmin": "il bot è iscritto ma non amministratore. In un canale può pubblicare solo un amministratore.",
+        "rights_noPostRight": "il bot è amministratore ma senza il permesso «Pubblica messaggi». Attivalo nelle impostazioni del canale.",
+        "rights_restricted": "il bot è limitato in questo gruppo e non può scrivere.",
+        "rights_unknown": "non è stato possibile leggerli ({error}).",
+        "rights_network": "Telegram non risponde. Controlla la connessione e riprova.",
+        "rights_skipped": "non verificati, serve prima una destinazione raggiungibile.",
+        "kind": {
+            "channel": "canale",
+            "group": "gruppo",
+            "private": "chat privata"
+        }
     }
 }

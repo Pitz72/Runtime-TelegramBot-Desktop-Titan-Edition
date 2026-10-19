@@ -67,8 +67,18 @@ function localDateStamp(d = new Date()): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+/** Righe tenute in memoria per l'interfaccia che si apre dopo (vedi `getRecent`). */
+const RECENT_MAX = 2000;
+
 class Logger {
     private ipcBuffer: LogEntry[] = [];
+    /**
+     * Le ultime righe, per l'interfaccia che arriva tardi: il motore può partire da solo
+     * all'apertura, o lavorare con la finestra chiusa nell'area di notifica, mentre il
+     * diario si monta solo dopo la schermata d'ingresso. Senza, quelle righe restavano
+     * solo nel file.
+     */
+    private recent: LogEntry[] = [];
     private logDir: string;
     private currentDate = '';
     private logFilePath = '';
@@ -138,6 +148,11 @@ class Logger {
         });
     }
 
+    /** Le ultime righe registrate, dalla più vecchia alla più recente. */
+    public getRecent(): LogEntry[] {
+        return [...this.recent];
+    }
+
     /** Percorso del file di log della giornata — l'esportazione legge questo, non la memoria. */
     public getLogFilePath(): string {
         this.rotateIfNeeded();
@@ -176,9 +191,12 @@ class Logger {
             id: ++_logId,
             level: event ? levelForEvent(event) : declaredLevel ?? detectLevel(message),
             message: formattedMessage,
+            time: Date.now(),
             ...(event ? { event } : {}),
         };
         this.ipcBuffer.push(entry);
+        this.recent.push(entry);
+        if (this.recent.length > RECENT_MAX) this.recent.splice(0, this.recent.length - RECENT_MAX);
 
         // Chi fa `await TitanLogger.log(...)` aspetta che la riga sia davvero sul file.
         await written;

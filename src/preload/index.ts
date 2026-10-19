@@ -29,7 +29,11 @@ const api = {
         templateYoutube?: string
         templateStartup?: string
         silentStart?: boolean
+        muteMode?: 'off' | 'always' | 'window'
+        muteFrom?: string
+        muteUntil?: string
     }) => ipcRenderer.invoke('update-bot', data),
+    testBot: (data: { token: string; channelId: string }) => ipcRenderer.invoke('test-bot', data),
 
     // Feed Management
     getFeeds: (botId: number) => ipcRenderer.invoke('get-feeds', botId),
@@ -47,6 +51,16 @@ const api = {
     startBot: () => ipcRenderer.invoke('start-bot'),
     stopBot: () => ipcRenderer.invoke('stop-bot'),
     getBotStatus: () => ipcRenderer.invoke('get-bot-status'),
+    scanNow: () => ipcRenderer.invoke('scan-now'),
+    getRecentLogs: () => ipcRenderer.invoke('get-recent-logs'),
+    onEngineStatus: (callback: (info: { running: boolean }) => void) => {
+        const handler = (_: unknown, info: { running: boolean }) => callback(info);
+        ipcRenderer.on('engine-status', handler);
+        return () => { ipcRenderer.removeListener('engine-status', handler); };
+    },
+    getDesktopSettings: () => ipcRenderer.invoke('get-desktop-settings'),
+    setDesktopSettings: (data: { closeAction?: 'ask' | 'tray' | 'quit'; autoStartEngine?: boolean; openAtLogin?: boolean }) =>
+        ipcRenderer.invoke('set-desktop-settings', data),
     onLog: (callback: (message: string) => void) => {
         ipcRenderer.removeAllListeners('bot-log');
         ipcRenderer.on('bot-log', (_, message) => callback(message));

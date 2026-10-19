@@ -6,7 +6,7 @@ import { BotConfig, FeedConfig, RssItem } from '../../shared/types';
 import { TitanLogger } from '../logger';
 import { app, BrowserWindow, Notification } from 'electron';
 import {
-    buildDigestMessage, isFeedDue, isTimeAllowed,
+    buildDigestMessage, isFeedDue, isMuted, isTimeAllowed,
     loopIntervalMinutes, parseStartDate, parseUtcTimestamp, passesKeywordFilter, startupMessage,
 } from './rules';
 
@@ -61,6 +61,30 @@ export class BotEngine {
     private hasNotifiedYoutubeError: boolean = false;
     /** Contenuti pubblicati nel giro in corso — è il numero della riga «pubblicati N» (Fase 7) */
     private publishedInScan: number = 0;
+    /**
+     * Generazione che sta leggendo le sorgenti in questo momento (avvio compreso), o null.
+     * Legata alla generazione e non un semplice booleano: un giro vecchio che finisce dopo
+     * un riavvio non deve dichiarare libero il motore mentre quello nuovo sta lavorando.
+     */
+    private scanningRun: number | null = null;
+    private statusListeners = new Set<(running: boolean) => void>();
+
+    /** Avvisa chi ascolta (l'icona nell'area di notifica) quando il motore si accende o si spegne. */
+    onStatusChange(listener: (running: boolean) => void): () => void {
+        this.statusListeners.add(listener);
+        return () => this.statusListeners.delete(listener);
+    }
+
+    private notifyStatus() {
+        for (const listener of this.statusListeners) {
+            try { listener(this.isRunning); } catch { /* un ascoltatore rotto non ferma il motore */ }
+        }
+    }
+
+    /** True mentre il motore legge le sorgenti (o sta ancora partendo). */
+    isScanning(): boolean {
+        return this.scanningRun !== null && this.scanningRun === this.runId;
+    }
 
     /** Stato corrente del motore — usato dal renderer per sincronizzare la UI al mount. */
     isEngineRunning(): boolean {
@@ -80,6 +104,10 @@ export class BotEngine {
         if (this.isRunning) return;
         this.isRunning = true;
         const run = ++this.runId;
+        // Avvio e primo giro sono un unico tratto «occupato»: un «Controlla adesso» premuto
+        // in questi secondi aprirebbe un secondo giro accanto al primo.
+        this.scanningRun = run;
+        this.notifyStatus();
 
         void (async () => {
             try {
@@ -90,6 +118,7 @@ export class BotEngine {
             } catch (e) {
                 TitanLogger.log(`❌ Errore durante l'avvio del motore: ${e}`);
             } finally {
+                if (this.scanningRun === run) this.scanningRun = null;
                 // Comunque vada il primo giro, il successivo va pianificato: prima un'eccezione
                 // qui lasciava il motore «acceso» ma senza più nessuna scansione in calendario.
                 this.scheduleNext(run);
@@ -117,7 +146,29 @@ export class BotEngine {
         // Invalida la cache YouTube alla fermata — fix #19
         clearYouTubeCache();
 
+        this.scanningRun = null;
         TitanLogger.log("🛑 Engine Stopped", { type: 'engine-stop' });
+        this.notifyStatus();
+    }
+
+    /**
+     * «Controlla adesso»: un giro subito, su tutte le sorgenti attive anche se il loro
+     * intervallo non è scaduto, poi il calendario riparte da qui. Prima l'unico modo per
+     * non aspettare era fermare e riavviare il motore, che rimandava i messaggi di avvio.
+     *
+     * Non apre mai un secondo giro accanto a uno in corso: in quel caso risponde `busy`.
+     */
+    scanNow(): 'started' | 'busy' | 'stopped' {
+        if (!this.isRunning) return 'stopped';
+        if (this.isScanning()) return 'busy';
+        const run = this.runId;
+        if (this.timeoutId) clearTimeout(this.timeoutId);
+        this.timeoutId = null;
+        TitanLogger.log('👆 Controllo immediato richiesto: tutte le sorgenti attive, senza aspettare il loro intervallo.');
+        this.checkLoop(run, true)
+            .catch(e => TitanLogger.log(`❌ Errore non gestito in checkLoop: ${e}`))
+            .finally(() => this.scheduleNext(run));
+        return 'started';
     }
 
     /** Remove cached client and pending jobs when a bot is deleted */
@@ -159,7 +210,7 @@ export class BotEngine {
                 }
                 continue;
             }
-            const res = await this.getClient(bot).sendMessage(message);
+            const res = await this.getClient(bot).sendMessage(message, { silent: isMuted(bot) });
             // Motore fermato mentre la richiesta era in volo: l'esito non interessa più.
             if (!this.isLive(run)) return;
             if (!res.ok && res.kind !== 'aborted') {
@@ -202,9 +253,18 @@ export class BotEngine {
         }, interval);
     }
 
-    private async checkLoop(run: number) {
+    /** @param force «Controlla adesso»: legge anche le sorgenti con l'intervallo non ancora scaduto. */
+    private async checkLoop(run: number, force = false) {
         if (!this.isLive(run)) return;
+        this.scanningRun = run;
+        try {
+            await this.scanAllBots(run, force);
+        } finally {
+            if (this.scanningRun === run) this.scanningRun = null;
+        }
+    }
 
+    private async scanAllBots(run: number, force: boolean) {
         const bots = BotManager.getBots();
         // Il contatore riparte a ogni giro: se un drenaggio precedente è ancora in corso
         // (coda lunga, invii lenti) il suo residuo confluisce nel riepilogo di questo giro.
@@ -258,7 +318,7 @@ export class BotEngine {
                 }
 
                 // F5: filtra i feed effettivamente da controllare in questo ciclo (intervallo scaduto).
-                const dueFeeds = activeFeeds.filter(feed => {
+                const dueFeeds = force ? activeFeeds : activeFeeds.filter(feed => {
                     const interval = feed.check_interval ?? bot.check_interval ?? 15;
                     if (!isFeedDue(feed.last_fetch_at, interval)) {
                         TitanLogger.log(`  ⏱️ [${feed.name}] Intervallo non scaduto, saltato.`);
@@ -578,7 +638,7 @@ export class BotEngine {
 
                     let result: SendResult;
                     try {
-                        result = await client.sendFormattedMessage(item, template, feed.type);
+                        result = await client.sendFormattedMessage(item, template, feed.type, { silent: isMuted(bot) });
                     } catch (err) {
                         result = { ok: false, kind: 'transient', error: String(err) };
                     }
@@ -669,7 +729,7 @@ export class BotEngine {
 
             const { text, included } = buildDigestMessage(feed.name, items);
             const sentIds = items.slice(0, included).map(it => it.item_id);
-            const result = await this.getClient(bot).sendMessage(text);
+            const result = await this.getClient(bot).sendMessage(text, { silent: isMuted(bot) });
 
             if (result.ok) {
                 // Si tolgono dalla coda SOLO i contenuti finiti nel messaggio: prima si svuotava

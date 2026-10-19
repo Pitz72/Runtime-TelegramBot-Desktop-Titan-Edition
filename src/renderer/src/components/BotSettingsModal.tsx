@@ -3,7 +3,8 @@ import { SlidersHorizontal, Settings2, CalendarClock, MessageSquareText, Wrench,
 import { BotConfig } from '../../../shared/types';
 import { Dialog } from './ui/Dialog';
 import { Button } from './ui/Button';
-import { Switch, Tabs, TabPanel, TextField } from './ui/Controls';
+import { SelectField, Switch, Tabs, TabPanel, TextField } from './ui/Controls';
+import { BotCheck } from './BotCheck';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { TemplateEditor } from './TemplateEditor';
 import { TokenVisibility, TOKEN_SHAPE } from './NewBotDialog';
@@ -42,6 +43,9 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
     const [isActive, setIsActive] = useState(bot.is_active);
     const [notifications, setNotifications] = useState(bot.notifications_enabled ?? true);
     const [silentStart, setSilentStart] = useState(bot.silent_start ?? false);
+    const [muteMode, setMuteMode] = useState<BotConfig['mute_mode']>(bot.mute_mode ?? 'off');
+    const [muteFrom, setMuteFrom] = useState(bot.mute_from || '22:00');
+    const [muteUntil, setMuteUntil] = useState(bot.mute_until || '07:00');
     const [startDate, setStartDate] = useState(bot.start_date.split('T')[0]);
     const [interval, setIntervalMinutes] = useState(String(bot.check_interval || 15));
     const [sendFrom, setSendFrom] = useState(bot.send_from || '00:00');
@@ -63,6 +67,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
         setTab('general');
         setName(bot.name); setToken(bot.token); setShowToken(false); setChannelId(bot.channel_id);
         setIsActive(bot.is_active); setNotifications(bot.notifications_enabled ?? true); setSilentStart(bot.silent_start ?? false);
+        setMuteMode(bot.mute_mode ?? 'off'); setMuteFrom(bot.mute_from || '22:00'); setMuteUntil(bot.mute_until || '07:00');
         setStartDate(bot.start_date.split('T')[0]); setIntervalMinutes(String(bot.check_interval || 15));
         setSendFrom(bot.send_from || '00:00'); setSendUntil(bot.send_until || '23:59');
         setTplStartup(bot.template_startup || ''); setTplNews(bot.template_news || '');
@@ -94,7 +99,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                 id: bot.id, name: name.trim(), token: token.trim(), channelId: channelId.trim(), isActive, startDate,
                 checkInterval: intervalNumber, notificationsEnabled: notifications, sendFrom, sendUntil,
                 templatePodcast: tplPodcast, templateNews: tplNews, templateYoutube: tplYoutube, templateStartup: tplStartup,
-                silentStart,
+                silentStart, muteMode, muteFrom, muteUntil,
             });
             success(t('botSettings.saved'));
             onSaved();
@@ -198,6 +203,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                                 error={submitted ? errors.channel : ''}
                                 required
                             />
+                            <BotCheck token={token} channelId={channelId} />
                             <div className="space-y-4 rounded-lg border border-line bg-surface-2 p-4">
                                 <Switch checked={isActive} onChange={setIsActive} label={t('botSettings.active')} description={t('botSettings.activeHint')} />
                                 <div className="h-px bg-line" aria-hidden="true" />
@@ -244,6 +250,33 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                                     {quietActive
                                         ? t('botSettings.windowSummary').replace('{from}', sendFrom).replace('{until}', sendUntil)
                                         : t('botSettings.windowAlways')}
+                                </p>
+                            </fieldset>
+                            <fieldset className="rounded-lg border border-line bg-surface-2 p-4">
+                                <legend className="px-1 text-base font-semibold text-fg">{t('botSettings.mute')}</legend>
+                                <p className="mb-4 text-sm text-fg-3">{t('botSettings.muteHint')}</p>
+                                <SelectField
+                                    label={t('botSettings.muteMode')}
+                                    value={muteMode}
+                                    onChange={e => setMuteMode(e.target.value as BotConfig['mute_mode'])}
+                                    containerClassName="max-w-sm"
+                                >
+                                    <option value="off">{t('botSettings.muteOff')}</option>
+                                    <option value="always">{t('botSettings.muteAlways')}</option>
+                                    <option value="window">{t('botSettings.muteWindow')}</option>
+                                </SelectField>
+                                {muteMode === 'window' && (
+                                    <div className="mt-4 flex flex-wrap gap-4">
+                                        <TextField label={t('botSettings.from')} type="time" value={muteFrom} onChange={e => setMuteFrom(e.target.value || '22:00')} containerClassName="w-40" />
+                                        <TextField label={t('botSettings.until')} type="time" value={muteUntil} onChange={e => setMuteUntil(e.target.value || '07:00')} containerClassName="w-40" />
+                                    </div>
+                                )}
+                                <p className="mt-3 text-sm text-fg-2" aria-live="polite">
+                                    {muteMode === 'always'
+                                        ? t('botSettings.muteSummaryAlways')
+                                        : muteMode === 'window'
+                                            ? t('botSettings.muteSummaryWindow').replace('{from}', muteFrom).replace('{until}', muteUntil)
+                                            : t('botSettings.muteSummaryOff')}
                                 </p>
                             </fieldset>
                         </div>

@@ -8,10 +8,13 @@ import { fetchFeed, validateFeedUrl } from './bot/parser';
 import { fetchYouTubeVideos } from './bot/youtube';
 import { TitanLogger } from './logger';
 import { writeFile, copyFile, readFile } from 'fs/promises';
-import { readSettings, writeSettings, applyZoom } from './settings';
+import { readSettings, writeSettings, applyZoom, CLOSE_ACTIONS } from './settings';
+import { canHideToTray, getOpenAtLogin, markQuitting, setOpenAtLogin } from './desktop';
 import { join, dirname } from 'path';
 import { tm, setMainLocale } from './i18n';
-import { parseStartDate } from './bot/rules';
+import { MUTE_MODES, parseStartDate } from './bot/rules';
+import type { BotBehavior } from './bot/manager';
+import { checkBot } from './bot/check';
 
 /**
  * Testo di un file di licenza spedito con l'app: quella di Titan (MIT) o l'elenco delle
@@ -119,6 +122,22 @@ function assertDigestInterval(value: unknown): number | null {
     return n;
 }
 
+/**
+ * Avvio silenzioso e pubblicazione senza suono. Ogni campo assente resta `undefined`, che
+ * per `updateBot` vuol dire «invariato»: un chiamante che non li conosce non li azzera.
+ */
+function assertBehavior(data: any): BotBehavior {
+    const behavior: BotBehavior = {};
+    if (data?.silentStart !== undefined) behavior.silentStart = data.silentStart === true;
+    if (data?.muteMode !== undefined) {
+        if (!MUTE_MODES.includes(data.muteMode)) throw new Error(`Modalità senza suono non valida: "${data.muteMode}"`);
+        behavior.muteMode = data.muteMode;
+    }
+    if (data?.muteFrom !== undefined) behavior.muteFrom = assertTimeOrDefault(data.muteFrom, '22:00');
+    if (data?.muteUntil !== undefined) behavior.muteUntil = assertTimeOrDefault(data.muteUntil, '07:00');
+    return behavior;
+}
+
 /** Parser OPML minimale — estrae xmlUrl e name dagli outline senza dipendenze esterne. */
 function parseOpml(content: string): Array<{ name: string; url: string }> {
     const results: Array<{ name: string; url: string }> = [];
@@ -187,7 +206,7 @@ export function setupIpc() {
         const sendFrom = assertTimeOrDefault(data.sendFrom, '00:00');
         const sendUntil = assertTimeOrDefault(data.sendUntil, '23:59');
         const startDate = assertStartDateOrUndefined(data.startDate);
-        return BotManager.createBot(name, token, channelId, startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup, data.silentStart === true);
+        return BotManager.createBot(name, token, channelId, startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup, assertBehavior(data));
     });
 
     ipcMain.handle('delete-bot', (_, id) => {
@@ -196,7 +215,8 @@ export function setupIpc() {
         return BotManager.deleteBot(botId);
     });
 
-    ipcMain.handle('update-bot', (_, { id, name, token, channelId, isActive, startDate, checkInterval, notificationsEnabled, sendFrom, sendUntil, templatePodcast, templateNews, templateYoutube, templateStartup, silentStart }) => {
+    ipcMain.handle('update-bot', (_, data) => {
+        const { id, name, token, channelId, isActive, startDate, checkInterval, notificationsEnabled, sendFrom, sendUntil, templatePodcast, templateNews, templateYoutube, templateStartup } = data ?? {};
         const validId = assertPositiveInt(id, 'id');
         const validName = assertString(name, 'name');
         const validToken = assertString(token, 'token');
@@ -205,9 +225,15 @@ export function setupIpc() {
         const validSendFrom = assertTimeOrDefault(sendFrom, '00:00');
         const validSendUntil = assertTimeOrDefault(sendUntil, '23:59');
         const validStartDate = assertStartDateOrUndefined(startDate);
-        // Assente = invariato: un chiamante che non conosce l'avvio silenzioso non lo spegne.
-        const validSilentStart = silentStart === undefined ? undefined : silentStart === true;
-        return BotManager.updateBot(validId, validName, validToken, validChannelId, !!isActive, validStartDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup, validSilentStart);
+        return BotManager.updateBot(validId, validName, validToken, validChannelId, !!isActive, validStartDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup, assertBehavior(data));
+    });
+
+    // «Prova il bot»: token, canale e permessi verificati senza pubblicare nulla. Usa i
+    // valori del modulo, non quelli salvati, così si prova prima di salvare.
+    ipcMain.handle('test-bot', (_, data) => {
+        const token = assertString(data?.token, 'token');
+        const channelId = assertString(data?.channelId, 'channelId');
+        return checkBot(token, channelId);
     });
 
     // --- FEED MANAGEMENT ---
@@ -319,7 +345,39 @@ export function setupIpc() {
         return { success: true };
     });
 
-    ipcMain.handle('get-bot-status', () => ({ running: getBotEngine().isEngineRunning() }));
+    // --- AVVIO E CHIUSURA ---
+    const desktopSettings = async () => {
+        const s = await readSettings();
+        return {
+            closeAction: s.closeAction ?? 'ask',
+            autoStartEngine: s.autoStartEngine === true,
+            openAtLogin: getOpenAtLogin(),
+            trayAvailable: canHideToTray(),
+        };
+    };
+
+    ipcMain.handle('get-desktop-settings', desktopSettings);
+
+    ipcMain.handle('set-desktop-settings', async (_, data) => {
+        const s = await readSettings();
+        if (data?.closeAction !== undefined) {
+            if (!CLOSE_ACTIONS.includes(data.closeAction)) throw new Error(`Azione di chiusura non valida: "${data.closeAction}"`);
+            s.closeAction = data.closeAction;
+        }
+        if (data?.autoStartEngine !== undefined) s.autoStartEngine = data.autoStartEngine === true;
+        await writeSettings(s);
+        if (data?.openAtLogin !== undefined) setOpenAtLogin(data.openAtLogin === true);
+        return desktopSettings();
+    });
+
+    ipcMain.handle('get-bot-status', () => ({ running: getBotEngine().isEngineRunning(), scanning: getBotEngine().isScanning() }));
+
+    // «Controlla adesso»: 'started', 'busy' (un giro è già in corso) o 'stopped'.
+    ipcMain.handle('scan-now', () => ({ status: getBotEngine().scanNow() }));
+
+    // Righe di log arrivate prima che l'interfaccia le ascoltasse: motore avviato da solo
+    // all'apertura, o finestra nell'area di notifica mentre si era ancora sulla schermata d'ingresso.
+    ipcMain.handle('get-recent-logs', () => TitanLogger.getRecent());
 
     // --- LOG EXPORT ---
     // Fase 7: si esporta il **file** della giornata, non l'array in memoria del renderer.
@@ -582,6 +640,7 @@ export function setupIpc() {
     });
 
     ipcMain.handle('install-update', () => {
+        markQuitting();
         autoUpdater.quitAndInstall(false, true);
     });
 }

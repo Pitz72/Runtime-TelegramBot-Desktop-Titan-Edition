@@ -49,7 +49,10 @@
         "working": "Scanning",
         "stoppedHint": "Nothing is published until you start it",
         "noBotsHint": "Create a bot first",
-        "startFailed": "The engine did not start:"
+        "startFailed": "The engine did not start:",
+        "scanNow": "Check now",
+        "scanNowHint": "Reads every active source right away, without waiting for its interval",
+        "scanBusy": "A check is already running: the next one starts as soon as it finishes."
     },
     "bots": {
         "title": "Bots",
@@ -72,7 +75,9 @@
         "window": "Sends from {from} to {until}",
         "settings": "Bot settings",
         "stats": "Statistics",
-        "silent": "Silent start"
+        "silent": "Silent start",
+        "muted": "Without sound",
+        "mutedWindow": "Without sound from {from} to {until}"
     },
     "botForm": {
         "newTitle": "New bot",
@@ -130,7 +135,16 @@
         "deleteConfirmTitle": "Delete “{name}”?",
         "deleteConfirmText": "The bot, its sources and its history are deleted. This cannot be undone.",
         "deleted": "Bot “{name}” deleted",
-        "saved": "Settings saved"
+        "saved": "Settings saved",
+        "mute": "Publish without sound",
+        "muteHint": "Subscribers receive the messages as usual, but their phone does not ring or vibrate. Useful at night, or for channels that post often.",
+        "muteMode": "Notification sound",
+        "muteOff": "With sound (normal)",
+        "muteAlways": "Always without sound",
+        "muteWindow": "Without sound during set hours",
+        "muteSummaryOff": "Messages arrive with sound.",
+        "muteSummaryAlways": "Every message arrives without sound.",
+        "muteSummaryWindow": "Without sound from {from} to {until}, with sound for the rest of the day."
     },
     "stats": {
         "today": "Today",
@@ -335,6 +349,21 @@
             "licenseApp": "Titan licence (MIT)",
             "licenseThirdParty": "Third-party licences",
             "licenseMissing": "Licence file not available in this installation."
+        },
+        "desktop": {
+            "title": "Startup and closing",
+            "text": "To keep your bots working even when the window is not there.",
+            "openAtLogin": "Start Titan with the computer",
+            "openAtLoginHint": "Titan starts when you log in, in the notification area, without opening the window.",
+            "openAtLoginUnsupported": "Available in the installed version of Titan.",
+            "autoStart": "Start the engine on launch",
+            "autoStartHint": "As soon as Titan opens, the engine starts by itself. Together with starting with the computer, Titan resumes publishing after every restart.",
+            "close": "When you close the window",
+            "closeHint": "In the notification area Titan keeps working: reopen it from its icon, or by starting it again.",
+            "noTray": "This desktop has no notification area.",
+            "closeAsk": "Ask, if the engine is running",
+            "closeTray": "Keep running in the notification area",
+            "closeQuit": "Close Titan"
         }
     },
     "youtubeError": {
@@ -384,5 +413,37 @@
         "sectionTitle": "Support the project",
         "sectionDesc": "Titan is free and open source. If you find it useful, you can leave a donation or get in touch through the contact page.",
         "contactBtn": "Contact"
+    },
+    "botCheck": {
+        "title": "Test the bot",
+        "hint": "Checks the token, the destination and the permissions with Telegram, without posting anything. You can do it before saving, too.",
+        "run": "Test",
+        "running": "Checking with Telegram…",
+        "allGood": "All good: the bot can post in this chat.",
+        "someProblems": "Something needs fixing:",
+        "token": "Token",
+        "chat": "Destination",
+        "rights": "Permissions",
+        "tokenOk": "valid, it is the bot {username}.",
+        "token_invalid": "not valid. Telegram does not recognise this bot: copy the token again from @BotFather.",
+        "token_network": "Telegram is not answering. Check your connection and try again.",
+        "chatOk": "“{title}” ({kind}).",
+        "chat_notFound": "not found. Check the address; a private channel needs its numeric ID (-100…).",
+        "chat_noAccess": "the bot cannot see it. Add it to the channel or group.",
+        "chat_network": "Telegram is not answering. Check your connection and try again.",
+        "chat_skipped": "not checked, a valid token is needed first.",
+        "rights_ok": "the bot can post.",
+        "rights_notMember": "the bot is not part of the chat. Add it as an administrator.",
+        "rights_notAdmin": "the bot is a subscriber but not an administrator. In a channel only administrators can post.",
+        "rights_noPostRight": "the bot is an administrator without the “Post messages” permission. Turn it on in the channel settings.",
+        "rights_restricted": "the bot is restricted in this group and cannot write.",
+        "rights_unknown": "they could not be read ({error}).",
+        "rights_network": "Telegram is not answering. Check your connection and try again.",
+        "rights_skipped": "not checked, a reachable destination is needed first.",
+        "kind": {
+            "channel": "channel",
+            "group": "group",
+            "private": "private chat"
+        }
     }
 }

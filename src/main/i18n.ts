@@ -38,6 +38,23 @@ const STRINGS = {
         filterAll: 'Tutti i file',
         filterRtb: 'Profili bot Titan',
         filterOpml: 'File OPML',
+        trayOpen: 'Apri Titan',
+        trayRunning: 'Motore acceso',
+        trayStopped: 'Motore spento',
+        trayStart: 'Avvia il motore',
+        trayStop: 'Ferma il motore',
+        trayScanNow: 'Controlla adesso',
+        trayQuit: 'Esci da Titan',
+        trayHintTitle: 'Titan continua a lavorare',
+        trayHintBody: 'La finestra è chiusa, il motore no. Riaprila dall’icona di Titan nell’area di notifica.',
+        closeTitle: 'Chiudere Titan?',
+        closeMessage: 'Il motore è acceso: se chiudi Titan, i bot smettono di pubblicare.',
+        closeDetail: 'Nell’area di notifica Titan continua a lavorare senza finestra. La riapri dalla sua icona, oppure avviando di nuovo Titan.',
+        closeDetailNoTray: 'Su questo desktop l’area di notifica non è disponibile: per continuare a pubblicare lascia la finestra aperta, anche ridotta a icona.',
+        closeToTray: 'Continua nell’area di notifica',
+        closeQuit: 'Chiudi Titan',
+        closeRemember: 'Non chiederlo più (si cambia in Impostazioni → Generale)',
+        autoStarted: '▶️ Motore avviato all’apertura (Impostazioni → Generale → Avvia il motore all’apertura).',
     },
     en: {
         exportLogTitle: 'Export log',
@@ -67,6 +84,23 @@ const STRINGS = {
         filterAll: 'All files',
         filterRtb: 'Titan bot profiles',
         filterOpml: 'OPML files',
+        trayOpen: 'Open Titan',
+        trayRunning: 'Engine running',
+        trayStopped: 'Engine stopped',
+        trayStart: 'Start the engine',
+        trayStop: 'Stop the engine',
+        trayScanNow: 'Check now',
+        trayQuit: 'Quit Titan',
+        trayHintTitle: 'Titan keeps working',
+        trayHintBody: 'The window is closed, the engine is not. Reopen it from the Titan icon in the notification area.',
+        closeTitle: 'Close Titan?',
+        closeMessage: 'The engine is running: if you close Titan, your bots stop publishing.',
+        closeDetail: 'In the notification area Titan keeps working without a window. Reopen it from its icon, or by starting Titan again.',
+        closeDetailNoTray: 'This desktop has no notification area: to keep publishing, leave the window open, even minimised.',
+        closeToTray: 'Keep running in the notification area',
+        closeQuit: 'Close Titan',
+        closeRemember: 'Don’t ask again (change it in Settings → General)',
+        autoStarted: '▶️ Engine started on launch (Settings → General → Start the engine on launch).',
     },
 } as const;
 
@@ -74,8 +108,18 @@ export type MainStringKey = keyof typeof STRINGS.it;
 
 let locale: MainLocale | null = null;
 
+const localeListeners = new Set<() => void>();
+
+/** Chi mostra testi fuori dalla finestra (il menu dell'area di notifica) si aggiorna al cambio lingua. */
+export function onMainLocaleChange(listener: () => void) {
+    localeListeners.add(listener);
+}
+
 export function setMainLocale(value: unknown) {
-    if (value === 'it' || value === 'en') locale = value;
+    if ((value === 'it' || value === 'en') && value !== locale) {
+        locale = value;
+        for (const listener of localeListeners) listener();
+    }
 }
 
 function currentLocale(): MainLocale {

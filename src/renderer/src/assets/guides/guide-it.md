@@ -41,12 +41,16 @@ Ogni sorgente ha accanto il suo interruttore (attiva o in pausa) e i pulsanti pe
 Inserito il token e aggiunte le sorgenti, resta solo da accendere.
 *   Clicca su **Avvia il motore**, in alto a destra. Il motore è uno solo e lavora per tutti i bot attivi.
 *   Accanto al pulsante vedi lo stato («Motore acceso») e l'ora del prossimo giro di controllo.
+*   **Controlla adesso** legge subito tutte le sorgenti attive, senza aspettare il loro intervallo.
 *   Nel pannello **Attività**, vista **Diario**, segui le scansioni, i contenuti trovati e quelli pubblicati. La vista **Console** mostra il log completo.
 
 ---
 
 ### 💡 Consigli utili e soluzione dei problemi
 *   **Fascia oraria di pubblicazione:** in *Impostazioni del bot → Pianificazione* scegli quando il bot può pubblicare. Se imposti dalle 08:00 alle 22:00, le notizie della notte non vanno perse: restano in coda e partono alle 08:00.
+*   **Prova il bot:** prima di avviare il motore, in *Impostazioni del bot → Generale* (o mentre crei un bot) il pulsante **Prova** verifica con Telegram il token, la destinazione e che il bot possa pubblicarci. Non scrive niente nel canale. L'errore più comune che trova: il bot aggiunto al canale come iscritto invece che come amministratore.
+*   **Senza suono:** in *Impostazioni del bot → Pianificazione* puoi far arrivare i messaggi senza suono, sempre o solo in una fascia oraria (per esempio di notte). Gli iscritti li ricevono come sempre, ma il telefono non suona.
+*   **Tenerlo sempre acceso:** in *Impostazioni → Generale → Avvio e chiusura* Titan può partire con il computer, avviare il motore da solo e restare nell'area di notifica quando chiudi la finestra. Se chiudi la finestra a motore acceso, Titan ti chiede cosa fare invece di fermare i bot senza dirlo.
 *   **Avvio silenzioso:** all'avvio del motore ogni bot annuncia nel suo canale di essere online. Per le chat e i canali che non lo gradiscono, accendi *Impostazioni del bot → Generale → Avvio silenzioso*: quel bot parte e lavora come gli altri, ma senza scrivere il messaggio di avvio.
 *   **Errori YouTube:** se compaiono errori sui canali YouTube, di solito YouTube ha cambiato qualcosa nelle sue pagine. Metti in pausa quella sorgente con il suo interruttore e controlla se c'è un aggiornamento dell'applicazione.
 *   **Cambio PC:** per spostare un bot su un altro computer non copiare i file: usa *Impostazioni del bot → Avanzate → Esporta*. Il file .rtb porta con sé sorgenti, filtri, template e fascia oraria. Il token no: è cifrato e legato al computer d'origine, quindi sul nuovo PC va reinserito a mano. Sul nuovo PC basta un doppio clic sul file .rtb per importarlo.

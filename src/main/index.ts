@@ -12,6 +12,8 @@ import { BotManager } from './bot/manager'
 import { closeDB } from './database/schema'
 import { tm } from './i18n'
 import { readSettings, applyZoom, stepZoom } from './settings'
+import { HIDDEN_ARG, attachCloseHandler, canHideToTray, markQuitting, setupDesktop, showMainWindow } from './desktop'
+import { TitanLogger } from './logger'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -54,11 +56,8 @@ if (!gotTheLock) {
     app.quit()
 } else {
     app.on('second-instance', (_event, argv) => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-            if (mainWindow.isMinimized()) mainWindow.restore()
-            mainWindow.show()
-            mainWindow.focus()
-        }
+        // Anche dall'area di notifica: rilanciare Titan è il modo sicuro di ritrovare la finestra.
+        showMainWindow()
         const rtb = findRtbArg(argv)
         if (rtb) void importRtbFromFile(rtb)
     })
@@ -116,7 +115,8 @@ function hardenSession() {
     session.defaultSession.setPermissionCheckHandler((_wc, permission) => allowed.has(permission))
 }
 
-function createWindow(): void {
+/** @param startHidden avvio insieme al computer: Titan resta nell'area di notifica, senza finestra */
+function createWindow(startHidden = false): void {
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 1100,
@@ -141,7 +141,10 @@ function createWindow(): void {
         }
     })
 
-    let isShown = false;
+    // Avviato nascosto: la finestra si carica (il motore e il diario ci sono già) ma non si mostra.
+    let isShown = startHidden;
+
+    attachCloseHandler(mainWindow)
 
     mainWindow.on('ready-to-show', () => {
         if (!isShown) {
@@ -233,7 +236,7 @@ function createWindow(): void {
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
     // Seconda istanza: app.quit() è già stato richiesto sopra, non inizializzare nulla
     // (niente DB, niente engine, niente finestra).
     if (!gotTheLock) return
@@ -265,7 +268,22 @@ app.whenReady().then(() => {
         return
     }
 
-    createWindow()
+    const settings = await readSettings()
+    setupDesktop(() => mainWindow)
+    createWindow(process.argv.includes(HIDDEN_ARG) && settings.closeAction !== 'quit' && canHideToTray())
+
+    // «Avvia il motore all'apertura»: con l'avvio insieme al computer, Titan riprende a
+    // pubblicare da solo dopo un riavvio, senza che nessuno debba aprire la finestra.
+    if (settings.autoStartEngine) {
+        try {
+            if (BotManager.getBots().some(b => b.is_active)) {
+                getBotEngine().start()
+                TitanLogger.log(tm('autoStarted'))
+            }
+        } catch (e) {
+            console.error('Avvio automatico del motore non riuscito:', e)
+        }
+    }
 
     if (!is.dev) {
         // autoDownload = false: l'utente decide se scaricare tramite la schermata di aggiornamento
@@ -313,6 +331,8 @@ app.on('window-all-closed', () => {
 // Nota: app.exit() (uncaughtException, import-database) NON scatena before-quit — in quei
 // percorsi la chiusura è già gestita o volutamente forzata.
 app.on('before-quit', () => {
+    // Da qui la X non chiede più nulla: l'uscita è decisa (menu, aggiornamento, sistema).
+    markQuitting()
     try {
         getBotEngine().stop()
     } catch (e) {

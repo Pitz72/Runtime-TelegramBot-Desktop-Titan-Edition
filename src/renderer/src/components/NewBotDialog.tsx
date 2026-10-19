@@ -4,6 +4,7 @@ import { Dialog } from './ui/Dialog';
 import { Button, IconButton } from './ui/Button';
 import { TextField } from './ui/Controls';
 import { useTranslation } from '../locales/I18nContext';
+import { BotCheck } from './BotCheck';
 import { errorMessage } from '../lib/errors';
 
 interface Props {
@@ -122,6 +123,7 @@ export function NewBotDialog({ open, onClose, onCreated }: Props) {
                     error={submitted ? errors.channel : ''}
                     required
                 />
+                <BotCheck token={token} channelId={channel} />
                 <TextField
                     label={t('botForm.startDate')}
                     hint={t('botForm.startDateHint')}

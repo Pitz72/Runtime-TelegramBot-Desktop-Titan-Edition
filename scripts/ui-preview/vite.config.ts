@@ -11,7 +11,7 @@ const root = path.resolve(here, '..', '..')
  *
  * Niente plugin di Electron: la pagina monta l'app vera con un `window.api` finto
  * (mock-api.ts). Parametri utili: ?empty (nessun bot), ?whatsnew (schermata novità),
- * ?reduce (animazioni ridotte), ?axe (audit di accessibilità al caricamento, risultato in window.__axe).
+ * ?reduce (animazioni ridotte), ?autostart (motore già acceso all'apertura), ?axe (audit di accessibilità al caricamento, risultato in window.__axe).
  *
  * `cacheDir` separata e `dedupe` di React: senza, convivono due copie di React
  * (framer-motion ne prende una, l'app l'altra) e gli hook esplodono.

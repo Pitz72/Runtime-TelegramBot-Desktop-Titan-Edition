@@ -1,6 +1,6 @@
 import { Telegram } from 'telegraf';
 import { TitanLogger } from '../logger';
-import { classifyTelegramError, escapeHtml, escapeUrl, type TelegramErrorKind } from './rules';
+import { classifyTelegramError, escapeHtml, escapeUrl, normalizeChannelId, type TelegramErrorKind } from './rules';
 
 /**
  * Esito di un invio. Chi chiama decide cosa fare del contenuto in base a `kind`
@@ -11,6 +11,11 @@ import { classifyTelegramError, escapeHtml, escapeUrl, type TelegramErrorKind } 
 export type SendResult =
     | { ok: true }
     | { ok: false; kind: TelegramErrorKind | 'aborted'; error: string };
+
+export interface SendOptions {
+    /** Pubblica senza suono: gli iscritti ricevono il messaggio senza squillo né vibrazione */
+    silent?: boolean;
+}
 
 /** Pause tra i tentativi per gli errori transitori: ~35 secondi in tutto. */
 const TRANSIENT_BACKOFF_MS = [5000, 10000, 20000];
@@ -24,35 +29,7 @@ export class TelegramClient {
 
     constructor(token: string, channelId: string) {
         this.client = new Telegram(token);
-        this.channelId = TelegramClient.normalizeChannelId(channelId);
-    }
-
-    /**
-     * Normalizes channel ID from various formats:
-     * - "https://t.me/MyChannel" → "@MyChannel"
-     * - "t.me/MyChannel" → "@MyChannel"
-     * - "MyChannel" → "@MyChannel"
-     * - "@MyChannel" → "@MyChannel" (already correct)
-     * - "-1001234567890" → "-1001234567890" (numeric ID, keep as-is)
-     */
-    private static normalizeChannelId(raw: string): string {
-        let id = raw.trim();
-
-        // Strip URL prefixes
-        id = id.replace(/^https?:\/\//i, '');
-        id = id.replace(/^t\.me\//i, '');
-
-        // If it's a numeric ID (possibly negative), keep as-is
-        if (/^-?\d+$/.test(id)) {
-            return id;
-        }
-
-        // Ensure @ prefix for username-based channels
-        if (!id.startsWith('@')) {
-            id = '@' + id;
-        }
-
-        return id;
+        this.channelId = normalizeChannelId(channelId);
     }
 
     /**
@@ -65,7 +42,7 @@ export class TelegramClient {
         this.aborted = true;
     }
 
-    async sendFormattedMessage(item: any, template: string | null, type: 'podcast' | 'news' | 'youtube'): Promise<SendResult> {
+    async sendFormattedMessage(item: any, template: string | null, type: 'podcast' | 'news' | 'youtube', options: SendOptions = {}): Promise<SendResult> {
         let text = template;
 
         if (!text || text.trim() === '') {
@@ -94,10 +71,10 @@ export class TelegramClient {
         const previewHack = safeImage ? `<a href="${safeImage}">&#8203;</a>` : "";
         const finalMessage = previewHack + text;
 
-        return this.sendMessage(finalMessage);
+        return this.sendMessage(finalMessage, options);
     }
 
-    async sendMessage(text: string): Promise<SendResult> {
+    async sendMessage(text: string, options: SendOptions = {}): Promise<SendResult> {
         let transientAttempts = 0;
         let floodWaits = 0;
         let previewDisabled = false;
@@ -110,6 +87,7 @@ export class TelegramClient {
             try {
                 await this.client.sendMessage(this.channelId, text, {
                     parse_mode: 'HTML',
+                    disable_notification: options.silent === true,
                     link_preview_options: previewDisabled
                         ? { is_disabled: true }
                         : { is_disabled: false, show_above_text: true },

@@ -5,7 +5,7 @@ import { safeStorage } from 'electron';
 import nodeCrypto from 'node:crypto';
 import { encryptToken, decryptToken } from '../crypto';
 import { validateFeedUrl } from './parser';
-import { parseStartDate } from './rules';
+import { MUTE_MODES, parseStartDate, type MuteMode } from './rules';
 
 // --- RTB Import Validation ---
 // Stesso set di regole applicato dagli handler IPC (ipc.ts) per create-bot/add-feed,
@@ -120,58 +120,87 @@ function decryptTokenFromExport(data: string): string {
     return data;
 }
 
+/**
+ * Comportamento del bot aggiunto con lo schema v13: avvio silenzioso e pubblicazione senza
+ * suono. Un oggetto a parte invece di altri parametri in coda a `createBot`/`updateBot`,
+ * che ne avevano già dodici. In `updateBot` un campo assente vuol dire «lascia com'è».
+ */
+export interface BotBehavior {
+    silentStart?: boolean;
+    muteMode?: MuteMode;
+    muteFrom?: string;
+    muteUntil?: string;
+}
+
+/** Riga del DB → BotConfig: token decifrato, booleani SQLite (0/1) in boolean — fix #18. */
+function rowToBot(row: any): BotConfig {
+    return {
+        ...row,
+        token: decryptToken(row.token),
+        is_active: row.is_active === 1,
+        notifications_enabled: row.notifications_enabled === 1,
+        silent_start: row.silent_start === 1,
+        mute_mode: MUTE_MODES.includes(row.mute_mode) ? row.mute_mode : 'off',
+        mute_from: TIME_REGEX.test(row.mute_from ?? '') ? row.mute_from : '22:00',
+        mute_until: TIME_REGEX.test(row.mute_until ?? '') ? row.mute_until : '07:00',
+    } as BotConfig;
+}
+
+/** Il comportamento di un bot letto da un profilo .rtb: valori sconosciuti → predefiniti. */
+function rtbBehavior(source: any): BotBehavior {
+    return {
+        silentStart: source?.silentStart === true || source?.silent_start === true || source?.silent_start === 1,
+        muteMode: MUTE_MODES.includes(source?.muteMode ?? source?.mute_mode) ? (source.muteMode ?? source.mute_mode) : 'off',
+        muteFrom: rtbAssertTimeOrDefault(source?.muteFrom ?? source?.mute_from, '22:00'),
+        muteUntil: rtbAssertTimeOrDefault(source?.muteUntil ?? source?.mute_until, '07:00'),
+    };
+}
+
 export class BotManager {
     // --- BOTS ---
     static getBots(): BotConfig[] {
-        const bots = db().prepare('SELECT * FROM bots ORDER BY created_at DESC').all() as any[];
-        return bots.map(bot => {
-            const decrypted = decryptToken(bot.token);
-            // Migrazione lazy: se il token era in formato legacy (nessun prefisso),
-            // lo re-cifriamo nel formato corrente al prossimo write.
-            // Normalizza i booleani SQLite (0/1) in boolean TypeScript — fix #18
-            return {
-                ...bot,
-                token: decrypted,
-                is_active: (bot.is_active as number) === 1,
-                notifications_enabled: (bot.notifications_enabled as number) === 1,
-                silent_start: (bot.silent_start as number) === 1,
-            } as BotConfig;
-        });
+        // Il token in formato legacy (senza prefisso) si legge comunque e torna nel formato
+        // corrente alla prossima scrittura.
+        const rows = db().prepare('SELECT * FROM bots ORDER BY created_at DESC').all() as any[];
+        return rows.map(rowToBot);
     }
 
     /** Un solo bot, con il token decifrato — `null` se non esiste (più). */
     static getBot(id: number): BotConfig | null {
-        const bot = db().prepare('SELECT * FROM bots WHERE id = ?').get(id) as any;
-        if (!bot) return null;
-        return {
-            ...bot,
-            token: decryptToken(bot.token),
-            is_active: bot.is_active === 1,
-            notifications_enabled: bot.notifications_enabled === 1,
-            silent_start: bot.silent_start === 1,
-        } as BotConfig;
+        const row = db().prepare('SELECT * FROM bots WHERE id = ?').get(id) as any;
+        return row ? rowToBot(row) : null;
     }
 
-    static createBot(name: string, token: string, channelId: string, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, silentStart?: boolean): number | bigint {
+    static createBot(name: string, token: string, channelId: string, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, behavior: BotBehavior = {}): number | bigint {
         const date = startDate || new Date().toISOString();
         const interval = checkInterval || 15;
         const notif = notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : 1;
         const sFrom = sendFrom || '00:00';
         const sUntil = sendUntil || '23:59';
         const secureToken = encryptToken(token);
-        const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup, silent_start) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        const info = stmt.run(name, secureToken, channelId, date, interval, notif, sFrom, sUntil, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null, silentStart ? 1 : 0);
+        const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup, silent_start, mute_mode, mute_from, mute_until) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const info = stmt.run(
+            name, secureToken, channelId, date, interval, notif, sFrom, sUntil,
+            templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null,
+            behavior.silentStart ? 1 : 0, behavior.muteMode ?? 'off', behavior.muteFrom ?? '22:00', behavior.muteUntil ?? '07:00',
+        );
         return info.lastInsertRowid;
     }
 
-    static updateBot(id: number, name: string, token: string, channelId: string, isActive: boolean, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, silentStart?: boolean) {
+    static updateBot(id: number, name: string, token: string, channelId: string, isActive: boolean, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, behavior: BotBehavior = {}) {
         const secureToken = encryptToken(token);
         const stmt = db().prepare(
-            'UPDATE bots SET name = ?, token = ?, channel_id = ?, is_active = ?, start_date = COALESCE(?, start_date), check_interval = COALESCE(?, check_interval), notifications_enabled = COALESCE(?, notifications_enabled), send_from = COALESCE(?, send_from), send_until = COALESCE(?, send_until), template_podcast = ?, template_news = ?, template_youtube = ?, template_startup = ?, silent_start = COALESCE(?, silent_start) WHERE id = ?'
+            'UPDATE bots SET name = ?, token = ?, channel_id = ?, is_active = ?, start_date = COALESCE(?, start_date), check_interval = COALESCE(?, check_interval), notifications_enabled = COALESCE(?, notifications_enabled), send_from = COALESCE(?, send_from), send_until = COALESCE(?, send_until), template_podcast = ?, template_news = ?, template_youtube = ?, template_startup = ?, silent_start = COALESCE(?, silent_start), mute_mode = COALESCE(?, mute_mode), mute_from = COALESCE(?, mute_from), mute_until = COALESCE(?, mute_until) WHERE id = ?'
         );
-        stmt.run(name, secureToken, channelId, isActive ? 1 : 0, startDate || null, checkInterval || null, notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : null, sendFrom || null, sendUntil || null, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null, silentStart !== undefined ? (silentStart ? 1 : 0) : null, id);
+        stmt.run(
+            name, secureToken, channelId, isActive ? 1 : 0, startDate || null, checkInterval || null,
+            notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : null, sendFrom || null, sendUntil || null,
+            templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null,
+            behavior.silentStart !== undefined ? (behavior.silentStart ? 1 : 0) : null,
+            behavior.muteMode ?? null, behavior.muteFrom ?? null, behavior.muteUntil ?? null,
+            id,
+        );
     }
-
     static deleteBot(id: number) {
         db().prepare('DELETE FROM bots WHERE id = ?').run(id);
     }
@@ -358,6 +387,9 @@ export class BotManager {
                 notifications_enabled: bot.notifications_enabled,
                 is_active: bot.is_active,
                 silent_start: bot.silent_start,
+                mute_mode: bot.mute_mode,
+                mute_from: bot.mute_from,
+                mute_until: bot.mute_until,
                 feeds: feeds.map(f => ({
                     name: f.name,
                     url: f.url,
@@ -400,7 +432,7 @@ export class BotManager {
                     bot.template_news,
                     bot.template_youtube,
                     bot.template_startup,
-                    bot.silent_start === true || bot.silent_start === 1
+                    rtbBehavior(bot)
                 );
 
                 if (bot.is_active === 0 || bot.is_active === false) {
@@ -456,7 +488,10 @@ export class BotManager {
                     template_news: botRecord.template_news,
                     template_youtube: botRecord.template_youtube,
                     template_startup: botRecord.template_startup,
-                    silentStart: botRecord.silent_start === 1
+                    silentStart: botRecord.silent_start === 1,
+                    muteMode: botRecord.mute_mode ?? 'off',
+                    muteFrom: botRecord.mute_from ?? '22:00',
+                    muteUntil: botRecord.mute_until ?? '07:00'
                 },
                 feeds: feeds.map(f => ({
                     name: f.name,
@@ -503,7 +538,7 @@ export class BotManager {
                     data.bot.template_news,
                     data.bot.template_youtube,
                     data.bot.template_startup,
-                    data.bot.silentStart === true
+                    rtbBehavior(data.bot)
                 ) as number;
 
                 // Aggiorna is_active (che createBot() omette partendo da acceso)

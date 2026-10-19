@@ -35,6 +35,8 @@ Nasce nel 2025 come script Python da terminale per i canali di [Runtime Radio](h
 - **Quiet Hours** — fasce di silenzio per bot. I contenuti si accumulano in una coda persistente su disco e vengono smaltiti alla ripresa, anche dopo un riavvio.
 - **Template** — editor visuale per i messaggi Telegram con variabili (`{{title}}`, `{{link}}`, `{{summary}}`, `{{feedName}}`) e validatore in tempo reale. Quattro modelli separati: avvio, news, podcast, YouTube.
 - **Retry queue** — gli invii falliti vengono riaccodati fino a 3 tentativi.
+- **Sempre al lavoro** — icona nell'area di notifica, avvio insieme al computer e motore che parte da solo all'apertura. A motore acceso, chiudere la finestra chiede prima cosa fare.
+- **Prova del bot** — token, destinazione e permessi verificati con Telegram prima di partire, senza pubblicare nulla.
 
 ### Avanzate
 - **Filtro per parole chiave** — include/exclude per singolo feed.
@@ -43,7 +45,9 @@ Nasce nel 2025 come script Python da terminale per i canali di [Runtime Radio](h
 - **Anteprima template** — resa inline con dati campione.
 - **Import OPML** — importazione in blocco, senza dipendenze esterne, con validazione anti-SSRF.
 - **Digest** — accumula i contenuti di un feed per un intervallo configurabile (da 1 ora a 7 giorni) e li invia in un unico messaggio.
-- **Performance Mode** — disattiva scanline, blur, glow e animazioni sulle macchine lente.
+- **Controlla adesso** — un giro immediato su tutte le sorgenti attive, senza aspettare il loro intervallo.
+- **Avvio silenzioso e pubblicazione senza suono** — per bot: niente messaggio di avvio nel canale; messaggi senza suono sempre o in una fascia oraria.
+- **Riduci effetti e animazioni** — interfaccia ferma per chi la preferisce o per le macchine lente; vale anche la preferenza del sistema.
 - **Aggiornamento automatico** — controllo all'avvio, download e installazione su conferma, con schermata delle novità al primo riavvio.
 - **Documentazione integrata** — guida rapida a schermo nella lingua corrente e manuale completo in PDF.
 

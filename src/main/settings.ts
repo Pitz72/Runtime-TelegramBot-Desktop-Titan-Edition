@@ -2,8 +2,20 @@ import { app, BrowserWindow } from 'electron';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 
+/**
+ * Cosa fa la X della finestra: `ask` chiede se il motore è acceso (e altrimenti chiude),
+ * `tray` nasconde Titan nell'area di notifica, `quit` chiude sempre.
+ */
+export type CloseAction = 'ask' | 'tray' | 'quit';
+export const CLOSE_ACTIONS: readonly CloseAction[] = ['ask', 'tray', 'quit'];
+
 /** Impostazioni dell'applicazione (titan-settings.json in userData). */
 export interface TitanSettings {
+    closeAction?: CloseAction;
+    /** Il motore parte da solo all'apertura di Titan */
+    autoStartEngine?: boolean;
+    /** L'avviso «Titan continua nell'area di notifica» è già comparso una volta */
+    trayHintShown?: boolean;
     /** «Riduci effetti e animazioni»: nome storico, la chiave resta per compatibilità */
     performanceMode: boolean;
     lastSeenVersion?: string;

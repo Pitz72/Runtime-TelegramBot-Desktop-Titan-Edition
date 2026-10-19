@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import { BotConfig, FeedConfig, LogEntry } from '../../shared/types'
+import { BotCheckResult, BotConfig, DesktopSettings, FeedConfig, LogEntry } from '../../shared/types'
 
 export interface TitanAPI {
     // Bot Management
@@ -23,7 +23,11 @@ export interface TitanAPI {
         templateYoutube?: string
         templateStartup?: string
         silentStart?: boolean
+        muteMode?: 'off' | 'always' | 'window'
+        muteFrom?: string
+        muteUntil?: string
     }) => Promise<void>
+    testBot: (data: { token: string; channelId: string }) => Promise<BotCheckResult>
 
     // Feed Management
     getFeeds: (botId: number) => Promise<FeedConfig[]>
@@ -37,7 +41,12 @@ export interface TitanAPI {
     // Engine
     startBot: () => Promise<{ success: boolean; error?: string }>
     stopBot: () => Promise<{ success: boolean }>
-    getBotStatus: () => Promise<{ running: boolean }>
+    getBotStatus: () => Promise<{ running: boolean; scanning?: boolean }>
+    scanNow: () => Promise<{ status: 'started' | 'busy' | 'stopped' }>
+    getRecentLogs: () => Promise<LogEntry[]>
+    onEngineStatus: (callback: (info: { running: boolean }) => void) => () => void
+    getDesktopSettings: () => Promise<DesktopSettings>
+    setDesktopSettings: (data: { closeAction?: DesktopSettings['closeAction']; autoStartEngine?: boolean; openAtLogin?: boolean }) => Promise<DesktopSettings>
     onLog: (callback: (message: string) => void) => void
     onLogsBatch: (callback: (messages: LogEntry[]) => void) => void
     onYouTubeApiError: (callback: () => void) => void

@@ -67,35 +67,61 @@ export function Dashboard({ updater }: { updater?: Updater }) {
     }, [error]);
 
     const addLocalLog = useCallback((message: string, level: LogEntry['level']) => {
-        setLogs(prev => [{ id: --localLogId.current, level, message: `[${new Date().toLocaleTimeString()}] ${message}` }, ...prev].slice(0, MAX_LOGS));
+        setLogs(prev => [{ id: --localLogId.current, level, time: Date.now(), message: `[${new Date().toLocaleTimeString()}] ${message}` }, ...prev].slice(0, MAX_LOGS));
     }, []);
 
     useEffect(() => {
         loadBots();
-        // Lo stato vero del motore vive nel main process e sopravvive a un ricaricamento.
-        window.api.getBotStatus().then(s => setRunning(s.running)).catch(() => {});
 
-        window.api.onLogsBatch((batch: LogEntry[]) => {
+        /** Stato che si ricava dalle righe: sorgente in lettura, ora del prossimo giro, motore acceso. */
+        const follow = (batch: LogEntry[]) => {
             for (const entry of batch) {
                 const type = entry.event?.type;
                 if (type === 'source-start') setActivity(entry.event!.source ?? null);
                 else if (type === 'scan-end' || type === 'engine-stop') setActivity(null);
-                if (type === 'next-scan' && entry.event?.count) setNextScanAt(new Date(Date.now() + entry.event.count * 60000));
+                if (type === 'next-scan' && entry.event?.count) setNextScanAt(new Date((entry.time ?? Date.now()) + entry.event.count * 60000));
                 if (type === 'engine-stop') setNextScanAt(null);
                 if (type === 'engine-start') setRunning(true);
                 if (type === 'engine-stop') setRunning(false);
             }
-            setLogs(prev => [...[...batch].reverse(), ...prev].slice(0, MAX_LOGS));
+        };
+        /** Righe nuove in cima, senza doppioni: l'archivio recente e i lotti in arrivo si sovrappongono. */
+        const merge = (incoming: LogEntry[]) => setLogs(prev => {
+            const seen = new Set(prev.map(l => l.id));
+            const fresh = incoming.filter(l => !seen.has(l.id));
+            if (fresh.length === 0) return prev;
+            return [...fresh, ...prev].sort((a, b) => (b.time ?? 0) - (a.time ?? 0) || b.id - a.id).slice(0, MAX_LOGS);
+        });
+
+        window.api.onLogsBatch((batch: LogEntry[]) => {
+            follow(batch);
+            merge(batch);
+        });
+
+        // Quello che è successo prima che il diario esistesse: motore partito da solo
+        // all'apertura, o al lavoro mentre si era sulla schermata d'ingresso.
+        window.api.getRecentLogs?.().then(recent => {
+            follow(recent);
+            merge(recent);
+        }).catch(() => {});
+
+        // Lo stato vero del motore vive nel main process e sopravvive a un ricaricamento.
+        // Va letto dopo l'archivio: è lui ad avere l'ultima parola.
+        window.api.getBotStatus().then(s => setRunning(s.running)).catch(() => {});
+        const offStatus = window.api.onEngineStatus?.(({ running: on }) => {
+            setRunning(on);
+            if (!on) { setActivity(null); setNextScanAt(null); }
         });
         window.api.onYouTubeApiError(() => {
             error(t('youtubeError.message'), t('youtubeError.title'));
         });
 
         // Profilo .rtb aperto con doppio clic: il main lo importa e avvisa.
-        return window.api.onBotsChanged(({ botId }) => {
+        const offBots = window.api.onBotsChanged(({ botId }) => {
             loadBots(botId);
             if (botId) success(t('bots.imported'));
         });
+        return () => { offBots(); offStatus?.(); };
     }, []);
 
     // Statistiche del bot selezionato: subito, e ogni 30 secondi a motore acceso.
@@ -130,6 +156,16 @@ export function Dashboard({ updater }: { updater?: Updater }) {
             error(errorMessage(e));
         } finally {
             setToggling(false);
+        }
+    };
+
+    const scanNow = async () => {
+        try {
+            const { status } = await window.api.scanNow();
+            if (status === 'busy') toast(t('engine.scanBusy'), 'info');
+            else if (status === 'stopped') toast(t('engine.stoppedHint'), 'info');
+        } catch (e) {
+            error(errorMessage(e));
         }
     };
 
@@ -185,6 +221,7 @@ export function Dashboard({ updater }: { updater?: Updater }) {
                 activity={activity}
                 canStart={bots.length > 0}
                 onToggle={toggleEngine}
+                onScanNow={scanNow}
                 onOpenSettings={() => setShowSystem(true)}
                 onOpenGuide={() => setShowGuide(true)}
             />

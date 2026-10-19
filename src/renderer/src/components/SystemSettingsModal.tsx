@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
     Settings, Globe, RefreshCw, Accessibility, Database, Info, Download, Upload, FileCode, BookOpen,
-    Heart, Mail, Scale, FileText, CheckCircle2, Sparkles, Github,
+    Heart, Mail, Scale, FileText, CheckCircle2, Sparkles, Github, Power,
 } from 'lucide-react';
+import type { DesktopSettings } from '../../../shared/types';
 import { Dialog } from './ui/Dialog';
 import { Button } from './ui/Button';
 import { SelectField, Switch, Tabs, TabPanel } from './ui/Controls';
@@ -48,7 +49,21 @@ export function SystemSettingsModal({ open, onClose, updater, onBotsImported, on
     const [busy, setBusy] = useState<string | null>(null);
     const [license, setLicense] = useState<{ kind: 'app' | 'third-party'; text: string } | null>(null);
 
-    useEffect(() => { if (open) setTab('general'); }, [open]);
+    const [desktop, setDesktop] = useState<DesktopSettings | null>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        setTab('general');
+        window.api.getDesktopSettings?.().then(setDesktop).catch(() => setDesktop(null));
+    }, [open]);
+
+    const changeDesktop = async (patch: { closeAction?: DesktopSettings['closeAction']; autoStartEngine?: boolean; openAtLogin?: boolean }) => {
+        try {
+            setDesktop(await window.api.setDesktopSettings(patch));
+        } catch (e) {
+            error(errorMessage(e));
+        }
+    };
 
     const run = async (key: string, fn: () => Promise<void>) => {
         setBusy(key);
@@ -140,6 +155,39 @@ export function SystemSettingsModal({ open, onClose, updater, onBotsImported, on
                                     </div>
                                 </fieldset>
                             </Section>
+
+                            {desktop && (
+                                <Section icon={Power} title={t('system.desktop.title')} text={t('system.desktop.text')}>
+                                    <div className="space-y-4">
+                                        <Switch
+                                            checked={desktop.openAtLogin.enabled}
+                                            disabled={!desktop.openAtLogin.supported}
+                                            onChange={on => changeDesktop({ openAtLogin: on })}
+                                            label={t('system.desktop.openAtLogin')}
+                                            description={desktop.openAtLogin.supported ? t('system.desktop.openAtLoginHint') : t('system.desktop.openAtLoginUnsupported')}
+                                        />
+                                        <div className="h-px bg-line" aria-hidden="true" />
+                                        <Switch
+                                            checked={desktop.autoStartEngine}
+                                            onChange={on => changeDesktop({ autoStartEngine: on })}
+                                            label={t('system.desktop.autoStart')}
+                                            description={t('system.desktop.autoStartHint')}
+                                        />
+                                        <div className="h-px bg-line" aria-hidden="true" />
+                                        <SelectField
+                                            label={t('system.desktop.close')}
+                                            hint={desktop.trayAvailable ? t('system.desktop.closeHint') : t('system.desktop.noTray')}
+                                            value={desktop.closeAction}
+                                            onChange={e => changeDesktop({ closeAction: e.target.value as DesktopSettings['closeAction'] })}
+                                            containerClassName="max-w-md"
+                                        >
+                                            <option value="ask">{t('system.desktop.closeAsk')}</option>
+                                            <option value="tray" disabled={!desktop.trayAvailable}>{t('system.desktop.closeTray')}</option>
+                                            <option value="quit">{t('system.desktop.closeQuit')}</option>
+                                        </SelectField>
+                                    </div>
+                                </Section>
+                            )}
 
                             <Section icon={RefreshCw} title={t('updater.sectionTitle')} text={t('updater.sectionDesc')}>
                                 <div className="flex flex-wrap items-center gap-3">

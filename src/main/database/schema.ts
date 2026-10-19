@@ -162,6 +162,9 @@ export function initDB() {
             notifications_enabled BOOLEAN DEFAULT 1,
             is_active BOOLEAN DEFAULT 1,
             silent_start BOOLEAN DEFAULT 0,
+            mute_mode TEXT DEFAULT 'off',
+            mute_from TEXT DEFAULT '22:00',
+            mute_until TEXT DEFAULT '07:00',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -455,9 +458,13 @@ export function initDB() {
     }
 
     if (currentVersion < 13) {
-        console.log("Migration v13: avvio silenzioso per bot...");
-        // Default 0: chi aggiorna continua a ricevere il messaggio di avvio come prima.
+        console.log("Migration v13: avvio silenzioso e pubblicazione senza suono per bot...");
+        // Default: tutto come prima. Chi aggiorna riceve ancora il messaggio di avvio e le
+        // notifiche con il suono, finché non decide altrimenti.
         try { db.exec(`ALTER TABLE bots ADD COLUMN silent_start BOOLEAN DEFAULT 0`); } catch (e) { }
+        try { db.exec(`ALTER TABLE bots ADD COLUMN mute_mode TEXT DEFAULT 'off'`); } catch (e) { }
+        try { db.exec(`ALTER TABLE bots ADD COLUMN mute_from TEXT DEFAULT '22:00'`); } catch (e) { }
+        try { db.exec(`ALTER TABLE bots ADD COLUMN mute_until TEXT DEFAULT '07:00'`); } catch (e) { }
         db.pragma('user_version = 13');
         currentVersion = 13;
         console.log("Database version set to 13");
@@ -465,9 +472,17 @@ export function initDB() {
 
     try {
         const botCols = db.pragma('table_info(bots)') as any[];
-        if (!botCols.some((c: any) => c.name === 'silent_start')) {
-            console.warn('Safety fix: silent_start mancante dalla tabella bots — aggiunto retroattivamente.');
-            db.exec(`ALTER TABLE bots ADD COLUMN silent_start BOOLEAN DEFAULT 0`);
+        const v13Columns: Array<[string, string]> = [
+            ['silent_start', 'BOOLEAN DEFAULT 0'],
+            ['mute_mode', `TEXT DEFAULT 'off'`],
+            ['mute_from', `TEXT DEFAULT '22:00'`],
+            ['mute_until', `TEXT DEFAULT '07:00'`],
+        ];
+        for (const [name, definition] of v13Columns) {
+            if (!botCols.some((c: any) => c.name === name)) {
+                console.warn(`Safety fix: ${name} mancante dalla tabella bots — aggiunto retroattivamente.`);
+                db.exec(`ALTER TABLE bots ADD COLUMN ${name} ${definition}`);
+            }
         }
     } catch (e) {
         console.error('Safety check bots columns fallito:', e);

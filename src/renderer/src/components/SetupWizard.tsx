@@ -6,6 +6,7 @@ import { errorMessage } from '../lib/errors';
 import { Button } from './ui/Button';
 import { TextField } from './ui/Controls';
 import { TokenVisibility, TOKEN_SHAPE } from './NewBotDialog';
+import { BotCheck } from './BotCheck';
 
 interface Props {
     onComplete: (name: string, token: string, channel: string, startDate: string) => Promise<void> | void;
@@ -69,14 +70,16 @@ export function SetupWizard({ onComplete }: Props) {
     }[step as 1 | 2 | 3 | 4];
 
     return (
-        <main className="relative flex h-screen items-center justify-center overflow-y-auto bg-canvas px-6 py-10">
+        <main className="relative h-screen overflow-y-auto bg-canvas">
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0"
+                className="pointer-events-none fixed inset-0"
                 style={{ background: 'radial-gradient(60% 50% at 50% 0%, rgba(37, 99, 235, 0.18), transparent 70%)' }}
             />
 
-            <div className="relative w-full max-w-md">
+            {/* Centrato quando c'è spazio, scorrevole dall'inizio quando non c'è (vedi IntroScreen) */}
+            <div className="relative flex min-h-full flex-col items-center px-6 py-10">
+            <div className="my-auto w-full max-w-md">
                 <div className="mb-8 text-center">
                     <img src={logo} alt="" className="mx-auto mb-4 h-16 w-16" />
                     <h1 className="text-2xl font-semibold text-fg">{t('setup.title')}</h1>
@@ -124,6 +127,13 @@ export function SetupWizard({ onComplete }: Props) {
                         trailing={step === 2 ? <TokenVisibility visible={showToken} onToggle={() => setShowToken(v => !v)} /> : undefined}
                     />
 
+                    {/* Al passo del canale token e destinazione ci sono entrambi: si possono provare subito */}
+                    {step === 3 && (
+                        <div className="mt-4">
+                            <BotCheck token={token} channelId={channel} headingLevel={2} />
+                        </div>
+                    )}
+
                     <div className="mt-6 flex items-center justify-between gap-3">
                         <Button variant="ghost" icon={ArrowLeft} disabled={step === 1} onClick={() => setStep(s => Math.max(1, s - 1))}>
                             {t('common.back')}
@@ -135,6 +145,7 @@ export function SetupWizard({ onComplete }: Props) {
                 </form>
 
                 <p className="mt-6 text-center text-xs text-fg-3">{t('app.copyright')}</p>
+            </div>
             </div>
         </main>
     );

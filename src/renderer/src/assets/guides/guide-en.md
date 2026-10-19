@@ -41,12 +41,16 @@ Each source has its own switch (active or paused) and buttons to edit or delete 
 With the token entered and the sources added, all that is left is to start.
 *   Click **Start the engine**, at the top right. There is a single engine and it works for every active bot.
 *   Next to the button you see its status ("Engine running") and the time of the next check.
+*   **Check now** reads every active source right away, without waiting for its interval.
 *   In the **Activity** panel, **Journal** view, follow scans, items found and items published. The **Console** view shows the full log.
 
 ---
 
 ### 💡 Useful Tips & Troubleshooting
 *   **Publishing hours:** in *Bot settings → Schedule* choose when the bot may publish. If you set 08:00 to 22:00, overnight news is not lost: it waits in a queue and goes out at 08:00.
+*   **Test the bot:** before starting the engine, in *Bot settings → General* (or while creating a bot) the **Test** button checks with Telegram the token, the destination and that the bot can post there. It writes nothing in the channel. The most common problem it finds: the bot added to the channel as a subscriber instead of an administrator.
+*   **Without sound:** in *Bot settings → Schedule* you can have messages arrive without sound, always or only during set hours (at night, for example). Subscribers receive them as usual, but their phone does not ring.
+*   **Keeping it running:** in *Settings → General → Startup and closing* Titan can start with the computer, start the engine by itself and stay in the notification area when you close the window. If you close the window while the engine is running, Titan asks what to do instead of silently stopping your bots.
 *   **Silent start:** when the engine starts, every bot announces in its channel that it is online. For chats and channels that would rather not see it, turn on *Bot settings → General → Silent start*: that bot starts and works like the others, but without posting the startup message.
 *   **YouTube errors:** if errors appear on YouTube channels, YouTube has usually changed something in its pages. Pause that source with its switch and check whether an application update is available.
 *   **Changing PC:** to move a bot to another computer, do not copy the files: use *Bot settings → Advanced → Export*. The .rtb file carries the sources, filters, templates and publishing hours. The token does not travel: it is encrypted and tied to the originating computer, so on the new PC it must be re-entered by hand. On the new PC, double-clicking the .rtb file imports it.

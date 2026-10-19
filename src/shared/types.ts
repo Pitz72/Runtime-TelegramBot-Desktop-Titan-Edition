@@ -52,6 +52,8 @@ export interface LogEntry {
     level: LogLevel;
     /** Messaggio formattato con timestamp: "[HH:MM:SS] testo" */
     message: string;
+    /** Istante di emissione in ms — serve a chi legge la riga più tardi (l'ora del prossimo giro) */
+    time?: number;
     /** Evento strutturato, presente solo sulle righe che il diario sa disegnare — Fase 7 */
     event?: ScanEvent;
 }
@@ -73,6 +75,12 @@ export interface BotConfig {
     is_active: boolean;
     /** Avvio silenzioso: all'avvio del motore il bot non pubblica il messaggio di avvio (schema v13) */
     silent_start: boolean;
+    /** Pubblicazione senza suono: mai, sempre o in una fascia oraria (schema v13, vedi `isMuted`) */
+    mute_mode: 'off' | 'always' | 'window';
+    /** Inizio della fascia senza suono, "HH:MM" */
+    mute_from: string;
+    /** Fine della fascia senza suono, "HH:MM" */
+    mute_until: string;
 }
 
 export interface FeedConfig {
@@ -102,4 +110,20 @@ export interface RssItem {
     image?: string;
     feedName: string;
     id: string; // MD5 hash
+}
+
+/** Esito di «Prova il bot» (main/bot/check.ts): tre verifiche, nessun messaggio pubblicato. */
+export interface BotCheckResult {
+    token: { status: 'ok' | 'invalid' | 'network'; username?: string; error?: string };
+    chat: { status: 'ok' | 'notFound' | 'noAccess' | 'network' | 'skipped'; title?: string; type?: string; error?: string };
+    rights: { status: 'ok' | 'notMember' | 'notAdmin' | 'noPostRight' | 'restricted' | 'unknown' | 'network' | 'skipped'; error?: string };
+}
+
+/** Avvio e chiusura dell'applicazione (Impostazioni → Generale). */
+export interface DesktopSettings {
+    closeAction: 'ask' | 'tray' | 'quit';
+    autoStartEngine: boolean;
+    openAtLogin: { supported: boolean; enabled: boolean };
+    /** L'area di notifica esiste su questo desktop */
+    trayAvailable: boolean;
 }

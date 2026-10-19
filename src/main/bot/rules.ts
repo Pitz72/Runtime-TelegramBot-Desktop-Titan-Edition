@@ -192,6 +192,66 @@ export function buildDigestMessage(
     return { text: header + lines.join('\n\n') + footer, included };
 }
 
+// ─── Destinazione e permessi ─────────────────────────────────────────────────
+
+/**
+ * L'identificativo del canale nella forma che vuole Telegram, qualunque forma abbia scritto
+ * l'utente: «https://t.me/Canale», «t.me/Canale» e «Canale» diventano «@Canale»; un ID
+ * numerico (anche negativo, «-100…») resta com'è.
+ */
+export function normalizeChannelId(raw: string): string {
+    let id = raw.trim().replace(/^https?:\/\//i, '').replace(/^t\.me\//i, '');
+    if (/^-?\d+$/.test(id)) return id;
+    if (!id.startsWith('@')) id = '@' + id;
+    return id;
+}
+
+/** Esito della verifica dei permessi di pubblicazione del bot in una chat. */
+export type PostRight = 'ok' | 'notMember' | 'notAdmin' | 'noPostRight' | 'restricted';
+
+/**
+ * Il bot può pubblicare in questa chat? Si decide dal suo stato di membro (getChatMember).
+ *
+ * In un canale scrive solo un amministratore con il permesso «Pubblica messaggi»; in un
+ * gruppo basta essere membri, purché non limitati. È il guasto più comune dopo il token
+ * sbagliato: il bot aggiunto al canale come semplice iscritto.
+ */
+export function postingRight(
+    chatType: string,
+    member: { status: string; can_post_messages?: boolean; can_send_messages?: boolean },
+): PostRight {
+    const { status } = member;
+    if (status === 'left' || status === 'kicked') return 'notMember';
+    if (chatType === 'channel') {
+        if (status === 'creator') return 'ok';
+        if (status === 'administrator') return member.can_post_messages === false ? 'noPostRight' : 'ok';
+        return 'notAdmin';
+    }
+    if (status === 'restricted' && member.can_send_messages === false) return 'restricted';
+    return 'ok';
+}
+
+// ─── Notifiche senza suono ───────────────────────────────────────────────────
+
+/** `off` = notifiche normali; `always` = sempre senza suono; `window` = senza suono in una fascia oraria. */
+export type MuteMode = 'off' | 'always' | 'window';
+
+export const MUTE_MODES: readonly MuteMode[] = ['off', 'always', 'window'];
+
+/**
+ * True se il messaggio va pubblicato senza suono (`disable_notification` di Telegram):
+ * gli iscritti lo ricevono come sempre, ma il telefono non suona e non vibra. Utile di
+ * notte, o per i canali che pubblicano spesso. La fascia può scavalcare la mezzanotte.
+ */
+export function isMuted(
+    bot: { mute_mode?: string | null; mute_from?: string | null; mute_until?: string | null },
+    now = new Date(),
+): boolean {
+    if (bot.mute_mode === 'always') return true;
+    if (bot.mute_mode === 'window') return isTimeAllowed(bot.mute_from || '22:00', bot.mute_until || '07:00', now);
+    return false;
+}
+
 // ─── Messaggio di avvio ──────────────────────────────────────────────────────
 
 /**
