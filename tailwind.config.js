@@ -1,3 +1,16 @@
+/**
+ * Design system «Titan Blue» (2.4).
+ *
+ * I colori vengono tutti da src/renderer/src/theme/palette.json, la stessa fonte che
+ * scripts/check-contrast.mjs misura contro WCAG 2.2 AA: un colore che non regge il
+ * contrasto non entra. Nei componenti si usano solo questi nomi semantici, mai un esadecimale.
+ *
+ * Regola per le trasparenze: `/NN` va bene per sfondi decorativi e bordi, MAI per il colore
+ * di un testo o per lo sfondo su cui sta del testo — il controllo del contrasto non le vede.
+ * Per gli stati selezionati c'è `surface-4`, per gli avvisi i `*-soft`.
+ */
+const { colors } = require('./src/renderer/src/theme/palette.json');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -6,122 +19,48 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors,
       fontFamily: {
-        headline: ['"Space Grotesk"', 'sans-serif'],
-        body: ['"Inter"', 'sans-serif'],
-        titan: ['"Inter"', 'sans-serif'],
-        mono: ['"Fira Code"', 'monospace'],
-        machine: ['"Fira Code"', 'monospace'],
+        sans: ['"Inter Variable"', 'Inter', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['"Fira Code Variable"', '"Fira Code"', 'ui-monospace', 'Consolas', 'monospace'],
       },
-      colors: {
-        // ── Obsidian Pulse V2 — Surface Hierarchy ──
-        background:                '#050510',
-        'surface-container-lowest': '#0a0a0f',
-        'surface-container-low':    '#10101a',
-        'surface-container':        '#16162a',
-        'surface-container-high':   '#1a1a2e',
-        'surface-container-highest':'#1e2040',
-        'surface-variant':          '#1e2040',
-        'surface-dim':              '#050510',
-        'surface-bright':           '#252542',
-
-        // ── Text & Borders ──
-        'on-surface':         '#e0e7ff',
-        'on-surface-variant': '#bfdbfe',
-        'on-background':      '#e0e7ff',
-        'outline':            '#6b7280',
-        'outline-variant':    '#3b82f6',
-        'inverse-surface':    '#e0e7ff',
-        'inverse-on-surface': '#1e2040',
-
-        // ── Primary (Blue) ──
-        primary:              '#93c5fd',
-        'primary-container':  '#3b82f6',
-        'primary-fixed':      '#dbeafe',
-        'primary-fixed-dim':  '#93c5fd',
-        'on-primary':         '#1e3a8a',
-        'on-primary-fixed':   '#172554',
-        'on-primary-container':'#1e40af',
-        'inverse-primary':    '#2563eb',
-
-        // ── Secondary (Cyan) ──
-        secondary:              '#4cd7f6',
-        'secondary-container':  '#03b5d3',
-        'secondary-fixed':      '#acedff',
-        'secondary-fixed-dim':  '#4cd7f6',
-        'on-secondary':         '#003640',
-        'on-secondary-fixed':   '#001f26',
-        'on-secondary-container':'#00424e',
-
-        // ── Tertiary (Lavender) ──
-        tertiary:              '#d0bcff',
-        'tertiary-container':  '#a078ff',
-        'tertiary-fixed':      '#e9ddff',
-        'tertiary-fixed-dim':  '#d0bcff',
-        'on-tertiary':         '#3c0091',
-        'on-tertiary-fixed':   '#23005c',
-        'on-tertiary-container':'#340080',
-
-        // ── Error ──
-        error:              '#f87171',
-        'error-container':  '#7f1d1d',
-        'on-error':         '#450a0a',
-        'on-error-container':'#fecaca',
-
-        // ── Success (Emerald) ──
-        success:             '#34d399',
-        'success-container': '#064e3b',
-        'on-success':        '#022c22',
-
-        // ── Legacy (retrocompatibilità) ──
-        titan: {
-          50:  '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
-        },
-        dark: {
-          900: '#0a0a0f',
-          800: '#10101a',
-          700: '#16162a',
-          950: '#050510',
-        },
-        glow: {
-          blue: '#adc6ff',
-          cyan: '#4cd7f6',
+      // Scala tipografica di un'app desktop densa: il corpo è 14px, niente sotto i 12px.
+      // L'ingrandimento dell'interfaccia (Impostazioni → Accessibilità) scala tutto.
+      fontSize: {
+        xs: ['12px', { lineHeight: '16px' }],
+        sm: ['13px', { lineHeight: '20px' }],
+        base: ['14px', { lineHeight: '22px' }],
+        md: ['15px', { lineHeight: '22px' }],
+        lg: ['17px', { lineHeight: '24px' }],
+        xl: ['20px', { lineHeight: '28px' }],
+        '2xl': ['24px', { lineHeight: '32px' }],
+        '3xl': ['30px', { lineHeight: '36px' }],
+        '4xl': ['36px', { lineHeight: '40px' }],
+      },
+      borderRadius: {
+        sm: '6px',
+        DEFAULT: '8px',
+        md: '10px',
+        lg: '12px',
+        xl: '16px',
+        '2xl': '20px',
+      },
+      boxShadow: {
+        // Ombre morbide e corte: l'elevazione si legge, non si vede «brillare».
+        raised: '0 1px 0 0 rgba(255,255,255,0.04) inset, 0 1px 2px rgba(0,0,0,0.35)',
+        overlay: '0 1px 0 0 rgba(255,255,255,0.05) inset, 0 24px 48px -12px rgba(0,0,0,0.6), 0 8px 16px -8px rgba(0,0,0,0.5)',
+      },
+      transitionDuration: {
+        DEFAULT: '150ms',
+      },
+      keyframes: {
+        'pulse-dot': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.45' },
         },
       },
       animation: {
-        'ignition-pulse': 'ignition-pulse 2s ease-in-out infinite',
-        'ignition-ring':  'ignition-ring 3s linear infinite',
-        'scanline':       'scanline 8s linear infinite',
-        'glow-breathe':   'glow-breathe 4s ease-in-out infinite',
-        'ping-slow':      'ping 2s cubic-bezier(0,0,0.2,1) infinite',
-      },
-      keyframes: {
-        'ignition-pulse': {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(173,198,255,0.25), 0 0 60px rgba(76,215,246,0.1)' },
-          '50%':       { boxShadow: '0 0 40px rgba(173,198,255,0.5),  0 0 80px rgba(76,215,246,0.2)' },
-        },
-        'ignition-ring': {
-          '0%':   { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' },
-        },
-        'scanline': {
-          '0%':   { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100%)' },
-        },
-        'glow-breathe': {
-          '0%, 100%': { opacity: '0.3' },
-          '50%':       { opacity: '0.7' },
-        },
+        'pulse-dot': 'pulse-dot 2s ease-in-out infinite',
       },
     },
   },

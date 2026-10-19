@@ -1,373 +1,270 @@
-import React, { useState, useEffect } from 'react';
-import { Database, Download, FileCode, Globe, Zap, ShieldCheck, Upload, X, RefreshCw, Loader2, CheckCircle2, Sparkles, BookOpen, Heart, Mail } from 'lucide-react';
-import { useTranslation } from '../locales/I18nContext';
-import { flagsList } from './IntroScreen';
+import React, { useEffect, useState } from 'react';
+import {
+    Settings, Globe, RefreshCw, Accessibility, Database, Info, Download, Upload, FileCode, BookOpen,
+    Heart, Mail, Scale, FileText, CheckCircle2, Sparkles, Github,
+} from 'lucide-react';
+import { Dialog } from './ui/Dialog';
+import { Button } from './ui/Button';
+import { SelectField, Switch, Tabs, TabPanel } from './ui/Controls';
 import { useToast } from './ui/Toast';
-import type { Updater } from '../hooks/useUpdater';
-import { GuideModal } from './GuideModal';
+import { flagsList } from './IntroScreen';
+import { useTranslation } from '../locales/I18nContext';
 import { openManual } from '../lib/docs';
-import { DONATE_URL, CONTACT_URL, openLink } from '../lib/links';
+import { DONATE_URL, CONTACT_URL, SOURCE_URL, openLink } from '../lib/links';
+import { errorMessage } from '../lib/errors';
+import { useUiPreferences, ZOOM_OPTIONS } from '../hooks/useUiPreferences';
+import type { Updater } from '../hooks/useUpdater';
+import { cn } from '@/lib/utils';
 
-interface Props { onClose: () => void; updater?: Updater; onBotsImported?: () => void; }
+interface Props {
+    open: boolean;
+    onClose: () => void;
+    updater?: Updater;
+    onBotsImported?: () => void;
+    onOpenGuide?: () => void;
+}
 
-export function SystemSettingsModal({ onClose, updater, onBotsImported }: Props) {
-    const { toast, success, error } = useToast();
-    const { locale, setLocale, t } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'general' | 'backup' | 'performance'>('general');
-    const [showGuide, setShowGuide] = useState(false);
-    const [isExporting, setIsExporting] = useState(false);
-    const [isImporting, setIsImporting] = useState(false);
-    const [performanceMode, setPerformanceMode] = useState(false);
+type Tab = 'general' | 'accessibility' | 'data' | 'about';
 
-    useEffect(() => {
-        window.api.getPerformanceMode().then(setPerformanceMode);
-    }, []);
+function Section({ icon: Icon, title, text, children }: { icon: typeof Globe; title: string; text?: string; children: React.ReactNode }) {
+    return (
+        <section className="rounded-lg border border-line bg-surface-2 p-4">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-fg">
+                <Icon size={16} className="text-accent" aria-hidden="true" />
+                {title}
+            </h3>
+            {text && <p className="mt-1 text-sm text-fg-3">{text}</p>}
+            <div className="mt-4">{children}</div>
+        </section>
+    );
+}
 
-    const handleTogglePerformanceMode = async (enabled: boolean) => {
-        setPerformanceMode(enabled);
-        document.body.classList.toggle('performance-mode', enabled);
-        await window.api.setPerformanceMode(enabled);
+export function SystemSettingsModal({ open, onClose, updater, onBotsImported, onOpenGuide }: Props) {
+    const { t, locale, setLocale } = useTranslation();
+    const { success, error, toast } = useToast();
+    const { zoom, setZoom, reduceMotion, setReduceMotion } = useUiPreferences();
+    const [tab, setTab] = useState<Tab>('general');
+    const [busy, setBusy] = useState<string | null>(null);
+    const [license, setLicense] = useState<{ kind: 'app' | 'third-party'; text: string } | null>(null);
+
+    useEffect(() => { if (open) setTab('general'); }, [open]);
+
+    const run = async (key: string, fn: () => Promise<void>) => {
+        setBusy(key);
+        try { await fn(); } catch (e) { error(errorMessage(e)); } finally { setBusy(null); }
     };
 
-    const handleExport = async () => {
-        setIsExporting(true);
-        try {
-            const result = await window.api.exportDatabase();
-            if (result.success) {
-                success(`${t('systemSettings.toasts.dbExportSuccessMsg')}\n${result.path}`, t('systemSettings.toasts.dbExportSuccessTitle'));
-            } else if (result.error !== 'Cancelled') {
-                error(`${t('systemSettings.toasts.dbExportErrorMsg')}\n${result.error}`, t('systemSettings.toasts.dbExportErrorTitle'));
-            }
-        } catch (e) { error(t('systemSettings.toasts.fsError')); }
-        finally { setIsExporting(false); }
-    };
+    const exportDb = () => run('exportDb', async () => {
+        const r = await window.api.exportDatabase();
+        if (r.success) success(r.path ?? '', t('system.data.dbExported'));
+        else if (r.error !== 'Cancelled') error(`${t('system.data.failed')} ${r.error}`);
+    });
+    const importDb = () => run('importDb', async () => {
+        const r = await window.api.importDatabase();
+        if (!r.success && r.error !== 'Cancelled' && r.error !== 'Cancelled by user') error(`${t('system.data.failed')} ${r.error}`);
+    });
+    const exportConfig = () => run('exportConfig', async () => {
+        const r = await window.api.exportConfig();
+        if (r.success) success(r.path ?? '', t('system.data.profilesExported'));
+        else if (r.error !== 'Cancelled') error(`${t('system.data.failed')} ${r.error}`);
+    });
+    const importConfig = () => run('importConfig', async () => {
+        const r = await window.api.importConfig();
+        if (r.success) {
+            // L'elenco dei bot si ricarica da sé (prima bisognava ricaricare l'interfaccia a mano).
+            onBotsImported?.();
+            success(t('system.data.profilesImported'));
+        } else if (r.error !== 'Cancelled') error(`${t('system.data.failed')} ${r.error}`);
+    });
 
-    const handleImport = async () => {
-        setIsImporting(true);
-        try {
-            const result = await window.api.importDatabase();
-            if (result.success === false && result.error !== 'Cancelled' && result.error !== 'Cancelled by user') {
-                error(`${t('systemSettings.toasts.dbImportErrorMsg')}\n${result.error}`, t('systemSettings.toasts.dbImportErrorTitle'));
-            }
-        } catch (e) { error(t('systemSettings.toasts.fsError')); }
-        finally { setIsImporting(false); }
-    };
+    const showLicense = (kind: 'app' | 'third-party') => run(`license-${kind}`, async () => {
+        const text = await window.api.readLicense(kind);
+        if (text) setLicense({ kind, text });
+        else toast(t('system.about.licenseMissing'), 'info');
+    });
 
-    const handleExportConfig = async () => {
-        setIsExporting(true);
-        try {
-            const result = await window.api.exportConfig();
-            if (result.success && result.path) {
-                success(`${t('systemSettings.toasts.configExportSuccessMsg')}\n${result.path}`, t('systemSettings.toasts.configExportSuccessTitle'));
-            } else if (!result.success && result.error !== 'Cancelled') {
-                error(`${t('systemSettings.toasts.configExportErrorMsg')}\n${result.error}`, t('systemSettings.toasts.configExportErrorTitle'));
-            }
-        } catch (e) { error(t('systemSettings.toasts.fsError')); }
-        finally { setIsExporting(false); }
-    };
-
-    const handleImportConfig = async () => {
-        setIsImporting(true);
-        try {
-            const result = await window.api.importConfig();
-            if (result.success) {
-                // L'elenco dei bot si ricarica da sé: prima il messaggio chiedeva di
-                // ricaricare l'interfaccia a mano per vedere i bot importati.
-                onBotsImported?.();
-                success(t('systemSettings.toasts.configImportSuccessMsg'), t('systemSettings.toasts.configImportSuccessTitle'));
-            } else if (!result.success && result.error !== 'Cancelled') {
-                error(`${t('systemSettings.toasts.configImportErrorMsg')}\n${result.error}`, t('systemSettings.toasts.configImportErrorTitle'));
-            }
-        } catch (e) { error(t('systemSettings.toasts.fsError')); }
-        finally { setIsImporting(false); }
-    };
+    const updateStatus = updater?.status;
 
     return (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="glass-panel w-full max-w-5xl rounded-xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
-
-                {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b border-outline-variant/15 bg-surface-container-high/50">
-                    <div>
-                        <h2 className="font-headline text-xl font-bold text-on-surface flex items-center gap-3">
-                            <ShieldCheck size={20}  className="text-primary drop-glow-primary" />
-                            {t('systemSettings.title')}
-                        </h2>
-                        <p className="text-nano text-outline-variant/50 mt-1">{t('systemSettings.subtitle')}</p>
-                    </div>
-                    <button onClick={onClose} className="p-1 text-outline-variant hover:text-on-surface hover:bg-surface-container-highest/50 rounded transition-colors">
-                        <X size={18}  />
-                    </button>
+        <>
+            <Dialog
+                open={open}
+                onClose={onClose}
+                icon={Settings}
+                title={t('system.title')}
+                description={t('system.subtitle')}
+                size="lg"
+                bodyClassName="pt-0"
+                footer={<Button variant="primary" onClick={onClose}>{t('common.done')}</Button>}
+            >
+                <div className="sticky top-0 z-10 -mx-6 mb-5 bg-surface-1 px-6 pt-3">
+                    <Tabs
+                        idBase="system"
+                        label={t('system.title')}
+                        value={tab}
+                        onChange={setTab}
+                        items={[
+                            { id: 'general', label: t('system.tabGeneral'), icon: Globe },
+                            { id: 'accessibility', label: t('system.tabAccessibility'), icon: Accessibility },
+                            { id: 'data', label: t('system.tabData'), icon: Database },
+                            { id: 'about', label: t('system.tabAbout'), icon: Info },
+                        ]}
+                    />
                 </div>
 
-                {/* Tabs */}
-                <div className="flex bg-surface-container-lowest border-b border-outline-variant/15 px-6 pt-2">
-                    {[
-                        { key: 'general',     label: t('systemSettings.tabGeneral')     || 'Generale'   },
-                        { key: 'backup',      label: t('systemSettings.tabBackup')      || 'Backup'     },
-                        { key: 'performance', label: t('systemSettings.tabPerformance') || 'Performance' },
-                    ].map(({ key, label }) => (
-                        <button key={key} onClick={() => setActiveTab(key as any)}
-                            className={`px-5 py-3 text-micro border-b-2 transition-all ${
-                                activeTab === key
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-outline-variant/50 hover:text-on-surface-variant'
-                            }`}
-                        >{label}</button>
-                    ))}
-                </div>
+                <TabPanel idBase="system" id={tab} className="space-y-4">
+                    {tab === 'general' && (
+                        <>
+                            <Section icon={Globe} title={t('system.language.title')} text={t('system.language.text')}>
+                                <fieldset>
+                                    <legend className="sr-only">{t('system.language.title')}</legend>
+                                    <div className="flex flex-wrap gap-2">
+                                        {flagsList.map(lang => {
+                                            const Flag = lang.component;
+                                            const checked = locale === lang.id;
+                                            return (
+                                                <label
+                                                    key={lang.id}
+                                                    className={cn(
+                                                        'flex cursor-pointer items-center gap-3 rounded-md border px-4 py-2.5 transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',
+                                                        checked ? 'border-accent bg-surface-4 text-fg' : 'border-line bg-surface-3 text-fg-2 hover:border-line-strong',
+                                                    )}
+                                                >
+                                                    <input type="radio" name="language" value={lang.id} checked={checked} onChange={() => setLocale(lang.id)} className="sr-only" />
+                                                    <span className="h-4 w-6 overflow-hidden rounded-sm" aria-hidden="true"><Flag className="h-full w-full" /></span>
+                                                    <span className="text-base font-medium" lang={lang.id}>{lang.label}</span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </fieldset>
+                            </Section>
 
-                {/* Content — altezza fissa: il modale non cambia misura cambiando scheda.
-                    Il max-h è la valvola per finestre basse, dove 28rem non ci starebbero. */}
-                <div className="px-6 py-5 h-[30rem] max-h-[calc(100vh-15rem)] overflow-y-auto">
-                    {activeTab === 'general' && (
-                        <div className="grid grid-cols-2 gap-x-10 gap-y-6 items-start">
-                          <div className="space-y-6">
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <Globe size={13}  />
-                                    {t('systemSettings.langSection.title')}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('systemSettings.langSection.desc')}</p>
-                                <div className="flex flex-wrap items-center gap-2 bg-surface-container-lowest rounded-xl p-3 ghost-border w-max">
-                                    {flagsList.map((lang) => {
-                                        const Flag = lang.component;
-                                        const isActive = locale === lang.id;
-                                        return (
-                                            <button
-                                                key={lang.id}
-                                                onClick={() => setLocale(lang.id)}
-                                                className={`p-2 rounded-lg transition-all ${
-                                                    isActive
-                                                        ? 'bg-primary/15 ring-1 ring-primary/40'
-                                                        : 'opacity-50 hover:opacity-100 hover:bg-surface-container'
-                                                }`}
-                                                title={lang.label}
-                                            >
-                                                <div className="w-6 h-4 overflow-hidden rounded shadow-sm">
-                                                    <Flag className="w-full h-full object-cover" />
-                                                </div>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Aggiornamenti */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <RefreshCw size={13} />
-                                    {t('updater.sectionTitle')}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('updater.sectionDesc')}</p>
-                                <div className="flex items-center gap-4">
-                                    <button
+                            <Section icon={RefreshCw} title={t('updater.sectionTitle')} text={t('updater.sectionDesc')}>
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <Button
+                                        icon={RefreshCw}
+                                        loading={updateStatus === 'checking'}
+                                        disabled={!updater || updateStatus === 'downloading'}
                                         onClick={() => updater?.check(true)}
-                                        disabled={!updater || updater.status === 'checking' || updater.status === 'downloading'}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all text-primary text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
                                     >
-                                        {updater?.status === 'checking'
-                                            ? <Loader2 size={15} className="animate-spin" />
-                                            : <RefreshCw size={15} />}
                                         {t('updater.checkBtn')}
-                                    </button>
-                                    <div className="text-nano">
-                                        {updater?.status === 'available' || updater?.status === 'downloading' || updater?.status === 'downloaded' ? (
-                                            <span className="flex items-center gap-1.5 text-primary drop-glow-primary">
-                                                <Sparkles size={12} />
-                                                {t('updater.newBadge').replace('{{version}}', updater.newVersion || '')}
+                                    </Button>
+                                    <p className="text-sm text-fg-3" aria-live="polite">
+                                        {updateStatus === 'available' || updateStatus === 'downloading' || updateStatus === 'downloaded' ? (
+                                            <span className="inline-flex items-center gap-1.5 text-accent">
+                                                <Sparkles size={14} aria-hidden="true" />
+                                                {t('updater.newBadge').replace('{{version}}', updater?.newVersion || '')}
                                             </span>
-                                        ) : updater?.status === 'uptodate' ? (
-                                            <span className="flex items-center gap-1.5 text-success">
-                                                <CheckCircle2 size={12} />
+                                        ) : updateStatus === 'uptodate' ? (
+                                            <span className="inline-flex items-center gap-1.5 text-success">
+                                                <CheckCircle2 size={14} aria-hidden="true" />
                                                 {t('updater.upToDate')}
                                             </span>
                                         ) : (
-                                            <span className="text-outline-variant/40 font-mono">v{updater?.currentVersion || ''}</span>
+                                            t('system.currentVersion').replace('{version}', updater?.currentVersion || '')
                                         )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Documentazione */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <BookOpen size={13} />
-                                    {t('quickGuide.docsSection')}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('quickGuide.docsDesc')}</p>
-                                <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={() => setShowGuide(true)}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all text-primary text-sm font-bold"
-                                    >
-                                        <BookOpen size={15} />
-                                        {t('quickGuide.btn')}
-                                    </button>
-                                    <button
-                                        onClick={() => openManual(locale)}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border bg-secondary/5 hover:bg-secondary/10 hover:border-secondary/30 transition-all text-secondary text-sm font-bold"
-                                    >
-                                        <Download size={15} />
-                                        {t('quickGuide.manualBtn')}
-                                    </button>
-                                </div>
-                            </div>
-
-                          </div>
-
-                          <div className="space-y-6">
-                            {/* Crediti — paternità del progetto */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <Sparkles size={13} />
-                                    {t('credits.title')}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed whitespace-pre-line">
-                                    {t('credits.body')}
-                                </p>
-                                <p className="text-nano text-outline-variant/40">{t('app.copyright')}</p>
-                            </div>
-
-                            {/* Sostegno al progetto — donazione libera e contatti */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <Heart size={13} />
-                                    {t('support.sectionTitle')}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('support.sectionDesc')}</p>
-                                <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={() => openLink(DONATE_URL)}
-                                        title={t('support.donateTitle')}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border bg-tertiary/5 hover:bg-tertiary/10 hover:border-tertiary/30 transition-all text-tertiary text-sm font-bold"
-                                    >
-                                        <Heart size={15} />
-                                        {t('support.donateBtn')}
-                                    </button>
-                                    <button
-                                        onClick={() => openLink(CONTACT_URL)}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-lg ghost-border hover:border-outline-variant/40 transition-all text-on-surface-variant text-sm font-bold"
-                                    >
-                                        <Mail size={15} />
-                                        {t('support.contactBtn')}
-                                    </button>
-                                </div>
-                            </div>
-                          </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'backup' && (
-                        <div className="grid grid-cols-2 gap-8 items-start">
-                            {/* Database */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <Database size={13}  />
-                                    {t('systemSettings.dbSection.title')}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('systemSettings.dbSection.desc')}</p>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button onClick={handleExport} disabled={isExporting || isImporting}
-                                        className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl ghost-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all text-primary disabled:opacity-40">
-                                        <Download size={24}  className="opacity-80" />
-                                        <span className="text-sm font-bold">{t('systemSettings.dbSection.exportBtn')}</span>
-                                        <span className="text-nano text-primary/40 text-center">{t('systemSettings.dbSection.exportHint')}</span>
-                                    </button>
-                                    <button onClick={handleImport} disabled={isExporting || isImporting}
-                                        className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl ghost-border bg-tertiary/5 hover:bg-tertiary/10 hover:border-tertiary/30 transition-all text-tertiary disabled:opacity-40">
-                                        <Upload size={24}  className="opacity-80" />
-                                        <span className="text-sm font-bold">{t('systemSettings.dbSection.importBtn')}</span>
-                                        <span className="text-nano text-tertiary/40 text-center">{t('systemSettings.dbSection.importHint')}</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* JSON Config */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                    <FileCode size={13}  />
-                                    {t('systemSettings.jsonSection.title')}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed">{t('systemSettings.jsonSection.desc')}</p>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button onClick={handleExportConfig} disabled={isExporting || isImporting}
-                                        className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl ghost-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all text-primary disabled:opacity-40">
-                                        <Download size={20}  />
-                                        <span className="text-sm font-bold">{t('systemSettings.jsonSection.exportBtn')}</span>
-                                        <span className="text-nano text-primary/40 text-center mt-1">{t('systemSettings.jsonSection.exportHint')}</span>
-                                    </button>
-                                    <button onClick={handleImportConfig} disabled={isExporting || isImporting}
-                                        className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl ghost-border bg-secondary/5 hover:bg-secondary/10 hover:border-secondary/30 transition-all text-secondary disabled:opacity-40">
-                                        <Upload size={20}  />
-                                        <span className="text-sm font-bold">{t('systemSettings.jsonSection.importBtn')}</span>
-                                        <span className="text-nano text-secondary/40 text-center mt-1">{t('systemSettings.jsonSection.importHint')}</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'performance' && (
-                        <div className="max-w-lg space-y-6">
-                            <div className="flex items-center gap-2 text-micro text-outline-variant/60 border-b border-outline-variant/10 pb-2">
-                                <Zap size={13}  />
-                                {t('systemSettings.perfSection.title')}
-                            </div>
-                            <p className="text-xs text-on-surface-variant leading-relaxed">
-                                {t('systemSettings.perfSection.desc')}
-                            </p>
-
-                            {/* Toggle */}
-                            <label className="flex items-center justify-between p-4 rounded-xl ghost-border bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-bold text-on-surface font-headline">
-                                        {t('systemSettings.perfSection.toggleLabel')}
-                                    </p>
-                                    <p className="text-nano text-outline-variant/50">
-                                        {t('systemSettings.perfSection.toggleHint')}
                                     </p>
                                 </div>
-                                <div
-                                    onClick={() => handleTogglePerformanceMode(!performanceMode)}
-                                    className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0 ${
-                                        performanceMode ? 'bg-success/80' : 'bg-surface-container-highest'
-                                    }`}
-                                >
-                                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform ${
-                                        performanceMode
-                                            ? 'translate-x-5 bg-on-primary-fixed'
-                                            : 'translate-x-0 bg-outline-variant'
-                                    }`} />
-                                </div>
-                            </label>
-
-                            {/* What gets disabled */}
-                            <div className="space-y-2 text-xs text-outline-variant/60">
-                                <p className="text-micro text-outline-variant/40 pb-1">{t('systemSettings.perfSection.disabledList')}</p>
-                                {['scanline', 'blur', 'glow', 'anim'].map((k) => (
-                                    <div key={k} className="flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-outline-variant/30 flex-shrink-0" />
-                                        {t(`systemSettings.perfSection.item_${k}`)}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                            </Section>
+                        </>
                     )}
-                </div>
 
-                {/* Footer */}
-                <div className="p-4 border-t border-outline-variant/15 bg-surface-container-low/40 flex justify-end">
-                    <button
-                        onClick={onClose}
-                        className="px-6 py-2 rounded-lg text-sm font-headline font-bold ignition-btn text-on-primary-fixed shadow-lg transition-all active:scale-95"
-                    >
-                        {t('systemSettings.close')}
-                    </button>
-                </div>
-            </div>
+                    {tab === 'accessibility' && (
+                        <>
+                            <Section icon={Accessibility} title={t('system.a11y.zoomTitle')} text={t('system.a11y.zoomText')}>
+                                <div className="flex flex-wrap items-end gap-3">
+                                    <SelectField
+                                        label={t('system.a11y.zoomLabel')}
+                                        value={String(zoom)}
+                                        onChange={e => setZoom(Number(e.target.value))}
+                                        containerClassName="w-48"
+                                    >
+                                        {ZOOM_OPTIONS.map(z => <option key={z} value={String(z)}>{Math.round(z * 100)}%</option>)}
+                                    </SelectField>
+                                    <Button variant="ghost" disabled={zoom === 1} onClick={() => setZoom(1)}>{t('system.a11y.zoomReset')}</Button>
+                                </div>
+                                <p className="mt-3 text-sm text-fg-3">{t('system.a11y.zoomShortcuts')}</p>
+                            </Section>
 
-            {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
-        </div>
+                            <Section icon={Sparkles} title={t('system.a11y.motionTitle')} text={t('system.a11y.motionText')}>
+                                <Switch
+                                    checked={reduceMotion}
+                                    onChange={setReduceMotion}
+                                    label={t('system.a11y.motionLabel')}
+                                    description={t('system.a11y.motionHint')}
+                                />
+                            </Section>
+
+                            <Section icon={Info} title={t('system.a11y.statementTitle')} text={t('system.a11y.statementText')}>
+                                <Button variant="ghost" icon={FileText} onClick={() => openLink(`${SOURCE_URL}/blob/main/docs/accessibilita.md`)}>
+                                    {t('system.a11y.statementLink')}
+                                </Button>
+                            </Section>
+                        </>
+                    )}
+
+                    {tab === 'data' && (
+                        <>
+                            <Section icon={Database} title={t('system.data.dbTitle')} text={t('system.data.dbText')}>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button icon={Download} loading={busy === 'exportDb'} disabled={!!busy} onClick={exportDb}>{t('system.data.dbExport')}</Button>
+                                    <Button variant="danger-ghost" icon={Upload} loading={busy === 'importDb'} disabled={!!busy} onClick={importDb}>{t('system.data.dbImport')}</Button>
+                                </div>
+                                <p className="mt-3 text-sm text-fg-3">{t('system.data.dbImportHint')}</p>
+                            </Section>
+                            <Section icon={FileCode} title={t('system.data.profilesTitle')} text={t('system.data.profilesText')}>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button icon={Download} loading={busy === 'exportConfig'} disabled={!!busy} onClick={exportConfig}>{t('system.data.profilesExport')}</Button>
+                                    <Button icon={Upload} loading={busy === 'importConfig'} disabled={!!busy} onClick={importConfig}>{t('system.data.profilesImport')}</Button>
+                                </div>
+                            </Section>
+                        </>
+                    )}
+
+                    {tab === 'about' && (
+                        <>
+                            <Section icon={BookOpen} title={t('quickGuide.docsSection')} text={t('quickGuide.docsDesc')}>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button icon={BookOpen} onClick={() => onOpenGuide?.()}>{t('quickGuide.btn')}</Button>
+                                    <Button icon={Download} onClick={() => openManual(locale)}>{t('quickGuide.manualBtn')}</Button>
+                                    <Button variant="ghost" icon={Github} onClick={() => openLink(SOURCE_URL)}>{t('system.about.source')}</Button>
+                                </div>
+                            </Section>
+
+                            <Section icon={Scale} title={t('system.about.licenseTitle')} text={t('system.about.licenseText')}>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button icon={FileText} loading={busy === 'license-app'} onClick={() => showLicense('app')}>{t('system.about.licenseApp')}</Button>
+                                    <Button icon={FileText} loading={busy === 'license-third-party'} onClick={() => showLicense('third-party')}>{t('system.about.licenseThirdParty')}</Button>
+                                </div>
+                            </Section>
+
+                            <Section icon={Sparkles} title={t('credits.title')}>
+                                <p className="whitespace-pre-line text-sm text-fg-2">{t('credits.body')}</p>
+                                <p className="mt-3 text-sm text-fg-3">{t('app.copyright')}</p>
+                            </Section>
+
+                            <Section icon={Heart} title={t('support.sectionTitle')} text={t('support.sectionDesc')}>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button icon={Heart} onClick={() => openLink(DONATE_URL)}>{t('support.donateBtn')}</Button>
+                                    <Button variant="ghost" icon={Mail} onClick={() => openLink(CONTACT_URL)}>{t('support.contactBtn')}</Button>
+                                </div>
+                            </Section>
+                        </>
+                    )}
+                </TabPanel>
+            </Dialog>
+
+            <Dialog
+                open={license !== null}
+                onClose={() => setLicense(null)}
+                icon={Scale}
+                title={license?.kind === 'app' ? t('system.about.licenseApp') : t('system.about.licenseThirdParty')}
+                size="lg"
+                footer={<Button variant="primary" onClick={() => setLicense(null)}>{t('common.close')}</Button>}
+            >
+                <pre tabIndex={0} className="select-text whitespace-pre-wrap break-words font-mono text-xs leading-5 text-fg-2">{license?.text}</pre>
+            </Dialog>
+        </>
     );
 }

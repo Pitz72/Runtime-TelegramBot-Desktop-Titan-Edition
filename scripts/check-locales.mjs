@@ -9,7 +9,7 @@
  *
  * Uso: node scripts/check-locales.mjs
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -49,4 +49,40 @@ if (failed) {
     process.exit(1);
 }
 
-console.log(`✓ Chiavi allineate su ${LANGS.length} lingue (${reference.length} chiavi).`);
+// ── Chiavi usate nel codice ─────────────────────────────────────────────────
+// La parità tra lingue non basta: una chiave scritta nel codice e mai aggiunta ai file
+// compare a schermo così com'è («feeds.qualcosa»). Si cercano le chiamate t('…') con
+// chiave letterale; quelle costruite a runtime sono elencate qui sotto, per esteso.
+const DYNAMIC_KEYS = [
+    ...['podcast', 'news', 'youtube'].map(k => `feedTypes.${k}`),
+    ...['engineStart', 'engineStop', 'scanStart', 'sourceStart', 'itemFound', 'itemDeferred', 'itemPublished', 'scanEnd', 'nextScan', 'error', 'warn'].map(k => `journal.${k}`),
+    ...['today', 'week', 'total'].map(k => `stats.${k}`),
+    ...['title', 'feedName', 'link', 'summary'].map(k => `templates.chip.${k}`),
+    ...['error', 'warning', 'info'].map(k => `templates.severity.${k}`),
+    ...['empty', 'chipStartup', 'chipUnknown', 'chipInHref', 'tagUnsupported', 'closeWithoutOpen', 'closeWrong', 'aMissingHref', 'spanSpoiler', 'tgEmojiId', 'unclosed'].map(k => `templateValidator.${k}`),
+    'updater.progress', 'updater.downloadedMsg', 'time.hour',
+];
+
+const srcDir = join(localesDir, '..');
+const sources = [];
+const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, entry.name);
+        if (entry.isDirectory()) walk(p);
+        else if (/\.(tsx?|jsx?)$/.test(entry.name) && !entry.name.endsWith('.test.ts')) sources.push(p);
+    }
+};
+walk(srcDir);
+
+const used = new Set(DYNAMIC_KEYS);
+for (const file of sources) {
+    const text = readFileSync(file, 'utf-8');
+    for (const m of text.matchAll(/\bt\(\s*['"]([a-zA-Z][\w.]*)['"]\s*\)/g)) used.add(m[1]);
+}
+const missingInCode = [...used].filter(k => !reference.includes(k)).sort();
+if (missingInCode.length) {
+    console.error(`✗ Chiavi usate nel codice ma assenti da ${REFERENCE}.json (${missingInCode.length}): ${missingInCode.join(', ')}`);
+    process.exit(1);
+}
+
+console.log(`✓ Chiavi allineate su ${LANGS.length} lingue (${reference.length} chiavi); tutte le ${used.size} usate nel codice esistono.`);

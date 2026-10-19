@@ -13,39 +13,43 @@ Prima di avviare Titan, devi creare un «Bot» su Telegram:
 
 ## 2. Il Primo Avvio (Setup Wizard)
 Avvia Titan. Se è la prima volta, apparirà la procedura guidata in quattro passaggi:
-*   **Nome Bot:** Scegli un nome per riconoscerlo (es. «Canale News»).
-*   **Bot Token:** Incolla il Token fornito da @BotFather.
-*   **Channel ID:** Inserisci il nome del tuo canale (es. `@ilmiocanale`). Se è un canale privato, inserisci l'ID numerico (es. `-100123456789`).
+*   **Nome del bot:** Scegli un nome per riconoscerlo (es. «Canale News»).
+*   **Token del bot:** Incolla il Token fornito da @BotFather.
+*   **Canale di destinazione:** Inserisci il nome del tuo canale (es. `@ilmiocanale`). Se è un canale privato, inserisci l'ID numerico (es. `-100123456789`).
 *   **Data di Partenza:** Scegli una data. Il bot **ignorerà** tutti gli articoli e i video pubblicati prima di questa data, evitando di inondare il tuo canale di vecchi contenuti.
 
-## 3. Aggiungere le Fonti (Feed Manager)
+## 3. Aggiungere le sorgenti
 Una volta entrato nella Dashboard:
-1. Assicurati che il tuo bot sia selezionato nella colonna di sinistra.
-2. Nel pannello **Sorgenti Feed**, clicca su **Aggiungi**.
-3. Inserisci il Nome (es. «Il mio Podcast») e seleziona il **Tipo** (Podcast, News o YouTube).
-4. Incolla l'URL:
-   * Per News e Podcast: incolla l'URL del feed RSS.
-   * Per YouTube: puoi incollare direttamente l'URL del canale o l'handle (es. `@RuntimeRadio`). Non serve nessuna API Key.
-5. Usa il pulsante **Testa (⚡)** per verificare che il link sia valido, poi clicca su **Salva**.
+1. Seleziona il bot nell'elenco **Bot**, a sinistra.
+2. Nel pannello **Sorgenti** clicca su **Aggiungi sorgente**.
+3. Inserisci il nome (es. «Il mio podcast») e scegli il **Tipo**: Podcast, Articoli o YouTube.
+4. Incolla l'indirizzo:
+   * per articoli e podcast, l'URL del feed RSS;
+   * per YouTube, l'indirizzo del canale o il suo handle (es. `@RuntimeRadio`). Non serve nessuna API key.
+5. Premi **Prova** per verificare che l'indirizzo funzioni, poi **Aggiungi**.
 
-## 4. Personalizzare i Messaggi (I Template)
-1. Clicca sull'icona a cursori (🎚️) accanto al nome del bot, nella colonna di sinistra.
-2. Spostati sulla scheda **Template**.
-3. Usa i pulsanti **Smart Chips** in alto per inserire le variabili come `{{title}}`, `{{link}}` o `{{summary}}`.
-4. Puoi usare i tag HTML di base supportati da Telegram, ad esempio: `<b>Grassetto</b>`, `<i>Corsivo</i>`, o nascondere un link lungo dietro a un testo usando `<a href="{{link}}">Clicca qui</a>`.
+Ogni sorgente ha accanto il suo interruttore (attiva o in pausa) e i pulsanti per modificarla o eliminarla.
 
-## 5. Accensione (Ignition)
+## 4. Personalizzare i messaggi (i template)
+1. Sotto il nome del bot clicca su **Impostazioni del bot**.
+2. Apri la scheda **Messaggi**.
+3. Con i pulsanti **Titolo**, **Nome sorgente**, **Link** e **Sommario** inserisci le variabili `{{title}}`, `{{feedName}}`, `{{link}}` e `{{summary}}`.
+4. Puoi usare l'HTML di base che Telegram accetta, per esempio `<b>Grassetto</b>`, `<i>Corsivo</i>`, oppure nascondere un link lungo dietro un testo con `<a href="{{link}}">Clicca qui</a>`.
+5. **Anteprima** mostra il messaggio con dati di esempio; sotto il campo, un controllo segnala subito i tag che Telegram rifiuterebbe.
+
+## 5. Accensione
 Inserito il token e aggiunte le sorgenti, resta solo da accendere.
-*   Clicca sul grande pulsante **Play (▶)** al centro della console.
-*   L'anello inizierà a ruotare e il bot entrerà in funzione.
-*   Nel pannello **System Logs** vedrai in tempo reale il bot che legge le tue fonti e pubblica i nuovi contenuti su Telegram.
+*   Clicca su **Avvia il motore**, in alto a destra. Il motore è uno solo e lavora per tutti i bot attivi.
+*   Accanto al pulsante vedi lo stato («Motore acceso») e l'ora del prossimo giro di controllo.
+*   Nel pannello **Attività**, vista **Diario**, segui le scansioni, i contenuti trovati e quelli pubblicati. La vista **Console** mostra il log completo.
 
 ---
 
-### 💡 Consigli Utili & Troubleshooting
-*   **Fasce di Silenzio:** Nelle impostazioni del bot puoi definire l'orario di attività. Se imposti dalle 08:00 alle 22:00, le notizie notturne non vanno perse: restano in coda e vengono pubblicate alle 08:00.
-*   **Errori YouTube:** se compaiono errori «rossi» sui canali YouTube, di solito Google ha cambiato il codice delle sue pagine. Metti in pausa quel feed dall'interruttore accanto alla sorgente e aspetta un aggiornamento dell'applicazione.
-*   **Cambio PC:** per spostare un bot su un altro computer non copiare i file: usa **Esporta (.rtb)** nelle impostazioni del bot. Il file porta con sé sorgenti, filtri e template. Il token no: è cifrato e legato al computer d'origine, quindi sul nuovo PC va reinserito a mano.
+### 💡 Consigli utili e soluzione dei problemi
+*   **Fascia oraria di pubblicazione:** in *Impostazioni del bot → Pianificazione* scegli quando il bot può pubblicare. Se imposti dalle 08:00 alle 22:00, le notizie della notte non vanno perse: restano in coda e partono alle 08:00.
+*   **Errori YouTube:** se compaiono errori sui canali YouTube, di solito YouTube ha cambiato qualcosa nelle sue pagine. Metti in pausa quella sorgente con il suo interruttore e controlla se c'è un aggiornamento dell'applicazione.
+*   **Cambio PC:** per spostare un bot su un altro computer non copiare i file: usa *Impostazioni del bot → Avanzate → Esporta*. Il file .rtb porta con sé sorgenti, filtri, template e fascia oraria. Il token no: è cifrato e legato al computer d'origine, quindi sul nuovo PC va reinserito a mano. Sul nuovo PC basta un doppio clic sul file .rtb per importarlo.
+*   **Leggere meglio:** in *Impostazioni → Accessibilità* puoi ingrandire tutta l'interfaccia (anche con **Ctrl +** e **Ctrl −**, **Ctrl 0** per tornare al 100%) e ridurre animazioni ed effetti.
 
 ---
 
@@ -53,7 +57,7 @@ Inserito il token e aggiunte le sorgenti, resta solo da accendere.
 
 Gran parte del codice è stata scritta con modelli linguistici (Google Gemini, Anthropic Claude). Concezione, direzione progettuale e verifica sono di Simone Pizzi.
 
-Per la trattazione completa usa il pulsante **Scarica Manuale (PDF)**.
+Per la trattazione completa usa il pulsante **Manuale completo (PDF)**.
 
 Contatti: simonepizzi.runtimeradio.it/contatti
 Donazione libera: paypal.me/runtimeradio

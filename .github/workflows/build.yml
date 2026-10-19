@@ -47,6 +47,8 @@ jobs:
         run: npm test
       - name: Check locale key parity
         run: node scripts/check-locales.mjs
+      - name: Colour contrast (WCAG 2.2 AA)
+        run: node scripts/check-contrast.mjs
       - name: Third-party licenses
         run: node scripts/third-party-notices.mjs
 

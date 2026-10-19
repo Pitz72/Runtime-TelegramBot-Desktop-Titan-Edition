@@ -11,6 +11,7 @@ import { getBotEngine } from './bot/engine'
 import { BotManager } from './bot/manager'
 import { closeDB } from './database/schema'
 import { tm } from './i18n'
+import { readSettings, applyZoom, stepZoom } from './settings'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -195,6 +196,32 @@ function createWindow(): void {
             app.exit(1);
         });
     }
+
+    // Ingrandimento salvato: si riapplica a ogni caricamento dell'interfaccia.
+    mainWindow.webContents.on('did-finish-load', () => {
+        void readSettings().then(s => {
+            if (mainWindow && !mainWindow.isDestroyed()) void applyZoom(mainWindow, s.uiZoom ?? 1, false)
+        })
+    })
+
+    // Ctrl + / Ctrl − / Ctrl 0: le scorciatoie di zoom di ogni browser, ma con l'ingrandimento
+    // che resta salvato e che l'interfaccia mostra nelle impostazioni.
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        if (input.type !== 'keyDown' || !(input.control || input.meta) || input.alt) return
+        const win = mainWindow
+        if (!win) return
+        const current = win.webContents.getZoomFactor()
+        if (input.key === '+' || input.key === '=' || input.code === 'NumpadAdd') {
+            event.preventDefault()
+            void applyZoom(win, stepZoom(current, 1))
+        } else if (input.key === '-' || input.code === 'NumpadSubtract') {
+            event.preventDefault()
+            void applyZoom(win, stepZoom(current, -1))
+        } else if (input.key === '0' || input.code === 'Numpad0') {
+            event.preventDefault()
+            void applyZoom(win, 1)
+        }
+    })
 
     // Profilo .rtb con cui è stata lanciata l'app: si importa a interfaccia pronta,
     // così l'elenco dei bot può aggiornarsi subito dopo.

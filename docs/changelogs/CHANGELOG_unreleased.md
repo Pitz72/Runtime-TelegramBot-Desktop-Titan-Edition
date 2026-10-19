@@ -56,3 +56,13 @@ Ogni correzione al motore è stata provata su una build pacchettizzata, con un p
 
 - **`safeStorage` asincrono.** Electron 45 depreca l'API sincrona e la 46 la rimuove. Su Electron 44 funziona senza avvisi; la migrazione tocca la cifratura di tutti i token e va provata sui portachiavi Linux (GNOME, KDE) prima di pubblicarla. Annotata in CONTRIBUTING come condizione per salire alla 46.
 - **Toolchain di sviluppo** (Vite 5, Tailwind 3): restano avvisi di `npm audit` che riguardano solo gli strumenti di build e il server di sviluppo, non l'app distribuita. Il passaggio a Vite 8 e Tailwind 4 è un lavoro a sé.
+
+## Riprogettazione grafica e accessibilità
+
+Interfaccia rifatta da capo su un design system blu («Titan Blue»): superfici blu notte, un solo accento blu, Inter e Fira Code inclusi nell'app (niente più Google Fonts a ogni avvio), corpo del testo a 14 px e nessun testo sotto i 12 (prima c'erano etichette a 9 px in maiuscoletto monospace).
+
+- **Struttura più logica.** Il comando del motore sta nella barra in alto, con lo stato e l'ora del prossimo giro: il motore è uno solo per tutti i bot, e prima il pulsante sembrava accendere solo quello selezionato. A sinistra l'elenco dei bot, al centro l'intestazione del bot con le statistiche, sotto sorgenti e attività affiancate (o a schede, sotto i 1180 px).
+- **Moduli in finestre proprie**: nuovo bot, nuova sorgente e impostazioni del bot (quattro schede: Generale, Pianificazione, Messaggi, Avanzate). Eliminare un bot sta nelle sue impostazioni, non più in un cestino che compariva solo al passaggio del mouse.
+- **Accessibilità WCAG 2.2 AA**, autovalutata e documentata in [docs/accessibilita.md](../accessibilita.md): 0 violazioni axe-core su oltre venti stati dell'interfaccia, 65 coppie di colori misurate (`npm run check:contrast`, anche in CI), navigazione completa da tastiera con focus visibile, finestre di dialogo con trappola del focus ed Esc, ingrandimento dell'interfaccia dall'80 al 180% (anche Ctrl +/−/0) salvato tra un avvio e l'altro, riduzione delle animazioni, regole per il contrasto elevato di Windows.
+- Testi dell'interfaccia riscritti in italiano e in inglese; `check:locales` ora verifica anche che ogni chiave usata nel codice esista. Corretti i testi fissi rimasti in italiano o in inglese (validatore dei template, «Fatto», «From:», segnaposto, «Feed rimosso»).
+- Banco di prova `npm run preview:ui`: l'interfaccia vera nel browser con dati finti, per lavorare sul design senza Electron e senza toccare dati reali.

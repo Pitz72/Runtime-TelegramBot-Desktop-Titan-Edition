@@ -1,141 +1,154 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import React, { useId, useMemo, useRef, useState } from 'react';
+import { Eye, EyeOff, CheckCircle2, AlertCircle, AlertTriangle, Info, RotateCcw } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
-import { validateTemplate } from '../utils/templateValidator';
+import { validateTemplate, type ValidationIssue } from '../utils/templateValidator';
 import { sanitizeTelegramHtml } from '../lib/telegramHtml';
+import { Button } from './ui/Button';
+import { cn } from '@/lib/utils';
 
-function renderPreview(template: string, t: (key: string) => any): string {
-    const title    = t('templateEditor.sampleTitle') as string;
-    const feedName = t('templateEditor.sampleFeed') as string;
-    const summary  = t('templateEditor.sampleSummary') as string;
-    const link     = 'https://example.com/articolo';
+type T = (key: string) => string;
+
+function renderPreview(template: string, t: T): string {
     // I valori di esempio passano dall'escape come quelli veri in telegram.ts; il risultato
     // passa dal sanificatore prima di finire nel DOM (vedi lib/telegramHtml.ts).
     const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const filled = template
         .replace(/&#10;/g, '\n')
-        .replace(/\{\{title\}\}/g, esc(title))
-        .replace(/\{\{feedName\}\}/g, esc(feedName))
-        .replace(/\{\{link\}\}/g, link)
-        .replace(/\{\{summary\}\}/g, esc(summary));
+        .replace(/\{\{title\}\}/g, esc(t('templates.sampleTitle')))
+        .replace(/\{\{feedName\}\}/g, esc(t('templates.sampleFeed')))
+        .replace(/\{\{link\}\}/g, 'https://example.com/articolo')
+        .replace(/\{\{summary\}\}/g, esc(t('templates.sampleSummary')));
     return sanitizeTelegramHtml(filled);
 }
 
-interface Props {
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    defaultTemplate: string;
-    hideChips?: boolean;
+function issueText(issue: ValidationIssue, t: T): string {
+    let text = t(`templateValidator.${issue.code}`);
+    if (text === `templateValidator.${issue.code}`) return issue.message;
+    for (const [k, v] of Object.entries(issue.params ?? {})) text = text.split(`{${k}}`).join(v);
+    return text;
 }
 
-export function TemplateEditor({ label, value, onChange, defaultTemplate, hideChips = false }: Props) {
+const CHIPS = ['title', 'feedName', 'link', 'summary'] as const;
+
+interface Props {
+    label: string;
+    description?: string;
+    value: string;
+    onChange: (value: string) => void;
+    /** Modello predefinito: mostrato come segnaposto e ripristinabile con un clic */
+    defaultTemplate: string;
+    /** Messaggio di avvio: lì i segnaposto non vengono sostituiti */
+    isStartup?: boolean;
+}
+
+export function TemplateEditor({ label, description, value, onChange, defaultTemplate, isStartup = false }: Props) {
     const { t } = useTranslation();
+    const id = useId();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [showPreview, setShowPreview] = useState(false);
 
-    const issues = useMemo(() => validateTemplate(value, hideChips), [value, hideChips]);
-    const hasErrors   = issues.some(i => i.severity === 'error');
-    const hasWarnings = issues.some(i => i.severity === 'warning');
+    const issues = useMemo(() => validateTemplate(value, isStartup), [value, isStartup]);
+    const visibleIssues = value.trim() === '' ? [] : issues;
+    const hasErrors = visibleIssues.some(i => i.severity === 'error');
+    const effective = value.trim() === '' ? defaultTemplate : value;
 
-    const insertText = (textToInsert: string) => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-        const start = textarea.selectionStart;
-        const end   = textarea.selectionEnd;
-        const newValue = value.substring(0, start) + textToInsert + value.substring(end);
-        onChange(newValue);
-        setTimeout(() => {
-            textarea.selectionStart = start + textToInsert.length;
-            textarea.selectionEnd   = start + textToInsert.length;
-            textarea.focus();
-        }, 0);
+    const insert = (text: string) => {
+        const area = textareaRef.current;
+        if (!area) return;
+        const start = area.selectionStart;
+        const end = area.selectionEnd;
+        onChange(value.slice(0, start) + text + value.slice(end));
+        requestAnimationFrame(() => {
+            area.focus();
+            area.selectionStart = area.selectionEnd = start + text.length;
+        });
     };
 
-    const chipCls = "px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded text-nano font-mono transition-colors border border-primary/20";
-
     return (
-        <div className="flex flex-col gap-2 p-4 ghost-border bg-surface-container rounded-xl">
-            {/* Label row */}
-            <div className="flex justify-between items-center mb-1">
-                <div className="flex items-center gap-3">
-                    <label className="text-sm font-headline font-semibold text-primary">{label}</label>
-                    {!hideChips && value.trim() !== '' && (
-                        <button
-                            onClick={() => setShowPreview(p => !p)}
-                            className={`flex items-center gap-1 px-2 py-0.5 rounded text-nano font-bold border transition-colors ${
-                                showPreview
-                                    ? 'bg-secondary/15 border-secondary/30 text-secondary'
-                                    : 'bg-surface-container-lowest border-outline-variant/20 text-outline-variant hover:text-primary'
-                            }`}
-                            title={t('templateEditor.previewBtn') as string}
-                        >
-                            {showPreview ? <EyeOff size={10} /> : <Eye size={10} />}
-                            {t('templateEditor.previewBtn') as string}
-                        </button>
+        <section aria-labelledby={`${id}-label`} className="rounded-lg border border-line bg-surface-2 p-4">
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h3 id={`${id}-label`} className="text-base font-semibold text-fg">
+                        <label htmlFor={`${id}-text`}>{label}</label>
+                    </h3>
+                    {description && <p className="text-sm text-fg-3">{description}</p>}
+                </div>
+                <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" icon={showPreview ? EyeOff : Eye} aria-pressed={showPreview} onClick={() => setShowPreview(p => !p)}>
+                        {t('templates.preview')}
+                    </Button>
+                    {value.trim() !== '' && (
+                        <Button size="sm" variant="ghost" icon={RotateCcw} onClick={() => onChange('')}>{t('templates.useDefault')}</Button>
                     )}
                 </div>
-                {!hideChips && (
-                    <div className="flex items-center gap-2">
-                        <span className="text-nano text-outline-variant/50">{t('templateEditor.insertVar')}</span>
-                        <button onClick={() => insertText('{{title}}')}    className={chipCls}>[Titolo]</button>
-                        <button onClick={() => insertText('{{feedName}}')} className={chipCls}>[Sorgente]</button>
-                        <button onClick={() => insertText('{{link}}')}     className={chipCls}>[Link]</button>
-                        <button onClick={() => insertText('{{summary}}')}  className={chipCls}>[Sommario]</button>
-                    </div>
-                )}
             </div>
 
-            {/* Preview panel */}
-            {showPreview && value.trim() !== '' && (
-                <div
-                    className="bg-surface-container-lowest ghost-border rounded-lg p-3 text-xs text-on-surface leading-relaxed font-body scanline-bg relative"
-                    style={{ whiteSpace: 'pre-wrap' }}
-                    dangerouslySetInnerHTML={{ __html: renderPreview(value, t) }}
-                />
-            )}
-
-            {/* Textarea */}
-            <textarea
-                ref={textareaRef}
-                value={value}
-                onChange={e => onChange(e.target.value)}
-                placeholder={defaultTemplate}
-                className={`w-full h-32 bg-surface-container-lowest border rounded-lg p-3 text-on-surface focus:outline-none focus:ring-1 transition-colors font-mono text-xs resize-y ${
-                    hasErrors
-                        ? 'border-error/40 focus:border-error/60 focus:ring-error/20'
-                        : hasWarnings
-                        ? 'border-tertiary/30 focus:border-tertiary/50 focus:ring-tertiary/20'
-                        : 'border-outline-variant/15 focus:border-primary/40 focus:ring-primary/20'
-                }`}
-            />
-
-            {/* Validation panel */}
-            {value.trim() !== '' && (
-                <div className="space-y-1">
-                    {issues.length === 0 ? (
-                        <div className="flex items-center gap-1.5 text-nano text-secondary/70">
-                            <span>✓</span>
-                            <span>{t('templateEditor.validOk')}</span>
-                        </div>
-                    ) : (
-                        issues.map((issue, i) => (
-                            <div key={i} className={`flex items-start gap-1.5 text-nano leading-relaxed ${
-                                issue.severity === 'error'   ? 'text-error'
-                                : issue.severity === 'warning' ? 'text-tertiary'
-                                : 'text-primary/60'
-                            }`}>
-                                <span className="shrink-0 mt-0.5 font-bold">
-                                    {issue.severity === 'error' ? '✗' : issue.severity === 'warning' ? '⚠' : 'ℹ'}
-                                </span>
-                                <span>{issue.message}</span>
-                            </div>
-                        ))
-                    )}
+            {!isStartup && (
+                <div className="mb-2 flex flex-wrap items-center gap-1.5" role="group" aria-label={t('templates.insertLabel')}>
+                    <span className="text-sm text-fg-3">{t('templates.insertLabel')}</span>
+                    {CHIPS.map(chip => (
+                        <button
+                            key={chip}
+                            type="button"
+                            onClick={() => insert(`{{${chip}}}`)}
+                            className="inline-flex h-7 items-center rounded-full border border-line bg-surface-3 px-2.5 font-mono text-xs text-accent hover:border-line-strong hover:bg-surface-4"
+                        >
+                            {t(`templates.chip.${chip}`)}
+                        </button>
+                    ))}
                 </div>
             )}
 
-            <p className="text-nano text-outline-variant/40 mt-1">{t('templateEditor.htmlHint')}</p>
-        </div>
+            <textarea
+                ref={textareaRef}
+                id={`${id}-text`}
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                placeholder={defaultTemplate.replace(/&#10;/g, '\n')}
+                spellCheck={false}
+                aria-invalid={hasErrors || undefined}
+                aria-describedby={`${id}-status`}
+                className={cn(
+                    'min-h-[120px] w-full resize-y rounded border bg-surface-1 px-3 py-2 font-mono text-sm leading-relaxed text-fg placeholder:text-fg-3',
+                    hasErrors ? 'border-danger' : 'border-line-strong hover:border-fg-3',
+                )}
+            />
+
+            <div id={`${id}-status`} className="mt-2 space-y-1" aria-live="polite">
+                {value.trim() === '' ? (
+                    <p className="flex items-center gap-1.5 text-sm text-fg-3">
+                        <Info size={14} aria-hidden="true" />
+                        {t('templates.usingDefault')}
+                    </p>
+                ) : visibleIssues.length === 0 ? (
+                    <p className="flex items-center gap-1.5 text-sm text-success">
+                        <CheckCircle2 size={14} aria-hidden="true" />
+                        {t('templates.valid')}
+                    </p>
+                ) : visibleIssues.map((issue, i) => {
+                    const Icon = issue.severity === 'error' ? AlertCircle : issue.severity === 'warning' ? AlertTriangle : Info;
+                    const color = issue.severity === 'error' ? 'text-danger' : issue.severity === 'warning' ? 'text-warning' : 'text-fg-3';
+                    return (
+                        <p key={i} className={cn('flex items-start gap-1.5 text-sm', color)}>
+                            <Icon size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
+                            <span>
+                                <span className="sr-only">{t(`templates.severity.${issue.severity}`)}: </span>
+                                {issueText(issue, t)}
+                            </span>
+                        </p>
+                    );
+                })}
+            </div>
+
+            {showPreview && (
+                <figure className="mt-3">
+                    <figcaption className="mb-1.5 text-sm font-medium text-fg-3">{t('templates.previewCaption')}</figcaption>
+                    <div
+                        className="tg-preview whitespace-pre-wrap rounded-md border border-line bg-surface-1 p-3 text-base text-fg"
+                        dangerouslySetInnerHTML={{ __html: renderPreview(effective, t) }}
+                    />
+                </figure>
+            )}
+        </section>
     );
 }

@@ -1,537 +1,179 @@
+/* Font inclusi nell'applicazione (OFL-1.1): niente richieste a Google a ogni avvio, e
+   l'interfaccia ha i suoi caratteri anche senza rete. */
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/fira-code/wght.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ═══════════════════════════════════════════════════
-   OBSIDIAN PULSE V2 — The Synthetic Monolith
-   Titan Edition Design System
-   ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════
+   TITAN BLUE — design system 2.4
+   Colori: src/renderer/src/theme/palette.json (verificati da check-contrast)
+   ═══════════════════════════════════════════════════════════════════════ */
 
-/* === BASE === */
-body {
-    background-color: #050510;
-    color: #e0e7ff;
-    font-family: 'Inter', sans-serif;
-    font-feature-settings: 'liga' 1, 'calt' 1;
-}
-
-/* === SCROLLBAR — Precision 4px === */
-::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #424754;
-    border-radius: 0.75rem;
-    transition: background 0.3s;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #4cd7f6;
-    box-shadow: 0 0 8px rgba(76, 215, 246, 0.6);
-}
-
-::-webkit-scrollbar-corner {
-    background: transparent;
-}
-
-/* === SCANLINE OVERLAY — Lavender Phosphor Tint === */
-.scanline-bg {
-    position: relative;
-    overflow: hidden;
-}
-
-.scanline-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 1px,
-        rgba(208, 188, 255, 0.04) 1px,
-        rgba(208, 188, 255, 0.04) 2px
-    );
-    pointer-events: none;
-    z-index: 1;
-}
-
-.scanline-bg::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100%;
-    background: linear-gradient(
-        180deg,
-        rgba(173, 198, 255, 0.03) 0%,
-        transparent 50%,
-        rgba(76, 215, 246, 0.02) 100%
-    );
-    animation: scanline-sweep 10s linear infinite;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.6;
-}
-
-@keyframes scanline-sweep {
-    0%   { transform: translateY(-100%); }
-    100% { transform: translateY(100%); }
-}
-
-/* === GHOST BORDER — No-Opaque-Line Rule === */
-.ghost-border {
-    border: 1px solid rgba(59, 130, 246, 0.10);
-}
-
-.ghost-border-hover:hover {
-    border-color: rgba(59, 130, 246, 0.25);
-}
-
-/* === GLASS PANEL — Titan Glass === */
-.glass-panel {
-    background: rgba(10, 10, 15, 0.80);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(59, 130, 246, 0.10);
-    box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.55),
-        0 0 15px rgba(59, 130, 246, 0.04);
-}
-
-.glass-panel-elevated {
-    background: rgba(16, 16, 26, 0.90);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(59, 130, 246, 0.15);
-    box-shadow:
-        0 24px 48px rgba(0, 0, 0, 0.6),
-        0 0 20px rgba(59, 130, 246, 0.06);
-}
-
-/* === TEXT UTILITIES === */
-.text-glow {
-    text-shadow: 0 0 8px rgba(173, 198, 255, 0.5);
-}
-
-.text-glow-cyan {
-    text-shadow: 0 0 8px rgba(76, 215, 246, 0.6);
-}
-
-.text-glow-error {
-    text-shadow: 0 0 8px rgba(255, 180, 171, 0.5);
-}
-
-/* Micro-label: 11px uppercase monospace tracking — terminal instrumentation */
-.text-micro {
-    font-family: 'Fira Code', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-}
-
-.text-nano {
-    font-family: 'Fira Code', monospace;
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-}
-
-/* === GLOW UTILITIES === */
-.glow-primary {
-    box-shadow: 0 0 8px rgba(173, 198, 255, 0.5);
-}
-
-.glow-secondary {
-    box-shadow: 0 0 8px rgba(76, 215, 246, 0.6);
-}
-
-.glow-error {
-    box-shadow: 0 0 8px rgba(255, 180, 171, 0.5);
-}
-
-.glow-ambient {
-    box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 0 15px rgba(173, 198, 255, 0.05);
-}
-
-.drop-glow-primary {
-    filter: drop-shadow(0 0 8px rgba(173, 198, 255, 0.5));
-}
-
-.drop-glow-secondary {
-    filter: drop-shadow(0 0 8px rgba(76, 215, 246, 0.6));
-}
-
-.drop-glow-error {
-    filter: drop-shadow(0 0 8px rgba(255, 180, 171, 0.5));
-}
-
-.drop-glow-success {
-    filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.6));
-}
-
-.text-glow-success {
-    text-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
-}
-
-.glow-success {
-    box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
-}
-
-/* === IGNITION BUTTON — Conic Gradient Core === */
-.ignition-btn {
-    position: relative;
-    isolation: isolate;
-    background: conic-gradient(from 180deg at 50% 50%, #4d8eff 0deg, #03b5d3 180deg, #4d8eff 360deg);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
-    transition: box-shadow 0.3s ease, filter 0.3s ease;
-}
-
-.ignition-btn:hover {
-    box-shadow:
-        inset 0 0 15px rgba(255, 255, 255, 0.15),
-        0 0 20px rgba(77, 142, 255, 0.7),
-        0 0 40px rgba(76, 215, 246, 0.3);
-    filter: brightness(1.1);
-}
-
-.ignition-btn.active {
-    animation: ignition-pulse 2s ease-in-out infinite;
-}
-
-.ignition-btn.stopping {
-    background: conic-gradient(from 180deg at 50% 50%, #93000a 0deg, #ffb4ab 180deg, #93000a 360deg);
-    box-shadow: 0 0 8px rgba(255, 180, 171, 0.5);
-    animation: none;
-}
-
-/* Outer ring — only when active */
-.ignition-ring {
-    position: absolute;
-    inset: -4px;
-    border-radius: inherit;
-    padding: 2px;
-    background: conic-gradient(
-        from 0deg,
-        rgba(173, 198, 255, 0) 0%,
-        rgba(173, 198, 255, 0.6) 25%,
-        rgba(76, 215, 246, 0.4) 50%,
-        rgba(173, 198, 255, 0.6) 75%,
-        rgba(173, 198, 255, 0) 100%
-    );
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    animation: ignition-spin 2s linear infinite;
-    pointer-events: none;
-}
-
-@keyframes ignition-spin {
-    0%   { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes ignition-pulse {
-    0%, 100% {
-        box-shadow:
-            0 0 12px rgba(173, 198, 255, 0.4),
-            0 0 30px rgba(76, 215, 246, 0.15);
+@layer base {
+    :root {
+        color-scheme: dark;
+        --focus: theme('colors.focus');
     }
-    50% {
-        box-shadow:
-            0 0 24px rgba(173, 198, 255, 0.7),
-            0 0 50px rgba(76, 215, 246, 0.3),
-            inset 0 0 10px rgba(255, 255, 255, 0.1);
+
+    html,
+    body,
+    #root {
+        height: 100%;
+    }
+
+    body {
+        @apply bg-canvas text-fg font-sans text-base antialiased;
+        font-feature-settings: 'cv11', 'ss01', 'tnum' 0;
+        overflow: hidden;
+    }
+
+    /* Il focus da tastiera si vede sempre, ovunque. È un `outline` e non un box-shadow:
+       in modalità a contrasto elevato di Windows le ombre spariscono, gli outline no. */
+    :focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
+    :focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    ::selection {
+        background: theme('colors.primary');
+        color: theme('colors.on-primary');
+    }
+
+    /* Le cifre che cambiano (contatori, orari) non devono far ballare il layout */
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Barre di scorrimento sottili ma visibili: 3:1 sullo sfondo, come ogni componente */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: theme('colors.surface-4');
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: theme('colors.line-strong');
+        background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+    input[type='date'],
+    input[type='time'] {
+        color-scheme: dark;
+    }
+
+    input[type='range'] {
+        accent-color: theme('colors.primary');
     }
 }
 
-/* === PANEL BORDERS — legacy compat === */
-.panel-border {
-    border: 1px solid rgba(59, 130, 246, 0.10);
+@layer components {
+    /* Etichetta di sezione: maiuscoletto leggibile, non il vecchio 9px monospace */
+    .eyebrow {
+        @apply text-xs font-semibold uppercase text-fg-3;
+        letter-spacing: 0.06em;
+    }
+
+    /* Pannello: superficie con bordo sottile e un filo di luce in alto */
+    .panel {
+        @apply bg-surface-1 border border-line rounded-lg;
+    }
+
+    /* Testo solo per i lettori di schermo */
+    .visually-hidden {
+        @apply sr-only;
+    }
+
+    /* Collegamento «salta al contenuto»: invisibile finché non riceve il focus */
+    .skip-link {
+        @apply absolute left-3 top-3 z-[200] -translate-y-16 rounded-md bg-primary px-4 py-2 font-semibold text-on-primary;
+        transition: transform 150ms;
+    }
+    .skip-link:focus {
+        @apply translate-y-0;
+    }
+
+    /* Anteprima dei template: i link di Telegram e lo spoiler */
+    .tg-preview .tg-link {
+        @apply text-accent underline underline-offset-2;
+    }
+    .tg-preview .tg-spoiler {
+        @apply rounded-sm bg-surface-4 px-1 text-fg-2;
+    }
+    .tg-preview pre,
+    .tg-preview code {
+        @apply font-mono text-sm;
+    }
+    .tg-preview blockquote {
+        @apply border-l-2 border-accent pl-3 text-fg-2;
+    }
 }
 
-.panel-border-active {
-    border-color: rgba(59, 130, 246, 0.25);
-    box-shadow: inset 0 0 30px rgba(59, 130, 246, 0.04), 0 0 15px rgba(59, 130, 246, 0.05);
+/* ═══════════════════════════════════════════════════════════════════════
+   MOVIMENTO
+   Chi chiede al sistema meno animazioni le ha tolte anche qui; «Riduci gli
+   effetti» nelle impostazioni (classe .reduce-motion) fa lo stesso a mano.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
-/* === STATUS DOTS === */
-.status-dot-active {
-    box-shadow: 0 0 6px rgba(74, 222, 128, 0.8), 0 0 12px rgba(74, 222, 128, 0.4);
+body.reduce-motion *,
+body.reduce-motion *::before,
+body.reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
 }
 
-.status-dot-stopped {
-    box-shadow: 0 0 6px rgba(255, 180, 171, 0.6);
-}
-
-/* === GRID DOT BACKGROUND === */
-.grid-dots {
-    background-image: radial-gradient(rgba(59, 130, 246, 0.10) 1px, transparent 1px);
-    background-size: 24px 24px;
-}
-
-/* === SELECTION HIGHLIGHT === */
-::selection {
-    background: rgba(76, 215, 246, 0.25);
-    color: #e3e0f3;
-}
-
-/* === GRADIENT BORDER BUTTON (sidebar new-bot pattern) === */
-.gradient-border-btn {
-    position: relative;
-    padding: 1px;
-    border-radius: 4px;
-    background: linear-gradient(135deg, #93c5fd, #4cd7f6);
-}
-
-.gradient-border-btn > * {
-    border-radius: 3px;
-    background: #0a0a0f;
-    transition: background 0.2s ease;
-}
-
-.gradient-border-btn:hover > * {
-    background: #10101a;
-}
-
-/* === NAV ACTIVE STATE — border-left accent === */
-.nav-item-active {
-    border-left: 2px solid #3b82f6;
-    background: rgba(59, 130, 246, 0.06);
-    box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.04);
-    color: #93c5fd;
-}
-
-.nav-item {
-    border-left: 2px solid transparent;
-    transition: all 0.2s ease;
-}
-
-.nav-item:hover {
-    border-left-color: rgba(59, 130, 246, 0.35);
-    background: rgba(59, 130, 246, 0.06);
-    color: #e0e7ff;
-}
-
-/* === INPUT FIELDS — Terminal underline style === */
-.input-terminal {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.25);
-    border-radius: 0;
-    color: #e0e7ff;
-    padding: 0.5rem 0;
-    font-family: 'Inter', sans-serif;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    width: 100%;
-}
-
-.input-terminal::placeholder {
-    color: rgba(66, 71, 84, 0.6);
-    font-size: 0.875rem;
-}
-
-.input-terminal:focus {
-    border-bottom-color: #adc6ff;
-    box-shadow: 0 1px 0 0 rgba(173, 198, 255, 0.3);
-}
-
-.input-terminal:focus + .input-label,
-.input-terminal:not(:placeholder-shown) + .input-label {
-    color: #adc6ff;
-}
-
-.input-label {
-    font-family: 'Fira Code', monospace;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #8c909f;
-    transition: color 0.2s ease;
-    display: block;
-    margin-bottom: 4px;
-}
-
-/* === TOAST STRIPE VARIANTS === */
-.toast-stripe-info    { background: #adc6ff; box-shadow: 0 0 8px rgba(173, 198, 255, 0.6); }
-.toast-stripe-success { background: #4cd7f6; box-shadow: 0 0 8px rgba(76, 215, 246, 0.6); }
-.toast-stripe-warning { background: #d0bcff; box-shadow: 0 0 8px rgba(208, 188, 255, 0.6); }
-.toast-stripe-error   { background: #ffb4ab; box-shadow: 0 0 8px rgba(255, 180, 171, 0.6); }
-
-/* === STAT TILE TOP STRIPE === */
-.tile-stripe-primary  { background: linear-gradient(90deg, #adc6ff, transparent); }
-.tile-stripe-secondary{ background: linear-gradient(90deg, #4cd7f6, transparent); }
-.tile-stripe-tertiary { background: linear-gradient(90deg, #d0bcff, transparent); }
-
-/* === MARKDOWN GUIDE RENDERER === */
-.markdown-body {
-    color: #e3e0f3;
-    font-size: 0.95rem;
-    line-height: 1.7;
-}
-
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    letter-spacing: 0.025em;
-}
-
-.markdown-body h1 {
-    font-size: 2.25rem;
-    border-bottom: 1px solid rgba(173, 198, 255, 0.2);
-    padding-bottom: 0.5rem;
-    color: #adc6ff;
-    text-shadow: 0 0 8px rgba(173, 198, 255, 0.3);
-}
-
-.markdown-body h2 {
-    font-size: 1.75rem;
-    color: #4cd7f6;
-}
-
-.markdown-body h3 {
-    font-size: 1.25rem;
-    color: #d0bcff;
-}
-
-.markdown-body p {
-    margin-bottom: 1.25rem;
-    color: #c2c6d6;
-}
-
-.markdown-body a {
-    color: #adc6ff;
-    text-decoration: underline;
-    text-decoration-color: rgba(173, 198, 255, 0.4);
-    text-underline-offset: 4px;
-    transition: all 0.2s;
-}
-
-.markdown-body a:hover {
-    color: #4cd7f6;
-    text-decoration-color: #4cd7f6;
-}
-
-.markdown-body ul,
-.markdown-body ol {
-    margin-top: 0;
-    margin-bottom: 1.25rem;
-    padding-left: 1.5rem;
-}
-
-.markdown-body li {
-    margin-bottom: 0.5rem;
-    color: #c2c6d6;
-}
-
-.markdown-body li::marker {
-    color: #4cd7f6;
-}
-
-.markdown-body code {
-    background-color: rgba(13, 13, 25, 0.8);
-    color: #d0bcff;
-    padding: 0.2rem 0.4rem;
-    border-radius: 2px;
-    font-family: 'Fira Code', monospace;
-    font-size: 0.8em;
-    border: 1px solid rgba(66, 71, 84, 0.3);
-}
-
-.markdown-body pre {
-    background-color: rgba(13, 13, 25, 0.9);
-    border: 1px solid rgba(66, 71, 84, 0.2);
-    box-shadow: inset 0 0 10px rgba(208, 188, 255, 0.03);
-    border-radius: 4px;
-    padding: 1rem;
-    overflow-x: auto;
-    margin-bottom: 1.5rem;
-}
-
-.markdown-body pre code {
-    background-color: transparent;
-    padding: 0;
-    border: none;
-    color: #e3e0f3;
-    font-size: 0.85em;
-}
-
-.markdown-body hr {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(76, 215, 246, 0.4), transparent);
-    border: none;
-    margin: 2.5rem 0;
-}
-
-.markdown-body blockquote {
-    border-left: 2px solid #4cd7f6;
-    padding-left: 1rem;
-    margin-left: 0;
-    color: #8c909f;
-    font-style: italic;
-    background: linear-gradient(90deg, rgba(76, 215, 246, 0.04), transparent);
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-radius: 0 4px 4px 0;
-}
-
-/* ═══════════════════════════════════════════════════
-   PERFORMANCE MODE — disabilita animazioni GPU-heavy
-   Attivato da body.performance-mode via toggle UI
-   ═══════════════════════════════════════════════════ */
-
-body.performance-mode .scanline-bg::before,
-body.performance-mode .scanline-bg::after {
-    display: none !important;
-}
-
-body.performance-mode .glass-panel,
-body.performance-mode .glass-panel-elevated {
+body.reduce-motion .backdrop-blur-sm,
+body.reduce-motion .backdrop-blur {
     backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(31, 30, 43, 0.95) !important;
 }
 
-body.performance-mode .ignition-btn.active,
-body.performance-mode .ignition-ring {
-    animation: none !important;
-}
-
-body.performance-mode .glow-primary,
-body.performance-mode .glow-secondary,
-body.performance-mode .glow-error,
-body.performance-mode .glow-success,
-body.performance-mode .glow-ambient,
-body.performance-mode .status-dot-active,
-body.performance-mode .status-dot-stopped,
-body.performance-mode .panel-border-active {
-    box-shadow: none !important;
-}
-
-body.performance-mode .drop-glow-primary,
-body.performance-mode .drop-glow-secondary,
-body.performance-mode .drop-glow-error,
-body.performance-mode .drop-glow-success {
-    filter: none !important;
-}
-
-body.performance-mode .text-glow,
-body.performance-mode .text-glow-cyan,
-body.performance-mode .text-glow-error,
-body.performance-mode .text-glow-success {
-    text-shadow: none !important;
+/* ═══════════════════════════════════════════════════════════════════════
+   CONTRASTO ELEVATO DI WINDOWS (forced-colors)
+   Il sistema sostituisce i colori: servono bordi veri dove prima c'erano
+   solo sfondi, così pulsanti, interruttori e pannelli restano distinguibili.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (forced-colors: active) {
+    .panel,
+    button,
+    [role='switch'],
+    [role='tab'],
+    input,
+    select,
+    textarea {
+        border: 1px solid CanvasText;
+    }
+    [role='switch'][aria-checked='true'] {
+        background: Highlight;
+    }
+    :focus-visible {
+        outline-color: Highlight;
+    }
 }

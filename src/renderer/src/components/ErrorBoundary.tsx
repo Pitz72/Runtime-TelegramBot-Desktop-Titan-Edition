@@ -1,17 +1,29 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
-const errorStrings: Record<string, { title: string; subtitle: string; body: string; reload: string; footer: string }> = {
-    it: { title: 'Errore Critico di Sistema', subtitle: 'Arresto Interfaccia Rilevato', body: "L'interfaccia ha riscontrato un errore fatale. I processi in background (Bot) potrebbero essere ancora attivi, ma l'interfaccia deve essere ricaricata.", reload: 'Ricarica Interfaccia', footer: 'Protocollo di Sicurezza Titan Desktop Attivo' },
-    en: { title: 'Critical System Error', subtitle: 'Interface Termination Detected', body: 'The interface module encountered a fatal error. Background processes (Bots) might still be operational, but the UI needs to be reloaded.', reload: 'Reload Interface', footer: 'Titan Desktop Safety Protocol Active' },
+// Testi propri e non dal contesto i18n: questa schermata deve funzionare anche quando è
+// proprio il resto dell'interfaccia a essersi rotto.
+const errorStrings: Record<string, { title: string; body: string; reload: string; details: string }> = {
+    it: {
+        title: 'L’interfaccia si è interrotta',
+        body: 'Si è verificato un errore imprevisto nell’interfaccia. Il motore dei bot, se era acceso, continua a lavorare in sottofondo: basta ricaricare la finestra.',
+        reload: 'Ricarica l’interfaccia',
+        details: 'Dettagli tecnici',
+    },
+    en: {
+        title: 'The interface has stopped',
+        body: 'An unexpected error occurred in the interface. The bot engine, if it was running, keeps working in the background: reloading the window is enough.',
+        reload: 'Reload the interface',
+        details: 'Technical details',
+    },
 };
 
 function getErrorStrings() {
     try {
-        const lang = localStorage.getItem('titan-lang') || 'en';
+        const lang = localStorage.getItem('titan-lang') || 'it';
         return errorStrings[lang] || errorStrings.en;
     } catch {
-        return errorStrings.en;
+        return errorStrings.it;
     }
 }
 
@@ -35,65 +47,37 @@ export class ErrorBoundary extends Component<Props, State> {
     handleReset = () => { window.location.reload(); };
 
     render() {
-        if (this.state.hasError) {
-            const s = getErrorStrings();
-            return (
-                <div className="h-screen w-screen bg-background grid-dots flex items-center justify-center p-6 font-body overflow-hidden">
-                    {/* Ambient halo */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-[700px] h-[700px] rounded-full bg-error/5 blur-[120px]" />
+        if (!this.state.hasError) return this.props.children;
+        const s = getErrorStrings();
+        return (
+            <main className="flex h-screen items-center justify-center bg-canvas p-6">
+                <div role="alert" className="w-full max-w-xl rounded-xl border border-line bg-surface-1 p-8 shadow-overlay">
+                    <div className="flex items-start gap-4">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-danger-soft text-danger" aria-hidden="true">
+                            <AlertTriangle size={22} />
+                        </span>
+                        <div>
+                            <h1 className="text-xl font-semibold text-fg">{s.title}</h1>
+                            <p className="mt-2 text-base text-fg-2">{s.body}</p>
+                        </div>
                     </div>
-
-                    <div className="max-w-2xl w-full glass-panel rounded-xl overflow-hidden animate-in fade-in zoom-in duration-300 relative"
-                        style={{ boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(255,180,171,0.08)' }}
+                    <details className="mt-5 rounded-md border border-line bg-surface-2 p-3">
+                        <summary className="cursor-pointer text-sm font-medium text-fg-2">{s.details}</summary>
+                        <code className="mt-2 block select-text whitespace-pre-wrap break-words font-mono text-xs text-danger">
+                            {this.state.error?.name}: {this.state.error?.message}
+                        </code>
+                    </details>
+                    <button
+                        type="button"
+                        onClick={this.handleReset}
+                        autoFocus
+                        className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-primary font-medium text-on-primary hover:bg-primary-hover"
                     >
-                        {/* Top accent stripe */}
-                        <div className="h-0.5 w-full bg-gradient-to-r from-error via-error/60 to-transparent" />
-
-                        {/* Header */}
-                        <div className="flex items-center gap-4 p-8 border-b border-outline-variant/15">
-                            <div className="w-14 h-14 rounded-xl bg-error-container/20 flex items-center justify-center text-error border border-error/20 drop-glow-error flex-shrink-0">
-                                <AlertTriangle size={28} />
-                            </div>
-                            <div>
-                                <h1 className="font-headline text-2xl font-black text-on-surface uppercase tracking-tight">
-                                    {s.title}
-                                </h1>
-                                <p className="text-micro text-error/60 mt-1">{s.subtitle}</p>
-                            </div>
-                        </div>
-
-                        {/* Body */}
-                        <div className="p-8 space-y-4">
-                            <p className="text-sm text-on-surface-variant leading-relaxed">{s.body}</p>
-
-                            <div className="bg-surface-container-lowest rounded-lg p-4 border border-error/10 overflow-auto max-h-40 scanline-bg">
-                                <code className="text-error font-mono text-xs break-all leading-relaxed relative z-10 block">
-                                    {this.state.error?.name}: {this.state.error?.message}
-                                </code>
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="px-8 pb-8 flex flex-col gap-3">
-                            <button
-                                onClick={this.handleReset}
-                                className="w-full bg-error/15 hover:bg-error/25 text-error border border-error/30 py-3 rounded-lg font-headline font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] drop-glow-error"
-                            >
-                                <RefreshCw size={18} />
-                                {s.reload}
-                            </button>
-                            <p className="text-center text-nano text-outline-variant/30 mt-1">{s.footer}</p>
-                        </div>
-
-                        {/* Micro-copy decorativo */}
-                        <div className="absolute bottom-3 left-5 text-nano text-outline-variant/25 pointer-events-none">
-                            ERR_CODE: 0xDEAD_BEEF · TITAN_SAFE
-                        </div>
-                    </div>
+                        <RefreshCw size={18} aria-hidden="true" />
+                        {s.reload}
+                    </button>
                 </div>
-            );
-        }
-        return this.props.children;
+            </main>
+        );
     }
 }

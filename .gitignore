@@ -54,3 +54,4 @@ gumroad-packages/
 
 # Generato a ogni build da scripts/third-party-notices.mjs
 resources/THIRD-PARTY-NOTICES.txt
+resources/LICENSE.txt

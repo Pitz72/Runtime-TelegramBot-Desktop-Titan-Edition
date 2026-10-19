@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { ArrowRight, Loader2, Sparkles, BookOpen, Download, Heart } from 'lucide-react';
 import { useTranslation, Language } from '../locales/I18nContext';
 import { FlagIT, FlagGB } from './ui/Flags';
-import { ChevronRight, Loader2, Sparkles, BookOpen, Download, Heart } from 'lucide-react';
 import logo from '../assets/logo.png';
 import type { UpdateStatus } from '../hooks/useUpdater';
 import { GuideModal } from './GuideModal';
+import { Button } from './ui/Button';
 import { openManual } from '../lib/docs';
 import { DONATE_URL, openLink } from '../lib/links';
+import { cn } from '@/lib/utils';
 
 interface Props {
     onComplete: () => void;
@@ -17,143 +19,101 @@ interface Props {
 }
 
 export const flagsList: { id: Language; label: string; component: React.FC<{ className?: string }> }[] = [
+    { id: 'it', label: 'Italiano', component: FlagIT },
     { id: 'en', label: 'English', component: FlagGB },
-    { id: 'it', label: 'Italiano', component: FlagIT }
 ];
 
+/** Schermata d'ingresso: chi è il programma, in che lingua parlarti, e la porta per entrare. */
 export function IntroScreen({ onComplete, updateStatus = 'idle', newVersion, currentVersion }: Props) {
     const { locale, setLocale, t } = useTranslation();
     const [showGuide, setShowGuide] = useState(false);
-
     const updateAvailable = updateStatus === 'available' || updateStatus === 'downloading' || updateStatus === 'downloaded';
 
     return (
-        <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-50 selection:bg-primary/30">
-            {/* Ambient halo */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none grid-dots">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[120px] opacity-60" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[80px] opacity-40" />
-            </div>
+        <main className="relative flex h-screen items-center justify-center overflow-y-auto bg-canvas px-6 py-10">
+            {/* Un solo alone, dall'alto: profondità senza rumore */}
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0"
+                style={{ background: 'radial-gradient(60% 50% at 50% 0%, rgba(37, 99, 235, 0.22), transparent 70%)' }}
+            />
 
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="relative z-10 max-w-2xl w-full p-8 flex flex-col items-center"
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="relative w-full max-w-lg text-center"
             >
-                <img src={logo} alt="Titan Logo" className="w-28 h-28 mb-6 drop-shadow-2xl" style={{ filter: 'drop-shadow(0 0 24px rgba(173,198,255,0.25))' }} />
+                <img src={logo} alt="" className="mx-auto mb-6 h-24 w-24" />
 
-                {/* Le due parti del nome canonico stanno su due righe: «Titan Edition» non si spezza mai */}
-                <h1 className="font-headline text-4xl font-black tracking-tight mb-2 text-on-surface text-center">
+                <h1 className="text-3xl font-semibold tracking-tight text-fg">
                     {t('app.title')}
-                    <span className="block text-primary drop-glow-primary">Titan Edition</span>
+                    <span className="mt-1 block text-accent">{t('app.edition')}</span>
                 </h1>
+                <p className="mx-auto mt-3 max-w-md text-base text-fg-3">{t('intro.tagline')}</p>
 
-                <p className="text-outline-variant/60 text-sm font-body mb-1">
-                    {t('app.copyright') || '© 2026 Simone Pizzi per Runtime Radio'}
-                </p>
-
-                {/* Paternità del progetto — il testo esteso è in Impostazioni di Sistema → Crediti */}
-                <p className="text-xs text-on-surface-variant/70 font-body mb-3 text-center max-w-md">
-                    {t('credits.short')}
-                </p>
-
-                {/* Versione + stato controllo aggiornamenti */}
-                <div className="h-6 mb-9 flex items-center justify-center">
+                <p className="mt-3 flex h-6 items-center justify-center gap-1.5 text-sm" aria-live="polite">
                     {updateAvailable ? (
-                        <span className="flex items-center gap-1.5 text-xs font-body text-primary drop-glow-primary">
-                            <Sparkles size={13} />
+                        <span className="inline-flex items-center gap-1.5 text-accent">
+                            <Sparkles size={14} aria-hidden="true" />
                             {t('updater.newBadge').replace('{{version}}', newVersion || '')}
                         </span>
                     ) : updateStatus === 'checking' ? (
-                        <span className="flex items-center gap-1.5 text-nano text-outline-variant/40">
-                            <Loader2 size={11} className="animate-spin" />
+                        <span className="inline-flex items-center gap-1.5 text-fg-3">
+                            <Loader2 size={14} className="animate-spin" aria-hidden="true" />
                             {t('updater.checking')}
                         </span>
-                    ) : (
-                        currentVersion && (
-                            <span className="text-nano text-outline-variant/35 font-mono">v{currentVersion}</span>
-                        )
-                    )}
-                </div>
+                    ) : currentVersion ? (
+                        <span className="font-mono text-fg-3">v{currentVersion}</span>
+                    ) : null}
+                </p>
 
-                {/* Language selector panel */}
-                <div className="w-full glass-panel rounded-2xl p-6 mb-8">
-                    <h3 className="text-center text-micro text-secondary mb-6 drop-glow-secondary">
-                        {t('systemSettings.langSection.title') || 'Interface Language'}
-                    </h3>
-
-                    {/* Centrato sul numero reale di lingue: niente colonne fisse */}
-                    <div className="flex flex-wrap justify-center gap-4">
-                        {flagsList.map((lang) => {
+                <fieldset className="mt-8 rounded-xl border border-line bg-surface-1 p-5 text-left shadow-raised">
+                    <legend className="sr-only">{t('system.language.title')}</legend>
+                    <p className="mb-3 text-sm font-medium text-fg-2" aria-hidden="true">{t('system.language.title')}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                        {flagsList.map(lang => {
                             const Flag = lang.component;
-                            const isActive = locale === lang.id;
-
+                            const checked = locale === lang.id;
                             return (
-                                <button
+                                <label
                                     key={lang.id}
-                                    onClick={() => setLocale(lang.id)}
-                                    className={`relative w-32 flex flex-col items-center p-3 rounded-xl border transition-all duration-300 ${
-                                        isActive
-                                            ? 'bg-primary/15 border-primary/40 text-on-surface'
-                                            : 'bg-surface-container-lowest border-outline-variant/10 text-outline-variant/60 hover:bg-surface-container hover:text-on-surface-variant hover:border-outline-variant/25'
-                                    }`}
-                                >
-                                    <div className="w-8 h-6 mb-2 rounded overflow-hidden shadow-sm shadow-black/50">
-                                        <Flag className="w-full h-full object-cover" />
-                                    </div>
-                                    <span className="text-nano">{lang.label}</span>
-
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="lang-active"
-                                            className="absolute inset-0 border-2 border-primary/50 rounded-xl pointer-events-none"
-                                        />
+                                    className={cn(
+                                        'flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors',
+                                        'has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',
+                                        checked ? 'border-accent bg-surface-4' : 'border-line bg-surface-2 hover:border-line-strong',
                                     )}
-                                </button>
+                                >
+                                    <input type="radio" name="intro-language" value={lang.id} checked={checked} onChange={() => setLocale(lang.id)} className="sr-only" />
+                                    <span className="h-5 w-7 shrink-0 overflow-hidden rounded-sm" aria-hidden="true"><Flag className="h-full w-full" /></span>
+                                    <span className={cn('text-base font-medium', checked ? 'text-fg' : 'text-fg-2')} lang={lang.id}>{lang.label}</span>
+                                    <span
+                                        aria-hidden="true"
+                                        className={cn('ml-auto flex h-4 w-4 items-center justify-center rounded-full border-2', checked ? 'border-accent' : 'border-line-strong')}
+                                    >
+                                        {checked && <span className="h-2 w-2 rounded-full bg-accent" />}
+                                    </span>
+                                </label>
                             );
                         })}
                     </div>
-                </div>
+                </fieldset>
 
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={onComplete}
-                    className="ignition-btn flex items-center gap-2 text-on-primary-fixed px-10 py-3.5 rounded-full font-headline font-bold text-sm shadow-lg"
-                >
-                    {t('setup.btnLaunch') || 'Lancia Titan'}
-                    <ChevronRight size={18}  />
-                </motion.button>
+                <Button variant="primary" size="lg" iconRight={ArrowRight} className="mt-6 w-full" onClick={onComplete} data-autofocus>
+                    {t('intro.enter')}
+                </Button>
 
-                {/* Azioni documentazione: guida rapida + manuale PDF */}
-                <div className="flex items-center gap-3 mt-6">
-                    <button
-                        onClick={() => setShowGuide(true)}
-                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full ghost-border text-outline-variant/70 hover:text-on-surface hover:border-primary/30 hover:bg-primary/5 transition-all text-xs font-body"
-                    >
-                        <BookOpen size={14} />
-                        {t('quickGuide.btn')}
-                    </button>
-                    <button
-                        onClick={() => openManual(locale)}
-                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full ghost-border text-outline-variant/70 hover:text-on-surface hover:border-secondary/30 hover:bg-secondary/5 transition-all text-xs font-body"
-                    >
-                        <Download size={14} />
-                        {t('quickGuide.manualBtn')}
-                    </button>
-                    <button
-                        onClick={() => openLink(DONATE_URL)}
-                        title={t('support.donateTitle')}
-                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full ghost-border text-outline-variant/70 hover:text-tertiary hover:border-tertiary/40 hover:bg-tertiary/5 transition-all text-xs font-body"
-                    >
-                        <Heart size={14} />
-                        {t('support.donateBtn')}
-                    </button>
-                </div>
+                <nav aria-label={t('intro.linksLabel')} className="mt-5 flex flex-wrap items-center justify-center gap-1">
+                    <Button variant="ghost" size="sm" icon={BookOpen} onClick={() => setShowGuide(true)}>{t('quickGuide.btn')}</Button>
+                    <Button variant="ghost" size="sm" icon={Download} onClick={() => openManual(locale)}>{t('quickGuide.manualBtn')}</Button>
+                    <Button variant="ghost" size="sm" icon={Heart} onClick={() => openLink(DONATE_URL)}>{t('support.donateBtn')}</Button>
+                </nav>
+
+                <p className="mt-6 text-sm text-fg-3">{t('credits.short')}</p>
+                <p className="mt-1 text-xs text-fg-3">{t('app.copyright')}</p>
             </motion.div>
 
-            {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
-        </div>
+            <GuideModal open={showGuide} onClose={() => setShowGuide(false)} />
+        </main>
     );
 }

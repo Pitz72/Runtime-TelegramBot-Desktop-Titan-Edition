@@ -19,10 +19,7 @@ function App(): JSX.Element {
     useEffect(() => {
         window.api.getBots().then((bots) => {
             setHasBots(bots.length > 0);
-        });
-        window.api.getPerformanceMode().then((enabled) => {
-            document.body.classList.toggle('performance-mode', enabled);
-        });
+        }).catch(() => setHasBots(false));
         // Un profilo .rtb aperto con doppio clic mentre è ancora aperto il wizard porta
         // direttamente alla Dashboard.
         const offBotsChanged = window.api.onBotsChanged(() => setHasBots(true));
@@ -32,17 +29,13 @@ function App(): JSX.Element {
         return offBotsChanged;
     }, []);
 
+    // Il wizard mostra l'errore da sé: qui si lascia propagare.
     const handleSetupComplete = async (name: string, token: string, channelId: string, startDate: string) => {
-        await window.api.createBot({
-            name,
-            token,
-            channelId,
-            startDate
-        });
+        await window.api.createBot({ name, token, channelId, startDate });
         setHasBots(true);
     };
 
-    if (hasBots === null) return <div className="h-screen bg-dark-900" />;
+    if (hasBots === null) return <div className="h-screen bg-canvas" />;
 
     return (
         <ErrorBoundary>
@@ -56,10 +49,7 @@ function App(): JSX.Element {
             ) : hasBots ? (
                 <Dashboard updater={updater} />
             ) : (
-                <SetupWizard
-                    onComplete={(name, token, channel, startDate) => handleSetupComplete(name, token, channel, startDate)}
-                    onSkip={() => setHasBots(true)}
-                />
+                <SetupWizard onComplete={handleSetupComplete} />
             )}
 
             {/* Schermata di aggiornamento — sopra ogni vista */}

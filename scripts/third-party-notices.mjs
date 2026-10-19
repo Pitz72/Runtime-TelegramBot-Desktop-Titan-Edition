@@ -14,7 +14,7 @@
  *
  * Uso: node scripts/third-party-notices.mjs   (lo lancia anche `npm run build`)
  */
-import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync, copyFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -87,6 +87,9 @@ for (const e of entries) {
 }
 
 writeFileSync(out, lines.join('\n'), 'utf-8');
+
+// La licenza di Titan accanto a quelle dei terzi: l'app la mostra in Impostazioni → Informazioni.
+copyFileSync(join(root, 'LICENSE'), join(root, 'resources', 'LICENSE.txt'));
 
 const unknown = entries.filter(e => !e.license || e.license === 'UNKNOWN');
 console.log(`✓ ${entries.length} pacchetti → ${out.replace(root, '.')}`);

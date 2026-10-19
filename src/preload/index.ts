@@ -104,6 +104,15 @@ const api = {
         ipcRenderer.removeAllListeners('update-error');
         ipcRenderer.on('update-error', (_, info) => callback(info));
     },
+    // Accessibilità e licenze
+    getUiZoom: () => ipcRenderer.invoke('get-ui-zoom') as Promise<number>,
+    setUiZoom: (zoom: number) => ipcRenderer.invoke('set-ui-zoom', zoom) as Promise<number>,
+    onUiZoomChanged: (callback: (zoom: number) => void) => {
+        const handler = (_: unknown, zoom: number) => callback(zoom);
+        ipcRenderer.on('ui-zoom-changed', handler);
+        return () => { ipcRenderer.removeListener('ui-zoom-changed', handler); };
+    },
+    readLicense: (kind: 'app' | 'third-party') => ipcRenderer.invoke('read-license', kind) as Promise<string | null>,
     // Fase 7: nessun argomento — il main esporta il file di log della giornata
     exportLogs: () => ipcRenderer.invoke('export-logs'),
     exportDatabase: () => ipcRenderer.invoke('export-database'),

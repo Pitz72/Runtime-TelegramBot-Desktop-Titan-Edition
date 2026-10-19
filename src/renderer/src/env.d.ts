@@ -43,7 +43,7 @@ export interface TitanAPI {
 
     // Stats
     getStats: (botId: number) => Promise<{ total: number; today: number; week: number }>
-    getDetailedStats: (botId: number) => Promise<{ total: number; today: number; week: number; byFeed: Array<{ feedId: number; feedName: string; total: number; today: number }> }>
+    getDetailedStats: (botId: number) => Promise<{ total: number; today: number; week: number; byFeed: Array<{ feedId: number; feedName: string | null; total: number; today: number }> }>
 
     // OPML
     importOpml: (botId: number) => Promise<{ success: boolean; count: number; error?: string }>
@@ -66,6 +66,10 @@ export interface TitanAPI {
     onUpdateProgress: (callback: (info: { percent: number }) => void) => void
     onUpdateDownloaded: (callback: (info: { version: string }) => void) => void
     onUpdateError: (callback: (info: { message: string }) => void) => void
+    getUiZoom: () => Promise<number>
+    setUiZoom: (zoom: number) => Promise<number>
+    onUiZoomChanged: (callback: (zoom: number) => void) => () => void
+    readLicense: (kind: 'app' | 'third-party') => Promise<string | null>
     exportLogs: () => Promise<{ success: boolean; path?: string; error?: string }>
     exportDatabase: () => Promise<{ success: boolean; path?: string; error?: string }>
     importDatabase: () => Promise<{ success: boolean; error?: string }>

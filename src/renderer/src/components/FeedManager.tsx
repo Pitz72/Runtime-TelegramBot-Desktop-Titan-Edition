@@ -1,498 +1,215 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-    Plus, Trash2, Rss, FileText, Globe, Play,
-    Pencil, Zap, Loader2, Filter, Clock,
-    Upload, BookOpen, Search, X
-} from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Plus, Trash2, Rss, Newspaper, Youtube, Pencil, Filter, Clock, Upload, BookOpen, Search, X } from 'lucide-react';
 import { FeedConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
+import { Button, IconButton } from './ui/Button';
+import { Badge, Switch, TextField, type BadgeTone } from './ui/Controls';
+import { FeedDialog, parseKeywordFilter, useDurationLabel } from './FeedDialog';
 import { useTranslation } from '../locales/I18nContext';
 import { errorMessage } from '../lib/errors';
+import { cn } from '@/lib/utils';
 
-interface Props { botId: number; }
-
-function buildKeywordFilter(include: string, exclude: string): string | null {
-    const inc = include.split(',').map(s => s.trim()).filter(Boolean);
-    const exc = exclude.split(',').map(s => s.trim()).filter(Boolean);
-    if (inc.length === 0 && exc.length === 0) return null;
-    return JSON.stringify({ include: inc, exclude: exc });
+interface Props {
+    botId: number;
+    /** false quando la sezione è già nominata da una scheda: il titolo resta solo per i lettori di schermo */
+    showTitle?: boolean;
 }
 
-function parseKeywordFilter(raw: string | null): { include: string; exclude: string } {
-    if (!raw) return { include: '', exclude: '' };
-    try {
-        const { include = [], exclude = [] } = JSON.parse(raw) as { include?: string[]; exclude?: string[] };
-        return { include: include.join(', '), exclude: exclude.join(', ') };
-    } catch { return { include: '', exclude: '' }; }
-}
+const TYPE_STYLE: Record<FeedConfig['type'], { icon: typeof Rss; tone: BadgeTone; tile: string }> = {
+    podcast: { icon: Rss, tone: 'podcast', tile: 'text-podcast' },
+    news: { icon: Newspaper, tone: 'news', tile: 'text-news' },
+    youtube: { icon: Youtube, tone: 'youtube', tile: 'text-youtube' },
+};
 
-const INTERVAL_PRESETS = [null, 5, 15, 30, 60, 120, 240, 480, 1440] as const;
-
-export function FeedManager({ botId }: Props) {
+export function FeedManager({ botId, showTitle = true }: Props) {
     const { t } = useTranslation();
-    const [feeds, setFeeds] = useState<FeedConfig[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [isAdding, setIsAdding] = useState(false);
-    const [editingFeed, setEditingFeed] = useState<FeedConfig | null>(null);
-    const [newFeed, setNewFeed] = useState({ name: '', url: '', type: 'podcast' as 'podcast' | 'news' | 'youtube' });
-    const [testing, setTesting] = useState<number | 'new' | null>(null);
-    const [testResult, setTestResult] = useState<{ success: boolean; count?: number; error?: string } | null>(null);
-    const [newFilterInclude, setNewFilterInclude] = useState('');
-    const [newFilterExclude, setNewFilterExclude] = useState('');
-    const [editFilterInclude, setEditFilterInclude] = useState('');
-    const [editFilterExclude, setEditFilterExclude] = useState('');
-    const [newCheckInterval, setNewCheckInterval] = useState<number | null>(null);
-    const [editCheckInterval, setEditCheckInterval] = useState<number | null>(null);
-    const [newDigestInterval, setNewDigestInterval] = useState<number | null>(null);
-    const [editDigestInterval, setEditDigestInterval] = useState<number | null>(null);
-    const [importingOpml, setImportingOpml] = useState(false);
-    const [query, setQuery] = useState('');
     const { toast } = useToast();
-    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [feedToDelete, setFeedToDelete] = useState<number | null>(null);
+    const duration = useDurationLabel();
+    const [feeds, setFeeds] = useState<FeedConfig[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [query, setQuery] = useState('');
+    const [dialog, setDialog] = useState<{ open: boolean; feed: FeedConfig | null }>({ open: false, feed: null });
+    const [toDelete, setToDelete] = useState<FeedConfig | null>(null);
+    const [importing, setImporting] = useState(false);
 
-    useEffect(() => { if (botId) loadFeeds(); setQuery(''); }, [botId]);
+    const loadFeeds = async () => {
+        try {
+            setFeeds(await window.api.getFeeds(botId));
+        } catch (e) {
+            toast(errorMessage(e), 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    // Ricerca locale al singolo canale: nome, URL, tipo e keyword del filtro.
-    // Piu' termini separati da spazio = AND (es. "news tech").
-    const filteredFeeds = useMemo(() => {
+    useEffect(() => { setLoading(true); setQuery(''); loadFeeds(); }, [botId]);
+
+    // Ricerca locale al canale: nome, URL, tipo e parole del filtro. Più termini = tutti.
+    const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
         if (!q) return feeds;
         const terms = q.split(/\s+/);
         return feeds.filter(feed => {
             const kw = parseKeywordFilter(feed.keyword_filter);
-            const haystack = `${feed.name} ${feed.url} ${feed.type} ${kw.include} ${kw.exclude}`.toLowerCase();
+            const haystack = `${feed.name} ${feed.url} ${feed.type} ${t(`feedTypes.${feed.type}`)} ${kw.include} ${kw.exclude}`.toLowerCase();
             return terms.every(term => haystack.includes(term));
         });
-    }, [feeds, query]);
+    }, [feeds, query, t]);
 
-    const loadFeeds = async () => {
-        setLoading(true);
-        const loaded = await window.api.getFeeds(botId);
-        setFeeds(loaded);
-        setLoading(false);
-    };
-
-    const handleAdd = async () => {
-        if (!newFeed.name || !newFeed.url) return;
-        const keywordFilter = buildKeywordFilter(newFilterInclude, newFilterExclude);
-        // Il main rifiuta URL non validi o verso reti private: prima l'errore restava una
-        // promise rifiutata nel vuoto, e il modulo non diceva perché non salvava.
+    const toggle = async (feed: FeedConfig) => {
+        // Aggiornamento ottimistico: l'interruttore risponde subito, poi si riallinea al database.
+        setFeeds(prev => prev.map(f => f.id === feed.id ? { ...f, is_active: !f.is_active } : f));
         try {
-            await window.api.addFeed({ ...newFeed, botId, keywordFilter, checkInterval: newCheckInterval, digestInterval: newDigestInterval });
+            await window.api.toggleFeed(feed.id, !feed.is_active);
         } catch (e) {
             toast(errorMessage(e), 'error');
-            return;
         }
-        setIsAdding(false);
-        setNewFeed({ name: '', url: '', type: 'podcast' });
-        setNewFilterInclude(''); setNewFilterExclude('');
-        setNewCheckInterval(null); setNewDigestInterval(null); setTestResult(null);
-        toast(t('feedManager.successAdd') as string, 'success');
         loadFeeds();
     };
 
-    const handleImportOpml = async () => {
-        setImportingOpml(true);
+    const confirmDelete = async () => {
+        if (!toDelete) return;
+        try {
+            await window.api.deleteFeed(toDelete.id);
+            toast(t('feeds.deleted').replace('{name}', toDelete.name), 'success');
+        } catch (e) {
+            toast(errorMessage(e), 'error');
+        }
+        setToDelete(null);
+        loadFeeds();
+    };
+
+    const importOpml = async () => {
+        setImporting(true);
         try {
             const res = await window.api.importOpml(botId);
             if (res.success && res.count > 0) {
-                toast((t('feedManager.opmlSuccess') as string).replace('%d', String(res.count)), 'success');
+                toast(t('feeds.opmlImported').replace('{n}', String(res.count)), 'success');
                 loadFeeds();
-            } else if (res.success && res.count === 0) {
-                toast(t('feedManager.opmlEmpty') as string, 'info');
+            } else if (res.success) {
+                toast(t('feeds.opmlEmpty'), 'info');
             } else if (res.error) {
-                toast(`${t('feedManager.opmlError') as string} ${res.error}`, 'error');
+                toast(`${t('feeds.opmlError')} ${res.error}`, 'error');
             }
-        } catch {
-            toast(t('feedManager.opmlError') as string, 'error');
-        } finally {
-            setImportingOpml(false);
-        }
-    };
-
-    const handleUpdate = async () => {
-        if (!editingFeed || !editingFeed.name || !editingFeed.url) return;
-        const keywordFilter = buildKeywordFilter(editFilterInclude, editFilterExclude);
-        try {
-            await window.api.updateFeed({ id: editingFeed.id, name: editingFeed.name, url: editingFeed.url, type: editingFeed.type, keywordFilter, checkInterval: editCheckInterval, digestInterval: editDigestInterval });
         } catch (e) {
-            toast(errorMessage(e), 'error');
-            return;
-        }
-        setEditingFeed(null);
-        setEditFilterInclude(''); setEditFilterExclude('');
-        setEditCheckInterval(null); setEditDigestInterval(null); setTestResult(null);
-        toast(t('feedManager.successUpdate') as string, 'success');
-        loadFeeds();
-    };
-
-    const startEdit = (feed: FeedConfig) => {
-        setEditingFeed({ ...feed });
-        const parsed = parseKeywordFilter(feed.keyword_filter);
-        setEditFilterInclude(parsed.include); setEditFilterExclude(parsed.exclude);
-        setEditCheckInterval(feed.check_interval ?? null);
-        setEditDigestInterval(feed.digest_interval ?? null);
-        setIsAdding(false); setTestResult(null);
-    };
-
-    const handleDelete = (id: number) => { setFeedToDelete(id); setDeleteConfirmOpen(true); };
-
-    const confirmDelete = async () => {
-        if (feedToDelete) {
-            try {
-                await window.api.deleteFeed(feedToDelete);
-                toast(t('feedManager.successDelete') as string, 'success');
-            } catch (e) {
-                toast(errorMessage(e), 'error');
-            }
-            loadFeeds();
-        }
-        setDeleteConfirmOpen(false); setFeedToDelete(null);
-    };
-
-    const toggleFeed = async (id: number, current: boolean) => {
-        try {
-            await window.api.toggleFeed(id, !current);
-        } catch (e) {
-            toast(errorMessage(e), 'error');
-        }
-        loadFeeds();
-    };
-
-    const handleTestFeed = async (url: string, feedId: number | 'new') => {
-        if (!url.trim()) return;
-        setTesting(feedId); setTestResult(null);
-        try {
-            const result = await window.api.testFeed({ url, type: (editingFeed ? editingFeed.type : newFeed.type) });
-            setTestResult(result);
-        } catch {
-            setTestResult({ success: false, error: t('feedManager.testErrorFallback') as string });
+            toast(`${t('feeds.opmlError')} ${errorMessage(e)}`, 'error');
         } finally {
-            setTesting(null);
+            setImporting(false);
         }
     };
 
-    const typeConfig = {
-        podcast: { icon: Rss,      color: 'text-tertiary',  bg: 'bg-tertiary/10',   border: 'border-tertiary/20' },
-        youtube: { icon: Play,     color: 'text-error',     bg: 'bg-error/10',       border: 'border-error/20'    },
-        news:    { icon: FileText, color: 'text-primary',   bg: 'bg-primary/10',     border: 'border-primary/20'  },
-    };
-
-    const intervalLabel = (v: number | null) => {
-        if (v === null) return t('feedManager.intervalDefault') as string;
-        if (v < 60) return `${v} min`;
-        return `${v / 60}h`;
-    };
-
-    const inputCls = "w-full bg-surface-container border border-outline-variant/15 rounded-lg p-2 text-on-surface text-sm focus:border-primary/40 outline-none transition-colors";
-    const labelCls = "block text-micro text-outline-variant/50 mb-1.5";
-
-    const cancelForm = () => {
-        setIsAdding(false); setEditingFeed(null); setTestResult(null);
-        setNewFilterInclude(''); setNewFilterExclude('');
-        setEditFilterInclude(''); setEditFilterExclude('');
-        setNewCheckInterval(null); setEditCheckInterval(null);
-        setNewDigestInterval(null); setEditDigestInterval(null);
-    };
+    const activeCount = feeds.filter(f => f.is_active).length;
 
     return (
-        <div className="flex-1 bg-surface-container-lowest flex flex-col h-full overflow-hidden">
-            {/* Header */}
-            <div className="p-4 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-lowest">
+        <section aria-labelledby="feeds-heading" className="flex h-full min-h-0 flex-col">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 pb-3 pt-4">
                 <div>
-                    <h2 className="font-headline text-sm font-bold text-on-surface uppercase tracking-wide">{t('feedManager.title')}</h2>
-                    <p className="text-nano text-outline-variant/40 mt-0.5">{t('feedManager.subtitle')}</p>
+                    <h2 id="feeds-heading" className={showTitle ? 'text-lg font-semibold text-fg' : 'sr-only'}>{t('feeds.title')}</h2>
+                    <p className={showTitle ? 'text-sm text-fg-3' : 'text-base text-fg-2'}>
+                        {loading ? t('common.loading')
+                            : feeds.length === 0 ? t('feeds.subtitleEmpty')
+                            : t('feeds.subtitle').replace('{active}', String(activeCount)).replace('{total}', String(feeds.length))}
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={handleImportOpml}
-                        disabled={importingOpml}
-                        className="ghost-border bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary px-3 py-1.5 rounded-lg text-nano font-bold flex items-center gap-1.5 transition-all disabled:opacity-50"
-                        title={t('feedManager.importOpml') as string}
-                    >
-                        {importingOpml
-                            ? <Loader2 size={12} className="animate-spin" />
-                            : <Upload size={12} />
-                        }
-                        OPML
-                    </button>
-                    <button
-                        onClick={() => { setIsAdding(true); setEditingFeed(null); setTestResult(null); }}
-                        className="gradient-border-btn"
-                    >
-                        <div className="px-3 py-1.5 flex items-center gap-1.5 text-nano font-bold text-on-surface rounded-sm">
-                            <Plus size={13} />
-                            {t('feedManager.addSource')}
-                        </div>
-                    </button>
+                    <Button size="sm" variant="ghost" icon={Upload} loading={importing} onClick={importOpml} title={t('feeds.opmlTitle')}>OPML</Button>
+                    <Button size="sm" variant="primary" icon={Plus} onClick={() => setDialog({ open: true, feed: null })}>{t('feeds.add')}</Button>
                 </div>
             </div>
 
-            {/* Search — filtra i feed del canale corrente */}
             {feeds.length > 0 && (
-                <div className="px-4 pt-3 border-b border-outline-variant/10 pb-3 bg-surface-container-lowest">
-                    <div className="relative flex items-center">
-                        <Search size={12} className="absolute left-2.5 text-outline-variant pointer-events-none" />
-                        <input
-                            type="text"
-                            value={query}
-                            onChange={e => setQuery(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); setQuery(''); } }}
-                            placeholder={t('feedManager.searchPlaceholder') as string}
-                            className="w-full bg-surface-container border border-outline-variant/15 rounded-lg py-1.5 pl-7 pr-20 text-on-surface text-xs focus:border-primary/40 outline-none transition-colors"
-                        />
-                        {query && (
-                            <>
-                                <span className="absolute right-8 text-nano text-on-surface-variant/70 pointer-events-none tabular-nums">
-                                    {filteredFeeds.length}/{feeds.length}
-                                </span>
-                                <button
-                                    onClick={() => setQuery('')}
-                                    title={t('feedManager.searchClear') as string}
-                                    className="absolute right-2 p-0.5 text-on-surface-variant/70 hover:text-on-surface transition-colors rounded"
-                                >
-                                    <X size={12} />
-                                </button>
-                            </>
-                        )}
-                    </div>
+                <div className="px-5 pb-3">
+                    <TextField
+                        label={t('feeds.search')}
+                        hideLabel
+                        leadingIcon={Search}
+                        type="search"
+                        placeholder={t('feeds.searchPlaceholder')}
+                        value={query}
+                        onChange={e => setQuery(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Escape' && query) { e.stopPropagation(); setQuery(''); } }}
+                        trailing={query ? <IconButton icon={X} size="sm" label={t('feeds.searchClear')} onClick={() => setQuery('')} /> : undefined}
+                    />
+                    {query && (
+                        <p className="mt-1.5 text-sm text-fg-3 tabular" aria-live="polite">
+                            {t('feeds.searchCount').replace('{n}', String(filtered.length)).replace('{total}', String(feeds.length))}
+                        </p>
+                    )}
                 </div>
             )}
 
-            {/* Scrollable list */}
-            <div className="p-4 overflow-y-auto flex-1">
-                {(isAdding || editingFeed) && (
-                    <div className="glass-panel rounded-xl p-4 mb-4 animate-in fade-in slide-in-from-top-2">
-                        {/* Name + Type */}
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                            <div>
-                                <label className={labelCls}>{t('feedManager.sourceName')}</label>
-                                <input type="text" className={inputCls}
-                                    placeholder={t('feedManager.namePlaceholder') as string}
-                                    value={editingFeed ? editingFeed.name : newFeed.name}
-                                    onChange={e => editingFeed ? setEditingFeed({ ...editingFeed, name: e.target.value }) : setNewFeed({ ...newFeed, name: e.target.value })}
-                                />
-                            </div>
-                            <div>
-                                <label className={labelCls}>{t('feedManager.sourceType')}</label>
-                                <select className={inputCls + " appearance-none"}
-                                    value={editingFeed ? editingFeed.type : newFeed.type}
-                                    onChange={e => editingFeed ? setEditingFeed({ ...editingFeed, type: e.target.value as any }) : setNewFeed({ ...newFeed, type: e.target.value as any })}
-                                >
-                                    <option value="podcast">{t('feedManager.typePodcast')}</option>
-                                    <option value="news">{t('feedManager.typeNews')}</option>
-                                    <option value="youtube">{t('feedManager.typeYoutube')}</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* URL + Test */}
-                        <div className="mb-3">
-                            <label className={labelCls}>{t('feedManager.feedUrl')}</label>
-                            <div className="flex gap-2">
-                                <input type="text" className={inputCls + " font-mono flex-1"}
-                                    placeholder="https://..."
-                                    value={editingFeed ? editingFeed.url : newFeed.url}
-                                    onChange={e => editingFeed ? setEditingFeed({ ...editingFeed, url: e.target.value }) : setNewFeed({ ...newFeed, url: e.target.value })}
-                                />
-                                <button
-                                    onClick={() => handleTestFeed(editingFeed ? editingFeed.url : newFeed.url, editingFeed ? editingFeed.id : 'new')}
-                                    disabled={testing !== null}
-                                    className="bg-primary/10 hover:bg-primary/20 text-primary px-3 rounded-lg text-xs font-bold transition-all border border-primary/20 flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
-                                    title={t('feedManager.testTitle') as string}
-                                >
-                                    {testing !== null ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
-                                    {t('feedManager.testBtn')}
-                                </button>
-                            </div>
-                            {testResult && (
-                                <div className={`mt-2 text-nano px-3 py-1.5 rounded-lg border ${
-                                    testResult.success ? 'bg-secondary/10 border-secondary/20 text-secondary' : 'bg-error/10 border-error/20 text-error'
-                                }`}>
-                                    {testResult.success
-                                        ? (t('feedManager.testSuccess') as string).replace('%d', testResult.count?.toString() || '0')
-                                        : (t('feedManager.testError') as string).replace('%s', testResult.error || '')
-                                    }
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Interval */}
-                        <div className="mb-3">
-                            <label className={labelCls + " flex items-center gap-1.5"}>
-                                <Clock size={10} />
-                                {t('feedManager.intervalLabel')}
-                            </label>
-                            <select className={inputCls + " appearance-none"}
-                                value={editingFeed ? (editCheckInterval ?? '') : (newCheckInterval ?? '')}
-                                onChange={e => { const val = e.target.value === '' ? null : Number(e.target.value); editingFeed ? setEditCheckInterval(val) : setNewCheckInterval(val); }}
-                            >
-                                {INTERVAL_PRESETS.map(v => <option key={v ?? 'default'} value={v ?? ''}>{intervalLabel(v)}</option>)}
-                            </select>
-                        </div>
-
-                        {/* Keyword Filter */}
-                        <div className="mb-3">
-                            <label className={labelCls + " flex items-center gap-1.5"}>
-                                <Filter size={10} />
-                                {t('feedManager.filterLabel')}
-                            </label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label className="text-nano text-secondary/50 mb-1 block">{t('feedManager.filterInclude')}</label>
-                                    <input type="text" className="w-full bg-surface-container border border-secondary/20 rounded-lg p-2 text-on-surface text-xs focus:border-secondary/50 outline-none transition-colors"
-                                        placeholder={t('feedManager.filterPlaceholder') as string}
-                                        value={editingFeed ? editFilterInclude : newFilterInclude}
-                                        onChange={e => editingFeed ? setEditFilterInclude(e.target.value) : setNewFilterInclude(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-nano text-error/50 mb-1 block">{t('feedManager.filterExclude')}</label>
-                                    <input type="text" className="w-full bg-surface-container border border-error/20 rounded-lg p-2 text-on-surface text-xs focus:border-error/50 outline-none transition-colors"
-                                        placeholder={t('feedManager.filterPlaceholder') as string}
-                                        value={editingFeed ? editFilterExclude : newFilterExclude}
-                                        onChange={e => editingFeed ? setEditFilterExclude(e.target.value) : setNewFilterExclude(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Digest Mode */}
-                        <div className="mb-4">
-                            <label className={labelCls + " flex items-center gap-1.5"}>
-                                <BookOpen size={10} />
-                                {t('feedManager.digestLabel')}
-                            </label>
-                            <select className={inputCls + " appearance-none"}
-                                value={editingFeed ? (editDigestInterval ?? '') : (newDigestInterval ?? '')}
-                                onChange={e => { const val = e.target.value === '' ? null : Number(e.target.value); editingFeed ? setEditDigestInterval(val) : setNewDigestInterval(val); }}
-                            >
-                                <option value="">{t('feedManager.digestDefault') as string}</option>
-                                <option value="60">{t('feedManager.digest60') as string}</option>
-                                <option value="360">{t('feedManager.digest360') as string}</option>
-                                <option value="720">{t('feedManager.digest720') as string}</option>
-                                <option value="1440">{t('feedManager.digest1440') as string}</option>
-                                <option value="10080">{t('feedManager.digest10080') as string}</option>
-                            </select>
-                        </div>
-
-                        <div className="flex justify-end gap-2">
-                            <button onClick={cancelForm} className="text-on-surface-variant text-xs hover:text-on-surface px-3 py-1.5 transition-colors">
-                                {t('botModal.cancel')}
-                            </button>
-                            <button
-                                onClick={editingFeed ? handleUpdate : handleAdd}
-                                className="bg-primary/15 text-primary hover:bg-primary/25 border border-primary/25 px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
-                            >
-                                {editingFeed ? t('feedManager.updateFeed') : t('feedManager.saveFeed')}
-                            </button>
-                        </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
+                {!loading && feeds.length === 0 && (
+                    <div className="flex flex-col items-center rounded-lg border border-dashed border-line-strong px-6 py-10 text-center">
+                        <Rss size={28} className="mb-3 text-fg-3" aria-hidden="true" />
+                        <p className="text-base font-medium text-fg">{t('feeds.emptyTitle')}</p>
+                        <p className="mt-1 max-w-sm text-sm text-fg-3">{t('feeds.emptyText')}</p>
+                        <Button className="mt-4" variant="primary" size="sm" icon={Plus} onClick={() => setDialog({ open: true, feed: null })}>{t('feeds.add')}</Button>
                     </div>
                 )}
 
-                <div className="space-y-2">
-                    {filteredFeeds.map(feed => {
-                        const cfg = typeConfig[feed.type] || typeConfig.news;
-                        const Icon = cfg.icon;
-                        const isEditing = editingFeed?.id === feed.id;
-                        const hasFilter = !!feed.keyword_filter;
-                        const hasCustomInterval = feed.check_interval !== null && feed.check_interval !== undefined;
-                        const hasDigest = feed.digest_interval !== null && feed.digest_interval !== undefined;
+                {feeds.length > 0 && filtered.length === 0 && (
+                    <div className="flex flex-col items-center px-6 py-10 text-center">
+                        <Search size={24} className="mb-2 text-fg-3" aria-hidden="true" />
+                        <p className="text-base text-fg-2">{t('feeds.noResults')}</p>
+                        <Button className="mt-3" size="sm" variant="ghost" onClick={() => setQuery('')}>{t('feeds.searchClear')}</Button>
+                    </div>
+                )}
 
+                <ul className="space-y-2">
+                    {filtered.map(feed => {
+                        const style = TYPE_STYLE[feed.type] ?? TYPE_STYLE.news;
+                        const Icon = style.icon;
                         return (
-                            <div key={feed.id} className={`group ghost-border rounded-xl p-3 flex items-center gap-3 transition-all ${
-                                isEditing
-                                    ? 'border-primary/30 bg-primary/5'
-                                    : 'bg-background/80 hover:bg-surface-container-lowest hover:border-outline-variant/20'
-                            }`}>
-                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center border ${cfg.bg} ${cfg.color} ${cfg.border} flex-shrink-0`}>
-                                    <Icon size={16} />
-                                </div>
-
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                        <h3 className="font-semibold text-on-surface text-sm truncate">{feed.name}</h3>
-                                        <span className={`text-nano px-1.5 py-0.5 rounded border ${cfg.border} ${cfg.color} flex-shrink-0`}>
-                                            {feed.type.toUpperCase()}
-                                        </span>
-                                        {hasFilter && (
-                                            <span className="text-nano px-1.5 py-0.5 rounded border border-tertiary/30 text-tertiary flex-shrink-0 flex items-center gap-0.5">
-                                                <Filter size={8} />
-                                                {t('feedManager.filterActive')}
-                                            </span>
-                                        )}
-                                        {hasCustomInterval && (
-                                            <span className="text-nano px-1.5 py-0.5 rounded border border-secondary/30 text-secondary flex-shrink-0 flex items-center gap-0.5">
-                                                <Clock size={8} />
-                                                {intervalLabel(feed.check_interval)}
-                                            </span>
-                                        )}
-                                        {hasDigest && (
-                                            <span className="text-nano px-1.5 py-0.5 rounded border border-tertiary-container/40 text-tertiary-container flex-shrink-0 flex items-center gap-0.5">
-                                                <BookOpen size={8} />
-                                                {t('feedManager.digestBadge')}
-                                            </span>
-                                        )}
+                            <li key={feed.id} className={cn('rounded-lg border border-line bg-surface-2 p-3 transition-colors hover:border-line-strong', !feed.is_active && 'bg-surface-1')}>
+                                <div className="flex items-start gap-3">
+                                    <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-3', style.tile)} aria-hidden="true">
+                                        <Icon size={17} />
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                        <h3 className={cn('truncate text-base font-medium', feed.is_active ? 'text-fg' : 'text-fg-3')}>{feed.name}</h3>
+                                        <p className="truncate font-mono text-xs text-fg-3" title={feed.url}>{feed.url}</p>
+                                        <div className="mt-2 flex flex-wrap gap-1.5">
+                                            <Badge tone={style.tone}>{t(`feedTypes.${feed.type}`)}</Badge>
+                                            {!feed.is_active && <Badge>{t('feeds.paused')}</Badge>}
+                                            {feed.keyword_filter && <Badge tone="accent" icon={Filter}>{t('feeds.badgeFilter')}</Badge>}
+                                            {feed.check_interval != null && <Badge icon={Clock}>{t('feedForm.every').replace('{d}', duration(feed.check_interval))}</Badge>}
+                                            {feed.digest_interval != null && <Badge tone="warning" icon={BookOpen}>{t('feeds.badgeDigest').replace('{d}', duration(feed.digest_interval))}</Badge>}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5 text-nano text-outline-variant/50 mt-0.5 truncate font-mono">
-                                        <Globe size={9} />
-                                        {feed.url}
+                                    <div className="flex shrink-0 items-center gap-1">
+                                        <Switch checked={!!feed.is_active} onChange={() => toggle(feed)} ariaLabel={t('feeds.toggle').replace('{name}', feed.name)} className="mr-1" />
+                                        <IconButton icon={Pencil} size="sm" label={t('feeds.edit').replace('{name}', feed.name)} onClick={() => setDialog({ open: true, feed })} />
+                                        <IconButton icon={Trash2} size="sm" variant="danger-ghost" label={t('feeds.delete').replace('{name}', feed.name)} onClick={() => setToDelete(feed)} />
                                     </div>
                                 </div>
-
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => startEdit(feed)} className="p-1.5 text-outline-variant/50 hover:text-primary transition-colors rounded">
-                                            <Pencil size={13} />
-                                        </button>
-                                        <button onClick={() => handleDelete(feed.id)} className="p-1.5 text-outline-variant/50 hover:text-error transition-colors rounded">
-                                            <Trash2 size={13} />
-                                        </button>
-                                    </div>
-
-                                    {/* Toggle switch */}
-                                    <label className="relative inline-flex items-center cursor-pointer ml-1">
-                                        <input type="checkbox" className="sr-only peer" checked={!!feed.is_active} onChange={() => toggleFeed(feed.id, !!feed.is_active)} />
-                                        <div className="w-8 h-4 bg-surface-container-lowest peer-focus:outline-none border border-outline-variant/15 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[2px] after:bg-outline-variant/60 after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-primary/25 peer-checked:border-primary/40 peer-checked:after:bg-primary-container" />
-                                    </label>
-                                </div>
-                            </div>
+                            </li>
                         );
                     })}
-
-                    {feeds.length === 0 && !loading && (
-                        <div className="text-center py-12 text-outline-variant/30">
-                            <Rss size={36} strokeWidth={1} className="mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">{t('feedManager.noFeeds')}</p>
-                            <p className="text-nano mt-1">{t('feedManager.addPrompt')}</p>
-                        </div>
-                    )}
-
-                    {feeds.length > 0 && filteredFeeds.length === 0 && (
-                        <div className="text-center py-12 text-outline-variant/30">
-                            <Search size={36} strokeWidth={1} className="mx-auto mb-3 opacity-30" />
-                            <p className="text-sm text-on-surface-variant/70">{t('feedManager.searchNoResults')}</p>
-                            <button
-                                onClick={() => setQuery('')}
-                                className="text-nano mt-2 text-primary/70 hover:text-primary transition-colors"
-                            >
-                                {t('feedManager.searchClear')}
-                            </button>
-                        </div>
-                    )}
-                </div>
+                </ul>
             </div>
 
-            <ConfirmDialog
-                isOpen={deleteConfirmOpen}
-                title={t('feedManager.deleteTitle') as string}
-                message={t('feedManager.deletePrompt') as string}
-                confirmText={t('feedManager.deleteConfirm') as string}
-                onConfirm={confirmDelete}
-                onCancel={() => { setDeleteConfirmOpen(false); setFeedToDelete(null); }}
+            <FeedDialog
+                open={dialog.open}
+                botId={botId}
+                feed={dialog.feed}
+                onClose={() => setDialog({ open: false, feed: null })}
+                onSaved={() => {
+                    toast(dialog.feed ? t('feeds.updated') : t('feeds.added'), 'success');
+                    setDialog({ open: false, feed: null });
+                    loadFeeds();
+                }}
             />
-        </div>
+
+            <ConfirmDialog
+                isOpen={toDelete !== null}
+                title={t('feeds.deleteTitle')}
+                message={t('feeds.deleteMessage').replace('{name}', toDelete?.name ?? '')}
+                confirmText={t('feeds.deleteConfirm')}
+                onConfirm={confirmDelete}
+                onCancel={() => setToDelete(null)}
+            />
+        </section>
     );
 }

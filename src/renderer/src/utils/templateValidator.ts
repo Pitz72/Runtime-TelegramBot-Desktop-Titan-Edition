@@ -7,6 +7,11 @@
 
 export interface ValidationIssue {
     severity: 'error' | 'warning' | 'info';
+    /** Chiave del messaggio, tradotta dall'interfaccia sotto `templateValidator.<code>` */
+    code: string;
+    /** Valori da inserire nel messaggio tradotto ({chip}, {tag}, {expected}) */
+    params?: Record<string, string>;
+    /** Testo inglese di riserva, per chi usa il validatore fuori dall'interfaccia */
     message: string;
 }
 
@@ -42,6 +47,7 @@ export function validateTemplate(template: string, isStartup = false): Validatio
     if (!template || template.trim() === '') {
         issues.push({
             severity: 'info',
+            code: 'empty',
             message: 'Empty template — the built-in default will be used at send time.',
         });
         return issues;
@@ -59,12 +65,16 @@ export function validateTemplate(template: string, isStartup = false): Validatio
             // Chips are never substituted in startup messages
             issues.push({
                 severity: 'info',
+                code: 'chipStartup',
+                params: { chip: chipName },
                 message: `{{${chipName}}} will not be substituted in the startup message — it will appear literally.`,
             });
         } else if (!KNOWN_CHIPS.has(chipName) && !seenUnknown.has(chipName)) {
             seenUnknown.add(chipName);
             issues.push({
                 severity: 'warning',
+                code: 'chipUnknown',
+                params: { chip: chipName },
                 message: `Unknown placeholder {{${chipName}}}. Valid chips: {{title}}, {{feedName}}, {{link}}, {{summary}}.`,
             });
         }
@@ -81,6 +91,8 @@ export function validateTemplate(template: string, isStartup = false): Validatio
             if (chipName !== 'link') {
                 issues.push({
                     severity: 'warning',
+                    code: 'chipInHref',
+                    params: { chip: chipName },
                     message: `{{${chipName}}} inside an href attribute may break the URL if its value contains special characters. Only {{link}} is safe inside href.`,
                 });
             }
@@ -106,6 +118,8 @@ export function validateTemplate(template: string, isStartup = false): Validatio
                 reportedUnsupported.add(tagName);
                 issues.push({
                     severity: 'error',
+                    code: 'tagUnsupported',
+                    params: { tag: tagName },
                     message: `<${tagName}> is not supported in Telegram HTML mode and will cause a parse error.`,
                 });
             }
@@ -116,11 +130,15 @@ export function validateTemplate(template: string, isStartup = false): Validatio
             if (stack.length === 0) {
                 issues.push({
                     severity: 'error',
+                    code: 'closeWithoutOpen',
+                    params: { tag: tagName },
                     message: `</${tagName}> found without a matching opening tag.`,
                 });
             } else if (stack[stack.length - 1] !== tagName) {
                 issues.push({
                     severity: 'error',
+                    code: 'closeWrong',
+                    params: { tag: tagName, expected: stack[stack.length - 1] },
                     message: `</${tagName}> closes the wrong tag (expected </${stack[stack.length - 1]}>).`,
                 });
                 stack.pop(); // Pop anyway to avoid cascading errors
@@ -132,6 +150,7 @@ export function validateTemplate(template: string, isStartup = false): Validatio
             if (tagName === 'a' && !attrs.includes('href')) {
                 issues.push({
                     severity: 'error',
+                    code: 'aMissingHref',
                     message: `<a> tag is missing the required href attribute.`,
                 });
             }
@@ -139,6 +158,7 @@ export function validateTemplate(template: string, isStartup = false): Validatio
             if (tagName === 'span' && !attrs.includes('tg-spoiler')) {
                 issues.push({
                     severity: 'warning',
+                    code: 'spanSpoiler',
                     message: `<span> is only valid in Telegram when used as <span class="tg-spoiler">…</span>.`,
                 });
             }
@@ -146,6 +166,7 @@ export function validateTemplate(template: string, isStartup = false): Validatio
             if (tagName === 'tg-emoji' && !attrs.includes('emoji-id')) {
                 issues.push({
                     severity: 'warning',
+                    code: 'tgEmojiId',
                     message: `<tg-emoji> requires an emoji-id attribute.`,
                 });
             }
@@ -158,6 +179,8 @@ export function validateTemplate(template: string, isStartup = false): Validatio
     for (const unclosed of stack) {
         issues.push({
             severity: 'error',
+            code: 'unclosed',
+            params: { tag: unclosed },
             message: `<${unclosed}> was opened but never closed.`,
         });
     }

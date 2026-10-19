@@ -1,4 +1,4 @@
-import { ipcMain, app, dialog, shell } from 'electron';
+import { ipcMain, app, dialog, shell, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import Database from 'better-sqlite3';
 import { getBotEngine } from './bot/engine';
@@ -8,29 +8,28 @@ import { fetchFeed, validateFeedUrl } from './bot/parser';
 import { fetchYouTubeVideos } from './bot/youtube';
 import { TitanLogger } from './logger';
 import { writeFile, copyFile, readFile } from 'fs/promises';
+import { readSettings, writeSettings, applyZoom } from './settings';
 import { join, dirname } from 'path';
 import { tm, setMainLocale } from './i18n';
 import { parseStartDate } from './bot/rules';
 
-// --- Settings File (titan-settings.json in userData) ---
-interface TitanSettings { performanceMode: boolean; lastSeenVersion?: string; }
-const DEFAULT_SETTINGS: TitanSettings = { performanceMode: false };
-
-function getSettingsPath(): string {
-    return join(app.getPath('userData'), 'titan-settings.json');
-}
-
-async function readSettings(): Promise<TitanSettings> {
-    try {
-        const raw = await readFile(getSettingsPath(), 'utf-8');
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
-    } catch {
-        return { ...DEFAULT_SETTINGS };
+/**
+ * Testo di un file di licenza spedito con l'app: quella di Titan (MIT) o l'elenco delle
+ * licenze di terze parti generato a ogni build. Nell'app installata stanno fuori dall'asar
+ * (asarUnpack: resources/**); in sviluppo nella cartella del progetto.
+ */
+async function readLicenseFile(kind: 'app' | 'third-party'): Promise<string | null> {
+    const appPath = app.getAppPath();
+    const unpacked = appPath.replace(/app\.asar$/, 'app.asar.unpacked');
+    const candidates = kind === 'app'
+        ? [join(unpacked, 'resources', 'LICENSE.txt'), join(appPath, 'LICENSE')]
+        : [join(unpacked, 'resources', 'THIRD-PARTY-NOTICES.txt'), join(appPath, 'resources', 'THIRD-PARTY-NOTICES.txt')];
+    for (const candidate of candidates) {
+        try {
+            return await readFile(candidate, 'utf-8');
+        } catch { /* prova il prossimo */ }
     }
-}
-
-async function writeSettings(settings: TitanSettings): Promise<void> {
-    await writeFile(getSettingsPath(), JSON.stringify(settings, null, 2), 'utf-8');
+    return null;
 }
 
 // --- Cartella dei dialoghi ---
@@ -534,6 +533,19 @@ export function setupIpc() {
         } catch (error: any) {
             return { success: false, error: error.message };
         }
+    });
+
+    // --- ACCESSIBILITÀ E LICENZE ---
+    ipcMain.handle('get-ui-zoom', async () => (await readSettings()).uiZoom ?? 1);
+
+    ipcMain.handle('set-ui-zoom', async (event, value: unknown) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        return win ? applyZoom(win, Number(value)) : 1;
+    });
+
+    ipcMain.handle('read-license', async (_, kind: unknown) => {
+        if (kind !== 'app' && kind !== 'third-party') throw new Error('Licenza sconosciuta');
+        return readLicenseFile(kind);
     });
 
     // --- PERFORMANCE SETTINGS ---

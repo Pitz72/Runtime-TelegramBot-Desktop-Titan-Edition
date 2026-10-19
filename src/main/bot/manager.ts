@@ -320,10 +320,10 @@ export class BotManager {
         return { total, today, week };
     }
 
-    static getDetailedStats(botId: number): { total: number; today: number; week: number; byFeed: Array<{ feedId: number; feedName: string; total: number; today: number }> } {
+    static getDetailedStats(botId: number): { total: number; today: number; week: number; byFeed: Array<{ feedId: number; feedName: string | null; total: number; today: number }> } {
         const base = BotManager.getStats(botId);
         const rows = db().prepare(`
-            SELECT h.feed_id as feedId, COALESCE(f.name, 'Feed rimosso') as feedName,
+            SELECT h.feed_id as feedId, f.name as feedName,
                 COUNT(*) as total,
                 SUM(CASE WHEN datetime(h.sent_at, 'localtime') >= datetime('now', 'localtime', 'start of day') THEN 1 ELSE 0 END) as today
             FROM history h
@@ -332,7 +332,8 @@ export class BotManager {
             GROUP BY h.feed_id
             ORDER BY total DESC
         `).all(botId) as any[];
-        return { ...base, byFeed: rows.map(r => ({ feedId: r.feedId, feedName: r.feedName, total: r.total, today: r.today })) };
+        // feedName null = sorgente eliminata: l'etichetta la mette l'interfaccia, nella sua lingua.
+        return { ...base, byFeed: rows.map(r => ({ feedId: r.feedId, feedName: r.feedName ?? null, total: r.total, today: r.today })) };
     }
 
     // --- IMPORT/EXPORT CONFIG ---
