@@ -23,9 +23,13 @@ function App(): JSX.Element {
         window.api.getPerformanceMode().then((enabled) => {
             document.body.classList.toggle('performance-mode', enabled);
         });
+        // Un profilo .rtb aperto con doppio clic mentre è ancora aperto il wizard porta
+        // direttamente alla Dashboard.
+        const offBotsChanged = window.api.onBotsChanged(() => setHasBots(true));
         window.api.consumeWhatsNew().then((res) => {
             if (res?.show) setWhatsNew(res);
         }).catch(() => {});
+        return offBotsChanged;
     }, []);
 
     const handleSetupComplete = async (name: string, token: string, channelId: string, startDate: string) => {

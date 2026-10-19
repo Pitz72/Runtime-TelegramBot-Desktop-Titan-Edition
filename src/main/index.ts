@@ -1,10 +1,16 @@
-import { app, BrowserWindow, shell, dialog } from 'electron'
-import { join } from 'node:path'
+// Deve restare il primo import: sposta `userData` prima che logger e database lo leggano.
+import './profile'
+import { app, BrowserWindow, shell, dialog, session } from 'electron'
+import { join, basename } from 'node:path'
+import { existsSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
 import { setupIpc } from './ipc'
 import { getBotEngine } from './bot/engine'
+import { BotManager } from './bot/manager'
 import { closeDB } from './database/schema'
+import { tm } from './i18n'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -15,7 +21,7 @@ process.on('uncaughtException', (error) => {
     // Usa un try-catch nel caso `dialog` fallisse se l'app è in uno stato troppo corrotto
     try {
         if (app.isReady()) {
-            dialog.showErrorBox('Errore Fatale di Sistema (Uncaught Exception)', error.message || 'Errore sconosciuto');
+            dialog.showErrorBox(tm('fatalTitle'), error.message || 'Errore sconosciuto');
         } else {
             console.error('App non ancora pronta, dialog impossibile da mostrare in uncaughtException.');
         }
@@ -40,17 +46,20 @@ process.on('unhandledRejection', (reason) => {
 // avvierebbero DUE motori indipendenti. La deduplica non protegge da questo: markProcessed()
 // viene eseguita solo DOPO l'invio Telegram riuscito, quindi entrambe le istanze possono
 // superare isProcessed() sullo stesso item e pubblicarlo due volte sul canale (oltre alla
-// contesa WAL su SQLite). La seconda istanza esce subito e passa il fuoco alla prima.
+// contesa WAL su SQLite). La seconda istanza esce subito e passa il fuoco alla prima —
+// insieme all'eventuale file .rtb con cui è stata lanciata (doppio clic sul file).
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
     app.quit()
 } else {
-    app.on('second-instance', () => {
+    app.on('second-instance', (_event, argv) => {
         if (mainWindow && !mainWindow.isDestroyed()) {
             if (mainWindow.isMinimized()) mainWindow.restore()
             mainWindow.show()
             mainWindow.focus()
         }
+        const rtb = findRtbArg(argv)
+        if (rtb) void importRtbFromFile(rtb)
     })
 }
 
@@ -59,20 +68,75 @@ if (!gotTheLock) {
 // dove Electron potrebbe avviarsi in background ma bloccarsi prima di renderizzare la finestra.
 app.disableHardwareAcceleration();
 
+/** Il primo argomento che sia un profilo .rtb esistente (associazione file del sistema). */
+function findRtbArg(argv: string[]): string | null {
+    return argv.slice(1).find(a => /\.rtb$/i.test(a) && existsSync(a)) ?? null
+}
+
+/**
+ * Importa un profilo .rtb aperto con doppio clic.
+ *
+ * L'installer registra l'estensione .rtb per Titan, ma fino alla 2.3 l'app ignorava il
+ * file ricevuto: il doppio clic apriva Titan e basta. Ora chiede conferma, importa e
+ * avvisa l'interfaccia, che ricarica l'elenco dei bot.
+ */
+async function importRtbFromFile(filePath: string) {
+    if (!mainWindow || mainWindow.isDestroyed()) return
+    const { response } = await dialog.showMessageBox(mainWindow, {
+        type: 'question',
+        title: tm('openRtbTitle'),
+        message: tm('openRtbMessage', { file: basename(filePath) }),
+        detail: tm('openRtbDetail'),
+        buttons: [tm('cancel'), tm('import')],
+        defaultId: 1,
+        cancelId: 0,
+        noLink: true,
+    })
+    if (response !== 1) return
+    try {
+        const botId = BotManager.importSingleBot(await readFile(filePath, 'utf-8'))
+        mainWindow.webContents.send('bots-changed', { botId })
+    } catch (e: any) {
+        dialog.showErrorBox(tm('openRtbFailed'), e?.message || String(e))
+    }
+}
+
+/**
+ * Il renderer carica solo file locali e non ha bisogno di nessun permesso del browser.
+ * Tutto ciò che non è previsto viene negato: navigazioni verso altri indirizzi, webview,
+ * richieste di permessi (fotocamera, posizione, notifiche web…). Le notifiche di Titan
+ * partono dal main process e non passano di qui.
+ */
+function hardenSession() {
+    const allowed = new Set(['clipboard-sanitized-write'])
+    session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => {
+        callback(allowed.has(permission))
+    })
+    session.defaultSession.setPermissionCheckHandler((_wc, permission) => allowed.has(permission))
+}
 
 function createWindow(): void {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        width: 900,
-        height: 670,
+        width: 1100,
+        height: 720,
+        // Sotto questa misura il layout non ha più spazio per sorgenti e diario affiancati
+        // né per i modali: meglio impedirlo che mostrare un'interfaccia tagliata.
+        minWidth: 880,
+        minHeight: 600,
         show: false,
         autoHideMenuBar: true,
+        backgroundColor: '#0b1220',
         // Su Windows serve un .ico multi-size per l'icona nella barra applicazioni;
         // il PNG 1024px non viene mostrato correttamente nella taskbar.
         icon: join(__dirname, process.platform === 'win32' ? '../../resources/icon.ico' : '../../resources/icon.png'),
         webPreferences: {
             preload: join(__dirname, '../preload/index.cjs'),
-            sandbox: true
+            sandbox: true,
+            contextIsolation: true,
+            nodeIntegration: false,
+            webviewTag: false,
+            spellcheck: false,
         }
     })
 
@@ -109,19 +173,34 @@ function createWindow(): void {
         return { action: 'deny' }
     })
 
+    // La finestra principale non lascia mai l'interfaccia di Titan. Un link o un
+    // `<meta refresh>` finito per errore nel DOM porterebbe altrimenti una pagina esterna
+    // dentro una finestra che ha il preload con le API del programma.
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+        if (url !== mainWindow?.webContents.getURL()) event.preventDefault()
+    })
+    mainWindow.webContents.on('will-attach-webview', (event) => event.preventDefault())
+
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    if (is.dev && process.env['VITE_DEV_SERVER_URL']) {
+        mainWindow.loadURL(process.env['VITE_DEV_SERVER_URL'])
     } else {
         const indexPath = join(__dirname, '../../dist/index.html');
         console.log('Loading production index from:', indexPath);
         mainWindow.loadFile(indexPath).catch(err => {
             console.error('Failed to load index.html:', err);
             // Mostriamo all'utente che il file UI non è stato trovato (es. build corrotta)
-            dialog.showErrorBox('Errore Caricamento Interfaccia', 'Impossibile caricare i file grafici dell\'applicazione (index.html mancante o corrotto).\n\nReinstalla l\'applicazione.\nDettagli: ' + err.message);
+            dialog.showErrorBox(tm('uiLoadFailedTitle'), tm('uiLoadFailed', { error: err.message }));
             app.exit(1);
         });
+    }
+
+    // Profilo .rtb con cui è stata lanciata l'app: si importa a interfaccia pronta,
+    // così l'elenco dei bot può aggiornarsi subito dopo.
+    const rtbAtLaunch = findRtbArg(process.argv)
+    if (rtbAtLaunch) {
+        mainWindow.webContents.once('did-finish-load', () => { void importRtbFromFile(rtbAtLaunch) })
     }
 }
 
@@ -142,7 +221,22 @@ app.whenReady().then(() => {
         optimizer.watchWindowShortcuts(window)
     })
 
-    setupIpc()
+    hardenSession()
+
+    // Il database si apre qui dentro. Se fallisce (file danneggiato, disco pieno, permessi)
+    // prima l'eccezione rompeva questa promise *prima* di creare la finestra: Titan restava
+    // un processo invisibile, e il blocco di istanza singola impediva perfino di rilanciarlo.
+    try {
+        setupIpc()
+    } catch (e: any) {
+        console.error('Inizializzazione fallita:', e)
+        dialog.showErrorBox(
+            tm('dbOpenFailedTitle'),
+            tm('dbOpenFailed', { path: join(app.getPath('userData'), 'titan.db'), error: e?.message || String(e) })
+        )
+        app.exit(1)
+        return
+    }
 
     createWindow()
 

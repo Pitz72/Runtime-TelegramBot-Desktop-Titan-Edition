@@ -54,6 +54,8 @@ export interface TitanAPI {
 
     // System
     getVersion: () => Promise<string>
+    setLocale: (locale: string) => Promise<void>
+    onBotsChanged: (callback: (info: { botId?: number }) => void) => () => void
     checkForUpdates: () => Promise<{ success: boolean; error?: string }>
     downloadUpdate: () => Promise<{ success: boolean; error?: string }>
     installUpdate: () => Promise<void>
@@ -76,6 +78,5 @@ export interface TitanAPI {
 declare global {
     interface Window {
         api: TitanAPI
-        electron: any
     }
 }

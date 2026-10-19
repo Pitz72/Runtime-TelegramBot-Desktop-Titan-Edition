@@ -24,19 +24,25 @@ export default defineConfig({
                 // Shortcut of `build.lib.entry`.
                 entry: path.join(__dirname, 'src/main/index.ts'),
                 vite: {
+                    plugins: [{
+                        // vite-plugin-electron imposta lib.formats a ["es"] quando
+                        // package.json ha "type":"module", e mergeConfig CONCATENA gli
+                        // array: il nostro ["cjs"] diventava ["es","cjs"], cioè due build
+                        // dello stesso index.cjs. In build la seconda vinceva (CJS); in
+                        // watch (`npm run dev`) no, e index.cjs restava ESM. Qui si impone
+                        // un solo formato, mutando la configurazione già fusa.
+                        name: 'titan-main-cjs-only',
+                        config(config) {
+                            if (config.build?.lib) config.build.lib.formats = ['cjs']
+                        },
+                    }],
                     build: {
                         outDir: path.join(__dirname, 'dist-electron/main'),
-                        // vite-plugin-electron (index.js:42) imposta build.lib.formats
-                        // a ["es"] quando package.json ha "type":"module", ignorando
-                        // rollupOptions.output.format: 'cjs'. Per forzare CJS dobbiamo
-                        // sovrascrivere formats qui, che viene mergiato sopra il default.
-                        lib: {
-                            formats: ['cjs'],
-                        },
+                        // Senza pulizia restavano i chunk delle build precedenti, e
+                        // electron-builder li impacchettava tutti (dist-electron/**).
+                        emptyOutDir: true,
                         rollupOptions: {
-                            // In watch mode il watcher rileva i propri output e lancia
-                            // una seconda build che ignora lib.formats:['cjs'] → ESM in .cjs.
-                            // Escludendo le cartelle di output si rompe il loop.
+                            // Il watcher non deve reagire ai propri output.
                             watch: {
                                 exclude: ['dist-electron/**', 'dist/**', 'node_modules/**'],
                             },
@@ -56,6 +62,7 @@ export default defineConfig({
                 vite: {
                     build: {
                         outDir: path.join(__dirname, 'dist-electron/preload'),
+                        emptyOutDir: true,
                         rollupOptions: {
                             output: {
                                 entryFileNames: '[name].cjs',

@@ -8,17 +8,30 @@ files:
   - dist/**/*
   - resources/**/*
   - package.json
-  # Escludi TUTTO node_modules tranne le dipendenze native di better-sqlite3.
+  # Escludi TUTTO node_modules tranne better-sqlite3, l'unico modulo nativo.
   # Tutte le altre dipendenze JS (telegraf, rss-parser, youtubei.js, react, ecc.)
-  # sono già bundlate inline da Vite grazie a ssr.noExternal: true.
+  # sono già bundlate inline da Vite.
+  #
+  # better-sqlite3 13 è un modulo N-API con i binari precompilati dentro il
+  # pacchetto (prebuilds/<piattaforma>-<arch>.node): l'ABI è stabile tra versioni
+  # di Node ed Electron, quindi non si ricompila nulla e non servono più
+  # `bindings` né `file-uri-to-path`. Sorgenti C (deps/, src/) e binari delle
+  # piattaforme che non distribuiamo restano fuori: sono 10 MB di zavorra.
   - "!node_modules/**/*"
-  - node_modules/better-sqlite3/**/*
-  - node_modules/bindings/**/*
-  - node_modules/file-uri-to-path/**/*
+  - node_modules/better-sqlite3/package.json
+  - node_modules/better-sqlite3/LICENSE
+  - node_modules/better-sqlite3/lib/**/*
+  - node_modules/better-sqlite3/prebuilds/win32-x64.node
+  - node_modules/better-sqlite3/prebuilds/linux-x64.node
+  - node_modules/better-sqlite3/prebuilds/linux-arm64.node
 asarUnpack:
   - resources/**
   # I moduli nativi (.node) non possono essere caricati dall'interno di un archivio asar
-  - node_modules/better-sqlite3/build/**/*
+  - node_modules/better-sqlite3/prebuilds/**/*
+
+# Niente ricompilazione dei moduli nativi per l'ABI di Electron: l'unico modulo
+# nativo è N-API e porta già i suoi binari (vedi sopra).
+npmRebuild: false
 
 fileAssociations:
   - ext: rtb

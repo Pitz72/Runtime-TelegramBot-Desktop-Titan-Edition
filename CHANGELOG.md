@@ -2,6 +2,7 @@
 
 Questa è la storia delle versioni del progetto, suddivisa in blocchi di versione per maggiore consultabilità:
 
+- **Non rilasciato** — [revisione tecnica e di sicurezza](docs/changelogs/CHANGELOG_unreleased.md): Electron 32 (fuori supporto) → 44, contenuti mai più persi per un guasto di rete, motore protetto da avvii e arresti rapidi, anteprima dei template sanificata, test automatici, licenze di terze parti nell'installer.
 - [v2.3.1 (Corrente)](docs/changelogs/CHANGELOG_v2.3.1.md) — Correzione al cuore della deduplica. Alcuni generatori RSS scrivono in ogni `<item>` il link della **pagina dello show** invece di quello dell'episodio: tutte le puntate arrivano con lo stesso indirizzo, e Titan — che ricavava l'identificativo dal solo link — dopo la prima pubblicazione scartava in silenzio ogni puntata successiva. Ora, e **soltanto** per i feed dove il link risulta davvero duplicato, l'identificativo si ricava dal `<guid>`: dove ogni puntata ha già il suo indirizzo nulla cambia, quindi lo storico di pubblicazione resta valido e niente torna in canale. Su quattro canali reali, la differenza è un solo contenuto: la puntata che era rimasta bloccata.
 - [v2.3.0 (Archivio)](docs/changelogs/CHANGELOG_v2.3.0.md) — Il pannello **Sorgenti Feed** guadagna una lente di ricerca, locale al canale selezionato: su un canale affollato ritrovare un feed non è più un lavoro di scorrimento. Si cerca su nome, indirizzo, tipo e parole del filtro; più termini valgono come una condizione sola; un contatore dice quanti feed su quanti, così una ricerca troppo stretta non si confonde con un canale quasi vuoto. Si azzera con ✕ o `Esc`, e cambiando canale riparte pulita. Nessuna modifica al motore, ai feed o al database.
 - [v2.2.1 (Archivio)](docs/changelogs/CHANGELOG_v2.2.1.md) — Correzione singola: nel diario di scansione finivano righe marcate come **errore** che errori non erano. Il livello di una riga si deduceva cercando «error» e «Fallito» in tutto il testo, titolo del contenuto compreso: due video con «Checked Errors» e «trial and error» nel titolo comparivano in rosso a ogni giro. Ora contano solo i marcatori del programma, e le sei segnalazioni del lettore YouTube che avvisavano a parole dichiarano il proprio livello, così non spariscono dal diario. Su una giornata di log: da 11 righe rosse a 1, l'unica vera.
@@ -45,9 +46,9 @@ Questa è la storia delle versioni del progetto, suddivisa in blocchi di version
 - [v1.0.x (Release Iniziali)](docs/changelogs/v1.0.x.md) — Release ufficiale v1.0.0 (Titan Glass UI) e patch correttive del parser.
 - [Legacy / Pre-Release (Alpha, Beta)](docs/changelogs/legacy-pre-v1.md) — Cronologia pre-release: build 0.x, alpha, beta e cicli numerici primordiali precedenti alla v1.
 
-## Versione Attuale: v2.1.9
+## Versione Attuale: v2.3.1
 
-Per i dettagli dell'ultima versione, consulta [docs/changelogs/CHANGELOG_v2.1.9.md](docs/changelogs/CHANGELOG_v2.1.9.md).
+Per i dettagli dell'ultima versione pubblicata, consulta [docs/changelogs/CHANGELOG_v2.3.1.md](docs/changelogs/CHANGELOG_v2.3.1.md). Il lavoro non ancora rilasciato è descritto nella sezione «Non rilasciato» in cima all'elenco.
 
 ## Storia dello sviluppo
 

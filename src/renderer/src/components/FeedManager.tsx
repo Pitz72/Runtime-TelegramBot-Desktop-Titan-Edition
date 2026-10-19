@@ -8,6 +8,7 @@ import { FeedConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { useTranslation } from '../locales/I18nContext';
+import { errorMessage } from '../lib/errors';
 
 interface Props { botId: number; }
 
@@ -76,7 +77,14 @@ export function FeedManager({ botId }: Props) {
     const handleAdd = async () => {
         if (!newFeed.name || !newFeed.url) return;
         const keywordFilter = buildKeywordFilter(newFilterInclude, newFilterExclude);
-        await window.api.addFeed({ ...newFeed, botId, keywordFilter, checkInterval: newCheckInterval, digestInterval: newDigestInterval });
+        // Il main rifiuta URL non validi o verso reti private: prima l'errore restava una
+        // promise rifiutata nel vuoto, e il modulo non diceva perché non salvava.
+        try {
+            await window.api.addFeed({ ...newFeed, botId, keywordFilter, checkInterval: newCheckInterval, digestInterval: newDigestInterval });
+        } catch (e) {
+            toast(errorMessage(e), 'error');
+            return;
+        }
         setIsAdding(false);
         setNewFeed({ name: '', url: '', type: 'podcast' });
         setNewFilterInclude(''); setNewFilterExclude('');
@@ -107,7 +115,12 @@ export function FeedManager({ botId }: Props) {
     const handleUpdate = async () => {
         if (!editingFeed || !editingFeed.name || !editingFeed.url) return;
         const keywordFilter = buildKeywordFilter(editFilterInclude, editFilterExclude);
-        await window.api.updateFeed({ id: editingFeed.id, name: editingFeed.name, url: editingFeed.url, type: editingFeed.type, keywordFilter, checkInterval: editCheckInterval, digestInterval: editDigestInterval });
+        try {
+            await window.api.updateFeed({ id: editingFeed.id, name: editingFeed.name, url: editingFeed.url, type: editingFeed.type, keywordFilter, checkInterval: editCheckInterval, digestInterval: editDigestInterval });
+        } catch (e) {
+            toast(errorMessage(e), 'error');
+            return;
+        }
         setEditingFeed(null);
         setEditFilterInclude(''); setEditFilterExclude('');
         setEditCheckInterval(null); setEditDigestInterval(null); setTestResult(null);
@@ -128,15 +141,23 @@ export function FeedManager({ botId }: Props) {
 
     const confirmDelete = async () => {
         if (feedToDelete) {
-            await window.api.deleteFeed(feedToDelete);
-            toast(t('feedManager.successDelete') as string, 'success');
+            try {
+                await window.api.deleteFeed(feedToDelete);
+                toast(t('feedManager.successDelete') as string, 'success');
+            } catch (e) {
+                toast(errorMessage(e), 'error');
+            }
             loadFeeds();
         }
         setDeleteConfirmOpen(false); setFeedToDelete(null);
     };
 
     const toggleFeed = async (id: number, current: boolean) => {
-        await window.api.toggleFeed(id, !current);
+        try {
+            await window.api.toggleFeed(id, !current);
+        } catch (e) {
+            toast(errorMessage(e), 'error');
+        }
         loadFeeds();
     };
 

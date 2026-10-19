@@ -2,13 +2,15 @@ import { ipcMain, app, dialog, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import Database from 'better-sqlite3';
 import { getBotEngine } from './bot/engine';
-import { getDB, initDB } from './database/schema';
+import { getDB, initDB, closeDB } from './database/schema';
 import { BotManager } from './bot/manager';
 import { fetchFeed, validateFeedUrl } from './bot/parser';
 import { fetchYouTubeVideos } from './bot/youtube';
 import { TitanLogger } from './logger';
 import { writeFile, copyFile, readFile } from 'fs/promises';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { tm, setMainLocale } from './i18n';
+import { parseStartDate } from './bot/rules';
 
 // --- Settings File (titan-settings.json in userData) ---
 interface TitanSettings { performanceMode: boolean; lastSeenVersion?: string; }
@@ -29,6 +31,19 @@ async function readSettings(): Promise<TitanSettings> {
 
 async function writeSettings(settings: TitanSettings): Promise<void> {
     await writeFile(getSettingsPath(), JSON.stringify(settings, null, 2), 'utf-8');
+}
+
+// --- Cartella dei dialoghi ---
+// Da Electron 43 i dialoghi senza `defaultPath` partono sempre da Download e il sistema
+// non ricorda più l'ultima cartella usata. La ricordiamo noi, per la sessione.
+let lastDialogDir: string | null = null;
+
+function dialogDir(): string {
+    return lastDialogDir ?? app.getPath('documents');
+}
+
+function rememberDir(filePath: string | undefined) {
+    if (filePath) lastDialogDir = dirname(filePath);
 }
 
 // --- Input Validation Helpers ---
@@ -63,6 +78,15 @@ function assertTimeOrDefault(value: unknown, defaultVal: string): string {
         throw new Error(`Formato orario non valido: "${value}". Usare HH:MM (es. 08:00)`);
     }
     return value;
+}
+
+/** Data di partenza facoltativa: se c'è, deve essere una data (vedi `parseStartDate`). */
+function assertStartDateOrUndefined(value: unknown): string | undefined {
+    if (value === undefined || value === null || value === '') return undefined;
+    if (parseStartDate(value) === null) {
+        throw new Error(`Data di partenza non valida: "${String(value)}"`);
+    }
+    return String(value).trim();
 }
 
 function assertFeedType(value: unknown): 'podcast' | 'news' | 'youtube' {
@@ -120,6 +144,9 @@ export function setupIpc() {
     // --- SYSTEM ---
     ipcMain.handle('get-version', () => app.getVersion());
 
+    // Lingua dell'interfaccia: serve ai dialoghi nativi aperti da qui (vedi main/i18n.ts).
+    ipcMain.handle('set-locale', (_, locale: unknown) => { setMainLocale(locale); });
+
     // Apre un URL esterno nel browser di sistema. Solo https per sicurezza.
     ipcMain.handle('open-external', (_, url: string) => {
         if (typeof url === 'string' && /^https:\/\//i.test(url)) {
@@ -160,7 +187,8 @@ export function setupIpc() {
         const checkInterval = data.checkInterval !== undefined ? assertCheckInterval(data.checkInterval) : 15;
         const sendFrom = assertTimeOrDefault(data.sendFrom, '00:00');
         const sendUntil = assertTimeOrDefault(data.sendUntil, '23:59');
-        return BotManager.createBot(name, token, channelId, data.startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup);
+        const startDate = assertStartDateOrUndefined(data.startDate);
+        return BotManager.createBot(name, token, channelId, startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup);
     });
 
     ipcMain.handle('delete-bot', (_, id) => {
@@ -177,7 +205,8 @@ export function setupIpc() {
         const validInterval = checkInterval !== undefined ? assertCheckInterval(checkInterval) : 15;
         const validSendFrom = assertTimeOrDefault(sendFrom, '00:00');
         const validSendUntil = assertTimeOrDefault(sendUntil, '23:59');
-        return BotManager.updateBot(validId, validName, validToken, validChannelId, isActive, startDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup);
+        const validStartDate = assertStartDateOrUndefined(startDate);
+        return BotManager.updateBot(validId, validName, validToken, validChannelId, !!isActive, validStartDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup);
     });
 
     // --- FEED MANAGEMENT ---
@@ -243,14 +272,16 @@ export function setupIpc() {
         try {
             const validBotId = assertPositiveInt(botId, 'botId');
             const { filePaths, canceled } = await dialog.showOpenDialog({
-                title: 'Importa Feed da OPML',
+                title: tm('importOpmlTitle'),
+                defaultPath: dialogDir(),
                 properties: ['openFile'],
                 filters: [
-                    { name: 'OPML Files', extensions: ['opml', 'xml'] },
-                    { name: 'All Files', extensions: ['*'] }
+                    { name: tm('filterOpml'), extensions: ['opml', 'xml'] },
+                    { name: tm('filterAll'), extensions: ['*'] }
                 ]
             });
             if (canceled || filePaths.length === 0) return { success: false, count: 0 };
+            rememberDir(filePaths[0]);
 
             const content = await readFile(filePaths[0], 'utf-8');
             const found = parseOpml(content);
@@ -273,7 +304,8 @@ export function setupIpc() {
     // --- ENGINE CONTROL ---
     ipcMain.handle('start-bot', async () => {
         try {
-            await getBotEngine().start();
+            // Ritorna subito: messaggio di avvio e primo giro corrono in sottofondo.
+            getBotEngine().start();
             return { success: true };
         } catch (e) {
             console.error('Failed to start bot engine:', e);
@@ -306,17 +338,18 @@ export function setupIpc() {
             }
 
             const { filePath, canceled } = await dialog.showSaveDialog({
-                title: 'Esporta Log',
-                defaultPath: `titan-log-${new Date().toISOString().split('T')[0]}.txt`,
+                title: tm('exportLogTitle'),
+                defaultPath: join(dialogDir(), `titan-log-${new Date().toISOString().split('T')[0]}.txt`),
                 filters: [
-                    { name: 'Text Files', extensions: ['txt'] },
-                    { name: 'All Files', extensions: ['*'] }
+                    { name: tm('filterText'), extensions: ['txt'] },
+                    { name: tm('filterAll'), extensions: ['*'] }
                 ]
             });
 
             if (canceled || !filePath) {
                 return { success: false, error: 'Cancelled' };
             }
+            rememberDir(filePath);
 
             await writeFile(filePath, content, 'utf-8');
             return { success: true, path: filePath };
@@ -329,15 +362,16 @@ export function setupIpc() {
     ipcMain.handle('export-database', async () => {
         try {
             const { filePath, canceled } = await dialog.showSaveDialog({
-                title: 'Esporta Database Completo',
-                defaultPath: `titan-backup-${new Date().toISOString().split('T')[0]}.db`,
+                title: tm('exportDbTitle'),
+                defaultPath: join(dialogDir(), `titan-backup-${new Date().toISOString().split('T')[0]}.db`),
                 filters: [
-                    { name: 'Database SQLite', extensions: ['db', 'sqlite'] },
-                    { name: 'All Files', extensions: ['*'] }
+                    { name: tm('filterDb'), extensions: ['db', 'sqlite'] },
+                    { name: tm('filterAll'), extensions: ['*'] }
                 ]
             });
 
             if (canceled || !filePath) return { success: false, error: 'Cancelled' };
+            rememberDir(filePath);
 
             await getDB().backup(filePath);
             return { success: true, path: filePath };
@@ -348,28 +382,30 @@ export function setupIpc() {
 
     ipcMain.handle('import-database', async () => {
         try {
-            const msg = "ATTENZIONE: Importando un database sovrascriverai TUTTI i dati attuali e l'applicazione si riavvierà automaticamente. Continuare?";
             const { response } = await dialog.showMessageBox({
                 type: 'warning',
-                title: 'Conferma Importazione',
-                message: msg,
-                buttons: ['Annulla', 'Procedi'],
+                title: tm('importDbConfirmTitle'),
+                message: tm('importDbConfirm'),
+                buttons: [tm('cancel'), tm('proceed')],
                 defaultId: 0,
-                cancelId: 0
+                cancelId: 0,
+                noLink: true,
             });
 
             if (response === 0) return { success: false, error: 'Cancelled by user' };
 
             const { filePaths, canceled } = await dialog.showOpenDialog({
-                title: 'Importa Database',
+                title: tm('importDbTitle'),
+                defaultPath: dialogDir(),
                 properties: ['openFile'],
                 filters: [
-                    { name: 'Database SQLite', extensions: ['db', 'sqlite'] },
-                    { name: 'All Files', extensions: ['*'] }
+                    { name: tm('filterDb'), extensions: ['db', 'sqlite'] },
+                    { name: tm('filterAll'), extensions: ['*'] }
                 ]
             });
 
             if (canceled || filePaths.length === 0) return { success: false, error: 'Cancelled' };
+            rememberDir(filePaths[0]);
 
             // Validazione PRIMA di toccare il DB attivo: un file corrotto o non-SQLite
             // sovrascritto su titan.db renderebbe l'app non avviabile (initDB lancerebbe
@@ -390,7 +426,9 @@ export function setupIpc() {
             }
 
             getBotEngine().stop();
-            getDB().close();
+            // closeDB: checkpoint WAL e chiusura pulita, così il file -wal del vecchio
+            // database non resta accanto a quello nuovo.
+            closeDB();
             const dbPath = join(app.getPath('userData'), 'titan.db');
             await copyFile(filePaths[0], dbPath);
 
@@ -404,14 +442,15 @@ export function setupIpc() {
     ipcMain.handle('export-config', async () => {
         try {
             const { filePath, canceled } = await dialog.showSaveDialog({
-                title: 'Esporta Tutti i Bot',
-                defaultPath: `titan-bots-backup-${new Date().toISOString().split('T')[0]}.rtb`,
+                title: tm('exportConfigTitle'),
+                defaultPath: join(dialogDir(), `titan-bots-backup-${new Date().toISOString().split('T')[0]}.rtb`),
                 filters: [
-                    { name: 'Titan Bot Profiles', extensions: ['rtb'] }
+                    { name: tm('filterRtb'), extensions: ['rtb'] }
                 ]
             });
 
             if (canceled || !filePath) return { success: false, error: 'Cancelled' };
+            rememberDir(filePath);
 
             const jsonData = BotManager.exportConfig();
             await writeFile(filePath, jsonData, 'utf-8');
@@ -424,14 +463,16 @@ export function setupIpc() {
     ipcMain.handle('import-config', async () => {
         try {
             const { filePaths, canceled } = await dialog.showOpenDialog({
-                title: 'Importa Profili Bot',
+                title: tm('importConfigTitle'),
+                defaultPath: dialogDir(),
                 properties: ['openFile'],
                 filters: [
-                    { name: 'Titan Bot Profiles', extensions: ['rtb'] }
+                    { name: tm('filterRtb'), extensions: ['rtb'] }
                 ]
             });
 
             if (canceled || filePaths.length === 0) return { success: false, error: 'Cancelled' };
+            rememberDir(filePaths[0]);
 
             const content = await readFile(filePaths[0], 'utf-8');
             BotManager.importConfig(content);
@@ -444,24 +485,24 @@ export function setupIpc() {
     });
 
     // --- IMPORT / EXPORT SINGOLO BOT (.rtb) ---
-    ipcMain.handle('export-single-bot', async (_, botId: number) => {
+    ipcMain.handle('export-single-bot', async (_, rawBotId: unknown) => {
         try {
-            // Ottieni il nome del bot per il suggerimento del file
-            const bots = BotManager.getBots();
-            const botRecord = bots.find((b: any) => b.id === botId);
+            const botId = assertPositiveInt(rawBotId, 'botId');
+            const botRecord = BotManager.getBot(botId);
             if (!botRecord) throw new Error('Bot non trovato');
 
             const suggestedName = `${botRecord.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.rtb`;
 
             const { canceled, filePath } = await dialog.showSaveDialog({
-                title: 'Esporta Profilo Bot',
-                defaultPath: suggestedName,
-                filters: [{ name: 'Titan Bot Profile', extensions: ['rtb'] }]
+                title: tm('exportBotTitle'),
+                defaultPath: join(dialogDir(), suggestedName),
+                filters: [{ name: tm('filterRtb'), extensions: ['rtb'] }]
             });
 
             if (canceled || !filePath) {
                 return { success: false };
             }
+            rememberDir(filePath);
 
             const jsonData = BotManager.exportSingleBot(botId);
             await writeFile(filePath, jsonData, 'utf-8');
@@ -475,14 +516,16 @@ export function setupIpc() {
     ipcMain.handle('import-single-bot', async () => {
         try {
             const { canceled, filePaths } = await dialog.showOpenDialog({
-                title: 'Importa Profilo Bot',
+                title: tm('importBotTitle'),
+                defaultPath: dialogDir(),
                 properties: ['openFile'],
-                filters: [{ name: 'Titan Bot Profile', extensions: ['rtb'] }]
+                filters: [{ name: tm('filterRtb'), extensions: ['rtb'] }]
             });
 
             if (canceled || filePaths.length === 0) {
                 return { success: false };
             }
+            rememberDir(filePaths[0]);
 
             const jsonData = await readFile(filePaths[0], 'utf-8');
             const newBotId = BotManager.importSingleBot(jsonData);

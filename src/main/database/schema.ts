@@ -4,9 +4,9 @@ import { app } from 'electron';
 import fs from 'fs';
 import crypto from 'crypto';
 
-const dbPath = join(app.getPath('userData'), 'titan.db');
-const dbDir = dirname(dbPath);
-const isNewInstall = !fs.existsSync(dbPath);
+// Percorsi calcolati al momento dell'uso, non all'import del modulo: così un profilo
+// dati alternativo (TITAN_USER_DATA_DIR, vedi main/profile.ts) vale anche qui.
+const getDbPath = () => join(app.getPath('userData'), 'titan.db');
 
 // Istanza DB lazily inizializzata dentro initDB() — fix #16
 // Non viene più creata al momento dell'import del modulo.
@@ -128,12 +128,21 @@ function runLegacyMigrations(db: Database.Database) {
 }
 
 export function initDB() {
+    const dbPath = getDbPath();
+    const dbDir = dirname(dbPath);
+    const isNewInstall = !fs.existsSync(dbPath);
+
     // 1. Crea istanza DB — fix #16: non più a livello di modulo ma dentro initDB()
     _db = new Database(dbPath);
     const db = _db; // alias locale per non modificare il codice sottostante
 
     // Enable WAL mode for better concurrency
     db.pragma('journal_mode = WAL');
+    // Le cancellazioni a cascata (bot → feed, storico, code) dipendono da questo.
+    // better-sqlite3 lo compila già attivo; dichiararlo lo rende indipendente dalla build.
+    db.pragma('foreign_keys = ON');
+    // Un lock momentaneo (backup in corso, antivirus) non deve diventare un errore immediato.
+    db.pragma('busy_timeout = 5000');
 
     // 2. Schema Base Aggiornato (Stato dell'arte per nuove installazioni)
     db.exec(`

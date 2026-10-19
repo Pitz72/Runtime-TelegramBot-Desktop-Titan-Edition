@@ -4,19 +4,21 @@ Come costruire gli installer per Windows e Linux, in locale o via CI. Le trappol
 
 Piattaforme con installer ufficiale: **Windows x64** e **Linux x64 e arm64**.
 
-Per **macOS** non esiste un installer ufficiale e la CI non lo produce. Non è un limite del codice — è cross-platform e su macOS compila e gira — ma distribuire un `.dmg` che non faccia comparire l'avviso di Gatekeeper richiede un certificato Apple a pagamento che il progetto non ha motivo di mantenere. Chi usa macOS può compilare dal sorgente: servono Node 20 e gli Xcode Command Line Tools, poi valgono gli stessi comandi descritti sotto. Il target `mac` va aggiunto a mano in `electron-builder.yml`, e l'app risultante andrà aperta la prima volta con tasto destro → *Apri*.
+Per **macOS** non esiste un installer ufficiale e la CI non lo produce. Non è un limite del codice — è cross-platform e su macOS compila e gira — ma distribuire un `.dmg` che non faccia comparire l'avviso di Gatekeeper richiede un certificato Apple a pagamento che il progetto non ha motivo di mantenere. Chi usa macOS può compilare dal sorgente: servono Node 22 e gli Xcode Command Line Tools, poi valgono gli stessi comandi descritti sotto. Il target `mac` va aggiunto a mano in `electron-builder.yml`, e l'app risultante andrà aperta la prima volta con tasto destro → *Apri*.
 
 ---
 
 ## Prerequisiti
 
-**Node.js 20.** Non versioni successive: `better-sqlite3` non ha prebuild per Node 22/24, `node-gyp` fallisce e su Windows Visual Studio non viene rilevato. Il progetto ha già pagato questo errore una volta.
+**Node.js 22 LTS** o successivo.
 
-`better-sqlite3` è un modulo nativo e viene ricompilato per la versione di Electron in uso da `electron-builder install-app-deps`, che gira automaticamente come `postinstall`.
+`better-sqlite3`, l'unico modulo nativo, dalla versione 13 è N-API e porta i binari precompilati per Windows x64 e Linux x64/arm64 dentro il pacchetto: non si ricompila nulla, né all'installazione né al packaging (`npmRebuild: false`). Non servono Visual Studio Build Tools né `node-gyp`.
+
+Da Electron 42 il binario di Electron non si scarica più durante `npm install`: arriva al primo avvio di `npx electron` o di `npm run dev`. Gli installer non ne risentono, perché electron-builder usa la propria cache.
 
 ### Windows
 
-Servono gli strumenti di compilazione C++: **Visual Studio Build Tools** con il workload *Desktop development with C++*, oppure Visual Studio Community con lo stesso workload. Python 3 è incluso nei Build Tools recenti; se manca, installarlo a parte.
+Basta Node.js. Nessuno strumento di compilazione.
 
 ### Linux
 
@@ -86,7 +88,7 @@ Gli installer finiscono in `Builds/`. Tutti i nomi cominciano con `RuntimeTelegr
 - **`.deb` e `.rpm`** — scaricano il nuovo pacchetto e lo installano **da root**, chiedendo la password con `pkexec` o `sudo`. È una funzione recente di `electron-updater` e meno collaudata delle altre due: se non va a buon fine, il pacchetto si installa a mano;
 - **portable, `.pacman` e `.tar.gz`** — non si aggiornano da soli. Il portable non compare nemmeno in `latest.yml` (`electron-builder` non scrive informazioni di aggiornamento per quel target), e per `pacman` non viene scritto `package-type`.
 
-> ⚠️ **`npm run dev` è rotto** e corrompe `dist-electron/main/index.cjs`. Riguarda solo il dev server, mai le build di release. Se capita, `npx vite build` rigenera un bundle valido. Spiegazione completa in [CONTRIBUTING.md](../CONTRIBUTING.md).
+> `npm run build` genera anche `resources/THIRD-PARTY-NOTICES.txt` (`scripts/third-party-notices.mjs`): le licenze di tutte le dipendenze che finiscono nell'app, che Vite toglierebbe dal bundle. Lo script si ferma con errore se tra le dipendenze di produzione compare una licenza copyleft.
 
 ### Installare quello che hai costruito, su Linux
 
@@ -134,19 +136,16 @@ Gli installer **non sono firmati**: non esiste un certificato di code signing. S
 
 In `electron-builder.yml`. Due cose da sapere:
 
-- **`files` è un elenco chiuso.** `node_modules` è escluso in blocco tranne `better-sqlite3` e le sue dipendenze: tutto il resto (telegraf, rss-parser, youtubei.js, React…) è già impacchettato da Vite. È questa configurazione che tiene l'installer a ~80 MB invece di 1,5 GB. Se aggiungi una dipendenza con binari nativi, va aggiunta anche qui e in `asarUnpack`.
+- **`files` è un elenco chiuso.** `node_modules` è escluso in blocco tranne `better-sqlite3`, e di quello entrano solo `lib/` e i tre binari delle piattaforme distribuite: tutto il resto (telegraf, rss-parser, youtubei.js, React…) è già impacchettato da Vite. Se aggiungi una dipendenza con binari nativi, va aggiunta anche qui e in `asarUnpack`, e deve essere N-API (vedi `npmRebuild`).
 - **`productName` non si tocca.** Da lì deriva il percorso della cartella `userData` degli utenti — vedi [database.md](database.md).
 
 ---
 
 ## Problemi frequenti
 
-**`better-sqlite3 was compiled against a different Node.js version`**
-```bash
-npm run rebuild      # electron-builder install-app-deps
-```
+**`Electron failed to install correctly`** al primo `npm run dev` — il download del binario è stato interrotto: `npx install-electron --no`.
 
-**`gyp ERR! build error`** — mancano gli strumenti di compilazione. Su Windows: Visual Studio Build Tools con il workload C++. Su Linux: `build-essential` e `python3`. Poi `rm -rf node_modules && npm install`.
+**`Cannot find module '…/prebuilds/<piattaforma>.node'`** — piattaforma senza binario precompilato in `better-sqlite3` (per esempio Windows arm64): non è tra quelle distribuite.
 
 **`libnss3.so: cannot open shared object file`** (Linux)
 ```bash

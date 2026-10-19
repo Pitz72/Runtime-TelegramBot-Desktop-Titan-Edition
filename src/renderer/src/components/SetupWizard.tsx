@@ -4,8 +4,10 @@ import { ArrowRight, Check } from 'lucide-react';
 import logo from '../assets/logo.png';
 import { useTranslation } from '../locales/I18nContext';
 
+import { errorMessage } from '../lib/errors';
+
 interface Props {
-    onComplete: (name: string, token: string, channel: string, startDate: string) => void;
+    onComplete: (name: string, token: string, channel: string, startDate: string) => Promise<void> | void;
     onSkip: () => void;
 }
 
@@ -18,7 +20,9 @@ export function SetupWizard({ onComplete, onSkip }: Props) {
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [dateError, setDateError] = useState('');
 
-    const handleNext = () => {
+    const [submitError, setSubmitError] = useState('');
+
+    const handleNext = async () => {
         if (step === 1 && botName) setStep(2);
         else if (step === 2 && token) setStep(3);
         else if (step === 3 && channel) setStep(4);
@@ -28,7 +32,12 @@ export function SetupWizard({ onComplete, onSkip }: Props) {
                 setDateError(t('setup.invalidDate') as string);
                 return;
             }
-            onComplete(botName, token, channel, startDate);
+            setSubmitError('');
+            try {
+                await onComplete(botName.trim(), token.trim(), channel.trim(), startDate);
+            } catch (e) {
+                setSubmitError(errorMessage(e));
+            }
         }
     };
 
@@ -135,6 +144,7 @@ export function SetupWizard({ onComplete, onSkip }: Props) {
                                 />
                                 <p className="text-nano text-outline-variant/40">{t('setup.step4Desc')}</p>
                                 {dateError && <p className="text-nano text-error">{dateError}</p>}
+                                {submitError && <p role="alert" className="text-xs text-error">{submitError}</p>}
                             </div>
                         )}
 

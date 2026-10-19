@@ -38,6 +38,13 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('titan-lang', lang);
     };
 
+    // La lingua serve anche fuori da React: ai lettori di schermo (attributo lang della
+    // pagina, per la pronuncia) e ai dialoghi nativi aperti dal main process.
+    useEffect(() => {
+        document.documentElement.lang = locale;
+        window.api?.setLocale?.(locale)?.catch?.(() => {});
+    }, [locale]);
+
     // Risolve una chiave "a.b.c" dentro un oggetto traduzioni; undefined se manca un anello.
     const resolve = (dict: any, keys: string[]): unknown => {
         let current: any = dict;

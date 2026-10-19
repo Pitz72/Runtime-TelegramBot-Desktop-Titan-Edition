@@ -62,10 +62,18 @@ function levelForEvent(event: ScanEvent): LogLevel {
     return EVENT_LEVELS[event.type];
 }
 
+/** Data locale "YYYY-MM-DD": il file di log è quello della giornata di chi lo legge. */
+function localDateStamp(d = new Date()): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 class Logger {
     private ipcBuffer: LogEntry[] = [];
     private logDir: string;
-    private logFilePath: string;
+    private currentDate = '';
+    private logFilePath = '';
+    /** Coda delle scritture su file: mantiene l'ordine delle righe. */
+    private writeChain: Promise<void> = Promise.resolve();
 
     constructor() {
         this.logDir = path.join(app.getPath('userData'), 'logs');
@@ -75,15 +83,25 @@ class Logger {
             fs.mkdirSync(this.logDir, { recursive: true });
         }
 
-        // Clean up old logs (> 7 days)
-        this.cleanupOldLogs();
-
-        // Set up current log file
-        const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        this.logFilePath = path.join(this.logDir, `titan-${dateStr}.log`);
+        this.rotateIfNeeded();
 
         // Set up IPC batching
         setInterval(() => this.flushIpcBuffer(), 300);
+    }
+
+    /**
+     * Il nome del file segue la giornata, non l'avvio.
+     *
+     * Titan resta acceso per giorni: prima il nome si calcolava una volta sola, quindi
+     * tutto finiva nel file del giorno di avvio, «Esporta log» salvava quel file invece di
+     * quello di oggi e la pulizia dei file oltre i 7 giorni non girava mai.
+     */
+    private rotateIfNeeded() {
+        const today = localDateStamp();
+        if (today === this.currentDate) return;
+        this.currentDate = today;
+        this.logFilePath = path.join(this.logDir, `titan-${today}.log`);
+        this.cleanupOldLogs();
     }
 
     private cleanupOldLogs() {
@@ -122,6 +140,7 @@ class Logger {
 
     /** Percorso del file di log della giornata — l'esportazione legge questo, non la memoria. */
     public getLogFilePath(): string {
+        this.rotateIfNeeded();
         return this.logFilePath;
     }
 
@@ -142,12 +161,15 @@ class Logger {
         // 1. Console log
         console.log(formattedMessage);
 
-        // 2. File log (asynchronous append)
-        try {
-            await fs.promises.appendFile(this.logFilePath, formattedMessage + '\n');
-        } catch (error) {
-            console.error('[Logger] Failed to write to log file:', error);
-        }
+        // 2. File log — le scritture passano in fila, una dopo l'altra. Lanciate in parallelo
+        // (come prima) si completavano nell'ordine in cui il sistema le smaltiva, e il file
+        // esportato per una segnalazione aveva righe fuori sequenza.
+        this.rotateIfNeeded();
+        const target = this.logFilePath;
+        this.writeChain = this.writeChain
+            .then(() => fs.promises.appendFile(target, formattedMessage + '\n'))
+            .catch(error => console.error('[Logger] Failed to write to log file:', error));
+        const written = this.writeChain;
 
         // 3. IPC Buffer — strutturato con id + level (fix #22/#23) + evento (Fase 7)
         const entry: LogEntry = {
@@ -157,6 +179,9 @@ class Logger {
             ...(event ? { event } : {}),
         };
         this.ipcBuffer.push(entry);
+
+        // Chi fa `await TitanLogger.log(...)` aspetta che la riga sia davvero sul file.
+        await written;
     }
 }
 

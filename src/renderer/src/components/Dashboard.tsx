@@ -467,7 +467,11 @@ export function Dashboard({ updater }: { updater?: Updater }) {
             )}
 
             {showSystemSettings && (
-                <SystemSettingsModal onClose={() => setShowSystemSettings(false)} updater={updater} />
+                <SystemSettingsModal
+                    onClose={() => setShowSystemSettings(false)}
+                    onBotsImported={() => setRefreshKey(prev => prev + 1)}
+                    updater={updater}
+                />
             )}
 
             {showStatsModal && selectedBot && (

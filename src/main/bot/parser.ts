@@ -4,39 +4,73 @@ import crypto from 'crypto';
 import dns from 'node:dns';
 import { isIP } from 'node:net';
 import { RssItem } from './types';
+import { pickUrl } from './rules';
 
 // --- Anti-SSRF URL Validation ---
 // Blocca schemi non HTTP/HTTPS e indirizzi di rete privata/loopback.
+
+/** True se l'IPv4 puntato appartiene a una rete privata, loopback, link-local o riservata. */
+function isPrivateV4(v4: string): boolean {
+    const [o1, o2] = v4.split('.').map(Number);
+    return (
+        o1 === 0 ||                             // 0.0.0.0/8
+        o1 === 10 ||                            // 10.0.0.0/8
+        o1 === 127 ||                           // loopback
+        (o1 === 100 && o2 >= 64 && o2 <= 127) || // CGNAT 100.64.0.0/10
+        (o1 === 169 && o2 === 254) ||           // link-local
+        (o1 === 172 && o2 >= 16 && o2 <= 31) || // 172.16.0.0/12
+        (o1 === 192 && o2 === 168) ||           // 192.168.0.0/16
+        o1 >= 224                               // multicast + riservati
+    );
+}
+
+/**
+ * Le otto parole da 16 bit di un IPv6, `::` espanso e coda IPv4 puntata convertita.
+ * `null` se la stringa non è un IPv6.
+ */
+function ipv6Words(addr: string): number[] | null {
+    if (isIP(addr) !== 6) return null;
+    let a = addr;
+    const tail = /(\d+\.\d+\.\d+\.\d+)$/.exec(a);
+    if (tail) {
+        const [b1, b2, b3, b4] = tail[1].split('.').map(Number);
+        a = a.slice(0, -tail[1].length) + `${((b1 << 8) | b2).toString(16)}:${((b3 << 8) | b4).toString(16)}`;
+    }
+    const [head, rest] = a.split('::');
+    const left = head ? head.split(':') : [];
+    const right = rest !== undefined && rest !== '' ? rest.split(':') : [];
+    const missing = 8 - left.length - right.length;
+    const words = [...left, ...Array(rest !== undefined ? missing : 0).fill('0'), ...right].map(w => parseInt(w || '0', 16));
+    return words.length === 8 && words.every(w => Number.isInteger(w) && w >= 0 && w <= 0xffff) ? words : null;
+}
+
+const wordsToV4 = (hi: number, lo: number) => [hi >> 8, hi & 255, lo >> 8, lo & 255].join('.');
 
 /** True se l'indirizzo IP (v4 o v6) appartiene a una rete privata, loopback o link-local. */
 function isPrivateAddress(addr: string): boolean {
     const a = addr.toLowerCase().replace(/^\[|\]$/g, '');
 
-    // IPv4 (anche in forma IPv4-mapped IPv6 ::ffff:127.0.0.1)
-    const v4 = a.startsWith('::ffff:') ? a.slice(7) : a;
-    if (isIP(v4) === 4) {
-        const [o1, o2] = v4.split('.').map(Number);
-        return (
-            o1 === 0 ||                             // 0.0.0.0/8
-            o1 === 10 ||                            // 10.0.0.0/8
-            o1 === 127 ||                           // loopback
-            (o1 === 100 && o2 >= 64 && o2 <= 127) || // CGNAT 100.64.0.0/10
-            (o1 === 169 && o2 === 254) ||           // link-local
-            (o1 === 172 && o2 >= 16 && o2 <= 31) || // 172.16.0.0/12
-            (o1 === 192 && o2 === 168) ||           // 192.168.0.0/16
-            o1 >= 224                               // multicast + riservati
-        );
-    }
+    if (isIP(a) === 4) return isPrivateV4(a);
 
-    if (isIP(a) === 6) {
-        return (
-            a === '::' || a === '::1' ||
-            /^f[cd]/.test(a) ||   // fc00::/7 unique-local
-            /^fe[89ab]/.test(a)   // fe80::/10 link-local
-        );
-    }
+    const w = ipv6Words(a);
+    if (!w) return false;
 
-    return false;
+    const zeros = (from: number, to: number) => w.slice(from, to).every(x => x === 0);
+
+    // IPv4 incapsulato. Il parser URL di Node riscrive «[::ffff:127.0.0.1]» come
+    // «[::ffff:7f00:1]»: il vecchio controllo cercava solo la forma puntata e quella
+    // esadecimale passava. Qui si guarda il valore, non la grafia.
+    if (zeros(0, 5) && w[5] === 0xffff) return isPrivateV4(wordsToV4(w[6], w[7]));      // ::ffff:a.b.c.d (mapped)
+    if (w[0] === 0x64 && w[1] === 0xff9b && zeros(2, 6)) return isPrivateV4(wordsToV4(w[6], w[7])); // 64:ff9b::/96 (NAT64)
+    if (zeros(0, 6) && (w[6] !== 0 || w[7] > 1)) return isPrivateV4(wordsToV4(w[6], w[7]));       // ::a.b.c.d (compatible)
+
+    return (
+        zeros(0, 8) ||                          // ::
+        (zeros(0, 7) && w[7] === 1) ||          // ::1
+        (w[0] & 0xfe00) === 0xfc00 ||           // fc00::/7 unique-local
+        (w[0] & 0xffc0) === 0xfe80 ||           // fe80::/10 link-local
+        (w[0] & 0xff00) === 0xff00              // ff00::/8 multicast
+    );
 }
 
 /**
@@ -260,53 +294,46 @@ export async function fetchFeed(name: string, url: string): Promise<RssItem[]> {
                 continue;
             }
 
-            // Image Logic Port (Enhanced for YouTube and AzuraCast)
+            // Immagine: i campi arrivano da xml2js in forme diverse (stringa, `{ $: { href } }`,
+            // `{ url: [...] }`, array). `pickUrl` accetta solo un URL http(s) vero: prima un
+            // oggetto poteva arrivare fino all'invio e farlo fallire.
             let image: string | undefined = undefined;
 
             // 1. YouTube/Atom media:group
             if (entry.media_group) {
-                const group = entry.media_group;
-                const thumb = group['media:thumbnail']?.[0] || group['media:thumbnail'];
-                if (thumb) image = thumb['$']?.url || thumb.url;
+                image = pickUrl(entry.media_group['media:thumbnail']);
             }
 
             // 2. iTunes Image (Podcasts / AzuraCast)
             if (!image && entry.itunes_image) {
-                // Handle both object with href and direct string
-                image = entry.itunes_image['$']?.['href'] || entry.itunes_image;
+                image = pickUrl(entry.itunes_image);
             }
 
             // 3. Generic Image Object
             if (!image && entry.image_obj) {
-                image = entry.image_obj['url'] || entry.image_obj;
+                image = pickUrl(entry.image_obj);
             }
 
-            // 4. Enclosure (News/Blogs)
-            if (!image && entry.enclosure && entry.enclosure.url && entry.enclosure.type?.startsWith('image')) {
-                let rawUrl = entry.enclosure.url;
-                if (rawUrl.startsWith('/')) {
-                    try {
-                        const baseUrl = new URL(url).origin;
-                        image = `${baseUrl}${rawUrl}`;
-                    } catch (e) {
-                        image = rawUrl;
-                    }
-                } else {
-                    image = rawUrl;
+            // 4. Enclosure (News/Blogs) — gli indirizzi relativi si completano con l'origine del feed
+            if (!image && entry.enclosure && typeof entry.enclosure.url === 'string' && entry.enclosure.type?.startsWith('image')) {
+                try {
+                    image = pickUrl(new URL(entry.enclosure.url, url).href);
+                } catch {
+                    image = undefined;
                 }
             }
 
             // 5. Fallback: Search in content/summary for <img> tags
             if (!image) {
                 const searchContent = entry.content || entry.contentSnippet;
-                if (searchContent) {
-                    const imgMatch = searchContent.match(/<img[^>]+src="([^">]+)"/);
-                    if (imgMatch) image = imgMatch[1];
+                if (typeof searchContent === 'string') {
+                    const imgMatch = searchContent.match(/<img[^>]+src=["']([^"'>]+)["']/i);
+                    if (imgMatch) image = pickUrl(imgMatch[1]);
                 }
             }
 
             items.push({
-                title: entry.title || 'No Title',
+                title: typeof entry.title === 'string' && entry.title.trim() ? entry.title.trim() : 'No Title',
                 link: link,
                 pubDate: date,
                 summary: cleanSummary(entry.contentSnippet || entry.content || ''),

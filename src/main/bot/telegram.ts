@@ -1,6 +1,21 @@
-
 import { Telegram } from 'telegraf';
 import { TitanLogger } from '../logger';
+import { classifyTelegramError, escapeHtml, escapeUrl, type TelegramErrorKind } from './rules';
+
+/**
+ * Esito di un invio. Chi chiama decide cosa fare del contenuto in base a `kind`
+ * (vedi `classifyTelegramError` in rules.ts) — prima l'esito era un booleano, e un
+ * guasto di rete di due minuti valeva quanto un messaggio rifiutato: in entrambi i
+ * casi il contenuto finiva marcato come pubblicato senza esserlo mai stato.
+ */
+export type SendResult =
+    | { ok: true }
+    | { ok: false; kind: TelegramErrorKind | 'aborted'; error: string };
+
+/** Pause tra i tentativi per gli errori transitori: ~35 secondi in tutto. */
+const TRANSIENT_BACKOFF_MS = [5000, 10000, 20000];
+/** Tetto all'attesa chiesta da Telegram: oltre, si lascia il contenuto al giro successivo. */
+const MAX_FLOOD_WAIT_S = 120;
 
 export class TelegramClient {
     private client: Telegram;
@@ -40,12 +55,17 @@ export class TelegramClient {
         return id;
     }
 
-    /** Call this to abort any in-progress retry loops */
+    /**
+     * Interrompe i tentativi in corso. È definitivo per questa istanza: il motore crea
+     * un client nuovo quando riparte o quando cambiano token o canale. Prima `sendMessage`
+     * rimetteva `aborted = false` a ogni chiamata, e un invio partito da una coda vecchia
+     * poteva riattivare un client già fermato.
+     */
     abort() {
         this.aborted = true;
     }
 
-    async sendFormattedMessage(item: any, template: string | null, type: 'podcast' | 'news' | 'youtube'): Promise<boolean> {
+    async sendFormattedMessage(item: any, template: string | null, type: 'podcast' | 'news' | 'youtube'): Promise<SendResult> {
         let text = template;
 
         if (!text || text.trim() === '') {
@@ -59,17 +79,16 @@ export class TelegramClient {
             }
         }
 
-        // Parsing Logica
         // Escape di TUTTI i campi per prevenire errori di parsing HTML Telegram
         // (URL con '&' causano "Bad Request: can't parse entities")
-        const safeLink = this.escapeUrl(item.link || '');
-        const safeImage = item.image ? this.escapeUrl(item.image) : '';
+        const safeLink = escapeUrl(item.link || '');
+        const safeImage = escapeUrl(item.image);
 
         text = text
-            .replace(/\{\{title\}\}/g, this.escape(item.title || ''))
+            .replace(/\{\{title\}\}/g, escapeHtml(String(item.title || '')))
             .replace(/\{\{link\}\}/g, safeLink)
-            .replace(/\{\{feedName\}\}/g, this.escape(item.feedName || ''))
-            .replace(/\{\{summary\}\}/g, item.summary ? this.escape(item.summary) : '');
+            .replace(/\{\{feedName\}\}/g, escapeHtml(String(item.feedName || '')))
+            .replace(/\{\{summary\}\}/g, item.summary ? escapeHtml(String(item.summary)) : '');
 
         // Image hack prepended to formatting
         const previewHack = safeImage ? `<a href="${safeImage}">&#8203;</a>` : "";
@@ -78,103 +97,64 @@ export class TelegramClient {
         return this.sendMessage(finalMessage);
     }
 
-    async sendMessage(text: string): Promise<boolean> {
-        const maxRetries = 5;
-        this.aborted = false;
+    async sendMessage(text: string): Promise<SendResult> {
+        let transientAttempts = 0;
+        let floodWaits = 0;
+        let previewDisabled = false;
 
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            // Check abort before each attempt
+        while (true) {
             if (this.aborted) {
-                this.logToUI(`🛑 Send aborted (engine stopped).`);
-                return false;
+                return { ok: false, kind: 'aborted', error: 'engine stopped' };
             }
 
             try {
                 await this.client.sendMessage(this.channelId, text, {
                     parse_mode: 'HTML',
-                    link_preview_options: {
-                        is_disabled: false,
-                        show_above_text: true,
-                    }
+                    link_preview_options: previewDisabled
+                        ? { is_disabled: true }
+                        : { is_disabled: false, show_above_text: true },
                 });
-                return true;
-            } catch (e: any) {
-                const errorMsg = e.response?.description || e.message || String(e);
+                return { ok: true };
+            } catch (e) {
+                const info = classifyTelegramError(e);
 
-                // FloodWait: Telegram says to wait
-                if (e.response?.parameters?.retry_after) {
-                    const waitTime = e.response.parameters.retry_after;
-                    this.logToUI(`⏳ FloodWait: waiting ${waitTime}s (attempt ${attempt}/${maxRetries})`);
-                    if (await this.abortableSleep(waitTime * 1000)) return false;
-                    continue;
-                }
-
-                // Network errors: wait 10s
-                if (errorMsg.includes('ETIMEOUT') || errorMsg.includes('ECONNREFUSED') || errorMsg.includes('network')) {
-                    this.logToUI(`⚠️ Network error (attempt ${attempt}/${maxRetries}): ${errorMsg}`);
-                    if (await this.abortableSleep(10000)) return false;
-                    continue;
-                }
-
-                // Fatal API errors (bad token, chat not found, etc.) - don't retry
-                if (errorMsg.includes('chat not found') || errorMsg.includes('bot was blocked') || errorMsg.includes('Unauthorized')) {
-                    this.logToUI(`❌ Fatal Telegram error: ${errorMsg}`);
-                    return false;
-                }
-
-                // Other errors
-                this.logToUI(`❌ Telegram error (attempt ${attempt}/${maxRetries}): ${errorMsg}`);
-
-                if (attempt === maxRetries) {
-                    // Try without preview as last resort
-                    try {
-                        this.logToUI(`🔄 Last attempt without link preview...`);
-                        await this.client.sendMessage(this.channelId, text, {
-                            parse_mode: 'HTML',
-                            link_preview_options: { is_disabled: true }
-                        });
-                        return true;
-                    } catch {
-                        // Final failure
+                if (info.kind === 'flood') {
+                    const wait = info.retryAfter ?? 5;
+                    if (wait > MAX_FLOOD_WAIT_S || floodWaits >= 3) {
+                        this.logToUI(`⚠️ Telegram chiede di attendere ${wait}s: contenuto rimandato al prossimo giro.`, 'warn');
+                        return { ok: false, kind: 'transient', error: info.description };
                     }
+                    floodWaits++;
+                    this.logToUI(`⏳ FloodWait: attesa di ${wait}s richiesta da Telegram`, 'warn');
+                    if (await this.abortableSleep(wait * 1000)) return { ok: false, kind: 'aborted', error: 'engine stopped' };
+                    continue;
                 }
 
-                if (await this.abortableSleep(5000)) return false;
+                if (info.kind === 'config') {
+                    // Token, canale o permessi: ritentare non cambia nulla finché l'utente non corregge.
+                    return { ok: false, kind: 'config', error: info.description };
+                }
+
+                if (info.kind === 'rejected') {
+                    // Unico ripiego sensato per un rifiuto: togliere l'anteprima del link, che è
+                    // la parte del messaggio più spesso contestata. Se non basta, il rifiuto è definitivo.
+                    if (!previewDisabled) {
+                        previewDisabled = true;
+                        this.logToUI(`🔄 Telegram ha rifiutato il messaggio (${info.description}): nuovo tentativo senza anteprima`, 'warn');
+                        continue;
+                    }
+                    return { ok: false, kind: 'rejected', error: info.description };
+                }
+
+                // transient
+                if (transientAttempts >= TRANSIENT_BACKOFF_MS.length) {
+                    return { ok: false, kind: 'transient', error: info.description };
+                }
+                const pause = TRANSIENT_BACKOFF_MS[transientAttempts++];
+                this.logToUI(`⚠️ Errore di rete verso Telegram (tentativo ${transientAttempts}/${TRANSIENT_BACKOFF_MS.length}): ${info.description}`, 'warn');
+                if (await this.abortableSleep(pause)) return { ok: false, kind: 'aborted', error: 'engine stopped' };
             }
         }
-
-        this.logToUI(`❌ Failed after ${maxRetries} attempts.`);
-        return false;
-    }
-
-    /** Escape testo generico per HTML Telegram (titoli, summary, nomi) */
-    private escape(text: string): string {
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
-    }
-
-    /**
-     * Rende un URL proveniente dal feed sicuro dentro un attributo href.
-     *
-     * Non basta codificare `&`: i template inseriscono il link in `href='{{link}}'` (apici
-     * singoli) e un URL contenente `'`, `"`, `<` o `>` uscirebbe dall'attributo, permettendo
-     * a chi controlla il feed di iniettare HTML nel messaggio pubblicato — in pratica di far
-     * comparire sul canale un link verso un dominio diverso da quello annunciato dal titolo.
-     * I caratteri strutturali vengono percent-encodati (sono URL, non testo), `&` resta
-     * `&amp;` perché il contesto è un attributo HTML.
-     * Gli URL con schema diverso da http/https vengono scartati del tutto.
-     */
-    private escapeUrl(url: string): string {
-        if (!/^https?:\/\//i.test(url.trim())) return '';
-        return url
-            .replace(/%(?![0-9A-Fa-f]{2})/g, '%25')
-            .replace(/'/g, '%27')
-            .replace(/"/g, '%22')
-            .replace(/</g, '%3C')
-            .replace(/>/g, '%3E')
-            .replace(/&(?!amp;)/g, '&amp;');
     }
 
     /** Sleep that can be interrupted by abort(). Returns true if aborted. */
@@ -193,7 +173,7 @@ export class TelegramClient {
     }
 
     /** Log unificato tramite TitanLogger (visibile sia in console che nella UI) */
-    private logToUI(message: string): void {
-        TitanLogger.log(message);
+    private logToUI(message: string, level?: 'warn' | 'error'): void {
+        TitanLogger.log(message, level);
     }
 }

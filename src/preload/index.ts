@@ -1,6 +1,10 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 import type { LogEntry } from '../shared/types'
+
+// Il renderer vede SOLO questa API, canale per canale. Fino alla 2.3 il preload esponeva
+// anche `window.electron` di @electron-toolkit/preload, cioè `ipcRenderer` intero: nessun
+// componente lo usava, ma chiunque riuscisse a eseguire codice nella pagina avrebbe potuto
+// invocare qualunque canale IPC. Superficie inutile, tolta.
 
 // Custom APIs for renderer
 const api = {
@@ -68,6 +72,13 @@ const api = {
 
     // System
     getVersion: () => ipcRenderer.invoke('get-version'),
+    setLocale: (locale: string) => ipcRenderer.invoke('set-locale', locale),
+    // Più ascoltatori (App e selettore dei bot): si aggiunge e si restituisce chi lo toglie.
+    onBotsChanged: (callback: (info: { botId?: number }) => void) => {
+        const handler = (_: unknown, info: { botId?: number }) => callback(info ?? {});
+        ipcRenderer.on('bots-changed', handler);
+        return () => { ipcRenderer.removeListener('bots-changed', handler); };
+    },
     checkForUpdates: () => ipcRenderer.invoke('check-for-updates') as Promise<{ success: boolean; error?: string }>,
     downloadUpdate: () => ipcRenderer.invoke('download-update') as Promise<{ success: boolean; error?: string }>,
     installUpdate: () => ipcRenderer.invoke('install-update'),
@@ -103,19 +114,10 @@ const api = {
     importSingleBot: () => ipcRenderer.invoke('import-single-bot'),
 }
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-    try {
-        contextBridge.exposeInMainWorld('electron', electronAPI)
-        contextBridge.exposeInMainWorld('api', api)
-    } catch (error) {
-        console.error(error)
-    }
-} else {
-    // @ts-ignore (define in dts)
-    window.electron = electronAPI
-    // @ts-ignore (define in dts)
-    window.api = api
+// contextIsolation è sempre attivo (vedi BrowserWindow in main/index.ts): l'API passa
+// solo dal contextBridge, mai assegnata direttamente al DOM.
+try {
+    contextBridge.exposeInMainWorld('api', api)
+} catch (error) {
+    console.error(error)
 }

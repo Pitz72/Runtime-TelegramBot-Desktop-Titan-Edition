@@ -2,18 +2,23 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useTranslation } from '../locales/I18nContext';
 import { validateTemplate } from '../utils/templateValidator';
+import { sanitizeTelegramHtml } from '../lib/telegramHtml';
 
 function renderPreview(template: string, t: (key: string) => any): string {
     const title    = t('templateEditor.sampleTitle') as string;
     const feedName = t('templateEditor.sampleFeed') as string;
     const summary  = t('templateEditor.sampleSummary') as string;
     const link     = 'https://example.com/articolo';
-    return template
+    // I valori di esempio passano dall'escape come quelli veri in telegram.ts; il risultato
+    // passa dal sanificatore prima di finire nel DOM (vedi lib/telegramHtml.ts).
+    const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const filled = template
         .replace(/&#10;/g, '\n')
-        .replace(/\{\{title\}\}/g, title)
-        .replace(/\{\{feedName\}\}/g, feedName)
+        .replace(/\{\{title\}\}/g, esc(title))
+        .replace(/\{\{feedName\}\}/g, esc(feedName))
         .replace(/\{\{link\}\}/g, link)
-        .replace(/\{\{summary\}\}/g, summary);
+        .replace(/\{\{summary\}\}/g, esc(summary));
+    return sanitizeTelegramHtml(filled);
 }
 
 interface Props {

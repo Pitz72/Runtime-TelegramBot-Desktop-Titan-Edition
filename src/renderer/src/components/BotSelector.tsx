@@ -5,6 +5,7 @@ import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { useTranslation } from '../locales/I18nContext';
 import { cn } from '@/lib/utils';
+import { errorMessage } from '../lib/errors';
 
 interface Props {
     onSelect: (bot: BotConfig) => void;
@@ -29,6 +30,20 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
 
     useEffect(() => { loadBots(); }, []);
 
+    // Profilo .rtb aperto con doppio clic: il main lo importa e avvisa; qui si ricarica
+    // l'elenco e si seleziona il bot appena arrivato.
+    useEffect(() => {
+        return window.api.onBotsChanged(async ({ botId }) => {
+            const loaded = await window.api.getBots();
+            setBots(loaded);
+            const imported = botId ? loaded.find((b: BotConfig) => b.id === botId) : undefined;
+            if (imported) {
+                toast(t('botSelector.successImport') as string, 'success');
+                onSelect(imported);
+            }
+        });
+    }, []);
+
     const loadBots = async () => {
         const loadedBots = await window.api.getBots();
         setBots(loadedBots);
@@ -39,12 +54,18 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
 
     const handleCreate = async () => {
         if (!newBot.name || !newBot.token || !newBot.channel_id) return;
-        const id = await window.api.createBot({
-            name: newBot.name,
-            token: newBot.token,
-            channelId: newBot.channel_id,
-            startDate: newBot.startDate
-        });
+        let id: number;
+        try {
+            id = await window.api.createBot({
+                name: newBot.name,
+                token: newBot.token,
+                channelId: newBot.channel_id,
+                startDate: newBot.startDate
+            });
+        } catch (e) {
+            toast(errorMessage(e), 'error');
+            return;
+        }
         setIsCreating(false);
         setNewBot({ name: '', token: '', channel_id: '', startDate: new Date().toISOString().split('T')[0] });
         await loadBots();
@@ -81,8 +102,12 @@ export function BotSelector({ onSelect, currentBotId, onEdit }: Props) {
 
     const confirmDelete = async () => {
         if (botToDelete) {
-            await window.api.deleteBot(botToDelete);
-            toast(t('botSelector.successDelete') as string, 'success');
+            try {
+                await window.api.deleteBot(botToDelete);
+                toast(t('botSelector.successDelete') as string, 'success');
+            } catch (e) {
+                toast(errorMessage(e), 'error');
+            }
             await loadBots();
         }
         setDeleteConfirmOpen(false);

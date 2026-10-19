@@ -14,6 +14,8 @@ Il progetto è mantenuto da una persona sola: aspettati una prima risposta entro
 
 Riceve correzioni solo l'ultima versione pubblicata. L'applicazione si aggiorna da sola e chiede conferma prima di scaricare e installare.
 
+Il runtime segue le versioni di **Electron supportate** (le ultime tre maggiori), perché solo quelle ricevono le correzioni di sicurezza di Chromium: dalla 2.4 Titan gira su Electron 44. Le dipendenze di produzione si controllano con `npm audit --omit=dev`, che al momento del passaggio risultava pulito.
+
 ## Modello di sicurezza
 
 Cosa protegge l'applicazione e cosa no.
@@ -33,8 +35,9 @@ I token vengono redatti dai file di log e dalla console dell'applicazione, così
 
 ### Superficie del renderer
 
-- `contextIsolation` attivo e `sandbox: true`.
-- Nessun accesso diretto a Node dal renderer: tutto passa da `preload/index.ts` via `contextBridge`, che espone un elenco chiuso di funzioni.
+- `contextIsolation` attivo, `sandbox: true`, `nodeIntegration` e `webviewTag` spenti, dichiarati esplicitamente.
+- Nessun accesso diretto a Node dal renderer: tutto passa da `preload/index.ts` via `contextBridge`, che espone un elenco chiuso di funzioni, canale per canale. Fino alla 2.3 il preload esponeva anche `window.electron` (`ipcRenderer` intero, di `@electron-toolkit/preload`): nessun componente lo usava, ed è stato tolto.
+- La finestra principale non naviga: `will-navigate` verso qualunque indirizzo diverso dall'interfaccia viene annullato, le `webview` sono rifiutate e ogni richiesta di permesso del browser (fotocamera, posizione, notifiche web…) viene negata.
 - Content-Security-Policy con `script-src 'self'`: niente script inline, niente script remoti.
 - Tutti gli handler IPC validano i propri input (tipi, intervalli, formati orari, tipi di feed).
 - Le finestre esterne sono negate: gli URL vengono aperti nel browser di sistema e solo se `http`/`https`.
@@ -43,7 +46,7 @@ I token vengono redatti dai file di log e dalla console dell'applicazione, così
 
 Un feed RSS è contenuto controllato da terzi, e viene trattato come tale:
 
-- **anti-SSRF** — schemi non-HTTP rifiutati, indirizzi privati/loopback/link-local bloccati sia in forma testuale (IPv4, IPv6, forme decimali e esadecimali) sia risolvendo il nome via DNS prima del fetch;
+- **anti-SSRF** — schemi non-HTTP rifiutati, indirizzi privati/loopback/link-local bloccati sia in forma testuale (IPv4, IPv6, forme decimali e esadecimali, IPv4 incapsulato in IPv6 — mapped, compatibile e NAT64 — in qualunque grafia) sia risolvendo il nome via DNS prima del fetch. Fino alla 2.3 `http://[::ffff:127.0.0.1]/` passava, perché il parser URL lo riscrive `[::ffff:7f00:1]` e il controllo cercava solo la forma puntata: lo hanno trovato i test automatici introdotti nella 2.4;
 - **HTML** — i sommari sono ripuliti da script, stili e tag; le entità sono decodificate e ri-escapate prima dell'invio;
 - **URL nei messaggi** — i link vengono percent-encodati nei caratteri che potrebbero chiudere l'attributo `href`, così un feed non può iniettare HTML nel messaggio pubblicato sul canale.
 
@@ -52,7 +55,7 @@ Un feed RSS è contenuto controllato da terzi, e viene trattato come tale:
 ### Cosa non è protetto
 
 - **Chi ha già accesso al tuo account utente.** L'applicazione difende i token da chi legge il disco (backup, altro profilo, altra macchina), non da un processo che gira come te: `safeStorage` e DPAPI decifrano su richiesta di qualsiasi processo del tuo profilo. È il limite di tutte le applicazioni desktop, e vale la pena saperlo.
-- **File `.rtb` di provenienza sconosciuta.** Vengono validati strutturalmente (campi obbligatori, tipi, URL anti-SSRF) prima di toccare il database, ma i template dei messaggi che contengono sono HTML e vengono mostrati nell'anteprima dell'editor. La CSP impedisce l'esecuzione di script; resta il fatto che importare un `.rtb` da uno sconosciuto è come aprire un file di configurazione di uno sconosciuto.
+- **File `.rtb` di provenienza sconosciuta.** Vengono validati strutturalmente (campi obbligatori, tipi, data di partenza, URL anti-SSRF) prima di toccare il database. I template che contengono sono HTML: l'anteprima dell'editor li mostra solo dopo averli ridotti ai tag che Telegram stesso accetta, senza attributi eseguibili (fino alla 2.3 finivano nel DOM così com'erano). Sul canale, invece, il template va com'è scritto: importare un `.rtb` da uno sconosciuto resta come aprire un file di configurazione di uno sconosciuto.
 - **Il database non è cifrato.** Lo sono solo i token. Titoli, link, storico e impostazioni sono in chiaro dentro `titan.db`.
 - **Gli installer non sono firmati.** Non esiste un certificato di code signing: Windows SmartScreen mostrerà un avviso alla prima esecuzione. Scaricare gli installer solo dalla pagina delle release ufficiali.
 

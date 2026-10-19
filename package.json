@@ -29,20 +29,19 @@
     "main": "dist-electron/main/index.cjs",
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build && electron-builder",
+        "build": "tsc && vite build && node scripts/third-party-notices.mjs && electron-builder",
         "preview": "vite preview",
         "typecheck": "tsc --noEmit",
-        "rebuild": "electron-builder install-app-deps",
-        "postinstall": "electron-builder install-app-deps"
+        "test": "vitest run",
+        "check:locales": "node scripts/check-locales.mjs",
+        "notices": "node scripts/third-party-notices.mjs"
     },
     "dependencies": {
-        "@electron-toolkit/preload": "^2.0.0",
-        "@electron-toolkit/utils": "^2.0.0",
-        "@phosphor-icons/react": "^2.1.10",
+        "@electron-toolkit/utils": "^4.0.0",
         "@tanstack/react-virtual": "^3.13.24",
-        "better-sqlite3": "^11.8.1",
+        "better-sqlite3": "^13.0.3",
         "clsx": "^2.1.0",
-        "electron-updater": "^6.8.3",
+        "electron-updater": "^6.8.9",
         "framer-motion": "^11.0.3",
         "lucide-react": "^0.316.0",
         "react": "^18.3.1",
@@ -54,18 +53,23 @@
     },
     "devDependencies": {
         "@types/better-sqlite3": "^7.6.13",
-        "@types/node": "^20.19.39",
+        "@types/node": "^22.20.5",
         "@types/react": "^18.3.28",
         "@types/react-dom": "^18.3.7",
         "@vitejs/plugin-react": "^4.7.0",
         "autoprefixer": "^10.4.17",
-        "electron": "^32.3.3",
-        "electron-builder": "^25.1.8",
+        "electron": "^44.9.0",
+        "electron-builder": "^26.15.3",
+        "jsdom": "^26.1.0",
         "postcss": "^8.4.33",
         "tailwindcss": "^3.4.1",
         "typescript": "^5.9.3",
         "vite": "^5.4.21",
         "vite-plugin-electron": "^0.28.8",
-        "vite-plugin-electron-renderer": "^0.14.6"
+        "vite-plugin-electron-renderer": "^0.14.6",
+        "vitest": "^3.2.7"
+    },
+    "engines": {
+        "node": ">=22.12.0"
     }
 }

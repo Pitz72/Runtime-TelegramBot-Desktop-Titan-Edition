@@ -5,6 +5,7 @@ import { safeStorage } from 'electron';
 import nodeCrypto from 'node:crypto';
 import { encryptToken, decryptToken } from '../crypto';
 import { validateFeedUrl } from './parser';
+import { parseStartDate } from './rules';
 
 // --- RTB Import Validation ---
 // Stesso set di regole applicato dagli handler IPC (ipc.ts) per create-bot/add-feed,
@@ -34,6 +35,19 @@ function rtbAssertTimeOrDefault(value: unknown, defaultVal: string): string {
     return value;
 }
 
+/**
+ * La data di partenza di un profilo importato: assente → «da adesso»; presente ma
+ * illeggibile → errore. Prima passava tale e quale, e una data rotta faceva superare
+ * il filtro a tutto l'arretrato dei feed (vedi `parseStartDate`).
+ */
+function rtbAssertStartDate(value: unknown): string | undefined {
+    if (value === undefined || value === null || value === '') return undefined;
+    if (parseStartDate(value) === null) {
+        throw new Error(`Data di partenza non valida nel file .rtb: "${String(value)}"`);
+    }
+    return String(value).trim();
+}
+
 function rtbAssertFeedType(value: unknown): 'podcast' | 'news' | 'youtube' {
     if (value !== 'podcast' && value !== 'news' && value !== 'youtube') {
         throw new Error(`Tipo feed non valido nel file .rtb: "${value}". Valori consentiti: podcast, news, youtube`);
@@ -47,6 +61,7 @@ function validateRtbBot(bot: any): void {
     rtbAssertCheckInterval(bot.checkInterval ?? bot.check_interval);
     rtbAssertTimeOrDefault(bot.sendFrom ?? bot.send_from, '00:00');
     rtbAssertTimeOrDefault(bot.sendUntil ?? bot.send_until, '23:59');
+    rtbAssertStartDate(bot.startDate ?? bot.start_date);
 }
 
 function validateRtbFeed(feed: any): void {
@@ -121,6 +136,18 @@ export class BotManager {
                 notifications_enabled: (bot.notifications_enabled as number) === 1,
             } as BotConfig;
         });
+    }
+
+    /** Un solo bot, con il token decifrato — `null` se non esiste (più). */
+    static getBot(id: number): BotConfig | null {
+        const bot = db().prepare('SELECT * FROM bots WHERE id = ?').get(id) as any;
+        if (!bot) return null;
+        return {
+            ...bot,
+            token: decryptToken(bot.token),
+            is_active: bot.is_active === 1,
+            notifications_enabled: bot.notifications_enabled === 1,
+        } as BotConfig;
     }
 
     static createBot(name: string, token: string, channelId: string, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string): number | bigint {
@@ -247,6 +274,14 @@ export class BotManager {
         db().prepare('DELETE FROM digest_queue WHERE bot_id = ? AND feed_id = ?').run(botId, feedId);
     }
 
+    /** Toglie dalla coda del digest solo i contenuti indicati (quelli effettivamente inviati). */
+    static removeDigestItems(botId: number, feedId: number, itemIds: string[]) {
+        const stmt = db().prepare('DELETE FROM digest_queue WHERE bot_id = ? AND feed_id = ? AND item_id = ?');
+        db().transaction(() => {
+            for (const id of itemIds) stmt.run(botId, feedId, id);
+        })();
+    }
+
     static updateFeedDigestLastSent(feedId: number) {
         // ISO-UTC esplicito con 'Z' — vedi nota in updateFeedLastFetch.
         db().prepare("UPDATE feeds SET digest_last_sent = strftime('%Y-%m-%dT%H:%M:%SZ','now') WHERE id = ?").run(feedId);
@@ -352,7 +387,7 @@ export class BotManager {
                     bot.name,
                     decryptTokenFromExport(bot.token),
                     bot.channel_id,
-                    bot.start_date,
+                    rtbAssertStartDate(bot.start_date),
                     bot.check_interval,
                     bot.notifications_enabled,
                     bot.send_from,
@@ -407,6 +442,10 @@ export class BotManager {
                     isActive: botRecord.is_active === 1,
                     startDate: botRecord.start_date,
                     checkInterval: botRecord.check_interval,
+                    // Le ore di silenzio mancavano dal profilo singolo: importandolo su un
+                    // altro PC il bot tornava a pubblicare a qualunque ora.
+                    sendFrom: botRecord.send_from,
+                    sendUntil: botRecord.send_until,
                     notificationsEnabled: botRecord.notifications_enabled === 1,
                     template_podcast: botRecord.template_podcast,
                     template_news: botRecord.template_news,
@@ -444,16 +483,16 @@ export class BotManager {
             for (const feed of data.feeds) validateRtbFeed(feed);
 
             const newBotId = db().transaction(() => {
-                // Instanzio il bot e questo ne incapsula il token in sicirezza
+                // Crea il bot: createBot cifra il token
                 const createdBotId = BotManager.createBot(
                     data.bot.name,
                     decryptTokenFromExport(data.bot.token),
                     data.bot.channelId,
-                    data.bot.startDate,
+                    rtbAssertStartDate(data.bot.startDate),
                     data.bot.checkInterval,
                     data.bot.notificationsEnabled !== undefined ? data.bot.notificationsEnabled : true,
-                    undefined, // sendFrom
-                    undefined, // sendUntil
+                    rtbAssertTimeOrDefault(data.bot.sendFrom, '00:00'),
+                    rtbAssertTimeOrDefault(data.bot.sendUntil, '23:59'),
                     data.bot.template_podcast,
                     data.bot.template_news,
                     data.bot.template_youtube,

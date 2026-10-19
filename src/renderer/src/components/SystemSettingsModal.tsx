@@ -8,9 +8,9 @@ import { GuideModal } from './GuideModal';
 import { openManual } from '../lib/docs';
 import { DONATE_URL, CONTACT_URL, openLink } from '../lib/links';
 
-interface Props { onClose: () => void; updater?: Updater; }
+interface Props { onClose: () => void; updater?: Updater; onBotsImported?: () => void; }
 
-export function SystemSettingsModal({ onClose, updater }: Props) {
+export function SystemSettingsModal({ onClose, updater, onBotsImported }: Props) {
     const { toast, success, error } = useToast();
     const { locale, setLocale, t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'general' | 'backup' | 'performance'>('general');
@@ -71,6 +71,9 @@ export function SystemSettingsModal({ onClose, updater }: Props) {
         try {
             const result = await window.api.importConfig();
             if (result.success) {
+                // L'elenco dei bot si ricarica da sé: prima il messaggio chiedeva di
+                // ricaricare l'interfaccia a mano per vedere i bot importati.
+                onBotsImported?.();
                 success(t('systemSettings.toasts.configImportSuccessMsg'), t('systemSettings.toasts.configImportSuccessTitle'));
             } else if (!result.success && result.error !== 'Cancelled') {
                 error(`${t('systemSettings.toasts.configImportErrorMsg')}\n${result.error}`, t('systemSettings.toasts.configImportErrorTitle'));

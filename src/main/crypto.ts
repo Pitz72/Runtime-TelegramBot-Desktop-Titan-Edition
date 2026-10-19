@@ -2,7 +2,7 @@ import { safeStorage } from 'electron';
 import { app } from 'electron';
 import nodeCrypto from 'node:crypto';
 import { join } from 'node:path';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
 
 // Prefissi per distinguere il formato del token cifrato in DB
 const PREFIX_SS = 'ss:'; // safeStorage (OS keychain)
@@ -21,11 +21,20 @@ function getMachineKey(): Buffer {
     if (_machineKey) return _machineKey;
     const keyPath = join(app.getPath('userData'), KEY_FILE);
     if (existsSync(keyPath)) {
-        _machineKey = Buffer.from(readFileSync(keyPath, 'utf-8').trim(), 'hex');
-    } else {
-        _machineKey = nodeCrypto.randomBytes(32);
-        writeFileSync(keyPath, _machineKey.toString('hex'), { mode: 0o600 });
+        const hex = readFileSync(keyPath, 'utf-8').trim();
+        if (/^[0-9a-f]{64}$/i.test(hex)) {
+            _machineKey = Buffer.from(hex, 'hex');
+            return _machineKey;
+        }
+        // Chiave danneggiata: con una lunghezza sbagliata createCipheriv lancia, e da quel
+        // momento nessun bot si poteva più creare né salvare. I token cifrati con la chiave
+        // rovinata erano già illeggibili; la si mette da parte (non si cancella) e se ne crea una nuova.
+        const aside = `${keyPath}.corrupt-${Date.now()}`;
+        console.error(`[crypto] ${KEY_FILE} non valida: spostata in ${aside}, ne genero una nuova.`);
+        try { renameSync(keyPath, aside); } catch (e) { console.error('[crypto] Impossibile spostare la chiave danneggiata:', e); }
     }
+    _machineKey = nodeCrypto.randomBytes(32);
+    writeFileSync(keyPath, _machineKey.toString('hex'), { mode: 0o600 });
     return _machineKey;
 }
 

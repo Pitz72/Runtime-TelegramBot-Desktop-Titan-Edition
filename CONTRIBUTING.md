@@ -24,7 +24,7 @@ Tre conseguenze pratiche per chi contribuisce:
 
 ## Ambiente di sviluppo
 
-Serve **Node.js 20** (non 22, non 24 — vedi sotto) e gli strumenti di compilazione nativi della propria piattaforma, perché `better-sqlite3` viene ricompilato in fase di installazione.
+Serve **Node.js 22 LTS** o successivo. Non servono più compilatori C++: `better-sqlite3` 13 è un modulo N-API con i binari precompilati per Windows x64 e Linux x64/arm64 dentro il pacchetto, e non si ricompila né per Node né per Electron.
 
 ```bash
 git clone https://github.com/Pitz72/Runtime-TelegramBot-Desktop-Titan-Edition.git
@@ -32,7 +32,7 @@ cd Runtime-TelegramBot-Desktop-Titan-Edition
 npm install
 ```
 
-Su Linux serve anche `libsecret-1-dev` (per il keychain OS) e `libfuse2` (per costruire l'AppImage):
+Su Linux servono `libsecret-1-dev` (per il keychain OS) e `libfuse2` (per costruire l'AppImage):
 
 ```bash
 sudo apt-get install -y libsecret-1-dev libfuse2
@@ -42,9 +42,23 @@ sudo apt-get install -y libsecret-1-dev libfuse2
 
 ```bash
 npx tsc --noEmit    # type check — deve passare pulito
+npm test            # test unitari (vitest) — devono passare tutti
+npm run dev         # app in sviluppo con ricarica a caldo dell'interfaccia
 npx vite build      # build dei bundle main/preload/renderer
-npm run build       # build completa + installer via electron-builder
+npm run build       # build completa + licenze di terze parti + installer
 ```
+
+I test coprono le regole che decidono **cosa** si pubblica e **come** si reagisce a un errore: data di partenza, ore di silenzio, intervalli, filtri, escape di testo e link, classificazione degli errori di Telegram, difesa anti-SSRF, sanificazione dell'anteprima dei template. Stanno accanto al codice (`*.test.ts`); le regole del motore vivono in `src/main/bot/rules.ts` proprio perché si possano provare senza avviare Electron.
+
+### Provare l'app senza toccare i propri dati
+
+`TITAN_USER_DATA_DIR` sposta database, log e impostazioni in un'altra cartella, con un proprio blocco di istanza singola. Così una build di prova gira accanto al Titan che sta pubblicando, senza leggerne né modificarne i dati:
+
+```bash
+TITAN_USER_DATA_DIR=/tmp/titan-prova npm run dev
+```
+
+Per un collaudo vero del motore conviene un bot finto (token inventato) e un feed pubblico: Telegram risponde `Unauthorized`, e il motore deve lasciare i contenuti in attesa senza marcarli come pubblicati.
 
 ---
 
@@ -52,16 +66,13 @@ npm run build       # build completa + installer via electron-builder
 
 Sono comportamenti non ovvi, tutti verificati sul campo. Ignorarli fa perdere ore.
 
-### `npm run dev` corrompe `dist-electron/`
+### `lib.formats` del main: un solo formato, imposto da un plugin
 
-Il dev server di `vite-plugin-electron` costruisce il main process **due volte**; la seconda passata, in watch mode, perde `lib.formats: ['cjs']` ed emette ESM dentro un file `.cjs`. Con `"type": "module"` in `package.json` Node lo carica come CommonJS e l'app muore con `SyntaxError: Cannot use import statement outside a module`.
+Fino alla 2.3 `npm run dev` emetteva ESM dentro `dist-electron/main/index.cjs` e l'app moriva con `Cannot use import statement outside a module`. La diagnosi giusta, trovata nella 2.4: `vite-plugin-electron` imposta `lib.formats: ['es']` quando `package.json` ha `"type": "module"`, e `mergeConfig` di Vite **concatena** gli array — il nostro `['cjs']` diventava `['es', 'cjs']`, cioè due build dello stesso file. In build vinceva per caso la seconda; in watch no. Per questo i tre tentativi con `watch.exclude` non avevano mai funzionato.
 
-- Il bug riguarda **solo** il dev server: `npm run build` e `npx vite build` producono CJS corretto, e gli installer non ne sono mai stati affetti.
-- Se capita: rigenerare con `npx vite build` ripristina un `dist-electron/main/index.cjs` valido.
-- Riconoscerlo: il file corrotto **non** è minificato e contiene `import`; quello buono è minificato e inizia con `"use strict"` + `require`.
-- Il fix "definitivo" via `watch.exclude` in `vite.config.ts` è già stato tentato tre volte senza successo. Non ritentarlo senza una diagnosi nuova.
+Ora un piccolo plugin nella configurazione del main (`titan-main-cjs-only` in `vite.config.ts`) impone un solo formato sulla configurazione già fusa. **Non** rimettere `lib.formats` nell'oggetto `vite.build`: verrebbe concatenato di nuovo.
 
-Per lavorare, il ciclo consigliato è `npx vite build` + avvio dell'app, non il dev server.
+In sviluppo l'interfaccia arriva dal server di Vite (`VITE_DEV_SERVER_URL`, la variabile che il plugin imposta davvero; la 2.3 cercava `ELECTRON_RENDERER_URL`, che non esiste, e caricava la build vecchia).
 
 ### `productName` non si tocca
 
@@ -76,9 +87,13 @@ Lì dentro vivono `titan.db`, `.machine-key` e `titan-settings.json`. Cambiare `
 
 `src/renderer/src/lib/releaseNotes.ts` deve contenere l'entry della versione che si sta costruendo. Se manca, la schermata «Novità» mostrata dopo l'aggiornamento cade sul testo generico invece dell'elenco delle modifiche.
 
-### Node 20, non oltre
+### Electron e moduli nativi
 
-Il tentativo di portare la CI a Node 24 ha rotto la build Windows: `better-sqlite3` non ha prebuild per quella versione, `node-gyp` va in errore e Visual Studio non viene rilevato sul runner. Il warning «Node 20 deprecato» che compare nelle GitHub Actions riguarda il runtime delle *action* (checkout, setup-node, cache), lo gestisce GitHub e **non** si risolve cambiando `node-version`.
+Il progetto segue le versioni di Electron **supportate** (le ultime tre maggiori): una versione fuori supporto non riceve più le correzioni di sicurezza di Chromium, e un'app che legge contenuti dalla rete non se lo può permettere. La 2.3 girava ancora su Electron 32, fuori supporto da oltre un anno; la 2.4 è passata alla 44.
+
+Quello che rendeva l'aggiornamento rischioso era `better-sqlite3`, che andava ricompilato con `node-gyp` per ogni versione di Electron e per ogni Node della CI (da qui il vecchio vincolo «Node 20, non oltre»). Dalla 13 è un modulo N-API: l'ABI è stabile, i binari sono nel pacchetto, `npmRebuild` è disattivato in `electron-builder.yml` e non serve più nessun compilatore. Se un giorno entra un'altra dipendenza nativa, deve essere N-API o il problema torna.
+
+⚠️ **`safeStorage` sincrono ha i giorni contati.** Electron 45 depreca `encryptString`/`decryptString`/`isEncryptionAvailable` e Electron 46 li rimuove: prima di salire alla 46, `src/main/crypto.ts` e l'export dei profili in `manager.ts` vanno portati alle versioni `…Async`. Electron garantisce che i dati cifrati con l'API sincrona si decifrano con quella asincrona, ma su Linux i portachiavi cambiano: va provato su GNOME e KDE prima di pubblicare.
 
 ### Le migrazioni del database sono il codice più pericoloso
 
@@ -148,7 +163,7 @@ Il modello è **producer-consumer**: `checkLoop()` scarica i feed e accoda i job
 **Fuori perimetro**
 - **Nuove lingue.** Il progetto è in italiano e inglese e ci resta: vedi «Traduzioni» qui sopra.
 - Migrazione a un altro framework (Tauri è stato valutato e scartato: il backend andrebbe riscritto in Rust e `youtubei.js` non ha equivalenti maturi).
-- **Installer ufficiali per macOS.** Il codice è cross-platform e su macOS compila e gira; quello che non c'è è la *distribuzione*, perché un `.dmg` senza avviso di Gatekeeper richiede un certificato Apple a pagamento che il progetto non ha motivo di mantenere. Chi usa macOS compila dal sorgente (servono Node 20 e Xcode Command Line Tools). Le pull request che aggiungono un target macOS alla CI non verranno accolte; quelle che correggono un bug che si manifesta *anche* su macOS, sì.
+- **Installer ufficiali per macOS.** Il codice è cross-platform e su macOS compila e gira; quello che non c'è è la *distribuzione*, perché un `.dmg` senza avviso di Gatekeeper richiede un certificato Apple a pagamento che il progetto non ha motivo di mantenere. Chi usa macOS compila dal sorgente (servono Node 22 e Xcode Command Line Tools). Le pull request che aggiungono un target macOS alla CI non verranno accolte; quelle che correggono un bug che si manifesta *anche* su macOS, sì.
 - Telemetria, analytics, servizi cloud: l'applicazione funziona in locale e ci resta.
 
 ---
