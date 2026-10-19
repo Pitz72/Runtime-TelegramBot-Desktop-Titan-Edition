@@ -6,6 +6,26 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.4.0': {
+        it: [
+            'Interfaccia ridisegnata in blu, più leggibile: testo più grande, ingrandimento dall’80 al 180% (Ctrl + e Ctrl −), tutto usabile da tastiera.',
+            'Chiudere la finestra a motore acceso non ferma più i bot senza avvisare. Titan può restare nell’area di notifica, partire con il computer e avviare il motore da solo: vedi Impostazioni → Generale.',
+            '«Prova il bot» verifica token, canale e permessi con Telegram, senza pubblicare nulla.',
+            '«Controlla adesso» legge subito tutte le sorgenti, senza aspettare il loro intervallo.',
+            'Bot per bot: avvio silenzioso, senza messaggio di avvio nel canale, e pubblicazione senza suono, sempre o in una fascia oraria.',
+            'Un guasto di rete di qualche minuto non fa più perdere contenuti: restano da pubblicare e partono al giro successivo.',
+            'Nuova schermata d’ingresso. Titan è un software di Simone Pizzi per Runtime Utilities.',
+        ],
+        en: [
+            'A redesigned blue interface that is easier to read: larger text, zoom from 80 to 180% (Ctrl + and Ctrl −), fully usable from the keyboard.',
+            'Closing the window while the engine runs no longer stops your bots without warning. Titan can stay in the notification area, start with the computer and start the engine by itself: see Settings → General.',
+            '“Test the bot” checks the token, the destination and the permissions with Telegram, without posting anything.',
+            '“Check now” reads every source right away, without waiting for its interval.',
+            'Bot by bot: silent start, with no startup message in the channel, and publishing without sound, always or during set hours.',
+            'A few minutes of network trouble no longer loses content: it stays to be published and goes out on the next check.',
+            'A new intro screen. Titan is software by Simone Pizzi for Runtime Utilities.',
+        ],
+    },
     '2.3.1': {
         it: [
             'Gli show il cui feed dà lo stesso indirizzo a tutte le puntate tornano a pubblicare: dopo la prima, le successive venivano scartate come già inviate.',

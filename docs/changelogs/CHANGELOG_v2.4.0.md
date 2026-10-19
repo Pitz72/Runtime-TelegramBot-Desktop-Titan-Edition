@@ -1,6 +1,6 @@
-# Non rilasciato — revisione tecnica, di sicurezza e di licenze
+# v2.4.0 — revisione completa, interfaccia blu, Titan sempre al lavoro
 
-**Stato:** nel ramo `main`, non ancora pubblicato come release.
+**Rilasciata:** 19 ottobre 2026.
 
 ## Overview
 
