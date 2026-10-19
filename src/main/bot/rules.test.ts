@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
     buildDigestMessage, classifyTelegramError, DIGEST_TEXT_BUDGET, escapeHtml, escapeUrl,
     isFeedDue, isTimeAllowed, loopIntervalMinutes, parseStartDate, parseUtcTimestamp,
-    isMuted, normalizeChannelId, passesKeywordFilter, pickUrl, postingRight, startupMessage, truncate,
+    isMuted, normalizeChannelId, passesKeywordFilter, pickUrl, pickYouTubeChannel, postingRight, startupMessage, truncate,
+    youtubeChannelRef,
 } from './rules';
 
 const at = (h: number, m: number) => new Date(2026, 9, 19, h, m, 0);
@@ -258,5 +259,46 @@ describe('isMuted', () => {
     });
     it('fascia senza orari leggibili: si usa 22:00–07:00', () => {
         expect(isMuted({ mute_mode: 'window', mute_from: null, mute_until: null }, at(23, 0))).toBe(true);
+    });
+});
+
+describe('youtubeChannelRef', () => {
+    const ID = 'UCBR8-60-B28hp2BmDPdntcQ';
+    it('un ID canale si usa così com\'è, anche dentro un indirizzo', () => {
+        expect(youtubeChannelRef(ID)).toEqual({ id: ID, key: ID.toLowerCase() });
+        expect(youtubeChannelRef(`https://www.youtube.com/channel/${ID}/videos`).id).toBe(ID);
+    });
+    it('un handle diventa l\'indirizzo della sua pagina, comunque sia scritto', () => {
+        const expected = { url: 'https://www.youtube.com/@Canale', key: '@canale' };
+        expect(youtubeChannelRef('@Canale')).toEqual(expected);
+        expect(youtubeChannelRef('https://www.youtube.com/@Canale')).toEqual(expected);
+        expect(youtubeChannelRef('youtube.com/@Canale/videos?view=0')).toEqual(expected);
+        expect(youtubeChannelRef('https://m.youtube.com/@Canale/')).toEqual(expected);
+    });
+    it('un handle scritto senza chiocciola resta un handle', () => {
+        expect(youtubeChannelRef('ArcheologiaInformatica')).toEqual({ url: 'https://www.youtube.com/@ArcheologiaInformatica', key: '@archeologiainformatica' });
+    });
+    it('i vecchi indirizzi /c/ e /user/ passano dalla loro pagina', () => {
+        expect(youtubeChannelRef('https://www.youtube.com/c/NomeCanale').url).toBe('https://www.youtube.com/c/NomeCanale');
+        expect(youtubeChannelRef('https://www.youtube.com/user/nome').url).toBe('https://www.youtube.com/user/nome');
+    });
+    it('un nome con gli spazi non è un indirizzo: resta alla ricerca', () => {
+        expect(youtubeChannelRef('Avvocati e Mac')).toEqual({ key: 'avvocati e mac' });
+    });
+});
+
+describe('pickYouTubeChannel', () => {
+    const results = [
+        { id: 'A', author: { name: 'Canale Omonimo', url: 'https://www.youtube.com/@canaleomonimo' } },
+        { id: 'B', author: { name: 'Il Canale', url: 'https://www.youtube.com/@IlCanale' } },
+    ];
+    it('sceglie il risultato con lo stesso handle, non il primo', () => {
+        expect(pickYouTubeChannel(results, '@ilcanale')?.id).toBe('B');
+    });
+    it('per una ricerca per nome vale il nome identico', () => {
+        expect(pickYouTubeChannel(results, 'Il Canale')?.id).toBe('B');
+    });
+    it('se nessuno corrisponde non inventa: null', () => {
+        expect(pickYouTubeChannel(results, '@altro')).toBeNull();
     });
 });

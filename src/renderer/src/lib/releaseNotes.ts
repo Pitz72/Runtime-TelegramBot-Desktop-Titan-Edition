@@ -6,6 +6,20 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.4.1': {
+        it: [
+            'Spariti gli avvisi «Direct getChannel failed… trying search» che comparivano nel diario per ogni canale YouTube, a ogni giro.',
+            'Titan trova il canale YouTube al primo colpo e se lo ricorda: metà delle richieste a YouTube, e meno occasioni di farsi rallentare.',
+            'Quando serve la ricerca, Titan sceglie il canale con lo stesso handle o lo stesso nome, non il primo risultato.',
+            'Un indirizzo come «youtube.com/@canale/videos» ora funziona come «@canale».',
+        ],
+        en: [
+            'The “Direct getChannel failed… trying search” warnings that showed up in the diary for every YouTube channel, on every check, are gone.',
+            'Titan finds the YouTube channel on the first try and remembers it: half the requests to YouTube, and fewer chances of being slowed down.',
+            'When a search is needed, Titan picks the channel with the same handle or the same name, not the first result.',
+            'An address like “youtube.com/@channel/videos” now works like “@channel”.',
+        ],
+    },
     '2.4.0': {
         it: [
             'Interfaccia ridisegnata in blu, più leggibile: testo più grande, ingrandimento dall’80 al 180% (Ctrl + e Ctrl −), tutto usabile da tastiera.',

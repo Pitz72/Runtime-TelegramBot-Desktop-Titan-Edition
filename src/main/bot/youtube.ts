@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { RssItem } from './types';
 import { validateFeedUrl } from './parser';
 import { TitanLogger } from '../logger';
+import { pickYouTubeChannel, youtubeChannelRef } from './rules';
 
 let youtube: any = null;
 
@@ -25,21 +26,60 @@ interface YouTubeCacheEntry {
 
 const youtubeCache = new Map<string, YouTubeCacheEntry>();
 
-/**
- * Normalizza l'identificatore del canale per usarlo come chiave di cache.
- * Equivalente alla pulizia input già fatta in fetchYouTubeVideos.
- */
+/** Chiave di cache del canale: uguale per le forme equivalenti (handle, indirizzo, ID). */
 function normalizeChannelKey(channelIdOrHandle: string): string {
-    let key = channelIdOrHandle.trim();
-    if (key.includes('youtube.com/')) {
-        const parts = key.split('/');
-        key = parts[parts.length - 1];
-        if (key.includes('?')) key = key.split('?')[0];
-    } else if (key.includes('youtu.be/')) {
-        const parts = key.split('/');
-        key = parts[parts.length - 1];
+    return youtubeChannelRef(channelIdOrHandle).key;
+}
+
+/**
+ * ID canale (UC…) già trovati in questa sessione. Un handle si traduce in ID una volta
+ * sola: dopo, ogni giro va dritto al canale. Non si svuota all'arresto del motore —
+ * un handle non cambia canale da un giro all'altro.
+ */
+const channelIds = new Map<string, string>();
+
+/**
+ * L'ID del canale per ciò che l'utente ha scritto nella sorgente.
+ *
+ * `getChannel` accetta solo ID: prima gli si passava l'handle, YouTube rispondeva 400 a
+ * ogni giro e si ripiegava su una ricerca (un avviso nel diario per canale, e il doppio
+ * delle richieste — proprio ciò che l'antibot di YouTube punisce). Ora l'handle si fa
+ * tradurre dalla pagina del canale, che risponde con l'ID esatto. La ricerca resta come
+ * ultima risorsa, e sceglie il canale con lo stesso handle o nome, non il primo che capita.
+ */
+async function resolveChannelId(yt: any, input: string): Promise<string> {
+    const ref = youtubeChannelRef(input);
+    if (ref.id) return ref.id;
+    const known = channelIds.get(ref.key);
+    if (known) return known;
+
+    let id: string | undefined;
+    if (ref.url) {
+        try {
+            const nav = await yt.resolveURL(ref.url);
+            const browseId = nav?.payload?.browseId;
+            if (typeof browseId === 'string' && browseId.startsWith('UC')) id = browseId;
+        } catch {
+            // Pagina non trovata o risposta inattesa: resta la ricerca.
+        }
     }
-    return key.toLowerCase();
+
+    if (!id) {
+        const query = ref.key.startsWith('@') ? ref.key : input.trim();
+        const search = await yt.search(query, { type: 'channel' });
+        const results: any[] = search?.channels ?? [];
+        const exact = pickYouTubeChannel(results, query);
+        const chosen = exact ?? results[0];
+        if (!chosen?.id) throw new Error(`Canale YouTube non trovato: ${input}`);
+        if (!exact) {
+            TitanLogger.log(`[YouTube] «${input}» non trovato con precisione: uso il primo risultato della ricerca, «${chosen.author?.name ?? chosen.id}». Se non è il canale giusto, scrivi nella sorgente l'indirizzo completo del canale.`, 'warn');
+        }
+        id = chosen.id as string;
+    }
+
+    channelIds.set(ref.key, id);
+    TitanLogger.log(`[YouTube] ${input} → ${id}`);
+    return id;
 }
 
 /** Svuota la cache dei canali YouTube (usato anche da resetYouTubeSession) */
@@ -140,32 +180,10 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
             validateFeedUrl(targetId);
         }
 
-        // Pulizia input
-        if (targetId.includes('youtube.com/')) {
-            const parts = targetId.split('/');
-            targetId = parts[parts.length - 1];
-            if (targetId.includes('?')) targetId = targetId.split('?')[0];
-        } else if (targetId.includes('youtu.be/')) {
-            const parts = targetId.split('/');
-            targetId = parts[parts.length - 1];
-        }
-
         TitanLogger.log(`[YouTube] Resolving channel: ${targetId}`);
 
-        let channel;
-        try {
-            // youtubei.js getChannel works with handles too (e.g. '@RuntimeRadio')
-            channel = await yt.getChannel(targetId);
-        } catch (e) {
-            // Se fallisce, proviamo a cercarlo (spesso utile per handle nuovi o URL strani)
-            TitanLogger.log(`[YouTube] Direct getChannel failed for "${targetId}", trying search...`, 'warn');
-            const search = await yt.search(targetId, { type: 'channel' });
-            if (search.channels && search.channels.length > 0) {
-                channel = await yt.getChannel(search.channels[0].id);
-            } else {
-                throw new Error(`Canale YouTube non trovato: ${targetId}`);
-            }
-        }
+        const channelId = await resolveChannelId(yt, targetId);
+        const channel = await yt.getChannel(channelId);
 
         TitanLogger.log(`[YouTube] Channel found: ${channel?.metadata?.title || 'unknown'}`);
 

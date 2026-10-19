@@ -231,6 +231,61 @@ export function postingRight(
     return 'ok';
 }
 
+// ─── Canali YouTube ──────────────────────────────────────────────────────────
+
+const YT_CHANNEL_ID = /^UC[\w-]{22}$/;
+
+/**
+ * Cosa ha scritto l'utente come sorgente YouTube, ridotto a ciò che serve per trovarla:
+ * - `id`: un ID canale («UC…»), che si usa così com'è;
+ * - `url`: l'indirizzo della pagina del canale, che YouTube sa tradurre in ID;
+ * - `key`: una chiave stabile per le cache, uguale per le forme equivalenti.
+ *
+ * Prima si prendeva l'ultimo pezzo dell'indirizzo e lo si passava a `getChannel`, che
+ * vuole solo ID: con un handle («@Canale») YouTube rispondeva 400 a ogni giro, e Titan
+ * ripiegava su una ricerca. Funzionava, ma con il doppio delle richieste e un avviso
+ * nel diario per ogni canale. In più «…/@Canale/videos» diventava «videos».
+ */
+export function youtubeChannelRef(input: string): { id?: string; url?: string; key: string } {
+    const raw = input.trim();
+    if (YT_CHANNEL_ID.test(raw)) return { id: raw, key: raw.toLowerCase() };
+
+    const fromUrl = raw.match(/^(?:https?:\/\/)?(?:www\.|m\.)?youtube\.com\/(.*)$/i);
+    const path = (fromUrl ? fromUrl[1] : raw).split(/[?#]/)[0];
+    const segs = path.split('/').filter(Boolean);
+    const [first = '', second = ''] = segs;
+
+    if (first.toLowerCase() === 'channel' && YT_CHANNEL_ID.test(second)) return { id: second, key: second.toLowerCase() };
+    if (first.startsWith('@') && first.length > 1) {
+        return { url: `https://www.youtube.com/${first}`, key: first.toLowerCase() };
+    }
+    if ((first === 'c' || first === 'user') && second) {
+        return { url: `https://www.youtube.com/${first}/${second}`, key: `${first}/${second}`.toLowerCase() };
+    }
+    // Una parola sola che ha la forma di un handle: quasi sempre è l'handle senza «@».
+    if (!fromUrl && segs.length === 1 && /^[\w.-]{3,30}$/.test(first)) {
+        return { url: `https://www.youtube.com/@${first}`, key: `@${first}`.toLowerCase() };
+    }
+    // Un nome con spazi o una forma che non si riconosce: resterà la ricerca.
+    return { key: raw.toLowerCase() };
+}
+
+/**
+ * Tra i risultati di una ricerca di canali, quello che corrisponde davvero a ciò che si
+ * cercava: stesso handle o, per una ricerca per nome, stesso nome. `null` se nessuno
+ * corrisponde — prima si prendeva comunque il primo, anche se era un omonimo.
+ */
+export function pickYouTubeChannel<T extends { author?: { name?: string; url?: string } }>(results: T[], wanted: string): T | null {
+    const target = wanted.trim().toLowerCase();
+    if (!target) return null;
+    const handle = target.startsWith('@') ? target : `@${target}`;
+    return results.find(r => {
+        const url = (r.author?.url ?? '').toLowerCase().split(/[?#]/)[0];
+        const name = (r.author?.name ?? '').trim().toLowerCase();
+        return url.endsWith(`/${handle}`) || name === target.replace(/^@/, '');
+    }) ?? null;
+}
+
 // ─── Notifiche senza suono ───────────────────────────────────────────────────
 
 /** `off` = notifiche normali; `always` = sempre senza suono; `window` = senza suono in una fascia oraria. */
