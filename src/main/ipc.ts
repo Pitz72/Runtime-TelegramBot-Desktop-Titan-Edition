@@ -187,7 +187,7 @@ export function setupIpc() {
         const sendFrom = assertTimeOrDefault(data.sendFrom, '00:00');
         const sendUntil = assertTimeOrDefault(data.sendUntil, '23:59');
         const startDate = assertStartDateOrUndefined(data.startDate);
-        return BotManager.createBot(name, token, channelId, startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup);
+        return BotManager.createBot(name, token, channelId, startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup, data.silentStart === true);
     });
 
     ipcMain.handle('delete-bot', (_, id) => {
@@ -196,7 +196,7 @@ export function setupIpc() {
         return BotManager.deleteBot(botId);
     });
 
-    ipcMain.handle('update-bot', (_, { id, name, token, channelId, isActive, startDate, checkInterval, notificationsEnabled, sendFrom, sendUntil, templatePodcast, templateNews, templateYoutube, templateStartup }) => {
+    ipcMain.handle('update-bot', (_, { id, name, token, channelId, isActive, startDate, checkInterval, notificationsEnabled, sendFrom, sendUntil, templatePodcast, templateNews, templateYoutube, templateStartup, silentStart }) => {
         const validId = assertPositiveInt(id, 'id');
         const validName = assertString(name, 'name');
         const validToken = assertString(token, 'token');
@@ -205,7 +205,9 @@ export function setupIpc() {
         const validSendFrom = assertTimeOrDefault(sendFrom, '00:00');
         const validSendUntil = assertTimeOrDefault(sendUntil, '23:59');
         const validStartDate = assertStartDateOrUndefined(startDate);
-        return BotManager.updateBot(validId, validName, validToken, validChannelId, !!isActive, validStartDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup);
+        // Assente = invariato: un chiamante che non conosce l'avvio silenzioso non lo spegne.
+        const validSilentStart = silentStart === undefined ? undefined : silentStart === true;
+        return BotManager.updateBot(validId, validName, validToken, validChannelId, !!isActive, validStartDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup, validSilentStart);
     });
 
     // --- FEED MANAGEMENT ---

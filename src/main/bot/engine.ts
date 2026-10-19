@@ -6,8 +6,8 @@ import { BotConfig, FeedConfig, RssItem } from '../../shared/types';
 import { TitanLogger } from '../logger';
 import { app, BrowserWindow, Notification } from 'electron';
 import {
-    buildDigestMessage, escapeHtml, isFeedDue, isTimeAllowed,
-    loopIntervalMinutes, parseStartDate, parseUtcTimestamp, passesKeywordFilter,
+    buildDigestMessage, isFeedDue, isTimeAllowed,
+    loopIntervalMinutes, parseStartDate, parseUtcTimestamp, passesKeywordFilter, startupMessage,
 } from './rules';
 
 // Re-export per chi lo importava da qui prima che le regole avessero un modulo proprio.
@@ -152,13 +152,14 @@ export class BotEngine {
         const appVersion = app.getVersion();
         for (const bot of BotManager.getBots()) {
             if (!this.isLive(run)) return;
-            if (!bot.is_active || !bot.token) continue;
-            const customTemplate = bot.template_startup;
-            const baseMessage = customTemplate && customTemplate.trim() !== ''
-                ? customTemplate
-                : `🟢 <b>${escapeHtml(bot.name)} Online</b>`;
-            const finalMessage = `${baseMessage}\n\n<pre>Runtime TelegramBot Desktop v${appVersion}</pre>`;
-            const res = await this.getClient(bot).sendMessage(finalMessage);
+            const message = startupMessage(bot, appVersion);
+            if (message === null) {
+                if (bot.is_active && bot.token && bot.silent_start) {
+                    TitanLogger.log(`🤫 [${bot.name}] Avvio silenzioso: nessun messaggio nel canale.`);
+                }
+                continue;
+            }
+            const res = await this.getClient(bot).sendMessage(message);
             // Motore fermato mentre la richiesta era in volo: l'esito non interessa più.
             if (!this.isLive(run)) return;
             if (!res.ok && res.kind !== 'aborted') {

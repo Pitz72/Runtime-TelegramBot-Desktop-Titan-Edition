@@ -10,7 +10,7 @@ import type { LogEntry } from '../shared/types'
 const api = {
     // Bot Management
     getBots: () => ipcRenderer.invoke('get-bots'),
-    createBot: (bot: { name: string; token: string; channelId: string; startDate?: string; checkInterval?: number; notificationsEnabled?: boolean; sendFrom?: string; sendUntil?: string; templatePodcast?: string; templateNews?: string; templateYoutube?: string; templateStartup?: string; }) =>
+    createBot: (bot: { name: string; token: string; channelId: string; startDate?: string; checkInterval?: number; notificationsEnabled?: boolean; sendFrom?: string; sendUntil?: string; templatePodcast?: string; templateNews?: string; templateYoutube?: string; templateStartup?: string; silentStart?: boolean; }) =>
         ipcRenderer.invoke('create-bot', bot),
     deleteBot: (id: number) => ipcRenderer.invoke('delete-bot', id),
     updateBot: (data: {
@@ -28,6 +28,7 @@ const api = {
         templateNews?: string
         templateYoutube?: string
         templateStartup?: string
+        silentStart?: boolean
     }) => ipcRenderer.invoke('update-bot', data),
 
     // Feed Management

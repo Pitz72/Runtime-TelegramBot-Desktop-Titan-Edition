@@ -161,6 +161,7 @@ export function initDB() {
             template_startup TEXT DEFAULT NULL,
             notifications_enabled BOOLEAN DEFAULT 1,
             is_active BOOLEAN DEFAULT 1,
+            silent_start BOOLEAN DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -237,8 +238,8 @@ export function initDB() {
         // Indice di deduplica title_hash scoped per content_type (IronShield v2).
         // Va creato qui: il fresh-install ritorna prima del blocco migrazioni/safety-check.
         db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, title_hash, content_type)`);
-        db.pragma('user_version = 12');
-        console.log("Nuova installazione rilevata. Database inizializzato alla v12.");
+        db.pragma('user_version = 13');
+        console.log("Nuova installazione rilevata. Database inizializzato alla v13.");
         console.log('Database initialized at:', dbPath);
         return db;
     }
@@ -249,7 +250,7 @@ export function initDB() {
     // 4. Backup automatico SOLO se servono migrazioni — fix #20
     // Cattura lo stato pre-migrazione per consentire il ripristino in caso di errore.
     // Su DB già alla versione corrente (nessuna migrazione), nessun backup viene creato.
-    if (currentVersion < 12) {
+    if (currentVersion < 13) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
@@ -451,6 +452,25 @@ export function initDB() {
         db.pragma('user_version = 12');
         currentVersion = 12;
         console.log("Database version set to 12");
+    }
+
+    if (currentVersion < 13) {
+        console.log("Migration v13: avvio silenzioso per bot...");
+        // Default 0: chi aggiorna continua a ricevere il messaggio di avvio come prima.
+        try { db.exec(`ALTER TABLE bots ADD COLUMN silent_start BOOLEAN DEFAULT 0`); } catch (e) { }
+        db.pragma('user_version = 13');
+        currentVersion = 13;
+        console.log("Database version set to 13");
+    }
+
+    try {
+        const botCols = db.pragma('table_info(bots)') as any[];
+        if (!botCols.some((c: any) => c.name === 'silent_start')) {
+            console.warn('Safety fix: silent_start mancante dalla tabella bots — aggiunto retroattivamente.');
+            db.exec(`ALTER TABLE bots ADD COLUMN silent_start BOOLEAN DEFAULT 0`);
+        }
+    } catch (e) {
+        console.error('Safety check bots columns fallito:', e);
     }
 
     // Safety check post-migration: verifica fisicamente l'esistenza delle colonne critiche.

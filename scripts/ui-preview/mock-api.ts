@@ -20,17 +20,17 @@ let bots: BotConfig[] = empty ? [] : [
     {
         id: 1, name: 'Radio Notizie', token: '123456789:AAEXAMPLEexampleEXAMPLEexample00000', channel_id: '@radio_notizie_demo',
         start_date: '2026-09-01', check_interval: 15, send_from: '07:00', send_until: '23:00',
-        notifications_enabled: true, is_active: true,
+        notifications_enabled: true, is_active: true, silent_start: false,
     },
     {
         id: 2, name: 'Podcast della settimana', token: '987654321:AAEXAMPLEexampleEXAMPLEexample11111', channel_id: '-1001234567890',
         start_date: '2026-10-01', check_interval: 30, send_from: '00:00', send_until: '23:59',
-        notifications_enabled: false, is_active: true,
+        notifications_enabled: false, is_active: true, silent_start: true,
     },
     {
         id: 3, name: 'Archivio tecnico', token: '', channel_id: 'archivio_demo',
         start_date: '2026-08-15', check_interval: 60, send_from: '00:00', send_until: '23:59',
-        notifications_enabled: true, is_active: false,
+        notifications_enabled: true, is_active: false, silent_start: false,
     },
 ];
 
@@ -76,12 +76,12 @@ const ok = <T,>(v: T) => new Promise<T>(r => setTimeout(() => r(v), 120));
     createBot: (b: any) => {
         if (!b.name?.trim()) return Promise.reject(new Error("Error invoking remote method 'create-bot': Error: Campo obbligatorio mancante o non valido: \"name\""));
         const id = Math.max(0, ...bots.map(x => x.id)) + 1;
-        bots = [...bots, { id, name: b.name, token: b.token, channel_id: b.channelId, start_date: b.startDate, check_interval: 15, send_from: '00:00', send_until: '23:59', notifications_enabled: true, is_active: true }];
+        bots = [...bots, { id, name: b.name, token: b.token, channel_id: b.channelId, start_date: b.startDate, check_interval: 15, send_from: '00:00', send_until: '23:59', notifications_enabled: true, is_active: true, silent_start: false }];
         return ok(id);
     },
     deleteBot: (id: number) => { bots = bots.filter(b => b.id !== id); return ok(undefined); },
     updateBot: (d: any) => {
-        bots = bots.map(b => b.id === d.id ? { ...b, name: d.name, token: d.token, channel_id: d.channelId, is_active: d.isActive, start_date: d.startDate, check_interval: d.checkInterval, notifications_enabled: d.notificationsEnabled, send_from: d.sendFrom, send_until: d.sendUntil, template_news: d.templateNews, template_podcast: d.templatePodcast, template_youtube: d.templateYoutube, template_startup: d.templateStartup } : b);
+        bots = bots.map(b => b.id === d.id ? { ...b, name: d.name, token: d.token, channel_id: d.channelId, is_active: d.isActive, start_date: d.startDate, check_interval: d.checkInterval, notifications_enabled: d.notificationsEnabled, send_from: d.sendFrom, send_until: d.sendUntil, template_news: d.templateNews, template_podcast: d.templatePodcast, template_youtube: d.templateYoutube, template_startup: d.templateStartup, silent_start: d.silentStart ?? b.silent_start } : b);
         return ok(undefined);
     },
     getFeeds: (botId: number) => ok(feeds.filter(f => f.bot_id === botId)),
@@ -122,7 +122,8 @@ const ok = <T,>(v: T) => new Promise<T>(r => setTimeout(() => r(v), 120));
         ] : [],
     }),
     importOpml: () => ok({ success: true, count: 0 }),
-    getPerformanceMode: () => ok(false),
+    // ?reduce — «Riduci effetti e animazioni» già acceso: per vedere l'interfaccia ferma.
+    getPerformanceMode: () => ok(params.has('reduce')),
     setPerformanceMode: () => ok({ success: true }),
     getVersion: () => ok('2.4.0-preview'),
     setLocale: () => ok(undefined),

@@ -192,6 +192,26 @@ export function buildDigestMessage(
     return { text: header + lines.join('\n\n') + footer, included };
 }
 
+// ─── Messaggio di avvio ──────────────────────────────────────────────────────
+
+/**
+ * Il messaggio che un bot pubblica quando parte il motore, oppure `null` se non deve
+ * pubblicarne nessuno: bot spento, token illeggibile o **avvio silenzioso**.
+ *
+ * L'avvio silenzioso è per le chat e i canali che non gradiscono l'annuncio: il bot
+ * parte e lavora come gli altri, solo senza farsi sentire. Prima l'unico modo era
+ * spegnerlo, avviare il motore e riaccenderlo a mano dopo un po'.
+ */
+export function startupMessage(
+    bot: { name: string; token: string; is_active: boolean; silent_start?: boolean; template_startup?: string | null },
+    appVersion: string,
+): string | null {
+    if (!bot.is_active || !bot.token || bot.silent_start) return null;
+    const custom = bot.template_startup && bot.template_startup.trim() !== '' ? bot.template_startup : null;
+    const base = custom ?? `🟢 <b>${escapeHtml(bot.name)} Online</b>`;
+    return `${base}\n\n<pre>Runtime TelegramBot Desktop v${appVersion}</pre>`;
+}
+
 // ─── Errori di Telegram ──────────────────────────────────────────────────────
 
 /**

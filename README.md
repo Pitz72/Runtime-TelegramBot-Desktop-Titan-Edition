@@ -155,7 +155,7 @@ L'applicazione funziona in locale. Contatta esclusivamente i server dei feed con
 
 ## Come è stato scritto
 
-Questo programma è stato scritto facendo un **uso massiccio di modelli linguistici di grandi dimensioni**: Google **Gemini**, dalla 2.5 alla 3.1, e Anthropic **Claude**, da Sonnet 4.6 a Opus 5. Gran parte del codice che leggi l'hanno prodotta loro, ed è giusto che sia dichiarato apertamente.
+Questo programma è stato scritto facendo un **uso massiccio di modelli linguistici di grandi dimensioni**: Google **Gemini**, dalla 2.5 alla 3.1, e Anthropic **Claude**, da Sonnet 4.6 a Opus 5.5. Gran parte del codice che leggi l'hanno prodotta loro, ed è giusto che sia dichiarato apertamente.
 
 Tutto il resto è di **Simone Pizzi**: il concetto, la visione, la direzione progettuale, la definizione minuziosa di ogni dettaglio funzionale e la caccia ostinata ai bug. Ogni comportamento del programma — dal filtro di cutoff iper-pessimista alla coda persistente delle quiet hours, dalla deduplica scoped per tipo di contenuto al modo in cui si presenta un aggiornamento — è una decisione progettuale presa, verificata sul campo e corretta a mano fino a farla funzionare.
 
@@ -169,6 +169,13 @@ Questo vale anche per la documentazione: manuali, guide e note tecniche sono sta
 
 Rilasciato sotto licenza **MIT** — vedi [LICENSE](LICENSE).
 
-Sviluppato da **Simone Pizzi** per **[Runtime Radio](https://runtimeradio.com)**.
+Sviluppato da **Simone Pizzi** per **Runtime Utilities**.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="branding/runtime-utilities/RuntimeUtilities_Bianco.svg">
+    <img src="branding/runtime-utilities/RuntimeUtilities_ColoreOriginale.svg" alt="Runtime Utilities" width="260">
+  </picture>
+</p>
 
 Fino ad agosto 2026 il progetto è stato distribuito commercialmente sotto una licenza proprietaria, conservata a titolo storico in [`docs/storico/EULA-v1-proprietaria.txt`](docs/storico/EULA-v1-proprietaria.txt). Quella licenza non si applica più: il software è ora liberamente utilizzabile, modificabile e ridistribuibile secondo i termini MIT.

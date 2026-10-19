@@ -9,6 +9,12 @@ interface UiPreferences {
     setZoom: (zoom: number) => void;
     reduceMotion: boolean;
     setReduceMotion: (reduce: boolean) => void;
+    /**
+     * Le preferenze salvate sono arrivate dal main process. Chi anima all'apertura
+     * (la schermata d'ingresso) aspetta questo: scoprire «Riduci effetti» a coreografia
+     * già partita la lascerebbe a metà.
+     */
+    ready: boolean;
 }
 
 const Ctx = createContext<UiPreferences | null>(null);
@@ -24,10 +30,14 @@ const Ctx = createContext<UiPreferences | null>(null);
 export function UiPreferencesProvider({ children }: { children: React.ReactNode }) {
     const [zoom, setZoomState] = useState(1);
     const [reduceMotion, setReduceMotionState] = useState(false);
+    const [ready, setReady] = useState(false);
 
     useEffect(() => {
         window.api.getUiZoom?.().then(z => setZoomState(z || 1)).catch(() => {});
-        window.api.getPerformanceMode?.().then(enabled => setReduceMotionState(!!enabled)).catch(() => {});
+        Promise.resolve(window.api.getPerformanceMode?.())
+            .then(enabled => setReduceMotionState(!!enabled))
+            .catch(() => {})
+            .finally(() => setReady(true));
         return window.api.onUiZoomChanged?.(z => setZoomState(z));
     }, []);
 
@@ -46,7 +56,7 @@ export function UiPreferencesProvider({ children }: { children: React.ReactNode 
     }, []);
 
     return (
-        <Ctx.Provider value={{ zoom, setZoom, reduceMotion, setReduceMotion }}>
+        <Ctx.Provider value={{ zoom, setZoom, reduceMotion, setReduceMotion, ready }}>
             {/* framer-motion segue la preferenza del sistema; con l'interruttore acceso, sempre ridotto */}
             <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
                 {children}

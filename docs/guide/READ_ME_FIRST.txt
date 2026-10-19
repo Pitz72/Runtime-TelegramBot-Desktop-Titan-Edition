@@ -124,4 +124,4 @@ Voluntary donation
 Titan is free and stays free. The donation is optional and
 unlocks nothing.
 
-  Simone Pizzi — Runtime Radio
+  Simone Pizzi — Runtime Utilities

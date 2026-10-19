@@ -2,7 +2,7 @@
     "app": {
         "title": "Runtime TelegramBot Desktop",
         "edition": "Titan Edition",
-        "copyright": "© 2026 Simone Pizzi for Runtime Radio",
+        "copyright": "© 2026 Simone Pizzi for Runtime Utilities",
         "skipToContent": "Skip to content"
     },
     "common": {
@@ -71,7 +71,8 @@
         "since": "Publishing since {date}",
         "window": "Sends from {from} to {until}",
         "settings": "Bot settings",
-        "stats": "Statistics"
+        "stats": "Statistics",
+        "silent": "Silent start"
     },
     "botForm": {
         "newTitle": "New bot",
@@ -101,6 +102,8 @@
         "activeHint": "When disabled, the engine skips it and publishes nothing.",
         "notifications": "Desktop notifications",
         "notificationsHint": "A system notification for every item published.",
+        "silentStart": "Silent start",
+        "silentStartHint": "When you start the engine, this bot gets to work without posting in the channel: no startup message. For chats and channels that would rather not see it.",
         "interval": "Check interval (minutes)",
         "intervalHint": "How often to check the sources, from 1 to 1440 minutes. Individual sources can have their own interval.",
         "intervalRange": "Enter a whole number from 1 to 1440.",
@@ -249,6 +252,7 @@
         "youtube": "YouTube",
         "startup": "Startup message",
         "startupHint": "Sent when you start the engine. Titan's version is appended automatically.",
+        "startupSilent": "Silent start is on: this message is not sent. You can turn it back on in the General tab.",
         "insertLabel": "Insert:",
         "chip": {
             "title": "Title",
@@ -372,7 +376,7 @@
     },
     "credits": {
         "title": "Credits",
-        "body": "This program was written making heavy use of large language models: Google Gemini, from 2.5 to 3.1, and Anthropic Claude, from Sonnet 4.6 to Opus 5. Most of the code came from them.\n\nEverything else belongs to Simone Pizzi: the concept, the vision, the design direction, the meticulous definition of every detail and the stubborn hunt for bugs. The models wrote the code, the decisions were all Simone Pizzi's.",
+        "body": "This program was written making heavy use of large language models: Google Gemini, from 2.5 to 3.1, and Anthropic Claude, from Sonnet 4.6 to Opus 5.5. Most of the code came from them.\n\nEverything else belongs to Simone Pizzi: the concept, the vision, the design direction, the meticulous definition of every detail and the stubborn hunt for bugs. The models wrote the code, the decisions were all Simone Pizzi's.",
         "short": "Built with the help of LLMs · conceived and directed by Simone Pizzi"
     },
     "support": {

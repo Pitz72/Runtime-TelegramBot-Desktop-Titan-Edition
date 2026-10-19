@@ -15,6 +15,7 @@ import { errorMessage } from '../lib/errors';
 import { useUiPreferences, ZOOM_OPTIONS } from '../hooks/useUiPreferences';
 import type { Updater } from '../hooks/useUpdater';
 import { cn } from '@/lib/utils';
+import { RuntimeUtilitiesLogo } from './brand/RuntimeUtilitiesLogo';
 
 interface Props {
     open: boolean;
@@ -241,7 +242,10 @@ export function SystemSettingsModal({ open, onClose, updater, onBotsImported, on
 
                             <Section icon={Sparkles} title={t('credits.title')}>
                                 <p className="whitespace-pre-line text-sm text-fg-2">{t('credits.body')}</p>
-                                <p className="mt-3 text-sm text-fg-3">{t('app.copyright')}</p>
+                                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-4">
+                                    <RuntimeUtilitiesLogo className="h-8 w-auto text-fg-2" />
+                                    <p className="text-sm text-fg-3">{t('app.copyright')}</p>
+                                </div>
                             </Section>
 
                             <Section icon={Heart} title={t('support.sectionTitle')} text={t('support.sectionDesc')}>

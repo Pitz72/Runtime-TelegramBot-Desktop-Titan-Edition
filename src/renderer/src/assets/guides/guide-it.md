@@ -47,6 +47,7 @@ Inserito il token e aggiunte le sorgenti, resta solo da accendere.
 
 ### 💡 Consigli utili e soluzione dei problemi
 *   **Fascia oraria di pubblicazione:** in *Impostazioni del bot → Pianificazione* scegli quando il bot può pubblicare. Se imposti dalle 08:00 alle 22:00, le notizie della notte non vanno perse: restano in coda e partono alle 08:00.
+*   **Avvio silenzioso:** all'avvio del motore ogni bot annuncia nel suo canale di essere online. Per le chat e i canali che non lo gradiscono, accendi *Impostazioni del bot → Generale → Avvio silenzioso*: quel bot parte e lavora come gli altri, ma senza scrivere il messaggio di avvio.
 *   **Errori YouTube:** se compaiono errori sui canali YouTube, di solito YouTube ha cambiato qualcosa nelle sue pagine. Metti in pausa quella sorgente con il suo interruttore e controlla se c'è un aggiornamento dell'applicazione.
 *   **Cambio PC:** per spostare un bot su un altro computer non copiare i file: usa *Impostazioni del bot → Avanzate → Esporta*. Il file .rtb porta con sé sorgenti, filtri, template e fascia oraria. Il token no: è cifrato e legato al computer d'origine, quindi sul nuovo PC va reinserito a mano. Sul nuovo PC basta un doppio clic sul file .rtb per importarlo.
 *   **Leggere meglio:** in *Impostazioni → Accessibilità* puoi ingrandire tutta l'interfaccia (anche con **Ctrl +** e **Ctrl −**, **Ctrl 0** per tornare al 100%) e ridurre animazioni ed effetti.

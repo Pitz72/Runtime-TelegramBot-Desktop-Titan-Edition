@@ -1,10 +1,10 @@
 # Runtime TelegramBot Titan Edition: Architettura, Resilienza e Sicurezza in un Sistema di Broadcast Automation Multi-Canale
 
-**Autore:** Simone Pizzi (Runtime Radio)
+**Autore:** Simone Pizzi (Runtime Utilities)
 **Revisione del Documento:** 1.0 (Riferimento Software v1.7.x "OmniSync")
 **Data:** Marzo 2026
 
-> **Nota sulla paternità del progetto.** Il software descritto qui è stato scritto facendo un uso massiccio di modelli linguistici di grandi dimensioni — Google Gemini, dalla 2.5 alla 3.1, e Anthropic Claude, da Sonnet 4.6 a Opus 5 — che hanno prodotto gran parte del codice. Il concetto, la visione, la direzione progettuale, la definizione di ogni dettaglio funzionale e la caccia ai bug sono di **Simone Pizzi**, che ha progettato, diretto e verificato ogni parte del programma: le scelte architetturali analizzate in questo documento sono sue, così come la loro validazione sul campo. Lo stesso metodo vale per la redazione del documento.
+> **Nota sulla paternità del progetto.** Il software descritto qui è stato scritto facendo un uso massiccio di modelli linguistici di grandi dimensioni — Google Gemini, dalla 2.5 alla 3.1, e Anthropic Claude, da Sonnet 4.6 a Opus 5.5 — che hanno prodotto gran parte del codice. Il concetto, la visione, la direzione progettuale, la definizione di ogni dettaglio funzionale e la caccia ai bug sono di **Simone Pizzi**, che ha progettato, diretto e verificato ogni parte del programma: le scelte architetturali analizzate in questo documento sono sue, così come la loro validazione sul campo. Lo stesso metodo vale per la redazione del documento.
 >
 > **Nota di lettura (agosto 2026).** Il documento si riferisce alla serie v1.7.x e non è stato aggiornato: descrive correttamente l'impianto architetturale, che non è cambiato, ma non copre quanto introdotto dalla v1.8 in poi — filtri per parola chiave, scheduler per feed, digest, coda persistente delle quiet hours, IronShield v2. Per lo stato attuale vedi [`CHANGELOG.md`](../CHANGELOG.md) e [`database.md`](database.md).
 

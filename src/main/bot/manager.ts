@@ -134,6 +134,7 @@ export class BotManager {
                 token: decrypted,
                 is_active: (bot.is_active as number) === 1,
                 notifications_enabled: (bot.notifications_enabled as number) === 1,
+                silent_start: (bot.silent_start as number) === 1,
             } as BotConfig;
         });
     }
@@ -147,27 +148,28 @@ export class BotManager {
             token: decryptToken(bot.token),
             is_active: bot.is_active === 1,
             notifications_enabled: bot.notifications_enabled === 1,
+            silent_start: bot.silent_start === 1,
         } as BotConfig;
     }
 
-    static createBot(name: string, token: string, channelId: string, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string): number | bigint {
+    static createBot(name: string, token: string, channelId: string, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, silentStart?: boolean): number | bigint {
         const date = startDate || new Date().toISOString();
         const interval = checkInterval || 15;
         const notif = notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : 1;
         const sFrom = sendFrom || '00:00';
         const sUntil = sendUntil || '23:59';
         const secureToken = encryptToken(token);
-        const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        const info = stmt.run(name, secureToken, channelId, date, interval, notif, sFrom, sUntil, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null);
+        const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup, silent_start) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const info = stmt.run(name, secureToken, channelId, date, interval, notif, sFrom, sUntil, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null, silentStart ? 1 : 0);
         return info.lastInsertRowid;
     }
 
-    static updateBot(id: number, name: string, token: string, channelId: string, isActive: boolean, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string) {
+    static updateBot(id: number, name: string, token: string, channelId: string, isActive: boolean, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, silentStart?: boolean) {
         const secureToken = encryptToken(token);
         const stmt = db().prepare(
-            'UPDATE bots SET name = ?, token = ?, channel_id = ?, is_active = ?, start_date = COALESCE(?, start_date), check_interval = COALESCE(?, check_interval), notifications_enabled = COALESCE(?, notifications_enabled), send_from = COALESCE(?, send_from), send_until = COALESCE(?, send_until), template_podcast = ?, template_news = ?, template_youtube = ?, template_startup = ? WHERE id = ?'
+            'UPDATE bots SET name = ?, token = ?, channel_id = ?, is_active = ?, start_date = COALESCE(?, start_date), check_interval = COALESCE(?, check_interval), notifications_enabled = COALESCE(?, notifications_enabled), send_from = COALESCE(?, send_from), send_until = COALESCE(?, send_until), template_podcast = ?, template_news = ?, template_youtube = ?, template_startup = ?, silent_start = COALESCE(?, silent_start) WHERE id = ?'
         );
-        stmt.run(name, secureToken, channelId, isActive ? 1 : 0, startDate || null, checkInterval || null, notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : null, sendFrom || null, sendUntil || null, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null, id);
+        stmt.run(name, secureToken, channelId, isActive ? 1 : 0, startDate || null, checkInterval || null, notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : null, sendFrom || null, sendUntil || null, templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null, silentStart !== undefined ? (silentStart ? 1 : 0) : null, id);
     }
 
     static deleteBot(id: number) {
@@ -355,6 +357,7 @@ export class BotManager {
                 template_startup: bot.template_startup,
                 notifications_enabled: bot.notifications_enabled,
                 is_active: bot.is_active,
+                silent_start: bot.silent_start,
                 feeds: feeds.map(f => ({
                     name: f.name,
                     url: f.url,
@@ -396,7 +399,8 @@ export class BotManager {
                     bot.template_podcast,
                     bot.template_news,
                     bot.template_youtube,
-                    bot.template_startup
+                    bot.template_startup,
+                    bot.silent_start === true || bot.silent_start === 1
                 );
 
                 if (bot.is_active === 0 || bot.is_active === false) {
@@ -451,7 +455,8 @@ export class BotManager {
                     template_podcast: botRecord.template_podcast,
                     template_news: botRecord.template_news,
                     template_youtube: botRecord.template_youtube,
-                    template_startup: botRecord.template_startup
+                    template_startup: botRecord.template_startup,
+                    silentStart: botRecord.silent_start === 1
                 },
                 feeds: feeds.map(f => ({
                     name: f.name,
@@ -497,7 +502,8 @@ export class BotManager {
                     data.bot.template_podcast,
                     data.bot.template_news,
                     data.bot.template_youtube,
-                    data.bot.template_startup
+                    data.bot.template_startup,
+                    data.bot.silentStart === true
                 ) as number;
 
                 // Aggiorna is_active (che createBot() omette partendo da acceso)

@@ -47,6 +47,7 @@ With the token entered and the sources added, all that is left is to start.
 
 ### 💡 Useful Tips & Troubleshooting
 *   **Publishing hours:** in *Bot settings → Schedule* choose when the bot may publish. If you set 08:00 to 22:00, overnight news is not lost: it waits in a queue and goes out at 08:00.
+*   **Silent start:** when the engine starts, every bot announces in its channel that it is online. For chats and channels that would rather not see it, turn on *Bot settings → General → Silent start*: that bot starts and works like the others, but without posting the startup message.
 *   **YouTube errors:** if errors appear on YouTube channels, YouTube has usually changed something in its pages. Pause that source with its switch and check whether an application update is available.
 *   **Changing PC:** to move a bot to another computer, do not copy the files: use *Bot settings → Advanced → Export*. The .rtb file carries the sources, filters, templates and publishing hours. The token does not travel: it is encrypted and tied to the originating computer, so on the new PC it must be re-entered by hand. On the new PC, double-clicking the .rtb file imports it.
 *   **Easier reading:** in *Settings → Accessibility* you can enlarge the whole interface (also with **Ctrl +** and **Ctrl −**, **Ctrl 0** to go back to 100%) and reduce animations and effects.

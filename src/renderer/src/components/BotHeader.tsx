@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, SlidersHorizontal, CalendarDays, Clock } from 'lucide-react';
+import { BarChart3, SlidersHorizontal, CalendarDays, Clock, MessageSquareOff } from 'lucide-react';
 import { BotConfig } from '../../../shared/types';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Controls';
@@ -48,6 +48,12 @@ export function BotHeader({ bot, stats, onOpenSettings, onOpenStats }: Props) {
                         <span className="inline-flex items-center gap-1.5">
                             <Clock size={14} aria-hidden="true" />
                             {t('botHeader.window').replace('{from}', bot.send_from).replace('{until}', bot.send_until)}
+                        </span>
+                    )}
+                    {bot.silent_start && (
+                        <span className="inline-flex items-center gap-1.5">
+                            <MessageSquareOff size={14} aria-hidden="true" />
+                            {t('botHeader.silent')}
                         </span>
                     )}
                 </p>

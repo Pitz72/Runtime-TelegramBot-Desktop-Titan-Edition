@@ -71,6 +71,8 @@ export interface BotConfig {
     template_startup?: string;
     notifications_enabled: boolean;
     is_active: boolean;
+    /** Avvio silenzioso: all'avvio del motore il bot non pubblica il messaggio di avvio (schema v13) */
+    silent_start: boolean;
 }
 
 export interface FeedConfig {

@@ -41,6 +41,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
     const [channelId, setChannelId] = useState(bot.channel_id);
     const [isActive, setIsActive] = useState(bot.is_active);
     const [notifications, setNotifications] = useState(bot.notifications_enabled ?? true);
+    const [silentStart, setSilentStart] = useState(bot.silent_start ?? false);
     const [startDate, setStartDate] = useState(bot.start_date.split('T')[0]);
     const [interval, setIntervalMinutes] = useState(String(bot.check_interval || 15));
     const [sendFrom, setSendFrom] = useState(bot.send_from || '00:00');
@@ -61,7 +62,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
         if (!open) return;
         setTab('general');
         setName(bot.name); setToken(bot.token); setShowToken(false); setChannelId(bot.channel_id);
-        setIsActive(bot.is_active); setNotifications(bot.notifications_enabled ?? true);
+        setIsActive(bot.is_active); setNotifications(bot.notifications_enabled ?? true); setSilentStart(bot.silent_start ?? false);
         setStartDate(bot.start_date.split('T')[0]); setIntervalMinutes(String(bot.check_interval || 15));
         setSendFrom(bot.send_from || '00:00'); setSendUntil(bot.send_until || '23:59');
         setTplStartup(bot.template_startup || ''); setTplNews(bot.template_news || '');
@@ -93,6 +94,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                 id: bot.id, name: name.trim(), token: token.trim(), channelId: channelId.trim(), isActive, startDate,
                 checkInterval: intervalNumber, notificationsEnabled: notifications, sendFrom, sendUntil,
                 templatePodcast: tplPodcast, templateNews: tplNews, templateYoutube: tplYoutube, templateStartup: tplStartup,
+                silentStart,
             });
             success(t('botSettings.saved'));
             onSaved();
@@ -200,6 +202,8 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                                 <Switch checked={isActive} onChange={setIsActive} label={t('botSettings.active')} description={t('botSettings.activeHint')} />
                                 <div className="h-px bg-line" aria-hidden="true" />
                                 <Switch checked={notifications} onChange={setNotifications} label={t('botSettings.notifications')} description={t('botSettings.notificationsHint')} />
+                                <div className="h-px bg-line" aria-hidden="true" />
+                                <Switch checked={silentStart} onChange={setSilentStart} label={t('botSettings.silentStart')} description={t('botSettings.silentStartHint')} />
                             </div>
                         </div>
                     )}
@@ -251,7 +255,14 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                             <TemplateEditor label={t('templates.news')} value={tplNews} onChange={setTplNews} defaultTemplate={DEFAULTS.news} />
                             <TemplateEditor label={t('templates.podcast')} value={tplPodcast} onChange={setTplPodcast} defaultTemplate={DEFAULTS.podcast} />
                             <TemplateEditor label={t('templates.youtube')} value={tplYoutube} onChange={setTplYoutube} defaultTemplate={DEFAULTS.youtube} />
-                            <TemplateEditor label={t('templates.startup')} description={t('templates.startupHint')} value={tplStartup} onChange={setTplStartup} defaultTemplate={DEFAULTS.startup} isStartup />
+                            <TemplateEditor
+                                label={t('templates.startup')}
+                                description={silentStart ? t('templates.startupSilent') : t('templates.startupHint')}
+                                value={tplStartup}
+                                onChange={setTplStartup}
+                                defaultTemplate={DEFAULTS.startup}
+                                isStartup
+                            />
                         </div>
                     )}
 

@@ -22,6 +22,7 @@ export interface TitanAPI {
         templateNews?: string
         templateYoutube?: string
         templateStartup?: string
+        silentStart?: boolean
     }) => Promise<void>
 
     // Feed Management

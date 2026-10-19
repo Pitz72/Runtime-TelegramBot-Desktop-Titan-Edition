@@ -10,7 +10,7 @@ Grazie per l'interesse. Il progetto è nato come applicazione commerciale a svil
 
 Vale la pena saperlo prima di leggerlo, perché spiega diverse cose che altrimenti sorprendono.
 
-Il codice è stato scritto facendo un **uso massiccio di modelli linguistici**: Google **Gemini**, dalla 2.5 alla 3.1, e Anthropic **Claude**, da Sonnet 4.6 a Opus 5. Gran parte di ciò che leggi l'hanno prodotta loro.
+Il codice è stato scritto facendo un **uso massiccio di modelli linguistici**: Google **Gemini**, dalla 2.5 alla 3.1, e Anthropic **Claude**, da Sonnet 4.6 a Opus 5.5. Gran parte di ciò che leggi l'hanno prodotta loro.
 
 Il concetto, la visione, la direzione progettuale, la definizione di ogni dettaglio funzionale e la caccia ai bug sono di **Simone Pizzi**, che ha progettato, diretto e verificato ogni parte del programma. I modelli hanno scritto il codice; le decisioni sono state tutte sue.
 

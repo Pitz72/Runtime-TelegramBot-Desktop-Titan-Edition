@@ -124,4 +124,4 @@ Donazione libera
 Titan è gratuito e resta gratuito. La donazione è facoltativa e
 non sblocca nulla.
 
-  Simone Pizzi — Runtime Radio
+  Simone Pizzi — Runtime Utilities

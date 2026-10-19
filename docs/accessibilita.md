@@ -64,11 +64,12 @@ Provato premendo i tasti, non simulando i clic:
 - lo stato del motore è annunciato quando cambia; il diario è una regione `log` senza annunci continui;
 - la lingua della pagina segue quella scelta, per la pronuncia corretta.
 
-### Ingrandimento e movimento (1.4.4, 1.4.10, 2.3.3)
+### Ingrandimento e movimento (1.4.4, 1.4.10, 2.2.2, 2.3.3)
 
 - **Impostazioni → Accessibilità → Dimensione dell'interfaccia**: dall'80% al 180%, anche con **Ctrl +**, **Ctrl −** e **Ctrl 0**. Il valore resta salvato tra un avvio e l'altro. Provato nell'app vera al 125% e, nel banco di prova, sull'equivalente di un portatile 1366×768 al 180%: nessun controllo esce dallo schermo, e quando l'altezza non basta l'area principale scorre invece di tagliare l'elenco.
 - La finestra ha una misura minima (880×600) sotto la quale l'interfaccia verrebbe tagliata; a quella misura tutte le finestre di dialogo entrano per intero.
 - Chi chiede al sistema meno animazioni le ha tolte anche in Titan; l'interruttore **«Riduci animazioni ed effetti»** fa lo stesso a mano.
+- La schermata d'ingresso ha un'animazione d'apertura (orbita, satellite, titolo) che dura meno di quattro secondi e poi resta ferma: niente movimento continuo accanto ai controlli, quindi nulla da mettere in pausa. Con la riduzione delle animazioni attiva la schermata compare già composta.
 
 ### Dimensione dei comandi (2.5.8)
 

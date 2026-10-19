@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     buildDigestMessage, classifyTelegramError, DIGEST_TEXT_BUDGET, escapeHtml, escapeUrl,
     isFeedDue, isTimeAllowed, loopIntervalMinutes, parseStartDate, parseUtcTimestamp,
-    passesKeywordFilter, pickUrl, truncate,
+    passesKeywordFilter, pickUrl, startupMessage, truncate,
 } from './rules';
 
 const at = (h: number, m: number) => new Date(2026, 9, 19, h, m, 0);
@@ -190,5 +190,25 @@ describe('classifyTelegramError', () => {
     });
     it('nel dubbio si riprova, non si perde il contenuto', () => {
         expect(classifyTelegramError(new Error('qualcosa di mai visto')).kind).toBe('transient');
+    });
+});
+
+describe('startupMessage', () => {
+    const bot = { name: 'Radio <Demo>', token: '123:abc', is_active: true, silent_start: false, template_startup: null };
+
+    it('annuncia l\'avvio col modello predefinito, nome in escape e versione in fondo', () => {
+        expect(startupMessage(bot, '2.4.0')).toBe('🟢 <b>Radio &lt;Demo&gt; Online</b>\n\n<pre>Runtime TelegramBot Desktop v2.4.0</pre>');
+    });
+    it('usa il modello personalizzato quando c\'è, e ignora quello fatto di soli spazi', () => {
+        expect(startupMessage({ ...bot, template_startup: 'Eccomi' }, '2.4.0')).toBe('Eccomi\n\n<pre>Runtime TelegramBot Desktop v2.4.0</pre>');
+        expect(startupMessage({ ...bot, template_startup: '   ' }, '2.4.0')).toContain('Online');
+    });
+    it('avvio silenzioso: nessun messaggio, nemmeno con un modello personalizzato', () => {
+        expect(startupMessage({ ...bot, silent_start: true }, '2.4.0')).toBeNull();
+        expect(startupMessage({ ...bot, silent_start: true, template_startup: 'Eccomi' }, '2.4.0')).toBeNull();
+    });
+    it('nessun messaggio da un bot spento o senza token leggibile', () => {
+        expect(startupMessage({ ...bot, is_active: false }, '2.4.0')).toBeNull();
+        expect(startupMessage({ ...bot, token: '' }, '2.4.0')).toBeNull();
     });
 });

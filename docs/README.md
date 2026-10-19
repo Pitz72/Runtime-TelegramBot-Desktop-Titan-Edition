@@ -2,7 +2,7 @@
 
 Indice della documentazione del progetto.
 
-> **Paternità.** Software e documentazione sono stati scritti facendo un uso massiccio di modelli linguistici — Google Gemini, dalla 2.5 alla 3.1, e Anthropic Claude, da Sonnet 4.6 a Opus 5. Il concetto, la visione, la direzione progettuale, la cura di ogni dettaglio e la caccia ai bug sono di **Simone Pizzi**, che ha progettato, diretto e verificato ogni parte del lavoro. Il resoconto completo è nel [README](../README.md#come-è-stato-scritto).
+> **Paternità.** Software e documentazione sono stati scritti facendo un uso massiccio di modelli linguistici — Google Gemini, dalla 2.5 alla 3.1, e Anthropic Claude, da Sonnet 4.6 a Opus 5.5. Il concetto, la visione, la direzione progettuale, la cura di ogni dettaglio e la caccia ai bug sono di **Simone Pizzi**, che ha progettato, diretto e verificato ogni parte del lavoro. Il resoconto completo è nel [README](../README.md#come-è-stato-scritto).
 
 > **Nota sulle versioni.** Questo indice non riporta il numero di versione corrente né l'elenco delle release: la fonte unica è [`CHANGELOG.md`](../CHANGELOG.md) nella radice del repository. La versione effettiva è quella in `package.json`. Il vecchio indice duplicava la tabella dei changelog ed è rimasto indietro di quattordici release — non ripetiamo l'errore.
 

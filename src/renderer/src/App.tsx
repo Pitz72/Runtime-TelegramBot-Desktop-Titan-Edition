@@ -6,6 +6,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { UpdateModal } from '@/components/UpdateModal';
 import { WhatsNewModal } from '@/components/WhatsNewModal';
 import { useUpdater } from '@/hooks/useUpdater';
+import { useUiPreferences } from '@/hooks/useUiPreferences';
 
 function App(): JSX.Element {
     const [hasBots, setHasBots] = useState<boolean | null>(null);
@@ -15,6 +16,7 @@ function App(): JSX.Element {
     // Controllo aggiornamenti centralizzato: parte già dall'intro e la schermata di avviso
     // (UpdateModal) compare sopra qualunque vista.
     const updater = useUpdater();
+    const { ready: preferencesReady } = useUiPreferences();
 
     useEffect(() => {
         window.api.getBots().then((bots) => {
@@ -35,7 +37,8 @@ function App(): JSX.Element {
         setHasBots(true);
     };
 
-    if (hasBots === null) return <div className="h-screen bg-canvas" />;
+    // L'intro anima all'apertura: deve già sapere se l'utente ha chiesto meno movimento.
+    if (hasBots === null || !preferencesReady) return <div className="h-screen bg-canvas" />;
 
     return (
         <ErrorBoundary>

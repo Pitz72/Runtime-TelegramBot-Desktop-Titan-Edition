@@ -67,7 +67,7 @@ portable:
 # ${arch} nel nome è obbligatorio, altrimenti x64 e arm64 producono file omonimi
 # che si sovrascrivono a vicenda quando la release li raccoglie insieme.
 linux:
-  maintainer: Runtime Radio <info@runtimeradio.it>
+  maintainer: Simone Pizzi (Runtime Utilities) <info@runtimeradio.it>
   icon: resources/icon.png
   target:
     - AppImage
