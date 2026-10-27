@@ -17,6 +17,7 @@ import { tm, setMainLocale } from './i18n';
 import { MUTE_MODES, parseStartDate } from './bot/rules';
 import type { BotBehavior } from './bot/manager';
 import { checkBot } from './bot/check';
+import { defaultTemplate } from './bot/telegram';
 
 /**
  * Testo di un file di licenza spedito con l'app: quella di Titan (MIT) o l'elenco delle
@@ -164,8 +165,21 @@ export function setupIpc() {
     // --- SYSTEM ---
     ipcMain.handle('get-version', () => app.getVersion());
 
-    // Lingua dell'interfaccia: serve ai dialoghi nativi aperti da qui (vedi main/i18n.ts).
-    ipcMain.handle('set-locale', (_, locale: unknown) => { setMainLocale(locale); });
+    // Lingua dell'interfaccia: serve ai testi del main (vedi main/i18n.ts). Si salva, così
+    // al prossimo avvio vale da subito, anche per il motore che parte da solo.
+    ipcMain.handle('set-locale', async (_, locale: unknown) => {
+        if (locale !== 'it' && locale !== 'en') return;
+        setMainLocale(locale);
+        if ((await readSettings()).locale !== locale) await updateSettings(s => { s.locale = locale; });
+    });
+
+    // I modelli predefiniti dei messaggi, come li usa il motore: l'interfaccia li mostra
+    // invece di tenerne una copia propria, che poteva divergere.
+    ipcMain.handle('get-default-templates', () => ({
+        news: defaultTemplate('news'),
+        podcast: defaultTemplate('podcast'),
+        youtube: defaultTemplate('youtube'),
+    }));
 
     // Apre un URL esterno nel browser di sistema. Solo https per sicurezza.
     ipcMain.handle('open-external', (_, url: string) => {
@@ -488,7 +502,7 @@ export function setupIpc() {
                 }
             } catch (e: any) {
                 rmSync(staged, { force: true });
-                return { success: false, error: `File non importato: database non valido o corrotto. ${e.message || e}` };
+                return { success: false, error: tm('dbImportInvalid', { error: String(e.message || e) }) };
             }
 
             // Il database attuale non si perde: una copia resta nella cartella dei backup.

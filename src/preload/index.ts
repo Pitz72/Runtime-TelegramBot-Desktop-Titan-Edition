@@ -34,6 +34,7 @@ const api = {
         muteUntil?: string
     }) => ipcRenderer.invoke('update-bot', data),
     testBot: (data: { token: string; channelId: string }) => ipcRenderer.invoke('test-bot', data),
+    getDefaultTemplates: () => ipcRenderer.invoke('get-default-templates') as Promise<{ news: string; podcast: string; youtube: string }>,
 
     // Feed Management
     getFeeds: (botId: number) => ipcRenderer.invoke('get-feeds', botId),

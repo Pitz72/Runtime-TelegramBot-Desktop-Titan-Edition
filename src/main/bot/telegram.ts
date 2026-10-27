@@ -1,5 +1,6 @@
 import { Telegram } from 'telegraf';
 import { TitanLogger } from '../logger';
+import { tm } from '../i18n';
 import { classifyTelegramError, escapeHtml, escapeUrl, normalizeChannelId, tidyMessage, type TelegramErrorKind } from './rules';
 
 /**
@@ -17,11 +18,15 @@ export interface SendOptions {
     silent?: boolean;
 }
 
-/** Il modello che il motore usa quando il bot non ha un template per quel tipo di sorgente. */
+/**
+ * Il modello che il motore usa quando il bot non ha un template per quel tipo di sorgente,
+ * nella lingua dell'app: in italiano è identico a quello di sempre; con l'interfaccia in
+ * inglese i messaggi dicono «Read the full article» invece di «Leggi l'articolo completo».
+ */
 export function defaultTemplate(type: 'podcast' | 'news' | 'youtube'): string {
-    if (type === 'podcast') return "🎙 <b>{{feedName}}</b>\n\n<i>{{title}}</i>\n\n{{summary}}\n\n🎧 <a href='{{link}}'>Ascolta l'episodio</a>";
-    if (type === 'youtube') return "🎬 <b>{{feedName}}</b>\n\n<b>{{title}}</b>\n\n▶️ <a href='{{link}}'>Guarda il video</a>";
-    return "📰 <b>{{feedName}}</b>\n\n<b>{{title}}</b>\n\n🔗 <a href='{{link}}'>Leggi l'articolo completo</a>";
+    if (type === 'podcast') return tm('tplPodcast');
+    if (type === 'youtube') return tm('tplYoutube');
+    return tm('tplNews');
 }
 
 /** Il messaggio di un contenuto: template riempito, campi messi in sicurezza, anteprima in testa. */
@@ -91,7 +96,7 @@ export class TelegramClient {
         // sbagliata) farebbe saltare ogni contenuto di quel tipo, uno dopo l'altro. Si riprova
         // con il modello predefinito: il contenuto esce con l'aspetto standard invece di perdersi.
         if (!result.ok && result.kind === 'rejected' && custom) {
-            this.logToUI(`⚠️ Telegram rifiuta il template personalizzato (${result.error}): «${String(item.title || '')}» pubblicato con il modello predefinito. Correggi il template nelle impostazioni del bot.`, 'warn');
+            this.logToUI(tm('templateRejected', { error: result.error, title: String(item.title || '') }), 'warn');
             return this.sendMessage(renderItemMessage(item, defaultTemplate(type)), options);
         }
         return result;
@@ -126,11 +131,11 @@ export class TelegramClient {
                 if (info.kind === 'flood') {
                     const wait = info.retryAfter ?? 5;
                     if (wait > MAX_FLOOD_WAIT_S || floodWaits >= 3) {
-                        this.logToUI(`⚠️ Telegram chiede di attendere ${wait}s: contenuto rimandato al prossimo giro.`, 'warn');
+                        this.logToUI(tm('floodTooLong', { wait: String(wait) }), 'warn');
                         return { ok: false, kind: 'transient', error: info.description };
                     }
                     floodWaits++;
-                    this.logToUI(`⏳ FloodWait: attesa di ${wait}s richiesta da Telegram`, 'warn');
+                    this.logToUI(tm('floodWait', { wait: String(wait) }), 'warn');
                     if (await this.abortableSleep(wait * 1000)) return { ok: false, kind: 'aborted', error: 'engine stopped' };
                     continue;
                 }
@@ -145,7 +150,7 @@ export class TelegramClient {
                     // la parte del messaggio più spesso contestata. Se non basta, il rifiuto è definitivo.
                     if (!previewDisabled) {
                         previewDisabled = true;
-                        this.logToUI(`🔄 Telegram ha rifiutato il messaggio (${info.description}): nuovo tentativo senza anteprima`, 'warn');
+                        this.logToUI(tm('previewRetry', { error: info.description }), 'warn');
                         continue;
                     }
                     return { ok: false, kind: 'rejected', error: info.description };
@@ -156,7 +161,7 @@ export class TelegramClient {
                     return { ok: false, kind: 'transient', error: info.description };
                 }
                 const pause = TRANSIENT_BACKOFF_MS[transientAttempts++];
-                this.logToUI(`⚠️ Errore di rete verso Telegram (tentativo ${transientAttempts}/${TRANSIENT_BACKOFF_MS.length}): ${info.description}`, 'warn');
+                this.logToUI(tm('networkRetry', { n: String(transientAttempts), max: String(TRANSIENT_BACKOFF_MS.length), error: info.description }), 'warn');
                 if (await this.abortableSleep(pause)) return { ok: false, kind: 'aborted', error: 'engine stopped' };
             }
         }

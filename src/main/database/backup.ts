@@ -10,10 +10,12 @@
  * il file `titan.db` da solo può non contenere le ultime scritture.
  */
 import { app } from 'electron';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { rename } from 'node:fs/promises';
 import { getDB } from './schema';
+import { TitanLogger } from '../logger';
+import { tm } from '../i18n';
 
 export const DAILY_BACKUPS_KEPT = 7;
 const BEFORE_IMPORT_KEPT = 3;
@@ -69,13 +71,13 @@ export async function backupBeforeImport(dir = backupDir()): Promise<string> {
  * Backup quotidiano: un minuto dopo l'avvio (non nel pieno della partenza) e poi un
  * controllo ogni ora, perché Titan resta acceso per giorni e la data cambia.
  */
-export function scheduleDailyBackups(log: (message: string, level?: 'warn' | 'error') => void) {
+export function scheduleDailyBackups() {
     const run = () => {
         ensureDailyBackup()
             .then(file => {
-                if (file) log(`🗄️ Backup quotidiano del database salvato (${file.split(/[\\/]/).pop()}); Titan tiene gli ultimi ${DAILY_BACKUPS_KEPT}.`);
+                if (file) TitanLogger.log(tm('backupDone', { file: basename(file), n: String(DAILY_BACKUPS_KEPT) }));
             })
-            .catch(e => log(`❌ Backup quotidiano del database non riuscito: ${e}`, 'error'));
+            .catch(e => TitanLogger.log(tm('backupFailed', { error: String(e) }), 'error'));
     };
     setTimeout(run, 60_000);
     setInterval(run, 60 * 60 * 1000);

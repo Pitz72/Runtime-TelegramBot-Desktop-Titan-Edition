@@ -4,6 +4,7 @@ import { TelegramClient, type SendResult } from './telegram';
 import { BotManager } from './manager';
 import { BotConfig, FeedConfig, RssItem } from '../../shared/types';
 import { TitanLogger } from '../logger';
+import { tm } from '../i18n';
 import { app, BrowserWindow, Notification } from 'electron';
 import {
     buildDigestMessage, hostOf, isFeedDue, isMuted, isTimeAllowed, isTransientFetchError,
@@ -138,7 +139,7 @@ export class BotEngine {
                 TitanLogger.log("🚀 Engine Started - Multi-Bot Mode", { type: 'engine-start' });
                 await this.checkLoop(run);
             } catch (e) {
-                TitanLogger.log(`❌ Errore durante l'avvio del motore: ${e}`);
+                TitanLogger.log(tm('engineStartFailed', { error: String(e) }));
             } finally {
                 if (this.scanningRun === run) this.scanningRun = null;
                 // Comunque vada il primo giro, il successivo va pianificato: prima un'eccezione
@@ -187,11 +188,9 @@ export class BotEngine {
         const run = this.runId;
         if (this.timeoutId) clearTimeout(this.timeoutId);
         this.timeoutId = null;
-        TitanLogger.log(reason === 'resume'
-            ? '💤 Ripresa dalla sospensione: controllo di tutte le sorgenti attive, senza aspettare il loro intervallo.'
-            : '👆 Controllo immediato richiesto: tutte le sorgenti attive, senza aspettare il loro intervallo.');
+        TitanLogger.log(tm(reason === 'resume' ? 'scanNowResume' : 'scanNowUser'));
         this.checkLoop(run, true)
-            .catch(e => TitanLogger.log(`❌ Errore non gestito in checkLoop: ${e}`))
+            .catch(e => TitanLogger.log(tm('engineUnexpected', { error: String(e) })))
             .finally(() => this.scheduleNext(run));
         return 'started';
     }
@@ -244,13 +243,13 @@ export class BotEngine {
             let res = await this.getClient(bot).sendMessage(message, { silent: isMuted(bot) });
             // Messaggio di avvio personalizzato rifiutato: si ripiega su quello standard.
             if (!res.ok && res.kind === 'rejected' && bot.template_startup?.trim() && this.isLive(run)) {
-                TitanLogger.log(`⚠️ [${bot.name}] Telegram rifiuta il messaggio di avvio personalizzato (${res.error}): uso quello standard.`, 'warn');
+                TitanLogger.log(tm('startupTemplateRejected', { bot: bot.name, error: res.error }), 'warn');
                 res = await this.getClient(bot).sendMessage(startupMessage({ ...bot, template_startup: null }, appVersion)!, { silent: isMuted(bot) });
             }
             // Motore fermato mentre la richiesta era in volo: l'esito non interessa più.
             if (!this.isLive(run)) return;
             if (!res.ok && res.kind !== 'aborted') {
-                TitanLogger.log(`❌ Failed to send startup message for ${bot.name}: ${res.error}`);
+                TitanLogger.log(tm('startupFailed', { bot: bot.name, error: res.error }));
             }
         }
     }
@@ -272,7 +271,7 @@ export class BotEngine {
         try {
             interval = this.getMinInterval();
         } catch (e) {
-            TitanLogger.log(`❌ Impossibile calcolare il prossimo giro, uso 15 minuti: ${e}`);
+            TitanLogger.log(tm('nextScanFallback', { error: String(e) }));
         }
         const minutes = interval / 60000;
         TitanLogger.log(
@@ -284,7 +283,7 @@ export class BotEngine {
             // il loop di scheduling (né propagarsi come unhandledRejection). Il prossimo
             // ciclo viene comunque pianificato — dalla stessa generazione, o da nessuna.
             this.checkLoop(run)
-                .catch(e => TitanLogger.log(`❌ Errore non gestito in checkLoop: ${e}`))
+                .catch(e => TitanLogger.log(tm('engineUnexpected', { error: String(e) })))
                 .finally(() => this.scheduleNext(run));
         }, interval);
     }
@@ -318,34 +317,34 @@ export class BotEngine {
             // Token illeggibile su questa macchina (es. DB importato da un altro PC, keychain
             // OS non disponibile): inutile tentare invii destinati a fallire con "Unauthorized".
             if (!bot.token) {
-                TitanLogger.log(`⚠️ Bot [${bot.name}]: token non leggibile su questa macchina — bot saltato. Apri le impostazioni del bot e reinserisci il token.`);
+                TitanLogger.log(tm('tokenUnreadable', { bot: bot.name }), 'warn');
                 continue;
             }
 
             const cutoff = parseStartDate(bot.start_date);
             if (cutoff === null) {
-                TitanLogger.log(`❌ Bot [${bot.name}]: la data di partenza «${bot.start_date}» non è una data valida — bot sospeso per non pubblicare l'intero arretrato dei feed. Correggila nelle impostazioni del bot.`);
+                TitanLogger.log(tm('startDateInvalid', { bot: bot.name, date: String(bot.start_date) }), 'error');
                 continue;
             }
 
             try {
                 const feeds = BotManager.getFeeds(bot.id);
                 if (feeds.length === 0) {
-                    TitanLogger.log(`⚠️ Bot [${bot.name}] has no feeds.`);
+                    TitanLogger.log(tm('botNoFeeds', { bot: bot.name }), 'warn');
                     continue;
                 }
 
                 TitanLogger.log(`🤖 Bot [${bot.name}]: Checking ${feeds.length} feeds...`);
 
                 if (cutoff > Date.now()) {
-                    TitanLogger.log(`  ⚠️ [${bot.name}] ATTENZIONE: la data di partenza del bot (${bot.start_date}) è nel futuro — nessun contenuto verrà pubblicato finché la data non viene raggiunta.`);
+                    TitanLogger.log(tm('startDateFuture', { bot: bot.name, date: String(bot.start_date) }), 'warn');
                 }
 
                 // Drena la coda quiet hours prima di processare i nuovi feed
                 try {
                     this.drainPendingQueue(bot, run);
                 } catch (e) {
-                    TitanLogger.log(`  ❌ [${bot.name}] Errore drenaggio coda quiet hours: ${e}`);
+                    TitanLogger.log(tm('pendingDrainFailed', { bot: bot.name, error: String(e) }), 'error');
                 }
 
                 const activeFeeds = feeds.filter(f => f.is_active);
@@ -374,7 +373,7 @@ export class BotEngine {
                     try {
                         await this.processFeed(bot, feed, cutoff, run);
                     } catch (feedError) {
-                        TitanLogger.log(`  ❌ [${feed.name}] Critical error: ${feedError}`);
+                        TitanLogger.log(tm('feedFailed', { feed: feed.name, error: String(feedError) }), 'error');
                     }
                 });
 
@@ -387,7 +386,7 @@ export class BotEngine {
                     try {
                         await this.processFeed(bot, feed, cutoff, run);
                     } catch (feedError) {
-                        TitanLogger.log(`  ❌ [${feed.name}] Critical error: ${feedError}`);
+                        TitanLogger.log(tm('feedFailed', { feed: feed.name, error: String(feedError) }), 'error');
                     }
 
                     if (i < youtubeFeeds.length - 1 && this.isLive(run)) {
@@ -397,18 +396,18 @@ export class BotEngine {
 
                 // Warning: coda troppo grande segnala un accumulo anomalo — fix #17
                 if (this.publishQueue.length > 50) {
-                    TitanLogger.log(`  ⚠️ [${bot.name}] Coda di invio grande: ${this.publishQueue.length} item in attesa.`);
+                    TitanLogger.log(tm('queueLarge', { bot: bot.name, n: String(this.publishQueue.length) }), 'warn');
                 }
 
                 // F9 Digest: invia i digest in scadenza per questo bot
                 try {
                     await this.processDigests(bot, run);
                 } catch (e) {
-                    TitanLogger.log(`  ❌ [${bot.name}] Errore digest: ${e}`);
+                    TitanLogger.log(tm('digestError', { bot: bot.name, error: String(e) }), 'error');
                 }
 
             } catch (e) {
-                TitanLogger.log(`❌ Error processing bot ${bot.name}: ${e}`);
+                TitanLogger.log(tm('botFailed', { bot: bot.name, error: String(e) }), 'error');
             }
         }
 
@@ -420,7 +419,7 @@ export class BotEngine {
         if (this.publishQueue.length > 0 && !this.isPublishing) {
             this.processPublishQueue(run).catch(e => {
                 if (run === this.runId) this.isPublishing = false;
-                TitanLogger.log(`❌ Errore non gestito in processPublishQueue: ${e}`);
+                TitanLogger.log(tm('engineUnexpected', { error: String(e) }), 'error');
             });
         } else if (!this.isPublishing) {
             // Nessun contenuto da inviare: il giro finisce qui, e va detto. Se invece la coda
@@ -519,7 +518,7 @@ export class BotEngine {
                 // La lettura può venire da un altro bot: il nome della sorgente è quello di questo.
                 items = read.items.map(item => ({ ...item, feedName: feed.name }));
                 if (read.retried) {
-                    TitanLogger.log(`  ⚠️ ${tag} ${feed.name}: letto al secondo tentativo (il primo era andato in timeout o la connessione era caduta).`, 'warn');
+                    TitanLogger.log(tm('feedRetried', { bot: bot.name, feed: feed.name }), 'warn');
                 }
             }
 
@@ -528,7 +527,7 @@ export class BotEngine {
             // SAFETY CHECK: il fetch è asincrono e può durare secondi; nel frattempo l'utente
             // può aver eliminato il bot (CASCADE) dalla Dashboard.
             if (!BotManager.botExists(bot.id)) {
-                TitanLogger.log(`  ⚠️ ${tag} Elaborazione interrotta: il bot è stato eliminato durante il fetch.`);
+                TitanLogger.log(tm('botDeletedDuringFetch', { bot: bot.name }), 'warn');
                 return;
             }
 
@@ -626,7 +625,7 @@ export class BotEngine {
             }
 
         } catch (e) {
-            TitanLogger.log(`  ❌ [${feed.name}] Processing error: ${e}`);
+            TitanLogger.log(tm('feedFailed', { feed: feed.name, error: String(e) }), 'error');
             if (feed.type === 'youtube' && !this.hasNotifiedYoutubeError) {
                 this.hasNotifiedYoutubeError = true;
                 BrowserWindow.getAllWindows().forEach(win => {
@@ -690,7 +689,7 @@ export class BotEngine {
             try {
                 BotManager.addToPendingQueue(job.botId, job.feed.id, job.item);
             } catch (e) {
-                TitanLogger.log(`  ❌ [${job.botName}] Impossibile rimettere in coda «${job.item.title}»: ${e}`);
+                TitanLogger.log(tm('requeueFailed', { bot: job.botName, title: job.item.title, error: String(e) }), 'error');
             }
         }
     }
@@ -713,7 +712,7 @@ export class BotEngine {
                     // token, canale e template modificati nel frattempo valgono da subito.
                     const bot = BotManager.getBot(job.botId);
                     if (!bot) {
-                        TitanLogger.log(`  ⚠️ [${job.botName}] Job scartato dalla coda: il bot originario è stato eliminato.`);
+                        TitanLogger.log(tm('jobBotDeleted', { bot: job.botName }), 'warn');
                         continue;
                     }
                     if (!bot.is_active) {
@@ -755,7 +754,7 @@ export class BotEngine {
                         if (bot.notifications_enabled && Notification.isSupported()) {
                             new Notification({
                                 title: `Titan: ${bot.name}`,
-                                body: `Inviato: ${item.title}`
+                                body: tm('notifySent', { title: item.title }),
                             }).show();
                         }
 
@@ -771,13 +770,13 @@ export class BotEngine {
 
                         case 'transient':
                             if (job.retryCount < MAX_RETRIES) {
-                                TitanLogger.log(`  ⚠️ ${tag} Send failed (tentativo ${job.retryCount + 1}/${MAX_RETRIES + 1}): ${item.title} — riaccodato`);
+                                TitanLogger.log(tm('sendRetry', { bot: bot.name, n: String(job.retryCount + 1), max: String(MAX_RETRIES + 1), title: item.title }), 'warn');
                                 this.publishQueue.push({ ...job, retryCount: job.retryCount + 1 });
                             } else {
                                 // NON si marca come pubblicato: il contenuto è ancora nel feed e torna
                                 // al prossimo giro. Prima veniva dato per inviato — e perso per sempre —
                                 // dopo pochi secondi di Telegram irraggiungibile.
-                                TitanLogger.log(`  ⚠️ ${tag} Telegram non raggiungibile: «${item.title}» non pubblicato, riproverò al prossimo giro. (${result.error})`, 'warn');
+                                TitanLogger.log(tm('sendGaveUp', { bot: bot.name, title: item.title, error: result.error }), 'warn');
                                 this.returnToPending([job]);
                             }
                             break;
@@ -789,19 +788,19 @@ export class BotEngine {
                             const sameBot = this.publishQueue.filter(j => j.botId === bot.id);
                             this.publishQueue = this.publishQueue.filter(j => j.botId !== bot.id);
                             this.returnToPending([job, ...sameBot]);
-                            TitanLogger.log(`  ❌ ${tag} Telegram rifiuta il bot: ${result.error}. Controlla token, canale e che il bot sia amministratore del canale. ${sameBot.length + 1} contenuti restano in attesa e partiranno quando il problema è risolto.`);
+                            TitanLogger.log(tm('botRejected', { bot: bot.name, error: result.error, n: String(sameBot.length + 1) }), 'error');
                             break;
                         }
 
                         case 'rejected':
                             // Telegram rifiuta proprio questo messaggio, anche senza anteprima: ritentare
                             // darebbe lo stesso esito a ogni giro. Si salta, dicendolo.
-                            TitanLogger.log(`  ❌ ${tag} Telegram ha rifiutato «${item.title}»: ${result.error}. Contenuto saltato per non ritentarlo all'infinito — controlla il template dei messaggi.`);
+                            TitanLogger.log(tm('itemRejected', { bot: bot.name, title: item.title, error: result.error }), 'error');
                             BotManager.markProcessed(bot.id, feed.id, item.id, item.title, contentType);
                             break;
                     }
                 } catch (jobError) {
-                    TitanLogger.log(`  ❌ [${job.botName}] Errore imprevisto durante l'elaborazione del job "${job.item?.title ?? '?'}": ${jobError} — job saltato.`);
+                    TitanLogger.log(tm('jobFailed', { bot: job.botName, title: job.item?.title ?? '?', error: String(jobError) }), 'error');
                 }
             }
         } finally {
@@ -842,7 +841,9 @@ export class BotEngine {
                 continue;
             }
 
-            const { text, included } = buildDigestMessage(feed.name, items);
+            const { text, included } = buildDigestMessage(feed.name, items, 20, {
+                one: tm('digestOne'), many: tm('digestMany'), read: tm('digestRead'), more: tm('digestMore'),
+            });
             const sentIds = items.slice(0, included).map(it => it.item_id);
             const result = await this.getClient(bot).sendMessage(text, { silent: isMuted(bot) });
 
@@ -856,9 +857,9 @@ export class BotEngine {
             } else if (result.kind === 'rejected') {
                 BotManager.updateFeedDigestLastSent(feed.id);
                 BotManager.removeDigestItems(bot.id, feed.id, sentIds);
-                TitanLogger.log(`  ❌ [${bot.name}] Digest di "${feed.name}" rifiutato da Telegram: ${result.error}. Quei ${included} contenuti vengono saltati.`);
+                TitanLogger.log(tm('digestRejected', { bot: bot.name, feed: feed.name, error: result.error, n: String(included) }), 'error');
             } else if (result.kind !== 'aborted') {
-                TitanLogger.log(`  ⚠️ [${bot.name}] Digest fallito per "${feed.name}" — verrà riprovato al prossimo ciclo (${result.error})`, 'warn');
+                TitanLogger.log(tm('digestFailed', { bot: bot.name, feed: feed.name, error: result.error }), 'warn');
             }
         }
     }

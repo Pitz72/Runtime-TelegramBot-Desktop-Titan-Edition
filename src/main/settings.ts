@@ -21,6 +21,12 @@ export interface TitanSettings {
     lastSeenVersion?: string;
     /** Ingrandimento dell'interfaccia, 1 = 100% */
     uiZoom?: number;
+    /**
+     * Lingua scelta nell'interfaccia. Il renderer la tiene nel suo localStorage; qui serve al
+     * main, che deve conoscerla prima che la finestra esista: il motore può partire da solo,
+     * e diario, notifiche e modelli dei messaggi devono uscire già nella lingua giusta.
+     */
+    locale?: 'it' | 'en';
 }
 
 const DEFAULT_SETTINGS: TitanSettings = { performanceMode: false, uiZoom: 1 };

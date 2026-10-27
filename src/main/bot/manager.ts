@@ -6,6 +6,7 @@ import nodeCrypto from 'node:crypto';
 import { encryptToken, decryptToken } from '../crypto';
 import { validateFeedUrl } from './parser';
 import { MUTE_MODES, sameChannel, type MuteMode } from './rules';
+import { tm } from '../i18n';
 
 // --- RTB Import Validation ---
 // Stesso set di regole applicato dagli handler IPC (ipc.ts) per create-bot/add-feed,
@@ -15,7 +16,7 @@ const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 function rtbAssertString(value: unknown, field: string): string {
     if (typeof value !== 'string' || value.trim() === '') {
-        throw new Error(`Campo obbligatorio mancante o non valido nel file .rtb: "${field}"`);
+        throw new Error(tm('rtbFieldMissing', { field }));
     }
     return value.trim();
 }
@@ -24,7 +25,7 @@ function rtbAssertCheckInterval(value: unknown): number {
     if (value === undefined || value === null) return 15;
     const n = Number(value);
     if (!Number.isInteger(n) || n < 1 || n > 1440) {
-        throw new Error(`check_interval nel file .rtb deve essere compreso tra 1 e 1440, ricevuto: ${value}`);
+        throw new Error(tm('rtbInterval', { value: String(value) }));
     }
     return n;
 }
@@ -37,7 +38,7 @@ function rtbAssertTimeOrDefault(value: unknown, defaultVal: string): string {
 
 function rtbAssertFeedType(value: unknown): 'podcast' | 'news' | 'youtube' {
     if (value !== 'podcast' && value !== 'news' && value !== 'youtube') {
-        throw new Error(`Tipo feed non valido nel file .rtb: "${value}". Valori consentiti: podcast, news, youtube`);
+        throw new Error(tm('rtbFeedType', { value: String(value) }));
     }
     return value;
 }
@@ -72,7 +73,7 @@ const isFalse = (value: unknown) => value === false || value === 0;
  * La data di partenza del file **non** si usa: vedi `BotManager.insertImportedBot`.
  */
 function readRtbBot(raw: any) {
-    if (!raw || typeof raw !== 'object') throw new Error('Elemento non valido nel file .rtb');
+    if (!raw || typeof raw !== 'object') throw new Error(tm('rtbItemInvalid'));
     return {
         name: rtbAssertString(raw.name, 'bot.name'),
         token: decryptTokenFromExport(typeof raw.token === 'string' ? raw.token : ''),
@@ -91,7 +92,7 @@ function readRtbBot(raw: any) {
 }
 
 function readRtbFeed(raw: any) {
-    if (!raw || typeof raw !== 'object') throw new Error('Feed non valido nel file .rtb');
+    if (!raw || typeof raw !== 'object') throw new Error(tm('rtbFeedInvalid'));
     const name = rtbAssertString(raw.name, 'feed.name');
     const type = rtbAssertFeedType(raw.type);
     const url = rtbAssertString(raw.url, 'feed.url');
@@ -485,7 +486,7 @@ export class BotManager {
 
     static importConfig(jsonData: string): ImportedBot[] {
         const data = JSON.parse(jsonData);
-        if (!Array.isArray(data)) throw new Error("Invalid config format");
+        if (!Array.isArray(data)) throw new Error(tm('rtbFormatInvalid'));
 
         // Validazione strutturale di tutti i bot e feed prima di toccare il DB
         const parsed = data.map(bot => ({
@@ -556,7 +557,7 @@ export class BotManager {
             const data = JSON.parse(jsonData);
 
             if (!data.bot || !data.feeds || !Array.isArray(data.feeds)) {
-                throw new Error('Formato .rtb non valido');
+                throw new Error(tm('rtbFormatInvalid'));
             }
 
             // Validazione strutturale prima di toccare il DB: stesse regole degli handler IPC

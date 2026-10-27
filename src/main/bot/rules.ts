@@ -222,10 +222,21 @@ const DIGEST_TITLE_MAX = 180;
  * rifiutato, la coda non si svuotava e il digest restava bloccato per sempre, ritentato
  * a ogni giro. Gli elementi che non ci stanno sono contati in coda al messaggio.
  */
+/** Le parole del digest, nella lingua dell'app; `{n}` in `more` è il numero dei rimasti. */
+export interface DigestLabels {
+    one: string;
+    many: string;
+    read: string;
+    more: string;
+}
+
+const DIGEST_LABELS_IT: DigestLabels = { one: 'contenuto', many: 'contenuti', read: 'Leggi', more: '… e altri {n}' };
+
 export function buildDigestMessage(
     feedName: string,
     items: Array<{ item_title: string | null; item_link: string | null }>,
     maxItems = 20,
+    labels: DigestLabels = DIGEST_LABELS_IT,
 ): { text: string; included: number } {
     const capped = items.slice(0, maxItems);
     const lines: string[] = [];
@@ -234,7 +245,7 @@ export function buildDigestMessage(
         const title = truncate((it.item_title || '').trim(), DIGEST_TITLE_MAX);
         const href = escapeUrl(it.item_link || '');
         const line = href
-            ? `${lines.length + 1}. <b>${escapeHtml(title)}</b>\n🔗 <a href="${href}">Leggi</a>`
+            ? `${lines.length + 1}. <b>${escapeHtml(title)}</b>\n🔗 <a href="${href}">${escapeHtml(labels.read)}</a>`
             : `${lines.length + 1}. <b>${escapeHtml(title)}</b>`;
         const cost = title.length + 16;
         if (visible + cost > DIGEST_TEXT_BUDGET && lines.length > 0) break;
@@ -243,8 +254,8 @@ export function buildDigestMessage(
     }
     const included = lines.length;
     const rest = items.length - included;
-    const header = `📋 <b>${escapeHtml(truncate(feedName, 120))}</b> — ${included} ${included === 1 ? 'contenuto' : 'contenuti'}\n\n`;
-    const footer = rest > 0 ? `\n\n… e altri ${rest}` : '';
+    const header = `📋 <b>${escapeHtml(truncate(feedName, 120))}</b> — ${included} ${included === 1 ? labels.one : labels.many}\n\n`;
+    const footer = rest > 0 ? `\n\n${escapeHtml(labels.more.replace('{n}', String(rest)))}` : '';
     return { text: header + lines.join('\n\n') + footer, included };
 }
 

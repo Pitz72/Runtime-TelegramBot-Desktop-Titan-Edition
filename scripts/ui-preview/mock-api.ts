@@ -147,6 +147,11 @@ const ok = <T,>(v: T) => new Promise<T>(r => setTimeout(() => r(v), 120));
     getRecentLogs: () => ok([...recent]),
     onEngineStatus: (cb: any) => on('engine-status', cb),
     testBot: (d: any) => new Promise(r => setTimeout(() => r(fakeCheck(d)), 700)),
+    getDefaultTemplates: () => ok({
+        news: "📰 <b>{{feedName}}</b>\n\n<b>{{title}}</b>\n\n🔗 <a href='{{link}}'>Leggi l'articolo completo</a>",
+        podcast: "🎙 <b>{{feedName}}</b>\n\n<i>{{title}}</i>\n\n{{summary}}\n\n🎧 <a href='{{link}}'>Ascolta l'episodio</a>",
+        youtube: "🎬 <b>{{feedName}}</b>\n\n<b>{{title}}</b>\n\n▶️ <a href='{{link}}'>Guarda il video</a>",
+    }),
     getDesktopSettings: () => ok({ ...desktop }),
     setDesktopSettings: (patch: any) => {
         desktop = {

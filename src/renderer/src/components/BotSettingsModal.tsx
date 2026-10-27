@@ -39,13 +39,14 @@ function hasTemplateErrors(value: string, isStartup = false): boolean {
     return value.trim() !== '' && validateTemplate(value, isStartup).some(i => i.severity === 'error');
 }
 
-/** I modelli che il motore usa quando un template è vuoto (telegram.ts / engine.ts). */
-const DEFAULTS = {
-    startup: '🟢 <b>Nome del bot Online</b>',
-    news: "📰 <b>{{feedName}}</b>&#10;&#10;<b>{{title}}</b>&#10;&#10;🔗 <a href='{{link}}'>Leggi l'articolo completo</a>",
-    podcast: "🎙 <b>{{feedName}}</b>&#10;&#10;<i>{{title}}</i>&#10;&#10;{{summary}}&#10;&#10;🎧 <a href='{{link}}'>Ascolta l'episodio</a>",
-    youtube: "🎬 <b>{{feedName}}</b>&#10;&#10;<b>{{title}}</b>&#10;&#10;▶️ <a href='{{link}}'>Guarda il video</a>",
-};
+/**
+ * I modelli che il motore usa quando un template è vuoto. Arrivano dal main
+ * (`get-default-templates`), nella lingua dell'app: prima qui ce n'era una copia fissa in
+ * italiano, che con l'interfaccia inglese non era più ciò che usciva davvero sul canale.
+ */
+type MessageDefaults = { news: string; podcast: string; youtube: string };
+
+const escapeName = (name: string) => name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHistoryCleared }: Props) {
     const { t } = useTranslation();
@@ -76,10 +77,14 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
     const [serverError, setServerError] = useState('');
     const [confirm, setConfirm] = useState<'delete' | 'clear' | null>(null);
     const [busy, setBusy] = useState(false);
+    const [defaults, setDefaults] = useState<MessageDefaults>({ news: '', podcast: '', youtube: '' });
+    // Il messaggio di avvio standard (rules.ts → startupMessage): «Online» non si traduce.
+    const startupDefault = `🟢 <b>${escapeName(name.trim() || bot.name)} Online</b>`;
 
     // Ogni apertura riparte dai valori salvati del bot.
     useEffect(() => {
         if (!open) return;
+        window.api.getDefaultTemplates().then(setDefaults).catch(() => {});
         setTab('general');
         setName(bot.name); setToken(bot.token); setShowToken(false); setChannelId(bot.channel_id);
         setIsActive(bot.is_active); setNotifications(bot.notifications_enabled ?? true); setSilentStart(bot.silent_start ?? false);
@@ -311,15 +316,15 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                     {tab === 'messages' && (
                         <div className="space-y-4">
                             <p className="text-sm text-fg-3">{t('templates.intro')}</p>
-                            <TemplateEditor label={t('templates.news')} value={tplNews} onChange={setTplNews} defaultTemplate={DEFAULTS.news} />
-                            <TemplateEditor label={t('templates.podcast')} value={tplPodcast} onChange={setTplPodcast} defaultTemplate={DEFAULTS.podcast} />
-                            <TemplateEditor label={t('templates.youtube')} value={tplYoutube} onChange={setTplYoutube} defaultTemplate={DEFAULTS.youtube} />
+                            <TemplateEditor label={t('templates.news')} value={tplNews} onChange={setTplNews} defaultTemplate={defaults.news} />
+                            <TemplateEditor label={t('templates.podcast')} value={tplPodcast} onChange={setTplPodcast} defaultTemplate={defaults.podcast} />
+                            <TemplateEditor label={t('templates.youtube')} value={tplYoutube} onChange={setTplYoutube} defaultTemplate={defaults.youtube} />
                             <TemplateEditor
                                 label={t('templates.startup')}
                                 description={silentStart ? t('templates.startupSilent') : t('templates.startupHint')}
                                 value={tplStartup}
                                 onChange={setTplStartup}
-                                defaultTemplate={DEFAULTS.startup}
+                                defaultTemplate={startupDefault}
                                 isStartup
                             />
                         </div>

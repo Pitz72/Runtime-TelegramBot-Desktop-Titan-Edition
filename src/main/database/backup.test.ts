@@ -9,6 +9,7 @@ vi.mock('electron', () => ({
     app: { getPath: () => dir.path },
     safeStorage: { isEncryptionAvailable: () => false },
 }));
+vi.mock('../logger', () => ({ TitanLogger: { log: () => {} } }));
 
 import { closeDB, getDB, initDB } from './schema';
 import { backupBeforeImport, DAILY_BACKUPS_KEPT, ensureDailyBackup, pruneBackups } from './backup';

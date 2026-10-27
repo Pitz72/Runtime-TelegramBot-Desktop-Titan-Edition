@@ -28,6 +28,7 @@ export interface TitanAPI {
         muteUntil?: string
     }) => Promise<void>
     testBot: (data: { token: string; channelId: string }) => Promise<BotCheckResult>
+    getDefaultTemplates: () => Promise<{ news: string; podcast: string; youtube: string }>
 
     // Feed Management
     getFeeds: (botId: number) => Promise<FeedConfig[]>

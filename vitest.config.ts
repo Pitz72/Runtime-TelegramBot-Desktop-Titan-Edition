@@ -11,6 +11,8 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'src/renderer/src'),
+            // Mai il vero `electron` nei test: fuori da Electron scarica il binario se manca.
+            electron: path.resolve(__dirname, 'src/test-support/electron-stub.ts'),
         },
     },
     test: {

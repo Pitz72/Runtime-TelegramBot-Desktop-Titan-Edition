@@ -5,6 +5,7 @@ import dns from 'node:dns';
 import { isIP } from 'node:net';
 import { RssItem } from './types';
 import { itemTitle, pickUrl } from './rules';
+import { tm } from '../i18n';
 
 // --- Anti-SSRF URL Validation ---
 // Blocca schemi non HTTP/HTTPS e indirizzi di rete privata/loopback.
@@ -84,21 +85,21 @@ export function validateFeedUrl(url: string): void {
     try {
         parsed = new URL(url);
     } catch {
-        throw new Error(`URL non valido: "${url}"`);
+        throw new Error(tm('urlInvalid', { url }));
     }
     if (!['http:', 'https:'].includes(parsed.protocol)) {
-        throw new Error(`Protocollo non consentito: "${parsed.protocol}". Usare http:// o https://`);
+        throw new Error(tm('urlProtocol', { protocol: parsed.protocol }));
     }
 
     const h = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '');
 
     if (h === 'localhost' || /\.(local|internal|localdomain|home\.arpa)$/.test(h)) {
-        throw new Error(`Indirizzo di rete privata/locale non consentito: "${h}"`);
+        throw new Error(tm('urlPrivate', { host: h }));
     }
 
     if (isIP(h) !== 0) {
         if (isPrivateAddress(h)) {
-            throw new Error(`Indirizzo di rete privata/locale non consentito: "${h}"`);
+            throw new Error(tm('urlPrivate', { host: h }));
         }
         return;
     }
@@ -111,7 +112,7 @@ export function validateFeedUrl(url: string): void {
         if (Number.isFinite(n) && n <= 0xffffffff) {
             const dotted = [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
             if (isPrivateAddress(dotted)) {
-                throw new Error(`Indirizzo di rete privata/locale non consentito: "${h}" (${dotted})`);
+                throw new Error(tm('urlPrivate', { host: `${h} (${dotted})` }));
             }
         }
     }
@@ -142,7 +143,7 @@ async function assertPublicHost(url: string): Promise<void> {
 
     const priv = addresses.find(a => isPrivateAddress(a.address));
     if (priv) {
-        throw new Error(`Il dominio "${host}" risolve a un indirizzo di rete privata (${priv.address}): richiesta bloccata.`);
+        throw new Error(tm('urlPrivateDns', { host, address: priv.address }));
     }
 }
 
@@ -373,6 +374,6 @@ export async function fetchFeed(name: string, url: string): Promise<RssItem[]> {
     } catch (error: any) {
         const msg = error.message || String(error);
         console.error(`[Parser] Errore critico fetching feed ${name}:`, error);
-        throw new Error(`Fetch fallito: ${msg}`);
+        throw new Error(tm('fetchFailed', { error: msg }));
     }
 }

@@ -47,3 +47,18 @@ Verifica: 9 test nuovi (109 in tutto) su ritentativi, lettura condivisa, tetto p
 - **Gli errori fatali finiscono nel file di log**, scritti subito prima della chiusura. Prima andavano solo nella console, che nell'app installata nessuno vede. Anche gli errori non gestiti che non chiudono Titan ora restano nel diario.
 
 Verifica: 7 test nuovi (116 in tutto) su impostazioni e backup, in cartelle temporanee.
+
+## Blocco 5 — La lingua del motore
+
+Chiude il problema noto registrato il 27/10: con l'interfaccia in inglese, parte del diario e la notifica di pubblicazione restavano in italiano.
+
+- **Il diario parla la lingua dell'app.** Tutte le righe che il diario mostra, cioè avvisi ed errori del motore, dell'invio a Telegram e di YouTube, passano dai testi del main (`main/i18n.ts`), in italiano e in inglese. Anche gli errori che arrivano all'interfaccia: indirizzo di un feed non valido o verso una rete privata, profilo `.rtb` rotto, canale YouTube non trovato, database da importare non valido.
+- **La notifica di sistema dice «Pubblicato: …» / «Published: …»** (prima «Inviato:» in ogni lingua).
+- **La lingua si salva nelle impostazioni.** Il renderer la teneva solo nel suo `localStorage`, e il main la scopriva quando la finestra gliela comunicava: con il motore avviato insieme al computer, le prime righe e il menu dell'area di notifica uscivano nella lingua del sistema.
+- **Modelli dei messaggi e digest nella lingua dell'app.** Con l'interfaccia in inglese i messaggi senza template dicono «Read the full article», «Listen to the episode», «Watch the video», e il digest «items», «Read», «… and N more». **In italiano non cambia un carattere**: un test confronta i modelli con quelli della 2.4.1.
+- **L'interfaccia mostra i modelli predefiniti presi dal motore** (`get-default-templates`) invece di tenerne una copia propria in italiano, che con l'inglese non era più ciò che usciva sul canale. Il messaggio di avvio d'esempio porta il nome vero del bot.
+- Le righe informative della console tecnica restano com'erano: sono diagnostica, non diario.
+
+E un difetto dei test trovato strada facendo: con Electron 44.9.3 il pacchetto `electron`, importato fuori da Electron, scarica il binario se manca, e i test che importavano anche solo i testi del main restavano appesi. Ora i test usano un sostituto di Electron (`src/test-support/electron-stub.ts`, collegato in `vitest.config.ts`) e non dipendono più dal binario.
+
+Verifica: 5 test nuovi (121 in tutto): stesse chiavi e stessi segnaposto in italiano e in inglese, modelli italiani identici alla 2.4.1, cambio di lingua.
