@@ -1,6 +1,12 @@
-# Non rilasciato — revisione del 27 ottobre 2026
+# v2.5.0 — contenuti mai persi né ripubblicati, rete robusta, stato delle sorgenti
 
-Lavoro nato da un'analisi completa del codice della 2.4.1 e dagli appunti rimasti aperti dopo la 2.4. Diviso in blocchi; ogni blocco è un commit a sé.
+**Rilasciata:** 27 ottobre 2026.
+
+Una revisione completa, nata da un'analisi del codice della 2.4.1 e dagli appunti rimasti aperti dopo la 2.4. Il lavoro è diviso in blocchi; ogni blocco è un commit a sé.
+
+**Database:** schema **v14**. La migrazione è automatica e, come sempre, preceduta da un backup del database (`titan.db.backup-…`).
+
+**In breve, per chi usa Titan:** sotto ogni sorgente si vede com'è andata l'ultima lettura; la finestra «Attività del bot» mostra cosa aspetta di uscire e lo storico; i bot possono pubblicare in un argomento dei gruppi con argomenti; un profilo `.rtb` importato non ripubblica più l'arretrato; un template sbagliato non fa più perdere contenuti; feed lenti e risvegli del computer non fanno più saltare giri; ogni giorno Titan salva da sé una copia del database; diario e notifiche seguono la lingua dell'app.
 
 ## Blocco 1 — Dipendenze di esercizio e sicurezza
 

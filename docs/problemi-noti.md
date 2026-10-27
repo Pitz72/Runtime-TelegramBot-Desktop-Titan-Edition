@@ -6,4 +6,4 @@ Difetti conosciuti e **non ancora corretti**, con il punto esatto del codice dov
 
 Nessun problema noto aperto.
 
-L'ultimo registrato, «Testi del motore non tradotti nell'interfaccia inglese» (scoperto il 27/10/2026 sulla 2.4.1), è chiuso nella revisione del 27 ottobre: vedi [il changelog non ancora rilasciato](changelogs/CHANGELOG_unreleased.md), blocco 5.
+L'ultimo registrato, «Testi del motore non tradotti nell'interfaccia inglese» (scoperto il 27/10/2026 sulla 2.4.1), è chiuso nella v2.5.0: vedi [il changelog della v2.5.0](changelogs/CHANGELOG_v2.5.0.md), blocco 5.

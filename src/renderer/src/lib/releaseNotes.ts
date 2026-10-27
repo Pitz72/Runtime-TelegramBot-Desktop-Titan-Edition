@@ -6,6 +6,28 @@ import type { Language } from '../locales/I18nContext';
  * la schermata usa un testo di fallback generico.
  */
 export const RELEASE_NOTES: Record<string, Record<Language, string[]>> = {
+    '2.5.0': {
+        it: [
+            'Sotto ogni sorgente vedi com’è andata l’ultima lettura: quando, quanti contenuti, o il motivo dell’errore.',
+            '«Attività del bot», al posto delle statistiche, mostra anche cosa aspetta di uscire e perché, e gli ultimi 100 contenuti pubblicati.',
+            'Nei gruppi con gli argomenti, un bot può pubblicare in un argomento preciso: Impostazioni del bot → Generale.',
+            'Un profilo .rtb importato pubblica solo i contenuti nuovi, da adesso: non ripubblica più l’arretrato dei feed.',
+            'Un template con errori non si salva più; e se Telegram ne rifiuta uno, il contenuto esce con il modello predefinito invece di perdersi.',
+            'Feed lenti e risvegli del computer: un secondo tentativo di lettura, e un controllo completo poco dopo il risveglio.',
+            'Ogni giorno Titan salva da sé una copia del database, e ne tiene sette: Impostazioni → Dati e backup.',
+            'Diario e notifiche parlano la lingua dell’app; e aggiornamenti di sicurezza.',
+        ],
+        en: [
+            'Under each source you can see how the last read went: when, how many items, or why it failed.',
+            '“Bot activity”, which replaces the statistics, also shows what is waiting to go out and why, and the last 100 published items.',
+            'In groups with topics, a bot can publish to a specific topic: Bot settings → General.',
+            'An imported .rtb profile publishes only new content, from now on: it no longer republishes the feeds’ backlog.',
+            'A template with errors can no longer be saved; and if Telegram rejects one, the item goes out with the default template instead of being lost.',
+            'Slow feeds and a computer waking from sleep: a second read attempt, and a full check shortly after waking up.',
+            'Every day Titan saves a copy of the database on its own and keeps seven: Settings → Data and backup.',
+            'The diary and the notifications follow the app’s language; plus security updates.',
+        ],
+    },
     '2.4.1': {
         it: [
             'Spariti gli avvisi «Direct getChannel failed… trying search» che comparivano nel diario per ogni canale YouTube, a ogni giro.',
