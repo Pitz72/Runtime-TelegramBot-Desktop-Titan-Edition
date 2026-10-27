@@ -25,9 +25,11 @@ E il token? Qui Titan fa una scelta di sicurezza precisa: il token viaggia nel f
 
 Il `.rtb` sposta quindi la configurazione senza esporre il segreto: quello resta legato alla macchina che l'ha generato.
 
+Il bot importato **parte da adesso**: pubblica solo i contenuti che escono dopo l'importazione, qualunque data di partenza avesse l'originale. Il file non porta lo storico, quindi il bot nuovo non saprebbe che cosa è già stato pubblicato, e ripartendo dalla data vecchia rimanderebbe sul canale tutto l'arretrato dei feed. Se un altro bot attivo pubblica già sullo stesso canale, l'importato resta **spento**: due bot sullo stesso canale manderebbero ogni contenuto due volte. Lo accendi tu dalle impostazioni, se ti serve davvero.
+
 *Nota per Linux.* La cifratura del token si appoggia al portachiavi di sistema (GNOME Keyring, KWallet o un altro servizio Secret Service). Se la tua distribuzione non ne ha uno, Titan non si blocca: usa una cifratura interna, comunque legata alla macchina. Per attivare il portachiavi nativo, installa `libsecret`.
 
 ### 7.3 Esportare tutti i bot insieme (configurazione)
-Se vuoi spostare non un bot ma l'intero assetto, torna nella scheda **Dati e Backup**: accanto al database trovi l'esportazione dell'intera **configurazione**, un unico file `.rtb`. Funziona come quello del singolo bot, ma comprende tutti i bot in una volta: porta con sé profili, feed e template di ognuno, sempre senza lo storico. Vale la stessa regola del token vista sopra: si ripristina da solo sullo stesso computer, altrove va reinserito.
+Se vuoi spostare non un bot ma l'intero assetto, torna nella scheda **Dati e Backup**: accanto al database trovi l'esportazione dell'intera **configurazione**, un unico file `.rtb`. Funziona come quello del singolo bot, ma comprende tutti i bot in una volta: porta con sé profili, feed e template di ognuno, sempre senza lo storico. Valgono le stesse regole viste sopra: il token si ripristina da solo sullo stesso computer e altrove va reinserito, e ogni bot importato parte da adesso. Per spostare anche lo storico, e con lui la memoria di ciò che è già uscito, serve il backup del database.
 
 ---

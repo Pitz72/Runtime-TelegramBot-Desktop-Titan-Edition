@@ -25,9 +25,11 @@ And the token? Here Titan makes a deliberate security choice: the token travels 
 
 The `.rtb` therefore moves the configuration without exposing the secret: that stays tied to the machine that generated it.
 
+An imported bot **starts from now**: it publishes only content that appears after the import, whatever start date the original had. The file carries no history, so the new bot would not know what has already been published, and starting from the old date it would send the feeds' whole backlog to the channel again. If another active bot already publishes to the same channel, the imported one stays **switched off**: two bots on one channel would send everything twice. You switch it on from its settings, if you really need it.
+
 *Note (Linux).* Token encryption relies on the system keychain (GNOME Keyring, KWallet or another Secret Service). If your distribution does not have one, Titan does not stall: it uses internal encryption, still tied to the machine. To enable the native keychain, install `libsecret`.
 
 ### 7.3 Exporting all bots at once (configuration)
-If you want to move not one bot but the whole setup, go back to the **Data & Backup** tab: next to the database you will find the export of the whole **configuration** as a single `.rtb` file. It works like the one for a single bot, but covers them all at once: it carries the profiles, feeds and templates of each, again without the history. The same token rule seen above applies: it restores itself on the same computer, elsewhere it must be re-entered.
+If you want to move not one bot but the whole setup, go back to the **Data & Backup** tab: next to the database you will find the export of the whole **configuration** as a single `.rtb` file. It works like the one for a single bot, but covers them all at once: it carries the profiles, feeds and templates of each, again without the history. The same rules seen above apply: the token restores itself on the same computer and must be re-entered elsewhere, and every imported bot starts from now. To move the history too, and with it the memory of what has already gone out, use the database backup.
 
 ---

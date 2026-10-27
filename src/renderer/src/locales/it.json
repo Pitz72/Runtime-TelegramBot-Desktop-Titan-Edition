@@ -62,7 +62,8 @@
         "active": "Attivo",
         "inactive": "Disattivato",
         "created": "Bot creato",
-        "imported": "Profilo importato",
+        "imported": "Profilo importato: pubblicherà solo i contenuti nuovi, da adesso.",
+        "importedPaused": "Profilo importato ma spento: sul canale pubblica già «{bot}», e due bot sullo stesso canale manderebbero ogni contenuto due volte. Accendilo dalle impostazioni del bot se ti serve davvero.",
         "importFailed": "Importazione non riuscita:"
     },
     "workspace": {
@@ -136,6 +137,7 @@
         "deleteConfirmText": "Il bot, le sue sorgenti e la sua cronologia vengono eliminati. Non si può annullare.",
         "deleted": "Bot «{name}» eliminato",
         "saved": "Impostazioni salvate",
+        "templateErrors": "Un template contiene errori (scheda Messaggi): Telegram rifiuterebbe i messaggi. Correggilo, o torna al modello predefinito, prima di salvare.",
         "mute": "Pubblicazione senza suono",
         "muteHint": "Gli iscritti ricevono i messaggi come sempre, ma il telefono non suona e non vibra. Utile di notte, o per i canali che pubblicano spesso.",
         "muteMode": "Suono delle notifiche",
@@ -339,7 +341,8 @@
             "profilesExport": "Esporta tutti i profili",
             "profilesImport": "Importa profili",
             "profilesExported": "Profili esportati",
-            "profilesImported": "Profili importati: li trovi nell'elenco dei bot.",
+            "profilesImported": "Profili importati: li trovi nell'elenco dei bot. Pubblicano solo i contenuti nuovi, da adesso.",
+            "profilesImportedPaused": "Restano spenti, perché sul loro canale pubblica già un altro bot: {list}.",
             "failed": "Operazione non riuscita:"
         },
         "about": {

@@ -5,7 +5,7 @@ import { safeStorage } from 'electron';
 import nodeCrypto from 'node:crypto';
 import { encryptToken, decryptToken } from '../crypto';
 import { validateFeedUrl } from './parser';
-import { MUTE_MODES, parseStartDate, type MuteMode } from './rules';
+import { MUTE_MODES, sameChannel, type MuteMode } from './rules';
 
 // --- RTB Import Validation ---
 // Stesso set di regole applicato dagli handler IPC (ipc.ts) per create-bot/add-feed,
@@ -35,19 +35,6 @@ function rtbAssertTimeOrDefault(value: unknown, defaultVal: string): string {
     return value;
 }
 
-/**
- * La data di partenza di un profilo importato: assente → «da adesso»; presente ma
- * illeggibile → errore. Prima passava tale e quale, e una data rotta faceva superare
- * il filtro a tutto l'arretrato dei feed (vedi `parseStartDate`).
- */
-function rtbAssertStartDate(value: unknown): string | undefined {
-    if (value === undefined || value === null || value === '') return undefined;
-    if (parseStartDate(value) === null) {
-        throw new Error(`Data di partenza non valida nel file .rtb: "${String(value)}"`);
-    }
-    return String(value).trim();
-}
-
 function rtbAssertFeedType(value: unknown): 'podcast' | 'news' | 'youtube' {
     if (value !== 'podcast' && value !== 'news' && value !== 'youtube') {
         throw new Error(`Tipo feed non valido nel file .rtb: "${value}". Valori consentiti: podcast, news, youtube`);
@@ -55,23 +42,75 @@ function rtbAssertFeedType(value: unknown): 'podcast' | 'news' | 'youtube' {
     return value;
 }
 
-function validateRtbBot(bot: any): void {
-    rtbAssertString(bot.name, 'bot.name');
-    rtbAssertString(bot.channelId ?? bot.channel_id, 'bot.channelId');
-    rtbAssertCheckInterval(bot.checkInterval ?? bot.check_interval);
-    rtbAssertTimeOrDefault(bot.sendFrom ?? bot.send_from, '00:00');
-    rtbAssertTimeOrDefault(bot.sendUntil ?? bot.send_until, '23:59');
-    rtbAssertStartDate(bot.startDate ?? bot.start_date);
+/** Un intero facoltativo tra `min` e `max`; tutto il resto diventa `null` («valore del bot»). */
+function rtbOptionalInt(value: unknown, min: number, max: number): number | null {
+    if (value === undefined || value === null || value === '') return null;
+    const n = Number(value);
+    return Number.isInteger(n) && n >= min && n <= max ? n : null;
 }
 
-function validateRtbFeed(feed: any): void {
-    rtbAssertString(feed.name, 'feed.name');
-    const type = rtbAssertFeedType(feed.type);
-    const url = rtbAssertString(feed.url, 'feed.url');
-    // Validazione anti-SSRF: stessa regola di add-feed in ipc.ts
-    if (type !== 'youtube') {
-        validateFeedUrl(url);
+/** Il filtro per parole chiave di un feed importato: solo una stringa JSON leggibile. */
+function rtbKeywordFilter(value: unknown): string | null {
+    if (typeof value !== 'string' || value.trim() === '') return null;
+    try {
+        const parsed = JSON.parse(value);
+        return parsed && typeof parsed === 'object' ? value : null;
+    } catch {
+        return null;
     }
+}
+
+const rtbTemplate = (value: unknown): string | undefined => (typeof value === 'string' && value.trim() !== '' ? value : undefined);
+const isFalse = (value: unknown) => value === false || value === 0;
+
+/**
+ * Un bot letto da un profilo .rtb, nei due formati che esistono: quello del singolo bot
+ * (`channelId`, `isActive`…) e quello di «tutti i bot» (`channel_id`, `is_active`…).
+ * Prima l'import multiplo validava i campi ma poi scriveva nel database i valori grezzi:
+ * un orario sbagliato o un intervallo scritto come testo arrivavano tali e quali.
+ *
+ * La data di partenza del file **non** si usa: vedi `BotManager.insertImportedBot`.
+ */
+function readRtbBot(raw: any) {
+    if (!raw || typeof raw !== 'object') throw new Error('Elemento non valido nel file .rtb');
+    return {
+        name: rtbAssertString(raw.name, 'bot.name'),
+        token: decryptTokenFromExport(typeof raw.token === 'string' ? raw.token : ''),
+        channelId: rtbAssertString(raw.channelId ?? raw.channel_id, 'bot.channelId'),
+        checkInterval: rtbAssertCheckInterval(raw.checkInterval ?? raw.check_interval),
+        notificationsEnabled: !isFalse(raw.notificationsEnabled ?? raw.notifications_enabled),
+        sendFrom: rtbAssertTimeOrDefault(raw.sendFrom ?? raw.send_from, '00:00'),
+        sendUntil: rtbAssertTimeOrDefault(raw.sendUntil ?? raw.send_until, '23:59'),
+        templatePodcast: rtbTemplate(raw.template_podcast),
+        templateNews: rtbTemplate(raw.template_news),
+        templateYoutube: rtbTemplate(raw.template_youtube),
+        templateStartup: rtbTemplate(raw.template_startup),
+        isActive: !isFalse(raw.isActive ?? raw.is_active),
+        behavior: rtbBehavior(raw),
+    };
+}
+
+function readRtbFeed(raw: any) {
+    if (!raw || typeof raw !== 'object') throw new Error('Feed non valido nel file .rtb');
+    const name = rtbAssertString(raw.name, 'feed.name');
+    const type = rtbAssertFeedType(raw.type);
+    const url = rtbAssertString(raw.url, 'feed.url');
+    // Validazione anti-SSRF: stessa regola di add-feed in ipc.ts
+    if (type !== 'youtube') validateFeedUrl(url);
+    return {
+        name, url, type,
+        keywordFilter: rtbKeywordFilter(raw.keyword_filter),
+        checkInterval: rtbOptionalInt(raw.check_interval, 1, 1440),
+        digestInterval: rtbOptionalInt(raw.digest_interval, 1, 10080),
+        isActive: !isFalse(raw.isActive ?? raw.is_active),
+    };
+}
+
+/** Esito dell'import di un bot: `pausedFor` è il bot che pubblica già su quel canale. */
+export interface ImportedBot {
+    botId: number;
+    name: string;
+    pausedFor?: string;
 }
 
 // --- RTB Export Encryption ---
@@ -222,9 +261,9 @@ export class BotManager {
         return rows.map(f => ({ ...f, is_active: f.is_active === 1 })) as FeedConfig[];
     }
 
-    static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube', keywordFilter?: string | null, checkInterval?: number | null, digestInterval?: number | null) {
+    static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube', keywordFilter?: string | null, checkInterval?: number | null, digestInterval?: number | null): number {
         const stmt = db().prepare('INSERT INTO feeds (bot_id, name, url, type, is_active, keyword_filter, check_interval, digest_interval) VALUES (?, ?, ?, ?, 1, ?, ?, ?)');
-        stmt.run(bot_id, name, url, type, keywordFilter ?? null, checkInterval ?? null, digestInterval ?? null);
+        return Number(stmt.run(bot_id, name, url, type, keywordFilter ?? null, checkInterval ?? null, digestInterval ?? null).lastInsertRowid);
     }
 
     static updateFeed(id: number, name: string, url: string, type: string, keywordFilter?: string | null, checkInterval?: number | null, digestInterval?: number | null) {
@@ -299,6 +338,12 @@ export class BotManager {
         return db().prepare(
             'SELECT item_id, item_title, item_link, item_summary, item_image FROM digest_queue WHERE bot_id = ? AND feed_id = ? ORDER BY added_at ASC'
         ).all(botId, feedId) as any[];
+    }
+
+    /** Feed del bot che hanno contenuti in attesa nel digest — anche se il digest è stato spento. */
+    static digestFeedIds(botId: number): number[] {
+        return (db().prepare('SELECT DISTINCT feed_id FROM digest_queue WHERE bot_id = ?').all(botId) as Array<{ feed_id: number }>)
+            .map(r => r.feed_id);
     }
 
     static clearDigestQueue(botId: number, feedId: number) {
@@ -404,56 +449,51 @@ export class BotManager {
         return JSON.stringify(exportData, null, 2);
     }
 
-    static importConfig(jsonData: string) {
+    /** Il primo bot attivo che pubblica già su quel canale, se c'è. */
+    static findActiveBotOnChannel(channelId: string): BotConfig | null {
+        const rows = db().prepare('SELECT id, name, channel_id FROM bots WHERE is_active = 1').all() as any[];
+        const match = rows.find(r => sameChannel(r.channel_id, channelId));
+        return match ? BotManager.getBot(match.id) : null;
+    }
+
+    /**
+     * Scrive nel database un bot letto da un profilo .rtb. Va chiamata dentro una transazione.
+     *
+     * **Il bot parte da adesso.** Un profilo non porta lo storico di ciò che è già stato
+     * pubblicato: con la data di partenza del file, al primo giro il bot nuovo — senza storico —
+     * ripubblicava sul canale tutto l'arretrato dei feed da quella data in poi. Sullo stesso
+     * computer il token si legge subito, quindi bastava reimportare un backup.
+     *
+     * **Resta spento se il canale è già servito** da un altro bot attivo: due bot sullo
+     * stesso canale pubblicherebbero ogni contenuto due volte.
+     */
+    private static insertImportedBot(bot: ReturnType<typeof readRtbBot>, feeds: Array<ReturnType<typeof readRtbFeed>>): ImportedBot {
+        const owner = bot.isActive ? BotManager.findActiveBotOnChannel(bot.channelId) : null;
+        const botId = Number(BotManager.createBot(
+            bot.name, bot.token, bot.channelId, undefined, bot.checkInterval, bot.notificationsEnabled,
+            bot.sendFrom, bot.sendUntil, bot.templatePodcast, bot.templateNews, bot.templateYoutube, bot.templateStartup,
+            bot.behavior,
+        ));
+        if (!bot.isActive || owner) db().prepare('UPDATE bots SET is_active = 0 WHERE id = ?').run(botId);
+
+        for (const feed of feeds) {
+            const feedId = BotManager.addFeed(botId, feed.name, feed.url, feed.type, feed.keywordFilter, feed.checkInterval, feed.digestInterval);
+            if (!feed.isActive) BotManager.toggleFeed(feedId, false);
+        }
+        return { botId, name: bot.name, ...(owner ? { pausedFor: owner.name } : {}) };
+    }
+
+    static importConfig(jsonData: string): ImportedBot[] {
         const data = JSON.parse(jsonData);
         if (!Array.isArray(data)) throw new Error("Invalid config format");
 
         // Validazione strutturale di tutti i bot e feed prima di toccare il DB
-        for (const bot of data) {
-            if (!bot || typeof bot !== 'object') throw new Error('Elemento non valido nel file .rtb multi-bot');
-            validateRtbBot({ ...bot, channelId: bot.channel_id, checkInterval: bot.check_interval, sendFrom: bot.send_from, sendUntil: bot.send_until });
-            if (Array.isArray(bot.feeds)) {
-                for (const f of bot.feeds) validateRtbFeed(f);
-            }
-        }
+        const parsed = data.map(bot => ({
+            bot: readRtbBot(bot),
+            feeds: Array.isArray(bot?.feeds) ? bot.feeds.map(readRtbFeed) : [],
+        }));
 
-        const applyImport = db().transaction(() => {
-            for (const bot of data) {
-                const botId = BotManager.createBot(
-                    bot.name,
-                    decryptTokenFromExport(bot.token),
-                    bot.channel_id,
-                    rtbAssertStartDate(bot.start_date),
-                    bot.check_interval,
-                    bot.notifications_enabled,
-                    bot.send_from,
-                    bot.send_until,
-                    bot.template_podcast,
-                    bot.template_news,
-                    bot.template_youtube,
-                    bot.template_startup,
-                    rtbBehavior(bot)
-                );
-
-                if (bot.is_active === 0 || bot.is_active === false) {
-                    db().prepare('UPDATE bots SET is_active = 0 WHERE id = ?').run(botId);
-                }
-
-                if (Array.isArray(bot.feeds)) {
-                    for (const f of bot.feeds) {
-                        BotManager.addFeed(Number(botId), f.name, f.url, f.type, f.keyword_filter ?? null, f.check_interval ?? null, f.digest_interval ?? null);
-                        if (f.is_active === 0 || f.is_active === false) {
-                            const lastFeed = db().prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(botId) as any;
-                            if (lastFeed) {
-                                db().prepare('UPDATE feeds SET is_active = 0 WHERE id = ?').run(lastFeed.id);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        applyImport();
+        return db().transaction(() => parsed.map(({ bot, feeds }) => BotManager.insertImportedBot(bot, feeds)))();
     }
 
     // --- IMPORT/EXPORT SINGOLO BOT (.rtb) ---
@@ -511,7 +551,7 @@ export class BotManager {
         }
     }
 
-    static importSingleBot(jsonData: string): number {
+    static importSingleBot(jsonData: string): ImportedBot {
         try {
             const data = JSON.parse(jsonData);
 
@@ -519,61 +559,10 @@ export class BotManager {
                 throw new Error('Formato .rtb non valido');
             }
 
-            // Validazione strutturale: stesse regole degli handler IPC (ipc.ts)
-            validateRtbBot(data.bot);
-            for (const feed of data.feeds) validateRtbFeed(feed);
-
-            const newBotId = db().transaction(() => {
-                // Crea il bot: createBot cifra il token
-                const createdBotId = BotManager.createBot(
-                    data.bot.name,
-                    decryptTokenFromExport(data.bot.token),
-                    data.bot.channelId,
-                    rtbAssertStartDate(data.bot.startDate),
-                    data.bot.checkInterval,
-                    data.bot.notificationsEnabled !== undefined ? data.bot.notificationsEnabled : true,
-                    rtbAssertTimeOrDefault(data.bot.sendFrom, '00:00'),
-                    rtbAssertTimeOrDefault(data.bot.sendUntil, '23:59'),
-                    data.bot.template_podcast,
-                    data.bot.template_news,
-                    data.bot.template_youtube,
-                    data.bot.template_startup,
-                    rtbBehavior(data.bot)
-                ) as number;
-
-                // Aggiorna is_active (che createBot() omette partendo da acceso)
-                db().prepare(`
-                    UPDATE bots 
-                    SET is_active = ?
-                    WHERE id = ?
-                `).run(
-                    data.bot.isActive ? 1 : 0,
-                    createdBotId
-                );
-
-                for (const feed of data.feeds) {
-                    BotManager.addFeed(
-                        createdBotId,
-                        feed.name,
-                        feed.url,
-                        feed.type,
-                        feed.keyword_filter ?? null,
-                        feed.check_interval ?? null,
-                        feed.digest_interval ?? null
-                    );
-
-                    if (feed.isActive === false) {
-                        const lastFeed = db().prepare('SELECT id FROM feeds WHERE bot_id = ? ORDER BY id DESC LIMIT 1').get(createdBotId) as any;
-                        if (lastFeed) {
-                            db().prepare('UPDATE feeds SET is_active = 0 WHERE id = ?').run(lastFeed.id);
-                        }
-                    }
-                }
-
-                return createdBotId;
-            })();
-
-            return newBotId;
+            // Validazione strutturale prima di toccare il DB: stesse regole degli handler IPC
+            const bot = readRtbBot(data.bot);
+            const feeds = data.feeds.map(readRtbFeed);
+            return db().transaction(() => BotManager.insertImportedBot(bot, feeds))();
         } catch (error) {
             console.error('Errore durante importSingleBot:', error);
             throw error;

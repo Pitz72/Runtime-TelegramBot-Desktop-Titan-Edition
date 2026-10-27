@@ -94,8 +94,8 @@ async function importRtbFromFile(filePath: string) {
     })
     if (response !== 1) return
     try {
-        const botId = BotManager.importSingleBot(await readFile(filePath, 'utf-8'))
-        mainWindow.webContents.send('bots-changed', { botId })
+        const { botId, pausedFor } = BotManager.importSingleBot(await readFile(filePath, 'utf-8'))
+        mainWindow.webContents.send('bots-changed', { botId, pausedFor })
     } catch (e: any) {
         dialog.showErrorBox(tm('openRtbFailed'), e?.message || String(e))
     }

@@ -1,6 +1,6 @@
 import { Telegram } from 'telegraf';
 import { TitanLogger } from '../logger';
-import { classifyTelegramError, escapeHtml, escapeUrl, normalizeChannelId, type TelegramErrorKind } from './rules';
+import { classifyTelegramError, escapeHtml, escapeUrl, normalizeChannelId, tidyMessage, type TelegramErrorKind } from './rules';
 
 /**
  * Esito di un invio. Chi chiama decide cosa fare del contenuto in base a `kind`
@@ -15,6 +15,29 @@ export type SendResult =
 export interface SendOptions {
     /** Pubblica senza suono: gli iscritti ricevono il messaggio senza squillo né vibrazione */
     silent?: boolean;
+}
+
+/** Il modello che il motore usa quando il bot non ha un template per quel tipo di sorgente. */
+export function defaultTemplate(type: 'podcast' | 'news' | 'youtube'): string {
+    if (type === 'podcast') return "🎙 <b>{{feedName}}</b>\n\n<i>{{title}}</i>\n\n{{summary}}\n\n🎧 <a href='{{link}}'>Ascolta l'episodio</a>";
+    if (type === 'youtube') return "🎬 <b>{{feedName}}</b>\n\n<b>{{title}}</b>\n\n▶️ <a href='{{link}}'>Guarda il video</a>";
+    return "📰 <b>{{feedName}}</b>\n\n<b>{{title}}</b>\n\n🔗 <a href='{{link}}'>Leggi l'articolo completo</a>";
+}
+
+/** Il messaggio di un contenuto: template riempito, campi messi in sicurezza, anteprima in testa. */
+export function renderItemMessage(item: any, template: string): string {
+    // Escape di TUTTI i campi per prevenire errori di parsing HTML Telegram
+    // (URL con '&' causano "Bad Request: can't parse entities")
+    const safeImage = escapeUrl(item.image);
+    const text = template
+        .replace(/\{\{title\}\}/g, escapeHtml(String(item.title || '')))
+        .replace(/\{\{link\}\}/g, escapeUrl(item.link || ''))
+        .replace(/\{\{feedName\}\}/g, escapeHtml(String(item.feedName || '')))
+        .replace(/\{\{summary\}\}/g, item.summary ? escapeHtml(String(item.summary)) : '');
+
+    // L'anteprima: un link invisibile all'immagine, che Telegram mostra sopra il testo.
+    const previewHack = safeImage ? `<a href="${safeImage}">&#8203;</a>` : '';
+    return previewHack + tidyMessage(text);
 }
 
 /** Pause tra i tentativi per gli errori transitori: ~35 secondi in tutto. */
@@ -43,35 +66,17 @@ export class TelegramClient {
     }
 
     async sendFormattedMessage(item: any, template: string | null, type: 'podcast' | 'news' | 'youtube', options: SendOptions = {}): Promise<SendResult> {
-        let text = template;
+        const custom = template && template.trim() !== '' ? template : null;
+        const result = await this.sendMessage(renderItemMessage(item, custom ?? defaultTemplate(type)), options);
 
-        if (!text || text.trim() === '') {
-            // Logica di Fallback: Se template è nullo o vuoto, usa costanti interne
-            if (type === 'podcast') {
-                text = "🎙 <b>{{feedName}}</b>\n\n<i>{{title}}</i>\n\n{{summary}}\n\n🎧 <a href='{{link}}'>Ascolta l'episodio</a>";
-            } else if (type === 'youtube') {
-                text = "🎬 <b>{{feedName}}</b>\n\n<b>{{title}}</b>\n\n▶️ <a href='{{link}}'>Guarda il video</a>";
-            } else { // news
-                text = "📰 <b>{{feedName}}</b>\n\n<b>{{title}}</b>\n\n🔗 <a href='{{link}}'>Leggi l'articolo completo</a>";
-            }
+        // Un template personalizzato rifiutato da Telegram (un tag non chiuso, un'entità
+        // sbagliata) farebbe saltare ogni contenuto di quel tipo, uno dopo l'altro. Si riprova
+        // con il modello predefinito: il contenuto esce con l'aspetto standard invece di perdersi.
+        if (!result.ok && result.kind === 'rejected' && custom) {
+            this.logToUI(`⚠️ Telegram rifiuta il template personalizzato (${result.error}): «${String(item.title || '')}» pubblicato con il modello predefinito. Correggi il template nelle impostazioni del bot.`, 'warn');
+            return this.sendMessage(renderItemMessage(item, defaultTemplate(type)), options);
         }
-
-        // Escape di TUTTI i campi per prevenire errori di parsing HTML Telegram
-        // (URL con '&' causano "Bad Request: can't parse entities")
-        const safeLink = escapeUrl(item.link || '');
-        const safeImage = escapeUrl(item.image);
-
-        text = text
-            .replace(/\{\{title\}\}/g, escapeHtml(String(item.title || '')))
-            .replace(/\{\{link\}\}/g, safeLink)
-            .replace(/\{\{feedName\}\}/g, escapeHtml(String(item.feedName || '')))
-            .replace(/\{\{summary\}\}/g, item.summary ? escapeHtml(String(item.summary)) : '');
-
-        // Image hack prepended to formatting
-        const previewHack = safeImage ? `<a href="${safeImage}">&#8203;</a>` : "";
-        const finalMessage = previewHack + text;
-
-        return this.sendMessage(finalMessage, options);
+        return result;
     }
 
     async sendMessage(text: string, options: SendOptions = {}): Promise<SendResult> {

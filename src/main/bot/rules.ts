@@ -152,6 +152,39 @@ export function truncate(text: string, max: number): string {
     return text.length <= max ? text : text.slice(0, Math.max(0, max - 1)).trimEnd() + '…';
 }
 
+/** Lunghezza del titolo ricavato dal testo, per i contenuti che un titolo non ce l'hanno. */
+export const DERIVED_TITLE_MAX = 140;
+
+/**
+ * Il titolo di un contenuto: quello del feed o, se manca, l'inizio del testo. Vuoto se
+ * non c'è nemmeno il testo.
+ *
+ * Prima un contenuto senza titolo diventava «No Title», e quel segnaposto entrava nella
+ * deduplica per titolo come un titolo vero: dopo il primo, ogni altro contenuto senza titolo
+ * dello stesso bot veniva scartato come «già pubblicato». È il caso dei feed di Mastodon e
+ * dei microblog, dove nessun post ha un titolo. Un titolo vuoto non entra nella deduplica.
+ */
+export function itemTitle(rawTitle: unknown, summary: string): string {
+    const title = typeof rawTitle === 'string' ? rawTitle.replace(/\s+/g, ' ').trim() : '';
+    if (title) return title;
+    return truncate(summary.replace(/\s+/g, ' ').trim(), DERIVED_TITLE_MAX);
+}
+
+/**
+ * Toglie i tag di formattazione rimasti vuoti (`<b></b>`, `<i> </i>`) e le righe vuote in
+ * eccesso. Succede quando un segnaposto non ha valore — un titolo o un sommario mancanti —
+ * e il messaggio avrebbe una riga in grassetto senza testo e un buco nel mezzo.
+ */
+export function tidyMessage(html: string): string {
+    let out = html;
+    let previous: string;
+    do {
+        previous = out;
+        out = out.replace(/<(b|strong|i|em|u|ins|s|strike|del|code|tg-spoiler)>\s*<\/\1>/gi, '');
+    } while (out !== previous);
+    return out.replace(/\n{3,}/g, '\n\n').trim();
+}
+
 /**
  * Telegram accetta al massimo 4096 caratteri di testo visibile per messaggio.
  * Il digest resta parecchio sotto: lascia margine a emoji e entità.
@@ -204,6 +237,14 @@ export function normalizeChannelId(raw: string): string {
     if (/^-?\d+$/.test(id)) return id;
     if (!id.startsWith('@')) id = '@' + id;
     return id;
+}
+
+/**
+ * True se due identificativi scritti dall'utente indicano la stessa chat. Gli username di
+ * Telegram non distinguono maiuscole e minuscole: «@Canale» e «t.me/canale» sono lo stesso.
+ */
+export function sameChannel(a: string, b: string): boolean {
+    return normalizeChannelId(a).toLowerCase() === normalizeChannelId(b).toLowerCase();
 }
 
 /** Esito della verifica dei permessi di pubblicazione del bot in una chat. */

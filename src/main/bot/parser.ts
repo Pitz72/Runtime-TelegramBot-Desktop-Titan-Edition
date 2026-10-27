@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import dns from 'node:dns';
 import { isIP } from 'node:net';
 import { RssItem } from './types';
-import { pickUrl } from './rules';
+import { itemTitle, pickUrl } from './rules';
 
 // --- Anti-SSRF URL Validation ---
 // Blocca schemi non HTTP/HTTPS e indirizzi di rete privata/loopback.
@@ -332,11 +332,13 @@ export async function fetchFeed(name: string, url: string): Promise<RssItem[]> {
                 }
             }
 
+            const summary = cleanSummary(entry.contentSnippet || entry.content || '');
             items.push({
-                title: typeof entry.title === 'string' && entry.title.trim() ? entry.title.trim() : 'No Title',
+                // Senza titolo (Mastodon, microblog) vale l'inizio del testo — vedi itemTitle.
+                title: itemTitle(entry.title, summary),
                 link: link,
                 pubDate: date,
-                summary: cleanSummary(entry.contentSnippet || entry.content || ''),
+                summary,
                 image: image,
                 feedName: name,
                 id: generateId(link)

@@ -62,7 +62,8 @@
         "active": "Active",
         "inactive": "Disabled",
         "created": "Bot created",
-        "imported": "Profile imported",
+        "imported": "Profile imported: it will publish only new content, from now on.",
+        "importedPaused": "Profile imported but switched off: “{bot}” already publishes to that channel, and two bots on one channel would send everything twice. Switch it on from the bot settings if you really need it.",
         "importFailed": "Import failed:"
     },
     "workspace": {
@@ -136,6 +137,7 @@
         "deleteConfirmText": "The bot, its sources and its history are deleted. This cannot be undone.",
         "deleted": "Bot “{name}” deleted",
         "saved": "Settings saved",
+        "templateErrors": "A template has errors (Messages tab): Telegram would reject the messages. Fix it, or go back to the default, before saving.",
         "mute": "Publish without sound",
         "muteHint": "Subscribers receive the messages as usual, but their phone does not ring or vibrate. Useful at night, or for channels that post often.",
         "muteMode": "Notification sound",
@@ -339,7 +341,8 @@
             "profilesExport": "Export all profiles",
             "profilesImport": "Import profiles",
             "profilesExported": "Profiles exported",
-            "profilesImported": "Profiles imported: you'll find them in the bot list.",
+            "profilesImported": "Profiles imported: you'll find them in the bot list. They publish only new content, from now on.",
+            "profilesImportedPaused": "They stay switched off because another bot already publishes to their channel: {list}.",
             "failed": "The operation failed:"
         },
         "about": {

@@ -65,7 +65,7 @@ export interface TitanAPI {
     // System
     getVersion: () => Promise<string>
     setLocale: (locale: string) => Promise<void>
-    onBotsChanged: (callback: (info: { botId?: number }) => void) => () => void
+    onBotsChanged: (callback: (info: { botId?: number; pausedFor?: string }) => void) => () => void
     checkForUpdates: () => Promise<{ success: boolean; error?: string }>
     downloadUpdate: () => Promise<{ success: boolean; error?: string }>
     installUpdate: () => Promise<void>
@@ -84,9 +84,9 @@ export interface TitanAPI {
     exportDatabase: () => Promise<{ success: boolean; path?: string; error?: string }>
     importDatabase: () => Promise<{ success: boolean; error?: string }>
     exportConfig: () => Promise<{ success: boolean; path?: string; error?: string }>
-    importConfig: () => Promise<{ success: boolean; error?: string }>
+    importConfig: () => Promise<{ success: boolean; imported?: number; paused?: Array<{ name: string; pausedFor: string }>; error?: string }>
     exportSingleBot: (botId: number) => Promise<{ success: boolean; path?: string; error?: string }>
-    importSingleBot: () => Promise<{ success: boolean; botId?: number; error?: string }>
+    importSingleBot: () => Promise<{ success: boolean; botId?: number; pausedFor?: string; error?: string }>
 }
 
 declare global {

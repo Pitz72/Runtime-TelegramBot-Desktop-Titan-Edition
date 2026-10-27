@@ -534,10 +534,14 @@ export function setupIpc() {
             rememberDir(filePaths[0]);
 
             const content = await readFile(filePaths[0], 'utf-8');
-            BotManager.importConfig(content);
+            const imported = BotManager.importConfig(content);
 
-            // Rileggiamo i bot aggiornati
-            return { success: true };
+            // `paused`: bot importati spenti perché il loro canale è già servito da un altro bot.
+            return {
+                success: true,
+                imported: imported.length,
+                paused: imported.filter(b => b.pausedFor).map(b => ({ name: b.name, pausedFor: b.pausedFor! })),
+            };
         } catch (e: any) {
             return { success: false, error: e.message || String(e) };
         }
@@ -587,9 +591,9 @@ export function setupIpc() {
             rememberDir(filePaths[0]);
 
             const jsonData = await readFile(filePaths[0], 'utf-8');
-            const newBotId = BotManager.importSingleBot(jsonData);
+            const { botId, pausedFor } = BotManager.importSingleBot(jsonData);
 
-            return { success: true, botId: newBotId };
+            return { success: true, botId, pausedFor };
         } catch (error: any) {
             return { success: false, error: error.message };
         }

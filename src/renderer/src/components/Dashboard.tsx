@@ -117,9 +117,10 @@ export function Dashboard({ updater }: { updater?: Updater }) {
         });
 
         // Profilo .rtb aperto con doppio clic: il main lo importa e avvisa.
-        const offBots = window.api.onBotsChanged(({ botId }) => {
+        const offBots = window.api.onBotsChanged(({ botId, pausedFor }) => {
             loadBots(botId);
-            if (botId) success(t('bots.imported'));
+            if (pausedFor) toast(t('bots.importedPaused').replace('{bot}', pausedFor), 'warning');
+            else if (botId) success(t('bots.imported'));
         });
         return () => { offBots(); offStatus?.(); };
     }, []);
@@ -180,7 +181,8 @@ export function Dashboard({ updater }: { updater?: Updater }) {
         try {
             const res = await window.api.importSingleBot();
             if (res.success && res.botId) {
-                success(t('bots.imported'));
+                if (res.pausedFor) toast(t('bots.importedPaused').replace('{bot}', res.pausedFor), 'warning');
+                else success(t('bots.imported'));
                 await loadBots(res.botId);
             } else if (!res.success && res.error) {
                 error(`${t('bots.importFailed')} ${res.error}`);

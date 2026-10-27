@@ -89,8 +89,8 @@ const api = {
     getVersion: () => ipcRenderer.invoke('get-version'),
     setLocale: (locale: string) => ipcRenderer.invoke('set-locale', locale),
     // Più ascoltatori (App e selettore dei bot): si aggiunge e si restituisce chi lo toglie.
-    onBotsChanged: (callback: (info: { botId?: number }) => void) => {
-        const handler = (_: unknown, info: { botId?: number }) => callback(info ?? {});
+    onBotsChanged: (callback: (info: { botId?: number; pausedFor?: string }) => void) => {
+        const handler = (_: unknown, info: { botId?: number; pausedFor?: string }) => callback(info ?? {});
         ipcRenderer.on('bots-changed', handler);
         return () => { ipcRenderer.removeListener('bots-changed', handler); };
     },

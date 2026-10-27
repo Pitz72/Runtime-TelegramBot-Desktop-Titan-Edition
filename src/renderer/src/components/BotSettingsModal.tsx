@@ -11,6 +11,7 @@ import { TokenVisibility, TOKEN_SHAPE } from './NewBotDialog';
 import { useToast } from './ui/Toast';
 import { useTranslation } from '../locales/I18nContext';
 import { errorMessage } from '../lib/errors';
+import { validateTemplate } from '../utils/templateValidator';
 
 interface Props {
     open: boolean;
@@ -22,6 +23,21 @@ interface Props {
 }
 
 type Tab = 'general' | 'schedule' | 'messages' | 'advanced';
+
+/**
+ * La data di partenza nella forma del selettore («AAAA-MM-GG»). Va bene per l'ISO con la T
+ * e per il formato di SQLite con lo spazio, che `split('T')` lasciava intero — e il campo
+ * restava vuoto.
+ */
+function dateInputValue(startDate: string | null | undefined): string {
+    const match = /^\d{4}-\d{2}-\d{2}/.exec(startDate ?? '');
+    return match ? match[0] : '';
+}
+
+/** True se il template ha errori che farebbero rifiutare i messaggi da Telegram. */
+function hasTemplateErrors(value: string, isStartup = false): boolean {
+    return value.trim() !== '' && validateTemplate(value, isStartup).some(i => i.severity === 'error');
+}
 
 /** I modelli che il motore usa quando un template è vuoto (telegram.ts / engine.ts). */
 const DEFAULTS = {
@@ -46,7 +62,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
     const [muteMode, setMuteMode] = useState<BotConfig['mute_mode']>(bot.mute_mode ?? 'off');
     const [muteFrom, setMuteFrom] = useState(bot.mute_from || '22:00');
     const [muteUntil, setMuteUntil] = useState(bot.mute_until || '07:00');
-    const [startDate, setStartDate] = useState(bot.start_date.split('T')[0]);
+    const [startDate, setStartDate] = useState(dateInputValue(bot.start_date));
     const [interval, setIntervalMinutes] = useState(String(bot.check_interval || 15));
     const [sendFrom, setSendFrom] = useState(bot.send_from || '00:00');
     const [sendUntil, setSendUntil] = useState(bot.send_until || '23:59');
@@ -68,7 +84,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
         setName(bot.name); setToken(bot.token); setShowToken(false); setChannelId(bot.channel_id);
         setIsActive(bot.is_active); setNotifications(bot.notifications_enabled ?? true); setSilentStart(bot.silent_start ?? false);
         setMuteMode(bot.mute_mode ?? 'off'); setMuteFrom(bot.mute_from || '22:00'); setMuteUntil(bot.mute_until || '07:00');
-        setStartDate(bot.start_date.split('T')[0]); setIntervalMinutes(String(bot.check_interval || 15));
+        setStartDate(dateInputValue(bot.start_date)); setIntervalMinutes(String(bot.check_interval || 15));
         setSendFrom(bot.send_from || '00:00'); setSendUntil(bot.send_until || '23:59');
         setTplStartup(bot.template_startup || ''); setTplNews(bot.template_news || '');
         setTplPodcast(bot.template_podcast || ''); setTplYoutube(bot.template_youtube || '');
@@ -93,10 +109,20 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
         setServerError('');
         if (generalInvalid) { setTab('general'); return; }
         if (scheduleInvalid) { setTab('schedule'); return; }
+        // Un template con errori non si salva: Telegram rifiuterebbe ogni messaggio di quel tipo.
+        if (hasTemplateErrors(tplStartup, true) || [tplNews, tplPodcast, tplYoutube].some(v => hasTemplateErrors(v))) {
+            setTab('messages');
+            setServerError(t('botSettings.templateErrors'));
+            return;
+        }
         setSaving(true);
         try {
             await window.api.updateBot({
-                id: bot.id, name: name.trim(), token: token.trim(), channelId: channelId.trim(), isActive, startDate,
+                id: bot.id, name: name.trim(), token: token.trim(), channelId: channelId.trim(), isActive,
+                // La data si manda solo se l'utente l'ha cambiata. Rimandata sempre, una data con
+                // l'ora (bot importato, creato da versioni vecchie) tornava alla mezzanotte UTC, e
+                // i contenuti di quella mezza giornata ancora nei feed partivano al giro dopo.
+                startDate: startDate !== dateInputValue(bot.start_date) ? startDate : undefined,
                 checkInterval: intervalNumber, notificationsEnabled: notifications, sendFrom, sendUntil,
                 templatePodcast: tplPodcast, templateNews: tplNews, templateYoutube: tplYoutube, templateStartup: tplStartup,
                 silentStart, muteMode, muteFrom, muteUntil,

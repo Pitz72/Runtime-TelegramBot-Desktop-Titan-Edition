@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { RssItem } from './types';
 import { validateFeedUrl } from './parser';
 import { TitanLogger } from '../logger';
-import { adaptLockupView, pickYouTubeChannel, youtubeChannelRef } from './rules';
+import { adaptLockupView, itemTitle, pickYouTubeChannel, youtubeChannelRef } from './rules';
 
 let youtube: any = null;
 
@@ -294,14 +294,18 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
                 || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : undefined);
 
             // `v.title` è un oggetto Text: usarlo come ripiego metteva un oggetto al posto del titolo.
-            const titleText = typeof v.title?.text === 'string' ? v.title.text.trim()
-                : typeof v.title === 'string' ? v.title.trim()
+            const titleText = typeof v.title?.text === 'string' ? v.title.text
+                : typeof v.title === 'string' ? v.title
+                : '';
+            const summary = typeof v.description_snippet?.text === 'string' ? v.description_snippet.text
+                : typeof v.short_description === 'string' ? v.short_description
                 : '';
             items.push({
-                title: titleText || 'No Title',
+                // Mai «No Title»: un segnaposto finirebbe nella deduplica per titolo (itemTitle).
+                title: itemTitle(titleText, summary),
                 link: videoLink,
                 pubDate: date,
-                summary: v.description_snippet?.text || v.short_description || '',
+                summary,
                 image: thumbnail,
                 feedName: channel.metadata?.title || channel.title || 'YouTube',
                 id: generateId(videoLink)

@@ -90,6 +90,10 @@ export function SystemSettingsModal({ open, onClose, updater, onBotsImported, on
             // L'elenco dei bot si ricarica da sé (prima bisognava ricaricare l'interfaccia a mano).
             onBotsImported?.();
             success(t('system.data.profilesImported'));
+            if (r.paused && r.paused.length > 0) {
+                const list = r.paused.map(p => `${p.name} → ${p.pausedFor}`).join('; ');
+                toast(t('system.data.profilesImportedPaused').replace('{list}', list), 'warning');
+            }
         } else if (r.error !== 'Cancelled') error(`${t('system.data.failed')} ${r.error}`);
     });
 

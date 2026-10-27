@@ -3,7 +3,7 @@ import {
     buildDigestMessage, classifyTelegramError, DIGEST_TEXT_BUDGET, escapeHtml, escapeUrl,
     isFeedDue, isTimeAllowed, loopIntervalMinutes, parseStartDate, parseUtcTimestamp,
     isMuted, normalizeChannelId, passesKeywordFilter, pickUrl, pickYouTubeChannel, postingRight, startupMessage, truncate,
-    youtubeChannelRef, adaptLockupView,
+    youtubeChannelRef, adaptLockupView, itemTitle, tidyMessage, sameChannel, DERIVED_TITLE_MAX,
 } from './rules';
 
 const at = (h: number, m: number) => new Date(2026, 9, 19, h, m, 0);
@@ -341,5 +341,46 @@ describe('adaptLockupView', () => {
     it('senza miniatura usa quella standard del video', () => {
         expect(adaptLockupView(lockup({ content_image: undefined }))?.thumbnails[0].url)
             .toBe('https://i.ytimg.com/vi/QEM3EHUV5ko/hqdefault.jpg');
+    });
+});
+
+describe('itemTitle', () => {
+    it('usa il titolo del feed, ripulito dagli spazi', () => {
+        expect(itemTitle('  Puntata\n 12 ', 'testo')).toBe('Puntata 12');
+    });
+    it('senza titolo usa l\'inizio del testo (Mastodon, microblog), mai un segnaposto', () => {
+        expect(itemTitle(undefined, 'Oggi in diretta alle 21')).toBe('Oggi in diretta alle 21');
+        const long = 'parola '.repeat(60);
+        const t = itemTitle('', long);
+        expect(t.length).toBeLessThanOrEqual(DERIVED_TITLE_MAX);
+        expect(t.endsWith('…')).toBe(true);
+    });
+    it('senza titolo né testo resta vuoto, e un titolo vuoto non entra nella deduplica', () => {
+        expect(itemTitle(null, '')).toBe('');
+        expect(itemTitle({ text: 'oggetto' }, '')).toBe('');
+    });
+});
+
+describe('tidyMessage', () => {
+    it('toglie i tag di formattazione vuoti, anche annidati', () => {
+        expect(tidyMessage('<b></b>x<i> <b></b> </i>y')).toBe('xy');
+    });
+    it('lascia i tag con del testo e i link', () => {
+        expect(tidyMessage("<b>a</b> <a href='x'></a>")).toBe("<b>a</b> <a href='x'></a>");
+    });
+    it('riduce le righe vuote in eccesso', () => {
+        expect(tidyMessage('a\n\n\n\nb\n')).toBe('a\n\nb');
+    });
+});
+
+describe('sameChannel', () => {
+    it('riconosce lo stesso canale scritto in modi diversi', () => {
+        expect(sameChannel('@Radio', 'https://t.me/radio')).toBe(true);
+        expect(sameChannel('radio', '@RADIO')).toBe(true);
+        expect(sameChannel('-1001234', '-1001234')).toBe(true);
+    });
+    it('distingue canali diversi', () => {
+        expect(sameChannel('@radio', '@radio2')).toBe(false);
+        expect(sameChannel('-1001234', '-1001235')).toBe(false);
     });
 });

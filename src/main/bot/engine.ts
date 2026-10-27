@@ -210,7 +210,18 @@ export class BotEngine {
                 }
                 continue;
             }
-            const res = await this.getClient(bot).sendMessage(message, { silent: isMuted(bot) });
+            // Ore di silenzio: niente annuncio. Con l'avvio insieme al computer il motore può
+            // partire alle tre di notte, e l'«Online» arrivava sul canale a quell'ora.
+            if (!isTimeAllowed(bot.send_from, bot.send_until)) {
+                TitanLogger.log(`🌙 [${bot.name}] Ore di silenzio: nessun messaggio di avvio nel canale.`);
+                continue;
+            }
+            let res = await this.getClient(bot).sendMessage(message, { silent: isMuted(bot) });
+            // Messaggio di avvio personalizzato rifiutato: si ripiega su quello standard.
+            if (!res.ok && res.kind === 'rejected' && bot.template_startup?.trim() && this.isLive(run)) {
+                TitanLogger.log(`⚠️ [${bot.name}] Telegram rifiuta il messaggio di avvio personalizzato (${res.error}): uso quello standard.`, 'warn');
+                res = await this.getClient(bot).sendMessage(startupMessage({ ...bot, template_startup: null }, appVersion)!, { silent: isMuted(bot) });
+            }
             // Motore fermato mentre la richiesta era in volo: l'esito non interessa più.
             if (!this.isLive(run)) return;
             if (!res.ok && res.kind !== 'aborted') {
@@ -446,6 +457,9 @@ export class BotEngine {
             let skipCount = 0;
             let alreadyProcessedCount = 0;
             let deferredCount = 0;
+            // I contenuti esclusi dal filtro non si marcano (cambiando il filtro devono poter
+            // passare), quindi tornano a ogni giro: una riga ciascuno riempiva il diario.
+            let filteredCount = 0;
             const toPublish: RssItem[] = [];
             const contentType = contentTypeOf(feed);
 
@@ -475,7 +489,7 @@ export class BotEngine {
                 }
 
                 if (!passesKeywordFilter(item, feed.keyword_filter)) {
-                    TitanLogger.log(`  🔍 ${tag} Filtrato da keyword: ${item.title}`);
+                    filteredCount++;
                     continue;
                 }
 
@@ -513,6 +527,10 @@ export class BotEngine {
                     type: 'item-found', bot: bot.name, source: feed.name, title: item.title
                 });
                 this.publishQueue.push({ botId: bot.id, botName: bot.name, feed, item, retryCount: 0, fromPending: false });
+            }
+
+            if (filteredCount > 0) {
+                TitanLogger.log(`  🔍 ${tag} ${feed.name}: ${filteredCount} contenuti esclusi dal filtro per parole chiave.`);
             }
 
             if (newCount === 0) {
@@ -710,14 +728,27 @@ export class BotEngine {
         }
     }
 
-    /** F9 Digest: invia i digest scaduti per il bot dato. */
+    /**
+     * F9 Digest: invia i digest scaduti per il bot dato.
+     *
+     * Un feed a cui l'utente ha tolto il digest può avere ancora contenuti in coda, già segnati
+     * come pubblicati: prima restavano lì per sempre, perché qui si guardavano solo i feed con
+     * il digest attivo. Ora partono subito, in un ultimo digest.
+     *
+     * Il digest rispetta le ore di silenzio come ogni altro invio: aspetta la loro fine.
+     */
     private async processDigests(bot: BotConfig, run: number) {
-        const feeds = BotManager.getFeeds(bot.id).filter(f => f.is_active && f.digest_interval);
+        const queued = new Set(BotManager.digestFeedIds(bot.id));
+        const feeds = BotManager.getFeeds(bot.id).filter(f => f.is_active && (f.digest_interval || queued.has(f.id)));
+        if (feeds.length === 0) return;
+        if (!isTimeAllowed(bot.send_from, bot.send_until)) return;
+
         for (const feed of feeds) {
             if (!this.isLive(run)) break;
-            const interval = feed.digest_interval!;
+            const flushing = !feed.digest_interval;
+            const interval = feed.digest_interval ?? 0;
             const lastSent = feed.digest_last_sent ? parseUtcTimestamp(feed.digest_last_sent) : 0;
-            if (Date.now() - lastSent < interval * 60 * 1000) continue;
+            if (!flushing && Date.now() - lastSent < interval * 60 * 1000) continue;
 
             const items = BotManager.getDigestQueue(bot.id, feed.id);
 
@@ -737,7 +768,7 @@ export class BotEngine {
                 // spariva senza mai essere pubblicato. Ora aspetta il digest successivo.
                 BotManager.updateFeedDigestLastSent(feed.id);
                 BotManager.removeDigestItems(bot.id, feed.id, sentIds);
-                TitanLogger.log(`  📋 [${bot.name}] Digest inviato per "${feed.name}": ${included} item${items.length > included ? ` (${items.length - included} al prossimo)` : ''}`);
+                TitanLogger.log(`  📋 [${bot.name}] ${flushing ? 'Ultimo digest (digest disattivato)' : 'Digest inviato'} per "${feed.name}": ${included} item${items.length > included ? ` (${items.length - included} al prossimo)` : ''}`);
             } else if (result.kind === 'rejected') {
                 BotManager.updateFeedDigestLastSent(feed.id);
                 BotManager.removeDigestItems(bot.id, feed.id, sentIds);
