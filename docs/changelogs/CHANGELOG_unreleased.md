@@ -73,3 +73,14 @@ Le quattro funzioni rimaste negli appunti della 2.4. Lo schema del database pass
 - **Argomenti dei gruppi.** Nei gruppi Telegram con gli argomenti (forum) un bot può pubblicare in un argomento preciso invece che nel «Generale». Nelle impostazioni del bot c'è il campo **Argomento del gruppo**: il numero, oppure il link di un messaggio dell'argomento così come lo copia Telegram (`t.me/c/…/45`). **Prova il bot** controlla anche che il gruppo abbia gli argomenti attivi. L'argomento viaggia nei profili `.rtb`. Valgono per l'argomento anche il messaggio di avvio e i riepiloghi.
 
 Verifica: 12 test nuovi (133 in tutto), tra cui la migrazione reale di un database costruito come quello della 2.4.1 alla v14, con i dati che restano al loro posto e il backup creato. Nel banco di prova: stato delle sorgenti (riuscita, errore, mai letta), le tre schede dell'attività, il campo dell'argomento con un valore sbagliato (errore annunciato) e con un link valido.
+
+## Blocco 7 — Token con le API asincrone di safeStorage
+
+Le API sincrone di `safeStorage` (`isEncryptionAvailable`, `encryptString`, `decryptString`) sono deprecate da Electron 45 e **spariscono nella 46**, insieme al backend sincrono di Chromium su cui poggiano ([breaking changes di Electron](https://www.electronjs.org/docs/latest/breaking-changes)). Titan le usava per ogni token, a ogni lettura di un bot. Senza questo passaggio, il primo aggiornamento a Electron 46 avrebbe reso illeggibili tutti i token.
+
+- **I token si decifrano una volta, all'avvio**, con le API asincrone, e restano in memoria per il motore, che legge i bot a ogni giro in modo sincrono. A ogni salvataggio si cifrano di nuovo e la memoria si aggiorna. Prima ogni lettura di un bot rifaceva la decifratura.
+- **Stesso portachiavi, stesso formato.** I token cifrati dalle versioni precedenti si leggono con le API nuove senza nessuna conversione. Quelli nei formati più vecchi (senza prefisso, delle versioni fino alla 1.10.1, o in chiaro, prima della 1.7.8) ora si riscrivono nel formato corrente subito all'avvio, invece che al primo salvataggio del bot. Lo stesso se il portachiavi segnala una chiave ruotata.
+- Anche i token nei profili `.rtb` passano dalle API nuove, in esportazione e in importazione.
+- Senza portachiavi (Linux senza `libsecret`) resta la chiave macchina, come prima.
+
+Verifica: 8 test nuovi (141 in tutto) su un portachiavi simulato: andata e ritorno, formati vecchi riscritti all'avvio, token di un altro computer illeggibile senza errori, token aggiornato subito dopo il salvataggio, profilo `.rtb` esportato e reimportato con il token leggibile.

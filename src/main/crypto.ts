@@ -39,18 +39,50 @@ function getMachineKey(): Buffer {
 }
 
 /**
- * Cifra un token per la memorizzazione in DB.
- * Usa safeStorage (OS keychain) se disponibile, altrimenti AES-256-GCM con chiave macchina.
- * Output sempre prefissato (ss: o mk:) per disambiguare al momento della decifratura.
+ * True se il portachiavi del sistema è utilizzabile.
+ *
+ * Solo API asincrone di `safeStorage`: quelle sincrone (`isEncryptionAvailable`,
+ * `encryptString`, `decryptString`) sono deprecate da Electron 45 e spariscono nella 46,
+ * insieme al backend sincrono di Chromium su cui poggiano. I dati cifrati con le vecchie
+ * si leggono con le nuove: stessi portachiavi, stesso formato.
  */
-export function encryptToken(plaintext: string): string {
-    if (safeStorage.isEncryptionAvailable()) {
-        try {
-            return PREFIX_SS + safeStorage.encryptString(plaintext).toString('base64');
-        } catch (e) {
-            console.error('[crypto] safeStorage.encryptString fallita, fallback a machine-key:', e);
-        }
+async function keychainAvailable(): Promise<boolean> {
+    try {
+        return await safeStorage.isAsyncEncryptionAvailable();
+    } catch {
+        return false;
     }
+}
+
+/**
+ * Cifra un testo con il portachiavi del sistema: il blob in base64, oppure `null` se il
+ * portachiavi non c'è o la cifratura fallisce.
+ */
+export async function keychainEncrypt(plaintext: string): Promise<string | null> {
+    if (!(await keychainAvailable())) return null;
+    try {
+        return (await safeStorage.encryptStringAsync(plaintext)).toString('base64');
+    } catch (e) {
+        console.error('[crypto] safeStorage.encryptStringAsync fallita:', e);
+        return null;
+    }
+}
+
+/**
+ * Decifra un blob del portachiavi. `null` se non si può (portachiavi assente, profilo o
+ * computer diverso). `reEncrypt` = il portachiavi chiede di cifrarlo di nuovo (chiave ruotata).
+ */
+export async function keychainDecrypt(base64: string): Promise<{ plain: string; reEncrypt: boolean } | null> {
+    if (!(await keychainAvailable())) return null;
+    try {
+        const { result, shouldReEncrypt } = await safeStorage.decryptStringAsync(Buffer.from(base64, 'base64'));
+        return { plain: result, reEncrypt: shouldReEncrypt };
+    } catch {
+        return null;
+    }
+}
+
+function machineKeyEncrypt(plaintext: string): string {
     const key = getMachineKey();
     const iv = nodeCrypto.randomBytes(12);
     const cipher = nodeCrypto.createCipheriv(ALGORITHM, key, iv);
@@ -61,27 +93,40 @@ export function encryptToken(plaintext: string): string {
 }
 
 /**
+ * Cifra un token per la memorizzazione in DB.
+ * Usa safeStorage (OS keychain) se disponibile, altrimenti AES-256-GCM con chiave macchina.
+ * Output sempre prefissato (ss: o mk:) per disambiguare al momento della decifratura.
+ */
+export async function encryptToken(plaintext: string): Promise<string> {
+    const blob = await keychainEncrypt(plaintext);
+    return blob !== null ? PREFIX_SS + blob : machineKeyEncrypt(plaintext);
+}
+
+/** Esito della decifratura: `upgrade` = va riscritto nel formato corrente (legacy o chiave ruotata). */
+export interface DecryptedToken {
+    token: string;
+    upgrade: boolean;
+}
+
+/**
  * Decifra un token letto dal DB.
  * Gestisce tutti i formati storici:
  *  - 'ss:...'  → safeStorage (v1.10.2+)
  *  - 'mk:...'  → machine-key AES-256-GCM (v1.10.2+ fallback)
- *  - base64 senza prefisso → legacy safeStorage (v1.7.8–v1.10.1), migrato al prossimo write
- *  - testo plain → legacy pre-v1.7.8, migrato al prossimo write
+ *  - base64 senza prefisso → legacy safeStorage (v1.7.8–v1.10.1)
+ *  - testo plain → legacy pre-v1.7.8
+ * Un token illeggibile torna vuoto: il motore salta il bot e l'interfaccia chiede il token.
  */
-export function decryptToken(stored: string): string {
-    if (!stored) return '';
+export async function decryptToken(stored: string): Promise<DecryptedToken> {
+    if (!stored) return { token: '', upgrade: false };
 
     if (stored.startsWith(PREFIX_SS)) {
-        if (!safeStorage.isEncryptionAvailable()) {
-            console.warn('[crypto] Token cifrato con safeStorage ma il keychain OS non è disponibile su questa macchina — token illeggibile.');
-            return '';
+        const decrypted = await keychainDecrypt(stored.slice(PREFIX_SS.length));
+        if (!decrypted) {
+            console.warn('[crypto] Token cifrato con safeStorage non leggibile (portachiavi assente, o profilo utente/computer diverso da quello di cifratura).');
+            return { token: '', upgrade: false };
         }
-        try {
-            return safeStorage.decryptString(Buffer.from(stored.slice(PREFIX_SS.length), 'base64'));
-        } catch (e) {
-            console.warn('[crypto] Decifratura safeStorage fallita — token illeggibile (probabile profilo utente/OS diverso da quello di cifratura):', e);
-            return '';
-        }
+        return { token: decrypted.plain, upgrade: decrypted.reEncrypt };
     }
 
     if (stored.startsWith(PREFIX_MK)) {
@@ -93,23 +138,18 @@ export function decryptToken(stored: string): string {
             const ciphertext = buf.subarray(28);
             const decipher = nodeCrypto.createDecipheriv(ALGORITHM, key, iv);
             decipher.setAuthTag(authTag);
-            return decipher.update(ciphertext).toString('utf8') + decipher.final('utf8');
+            return { token: decipher.update(ciphertext).toString('utf8') + decipher.final('utf8'), upgrade: false };
         } catch (e) {
             console.warn('[crypto] Decifratura machine-key fallita — token illeggibile (file .machine-key assente o diverso):', e);
-            return '';
+            return { token: '', upgrade: false };
         }
     }
 
     // Legacy: base64 senza prefisso — era safeStorage pre-v1.10.2
-    if (safeStorage.isEncryptionAvailable()) {
-        try {
-            return safeStorage.decryptString(Buffer.from(stored, 'base64'));
-        } catch {
-            // Non è un blob safeStorage, potrebbe essere testo plain (pre-v1.7.8)
-        }
-    }
+    const legacy = await keychainDecrypt(stored);
+    if (legacy) return { token: legacy.plain, upgrade: true };
 
     // Pre-v1.7.8: token in chiaro (solo se non sembra JSON)
-    if (stored.startsWith('{')) return '';
-    return stored;
+    if (stored.startsWith('{')) return { token: '', upgrade: false };
+    return { token: stored, upgrade: true };
 }

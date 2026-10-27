@@ -11,7 +11,7 @@ const dir = vi.hoisted(() => ({ path: '' }));
 
 vi.mock('electron', () => ({
     app: { getPath: () => dir.path, getVersion: () => '0.0.0-test', getLocale: () => 'it' },
-    safeStorage: { isEncryptionAvailable: () => false },
+    safeStorage: { isAsyncEncryptionAvailable: async () => false },
     BrowserWindow: { getAllWindows: () => [] },
     Notification: { isSupported: () => false },
 }));
@@ -56,8 +56,8 @@ function engineWithFakeTelegram() {
 
 const hh = (h: number) => `${String(((h % 24) + 24) % 24).padStart(2, '0')}:00`;
 
-function botWithDigestQueue(sendFrom = '00:00', sendUntil = '23:59') {
-    const botId = Number(BotManager.createBot('Bot', '123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', '@c', undefined, 15, true, sendFrom, sendUntil));
+async function botWithDigestQueue(sendFrom = '00:00', sendUntil = '23:59') {
+    const botId = Number(await BotManager.createBot('Bot', '123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', '@c', undefined, 15, true, sendFrom, sendUntil));
     const feedId = BotManager.addFeed(botId, 'Notizie', 'https://example.org/f.xml', 'news', null, null, 1440);
     for (const n of [1, 2, 3]) {
         BotManager.addToDigestQueue(botId, feedId, { id: `id-${n}`, title: `Titolo ${n}`, link: `https://example.org/${n}`, summary: '' });
@@ -121,7 +121,7 @@ describe('lettura dei feed', () => {
 
 describe('digest', () => {
     it('spegnere il digest non fa sparire i contenuti in coda: partono in un ultimo digest', async () => {
-        const { botId, feedId } = botWithDigestQueue();
+        const { botId, feedId } = await botWithDigestQueue();
         BotManager.updateFeed(feedId, 'Notizie', 'https://example.org/f.xml', 'news', null, null, null);
         const { engine, sent } = engineWithFakeTelegram();
 
@@ -135,7 +135,7 @@ describe('digest', () => {
 
     it('durante le ore di silenzio il digest aspetta', async () => {
         const now = new Date().getHours();
-        const { botId, feedId } = botWithDigestQueue(hh(now + 2), hh(now + 3));
+        const { botId, feedId } = await botWithDigestQueue(hh(now + 2), hh(now + 3));
         const { engine, sent } = engineWithFakeTelegram();
 
         await (engine as any).processDigests(BotManager.getBot(botId), 1);
@@ -145,7 +145,7 @@ describe('digest', () => {
     });
 
     it('fuori dalle ore di silenzio il digest scaduto parte', async () => {
-        const { botId, feedId } = botWithDigestQueue();
+        const { botId, feedId } = await botWithDigestQueue();
         const { engine, sent } = engineWithFakeTelegram();
 
         await (engine as any).processDigests(BotManager.getBot(botId), 1);

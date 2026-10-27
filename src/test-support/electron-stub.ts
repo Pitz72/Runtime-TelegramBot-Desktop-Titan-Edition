@@ -15,7 +15,7 @@ export const app = {
     isReady: () => false,
     isPackaged: false,
 };
-export const safeStorage = { isEncryptionAvailable: () => false };
+export const safeStorage = { isAsyncEncryptionAvailable: async () => false };
 export const BrowserWindow = { getAllWindows: () => [] };
 export const Notification = { isSupported: () => false };
 export const shell = {};

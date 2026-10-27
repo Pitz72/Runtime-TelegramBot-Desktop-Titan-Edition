@@ -1,9 +1,8 @@
 import { getDB } from '../database/schema';
 const db = () => getDB(); // lazy accessor — fix #16
 import { BotConfig, FeedConfig, HistoryEntry, QueuedItem } from '../../shared/types';
-import { safeStorage } from 'electron';
 import nodeCrypto from 'node:crypto';
-import { encryptToken, decryptToken } from '../crypto';
+import { encryptToken, decryptToken, keychainDecrypt, keychainEncrypt } from '../crypto';
 import { validateFeedUrl } from './parser';
 import { MUTE_MODES, sameChannel, type MuteMode } from './rules';
 import { tm } from '../i18n';
@@ -76,7 +75,8 @@ function readRtbBot(raw: any) {
     if (!raw || typeof raw !== 'object') throw new Error(tm('rtbItemInvalid'));
     return {
         name: rtbAssertString(raw.name, 'bot.name'),
-        token: decryptTokenFromExport(typeof raw.token === 'string' ? raw.token : ''),
+        /** Il token come sta nel file: si decifra a parte, perché la decifratura è asincrona */
+        exportedToken: typeof raw.token === 'string' ? raw.token : '',
         channelId: rtbAssertString(raw.channelId ?? raw.channel_id, 'bot.channelId'),
         checkInterval: rtbAssertCheckInterval(raw.checkInterval ?? raw.check_interval),
         notificationsEnabled: !isFalse(raw.notificationsEnabled ?? raw.notifications_enabled),
@@ -107,6 +107,14 @@ function readRtbFeed(raw: any) {
     };
 }
 
+/** Un bot del profilo con il token già decifrato dal file e ricifrato per il database. */
+type ReadyRtbBot = ReturnType<typeof readRtbBot> & { token: string; storedToken: string };
+
+async function prepareRtbToken(bot: ReturnType<typeof readRtbBot>): Promise<ReadyRtbBot> {
+    const token = await decryptTokenFromExport(bot.exportedToken);
+    return { ...bot, token, storedToken: await encryptToken(token) };
+}
+
 /** Esito dell'import di un bot: `pausedFor` è il bot che pubblica già su quel canale. */
 export interface ImportedBot {
     botId: number;
@@ -118,37 +126,22 @@ export interface ImportedBot {
 // Il token esportato viene cifrato utilizzando safeStorage (se disponibile).
 // I file .rtb risultano vincolati alla macchina corrente per la massima sicurezza.
 
-function encryptTokenForExport(plaintext: string): string {
-    if (safeStorage.isEncryptionAvailable()) {
-        try {
-            const encrypted = safeStorage.encryptString(plaintext);
-            return JSON.stringify({ ss: encrypted.toString('base64') });
-        } catch (error) {
-            console.error('Errore durante la cifratura safeStorage per export', error);
-        }
-    }
+async function encryptTokenForExport(plaintext: string): Promise<string> {
+    if (!plaintext) return '';
+    const blob = await keychainEncrypt(plaintext);
     // Su macchine senza safeStorage, esportiamo il token vuoto per evitare data leak
-    return '';
+    return blob !== null ? JSON.stringify({ ss: blob }) : '';
 }
 
-function decryptTokenFromExport(data: string): string {
+async function decryptTokenFromExport(data: string): Promise<string> {
     if (!data) return '';
     try {
         const parsed = JSON.parse(data);
-        // Nuovo formato sicuro via safeStorage (v1.7.8+)
-        if (parsed.ss && safeStorage.isEncryptionAvailable()) {
-            try {
-                const buffer = Buffer.from(parsed.ss, 'base64');
-                return safeStorage.decryptString(buffer);
-            } catch (error) {
-                console.error('Errore durante la decifratura safeStorage di un export', error);
-                return ''; // Token illeggibile o proveniente da altra macchina
-            }
-        } 
-        // Vecchio formato vulnerabile (v1.7.7) basato su chiave hardcoded
-        else if (parsed.e && parsed.iv) {
-            return ''; // Forziamo il reinserimento del token per i vecchi export per sicurezza
-        }
+        // Nuovo formato sicuro via safeStorage (v1.7.8+); illeggibile se viene da un altro computer
+        if (parsed?.ss) return (await keychainDecrypt(parsed.ss))?.plain ?? '';
+        // Vecchio formato vulnerabile (v1.7.7) basato su chiave hardcoded:
+        // si forza il reinserimento del token per sicurezza
+        if (parsed?.e && parsed?.iv) return '';
     } catch {
         // Fallback per file .rtb molto vecchi (pre-v1.7.7) dove il token era in chiaro.
         // Se il parse fallisce, la stringa potrebbe essere il token raw.
@@ -174,11 +167,20 @@ export interface BotBehavior {
     topicId?: number | null;
 }
 
-/** Riga del DB → BotConfig: token decifrato, booleani SQLite (0/1) in boolean — fix #18. */
+/**
+ * I token in chiaro, per bot. Si decifrano una volta, all'avvio (`loadTokens`), e si
+ * aggiornano a ogni salvataggio. Il portachiavi del sistema ora si usa solo con le API
+ * asincrone di `safeStorage` (le sincrone spariscono con Electron 46), mentre il motore
+ * legge i bot in modo sincrono a ogni giro: qui le due cose si incontrano. Prima ogni
+ * lettura di un bot rifaceva la decifratura.
+ */
+const tokens = new Map<number, string>();
+
+/** Riga del DB → BotConfig: token in chiaro, booleani SQLite (0/1) in boolean — fix #18. */
 function rowToBot(row: any): BotConfig {
     return {
         ...row,
-        token: decryptToken(row.token),
+        token: tokens.get(row.id) ?? '',
         is_active: row.is_active === 1,
         notifications_enabled: row.notifications_enabled === 1,
         silent_start: row.silent_start === 1,
@@ -203,9 +205,29 @@ function rtbBehavior(source: any): BotBehavior {
 
 export class BotManager {
     // --- BOTS ---
+
+    /**
+     * Decifra i token di tutti i bot e li tiene in memoria. Va chiamata all'avvio, dopo
+     * `initDB` e prima che motore e interfaccia leggano i bot. Un token in un formato vecchio
+     * (o con la chiave del portachiavi ruotata) si riscrive subito nel formato corrente.
+     * Restituisce quanti token non si sono potuti leggere su questo computer.
+     */
+    static async loadTokens(): Promise<number> {
+        tokens.clear();
+        let unreadable = 0;
+        const rows = db().prepare('SELECT id, token FROM bots').all() as Array<{ id: number; token: string }>;
+        for (const row of rows) {
+            const { token, upgrade } = await decryptToken(row.token);
+            tokens.set(row.id, token);
+            if (!token && row.token) unreadable++;
+            if (token && upgrade) {
+                db().prepare('UPDATE bots SET token = ? WHERE id = ?').run(await encryptToken(token), row.id);
+            }
+        }
+        return unreadable;
+    }
+
     static getBots(): BotConfig[] {
-        // Il token in formato legacy (senza prefisso) si legge comunque e torna nel formato
-        // corrente alla prossima scrittura.
         const rows = db().prepare('SELECT * FROM bots ORDER BY created_at DESC').all() as any[];
         return rows.map(rowToBot);
     }
@@ -216,13 +238,19 @@ export class BotManager {
         return row ? rowToBot(row) : null;
     }
 
-    static createBot(name: string, token: string, channelId: string, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, behavior: BotBehavior = {}): number | bigint {
+    static async createBot(name: string, token: string, channelId: string, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, behavior: BotBehavior = {}): Promise<number> {
+        const id = BotManager.insertBot(await encryptToken(token), name, channelId, startDate, checkInterval, notificationsEnabled, sendFrom, sendUntil, templatePodcast, templateNews, templateYoutube, templateStartup, behavior);
+        tokens.set(id, token);
+        return id;
+    }
+
+    /** L'inserimento vero e proprio, sincrono, con il token già cifrato (vale anche dentro una transazione). */
+    private static insertBot(secureToken: string, name: string, channelId: string, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, behavior: BotBehavior = {}): number {
         const date = startDate || new Date().toISOString();
         const interval = checkInterval || 15;
         const notif = notificationsEnabled !== undefined ? (notificationsEnabled ? 1 : 0) : 1;
         const sFrom = sendFrom || '00:00';
         const sUntil = sendUntil || '23:59';
-        const secureToken = encryptToken(token);
         const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup, silent_start, mute_mode, mute_from, mute_until, topic_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         const info = stmt.run(
             name, secureToken, channelId, date, interval, notif, sFrom, sUntil,
@@ -230,11 +258,11 @@ export class BotManager {
             behavior.silentStart ? 1 : 0, behavior.muteMode ?? 'off', behavior.muteFrom ?? '22:00', behavior.muteUntil ?? '07:00',
             behavior.topicId ?? null,
         );
-        return info.lastInsertRowid;
+        return Number(info.lastInsertRowid);
     }
 
-    static updateBot(id: number, name: string, token: string, channelId: string, isActive: boolean, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, behavior: BotBehavior = {}) {
-        const secureToken = encryptToken(token);
+    static async updateBot(id: number, name: string, token: string, channelId: string, isActive: boolean, startDate?: string, checkInterval?: number, notificationsEnabled?: boolean, sendFrom?: string, sendUntil?: string, templatePodcast?: string, templateNews?: string, templateYoutube?: string, templateStartup?: string, behavior: BotBehavior = {}) {
+        const secureToken = await encryptToken(token);
         const stmt = db().prepare(
             'UPDATE bots SET name = ?, token = ?, channel_id = ?, is_active = ?, start_date = COALESCE(?, start_date), check_interval = COALESCE(?, check_interval), notifications_enabled = COALESCE(?, notifications_enabled), send_from = COALESCE(?, send_from), send_until = COALESCE(?, send_until), template_podcast = ?, template_news = ?, template_youtube = ?, template_startup = ?, silent_start = COALESCE(?, silent_start), mute_mode = COALESCE(?, mute_mode), mute_from = COALESCE(?, mute_from), mute_until = COALESCE(?, mute_until) WHERE id = ?'
         );
@@ -250,9 +278,12 @@ export class BotManager {
         if (behavior.topicId !== undefined) {
             db().prepare('UPDATE bots SET topic_id = ? WHERE id = ?').run(behavior.topicId, id);
         }
+        tokens.set(id, token);
     }
+
     static deleteBot(id: number) {
         db().prepare('DELETE FROM bots WHERE id = ?').run(id);
+        tokens.delete(id);
     }
 
     /**
@@ -471,13 +502,14 @@ export class BotManager {
     }
 
     // --- IMPORT/EXPORT CONFIG ---
-    static exportConfig(): string {
+    static async exportConfig(): Promise<string> {
         const bots = BotManager.getBots();
-        const exportData = bots.map(bot => {
+        const exportData = [];
+        for (const bot of bots) {
             const feeds = BotManager.getFeeds(bot.id);
-            return {
+            exportData.push({
                 name: bot.name,
-                token: encryptTokenForExport(bot.token), // safeStorage cifrato per il file .rtb
+                token: await encryptTokenForExport(bot.token), // safeStorage cifrato per il file .rtb
                 channel_id: bot.channel_id,
                 start_date: bot.start_date,
                 check_interval: bot.check_interval,
@@ -503,8 +535,8 @@ export class BotManager {
                     check_interval: f.check_interval ?? null,
                     digest_interval: f.digest_interval ?? null,
                 }))
-            };
-        });
+            });
+        }
         return JSON.stringify(exportData, null, 2);
     }
 
@@ -526,13 +558,14 @@ export class BotManager {
      * **Resta spento se il canale è già servito** da un altro bot attivo: due bot sullo
      * stesso canale pubblicherebbero ogni contenuto due volte.
      */
-    private static insertImportedBot(bot: ReturnType<typeof readRtbBot>, feeds: Array<ReturnType<typeof readRtbFeed>>): ImportedBot {
+    private static insertImportedBot(bot: ReadyRtbBot, feeds: Array<ReturnType<typeof readRtbFeed>>): ImportedBot {
         const owner = bot.isActive ? BotManager.findActiveBotOnChannel(bot.channelId) : null;
-        const botId = Number(BotManager.createBot(
-            bot.name, bot.token, bot.channelId, undefined, bot.checkInterval, bot.notificationsEnabled,
+        const botId = BotManager.insertBot(
+            bot.storedToken, bot.name, bot.channelId, undefined, bot.checkInterval, bot.notificationsEnabled,
             bot.sendFrom, bot.sendUntil, bot.templatePodcast, bot.templateNews, bot.templateYoutube, bot.templateStartup,
             bot.behavior,
-        ));
+        );
+        tokens.set(botId, bot.token);
         if (!bot.isActive || owner) db().prepare('UPDATE bots SET is_active = 0 WHERE id = ?').run(botId);
 
         for (const feed of feeds) {
@@ -542,7 +575,7 @@ export class BotManager {
         return { botId, name: bot.name, ...(owner ? { pausedFor: owner.name } : {}) };
     }
 
-    static importConfig(jsonData: string): ImportedBot[] {
+    static async importConfig(jsonData: string): Promise<ImportedBot[]> {
         const data = JSON.parse(jsonData);
         if (!Array.isArray(data)) throw new Error(tm('rtbFormatInvalid'));
 
@@ -551,20 +584,22 @@ export class BotManager {
             bot: readRtbBot(bot),
             feeds: Array.isArray(bot?.feeds) ? bot.feeds.map(readRtbFeed) : [],
         }));
+        // I token si preparano prima: la transazione di SQLite è sincrona, la cifratura no.
+        const ready: Array<{ bot: ReadyRtbBot; feeds: Array<ReturnType<typeof readRtbFeed>> }> = [];
+        for (const { bot, feeds } of parsed) ready.push({ bot: await prepareRtbToken(bot), feeds });
 
-        return db().transaction(() => parsed.map(({ bot, feeds }) => BotManager.insertImportedBot(bot, feeds)))();
+        return db().transaction(() => ready.map(({ bot, feeds }) => BotManager.insertImportedBot(bot, feeds)))();
     }
 
     // --- IMPORT/EXPORT SINGOLO BOT (.rtb) ---
-    static exportSingleBot(botId: number): string {
+    static async exportSingleBot(botId: number): Promise<string> {
         try {
             const botRecord = db().prepare('SELECT * FROM bots WHERE id = ?').get(botId) as any;
             if (!botRecord) {
                 throw new Error('Bot non trovato');
             }
 
-            // Decripta il token per l'esportazione
-            const plainToken = decryptToken(botRecord.token);
+            const plainToken = tokens.get(botId) ?? '';
 
             // Recupera fields
             const feeds = db().prepare('SELECT * FROM feeds WHERE bot_id = ?').all(botId) as any[];
@@ -573,7 +608,7 @@ export class BotManager {
             const exportData = {
                 bot: {
                     name: botRecord.name,
-                    token: encryptTokenForExport(plainToken), // safeStorage cifrato per il file .rtb
+                    token: await encryptTokenForExport(plainToken), // safeStorage cifrato per il file .rtb
                     channelId: botRecord.channel_id,
                     isActive: botRecord.is_active === 1,
                     startDate: botRecord.start_date,
@@ -611,7 +646,7 @@ export class BotManager {
         }
     }
 
-    static importSingleBot(jsonData: string): ImportedBot {
+    static async importSingleBot(jsonData: string): Promise<ImportedBot> {
         try {
             const data = JSON.parse(jsonData);
 
@@ -620,7 +655,7 @@ export class BotManager {
             }
 
             // Validazione strutturale prima di toccare il DB: stesse regole degli handler IPC
-            const bot = readRtbBot(data.bot);
+            const bot = await prepareRtbToken(readRtbBot(data.bot));
             const feeds = data.feeds.map(readRtbFeed);
             return db().transaction(() => BotManager.insertImportedBot(bot, feeds))();
         } catch (error) {

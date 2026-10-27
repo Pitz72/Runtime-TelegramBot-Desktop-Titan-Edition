@@ -7,7 +7,7 @@ import Database from 'better-sqlite3';
 const dir = vi.hoisted(() => ({ path: '' }));
 vi.mock('electron', () => ({
     app: { getPath: () => dir.path },
-    safeStorage: { isEncryptionAvailable: () => false },
+    safeStorage: { isAsyncEncryptionAvailable: async () => false },
 }));
 vi.mock('../logger', () => ({ TitanLogger: { log: () => {} } }));
 

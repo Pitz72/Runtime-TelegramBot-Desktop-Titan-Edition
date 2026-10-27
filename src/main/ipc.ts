@@ -212,7 +212,7 @@ export function setupIpc() {
     // --- BOT MANAGEMENT ---
     ipcMain.handle('get-bots', () => BotManager.getBots());
 
-    ipcMain.handle('create-bot', (_, data) => {
+    ipcMain.handle('create-bot', async (_, data) => {
         const name = assertString(data.name, 'name');
         const token = assertString(data.token, 'token');
         const channelId = assertString(data.channelId || data.channel_id, 'channelId');
@@ -220,7 +220,7 @@ export function setupIpc() {
         const sendFrom = assertTimeOrDefault(data.sendFrom, '00:00');
         const sendUntil = assertTimeOrDefault(data.sendUntil, '23:59');
         const startDate = assertStartDateOrUndefined(data.startDate);
-        return BotManager.createBot(name, token, channelId, startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup, assertBehavior(data));
+        return await BotManager.createBot(name, token, channelId, startDate, checkInterval, data.notificationsEnabled, sendFrom, sendUntil, data.templatePodcast, data.templateNews, data.templateYoutube, data.templateStartup, assertBehavior(data));
     });
 
     ipcMain.handle('delete-bot', (_, id) => {
@@ -229,7 +229,7 @@ export function setupIpc() {
         return BotManager.deleteBot(botId);
     });
 
-    ipcMain.handle('update-bot', (_, data) => {
+    ipcMain.handle('update-bot', async (_, data) => {
         const { id, name, token, channelId, isActive, startDate, checkInterval, notificationsEnabled, sendFrom, sendUntil, templatePodcast, templateNews, templateYoutube, templateStartup } = data ?? {};
         const validId = assertPositiveInt(id, 'id');
         const validName = assertString(name, 'name');
@@ -239,7 +239,7 @@ export function setupIpc() {
         const validSendFrom = assertTimeOrDefault(sendFrom, '00:00');
         const validSendUntil = assertTimeOrDefault(sendUntil, '23:59');
         const validStartDate = assertStartDateOrUndefined(startDate);
-        return BotManager.updateBot(validId, validName, validToken, validChannelId, !!isActive, validStartDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup, assertBehavior(data));
+        return await BotManager.updateBot(validId, validName, validToken, validChannelId, !!isActive, validStartDate, validInterval, notificationsEnabled, validSendFrom, validSendUntil, templatePodcast, templateNews, templateYoutube, templateStartup, assertBehavior(data));
     });
 
     // «Prova il bot»: token, canale e permessi verificati senza pubblicare nulla. Usa i
@@ -563,7 +563,7 @@ export function setupIpc() {
             if (canceled || !filePath) return { success: false, error: 'Cancelled' };
             rememberDir(filePath);
 
-            const jsonData = BotManager.exportConfig();
+            const jsonData = await BotManager.exportConfig();
             await writeFile(filePath, jsonData, 'utf-8');
             return { success: true, path: filePath };
         } catch (e: any) {
@@ -586,7 +586,7 @@ export function setupIpc() {
             rememberDir(filePaths[0]);
 
             const content = await readFile(filePaths[0], 'utf-8');
-            const imported = BotManager.importConfig(content);
+            const imported = await BotManager.importConfig(content);
 
             // `paused`: bot importati spenti perché il loro canale è già servito da un altro bot.
             return {
@@ -619,7 +619,7 @@ export function setupIpc() {
             }
             rememberDir(filePath);
 
-            const jsonData = BotManager.exportSingleBot(botId);
+            const jsonData = await BotManager.exportSingleBot(botId);
             await writeFile(filePath, jsonData, 'utf-8');
 
             return { success: true, path: filePath };
@@ -643,7 +643,7 @@ export function setupIpc() {
             rememberDir(filePaths[0]);
 
             const jsonData = await readFile(filePaths[0], 'utf-8');
-            const { botId, pausedFor } = BotManager.importSingleBot(jsonData);
+            const { botId, pausedFor } = await BotManager.importSingleBot(jsonData);
 
             return { success: true, botId, pausedFor };
         } catch (error: any) {

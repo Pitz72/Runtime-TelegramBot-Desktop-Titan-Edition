@@ -98,7 +98,7 @@ async function importRtbFromFile(filePath: string) {
     })
     if (response !== 1) return
     try {
-        const { botId, pausedFor } = BotManager.importSingleBot(await readFile(filePath, 'utf-8'))
+        const { botId, pausedFor } = await BotManager.importSingleBot(await readFile(filePath, 'utf-8'))
         mainWindow.webContents.send('bots-changed', { botId, pausedFor })
     } catch (e: any) {
         dialog.showErrorBox(tm('openRtbFailed'), e?.message || String(e))
@@ -262,6 +262,8 @@ app.whenReady().then(async () => {
     // un processo invisibile, e il blocco di istanza singola impediva perfino di rilanciarlo.
     try {
         setupIpc()
+        // I token si decifrano qui, una volta, prima che motore e finestra leggano i bot.
+        await BotManager.loadTokens()
     } catch (e: any) {
         console.error('Inizializzazione fallita:', e)
         dialog.showErrorBox(
