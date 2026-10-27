@@ -32,6 +32,7 @@ Indice della documentazione del progetto.
 | | |
 | :--- | :--- |
 | [PIANO-APERTURA.md](PIANO-APERTURA.md) | Checklist operativa del passaggio a open source: cosa è fatto, cosa manca, in che ordine e perché quell'ordine. Da spostare in `storico/` a lavoro concluso. |
+| [problemi-noti.md](problemi-noti.md) | Difetti conosciuti e non ancora corretti, con il punto del codice dove stanno. Oggi: testi del motore non tradotti nell'interfaccia inglese. |
 
 ## Idee non realizzate
 
