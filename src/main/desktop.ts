@@ -7,7 +7,7 @@
  * fermare tutti i canali. Ora, a motore acceso, la X chiede cosa fare (e si può fargli
  * ricordare la risposta), e Titan può continuare a lavorare nell'area di notifica.
  */
-import { app, BrowserWindow, Menu, Notification, Tray, dialog, nativeImage } from 'electron';
+import { app, BrowserWindow, Menu, Notification, Tray, dialog, nativeImage, powerMonitor } from 'electron';
 import { join } from 'node:path';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { getBotEngine } from './bot/engine';
@@ -88,6 +88,31 @@ export function setupDesktop(windowGetter: () => BrowserWindow | null) {
         }
     });
     onMainLocaleChange(refreshTray);
+    powerMonitor.on('resume', onResume);
+}
+
+// ─── Ripresa dalla sospensione ───────────────────────────────────────────────
+
+/** Il tempo che si lascia alla rete per tornare, dopo il risveglio. */
+const RESUME_DELAY_MS = 30_000;
+const RESUME_ATTEMPTS = 4;
+let resumeTimer: NodeJS.Timeout | null = null;
+
+/**
+ * Dopo una sospensione il giro in calendario scatta subito, spesso con la rete non ancora
+ * tornata: tutte le sorgenti vanno in errore e aspettano il loro intervallo. Qui, passato il
+ * tempo di riconnettersi, si fa un controllo completo. Se in quel momento un giro è in corso
+ * si riprova poco dopo, qualche volta.
+ */
+function onResume() {
+    if (resumeTimer) clearTimeout(resumeTimer);
+    let attempts = 0;
+    const tryScan = () => {
+        resumeTimer = null;
+        const status = getBotEngine().scanNow('resume');
+        if (status === 'busy' && ++attempts < RESUME_ATTEMPTS) resumeTimer = setTimeout(tryScan, RESUME_DELAY_MS);
+    };
+    if (getBotEngine().isEngineRunning()) resumeTimer = setTimeout(tryScan, RESUME_DELAY_MS);
 }
 
 /** True se la finestra può nascondersi: senza icona nell'area di notifica non si ritroverebbe. */

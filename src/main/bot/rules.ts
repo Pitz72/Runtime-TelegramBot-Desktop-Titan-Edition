@@ -73,6 +73,29 @@ export function loopIntervalMinutes(
     return Math.max(1, Math.min(120, Math.min(...candidates)));
 }
 
+// ─── Lettura dei feed ────────────────────────────────────────────────────────
+
+/**
+ * True se l'errore di lettura di un feed è un singhiozzo che vale la pena ritentare:
+ * timeout, connessione chiusa, DNS momentaneamente giù, server sovraccarico (5xx).
+ *
+ * Il 19/10 sette podcast sono andati in errore insieme, cinque timeout nello stesso secondo
+ * e due ECONNRESET, su feed che un minuto prima rispondevano in 6 secondi. Un 404, un XML
+ * rotto o un indirizzo inesistente invece restano tali: ritentarli subito non serve.
+ */
+export function isTransientFetchError(message: string): boolean {
+    return /timed? ?out|ETIMEDOUT|ESOCKETTIMEDOUT|ECONNRESET|ECONNREFUSED|ECONNABORTED|EAI_AGAIN|EPIPE|socket hang up|network|Status code 5\d\d|Status code 429/i.test(message);
+}
+
+/** Il server di un indirizzo, per contare le letture parallele verso lo stesso host. */
+export function hostOf(url: string): string {
+    try {
+        return new URL(url).hostname.toLowerCase();
+    } catch {
+        return url;
+    }
+}
+
 // ─── Filtri sui contenuti ────────────────────────────────────────────────────
 
 /** Filtro per parole chiave di un feed (F4). Un filtro illeggibile non blocca nulla. */

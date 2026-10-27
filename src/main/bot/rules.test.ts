@@ -4,7 +4,36 @@ import {
     isFeedDue, isTimeAllowed, loopIntervalMinutes, parseStartDate, parseUtcTimestamp,
     isMuted, normalizeChannelId, passesKeywordFilter, pickUrl, pickYouTubeChannel, postingRight, startupMessage, truncate,
     youtubeChannelRef, adaptLockupView, itemTitle, tidyMessage, sameChannel, DERIVED_TITLE_MAX,
+    isTransientFetchError, hostOf,
 } from './rules';
+
+describe('isTransientFetchError', () => {
+    it('ritenta i singhiozzi di rete e i server sovraccarichi', () => {
+        for (const m of [
+            'Fetch fallito: Request timed out after 30000ms',
+            'Fetch fallito: read ECONNRESET',
+            'getaddrinfo EAI_AGAIN www.spreaker.com',
+            'socket hang up',
+            'Fetch fallito: Status code 503',
+            'Status code 429',
+        ]) expect(isTransientFetchError(m)).toBe(true);
+    });
+    it('non ritenta ciò che resterebbe rotto', () => {
+        for (const m of [
+            'Fetch fallito: Status code 404',
+            'Fetch fallito: Non-whitespace before first tag.',
+            'getaddrinfo ENOTFOUND feed.inesistente.example',
+            'Indirizzo di rete privata/locale non consentito',
+        ]) expect(isTransientFetchError(m)).toBe(false);
+    });
+});
+
+describe('hostOf', () => {
+    it('restituisce il server, senza distinguere maiuscole', () => {
+        expect(hostOf('https://WWW.Spreaker.com/show/1/episodes/feed')).toBe('www.spreaker.com');
+        expect(hostOf('non un indirizzo')).toBe('non un indirizzo');
+    });
+});
 
 const at = (h: number, m: number) => new Date(2026, 9, 19, h, m, 0);
 

@@ -16,10 +16,17 @@ vi.mock('electron', () => ({
     Notification: { isSupported: () => false },
 }));
 vi.mock('../logger', () => ({ TitanLogger: { log: () => {} } }));
+vi.mock('./parser', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('./parser')>()),
+    fetchFeed: vi.fn(),
+}));
 
 import { closeDB, getDB, initDB } from '../database/schema';
 import { BotManager } from './manager';
 import { BotEngine } from './engine';
+import { fetchFeed } from './parser';
+
+const fetchFeedMock = vi.mocked(fetchFeed);
 
 beforeAll(() => {
     dir.path = mkdtempSync(join(tmpdir(), 'titan-engine-test-'));
@@ -57,6 +64,60 @@ function botWithDigestQueue(sendFrom = '00:00', sendUntil = '23:59') {
     }
     return { botId, feedId };
 }
+
+describe('lettura dei feed', () => {
+    const sample = [{ id: 'a', title: 'T', link: 'https://example.org/a', pubDate: new Date(), summary: '', feedName: 'Nome A' }];
+
+    beforeEach(() => { fetchFeedMock.mockReset(); });
+
+    it('lo stesso feed usato da più bot si legge una volta per giro', async () => {
+        fetchFeedMock.mockResolvedValue(sample);
+        const { engine } = engineWithFakeTelegram();
+        const first = await (engine as any).readFeedOnce('https://example.org/f.xml', 'Nome A', 1);
+        const second = await (engine as any).readFeedOnce('https://example.org/f.xml', 'Nome B', 1);
+        expect(fetchFeedMock).toHaveBeenCalledTimes(1);
+        expect(second.items).toBe(first.items);
+    });
+
+    it('un timeout si ritenta una volta, e lo si dice', async () => {
+        fetchFeedMock
+            .mockRejectedValueOnce(new Error('Fetch fallito: Request timed out after 30000ms'))
+            .mockResolvedValueOnce(sample);
+        const { engine } = engineWithFakeTelegram();
+        (engine as any).feedRetryDelayMs = 0;
+        const read = await (engine as any).fetchWithRetry('F', 'https://example.org/f.xml', 1);
+        expect(read.retried).toBe(true);
+        expect(fetchFeedMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('un 404 non si ritenta', async () => {
+        fetchFeedMock.mockRejectedValue(new Error('Fetch fallito: Status code 404'));
+        const { engine } = engineWithFakeTelegram();
+        (engine as any).feedRetryDelayMs = 0;
+        await expect((engine as any).fetchWithRetry('F', 'https://example.org/f.xml', 1)).rejects.toThrow('404');
+        expect(fetchFeedMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('al massimo tre letture parallele verso lo stesso server, senza frenare gli altri', async () => {
+        const { engine } = engineWithFakeTelegram();
+        const active: Record<string, number> = {};
+        const peak: Record<string, number> = {};
+        const task = (host: string) => (engine as any).withHostSlot(`https://${host}/feed`, async () => {
+            active[host] = (active[host] ?? 0) + 1;
+            peak[host] = Math.max(peak[host] ?? 0, active[host]);
+            await new Promise(r => setTimeout(r, 15));
+            active[host]--;
+        });
+        await Promise.all([
+            ...Array.from({ length: 8 }, () => task('www.spreaker.com')),
+            ...Array.from({ length: 4 }, () => task('altro.example.org')),
+        ]);
+        expect(peak['www.spreaker.com']).toBe(3);
+        expect(peak['altro.example.org']).toBe(3);
+        expect((engine as any).hostActive.size).toBe(0);
+        expect((engine as any).hostWaiters.size).toBe(0);
+    });
+});
 
 describe('digest', () => {
     it('spegnere il digest non fa sparire i contenuti in coda: partono in un ultimo digest', async () => {

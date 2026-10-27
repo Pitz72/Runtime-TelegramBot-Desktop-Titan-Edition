@@ -25,3 +25,15 @@ Lavoro nato da un'analisi completa del codice della 2.4.1 e dagli appunti rimast
 - **I contenuti esclusi dal filtro per parole chiave si contano in una riga sola per feed**, invece di una riga per contenuto a ogni giro.
 
 Verifica: 25 test nuovi (100 in tutto), tra cui l'import dei profili e il digest del motore su un database SQLite vero in una cartella temporanea. Nel banco di prova dell'interfaccia, un template con un tag non chiuso blocca il salvataggio; tornando al predefinito si salva.
+
+## Blocco 3 — Rete robusta
+
+È il lavoro concordato il 19/10 dopo che sette podcast erano andati in errore insieme (cinque timeout nello stesso secondo, due ECONNRESET) su feed che un minuto prima rispondevano in 6 secondi.
+
+- **Un secondo tentativo sui feed.** Timeout, connessione caduta, DNS momentaneamente giù o server sovraccarico (5xx, 429): la lettura si ripete dopo 5 secondi. Se riesce, il diario lo dice con un avviso invece che con un errore. Un 404 o un XML rotto non si ritentano (`isTransientFetchError`).
+- **Lo stesso feed si legge una volta per giro**, anche se lo usano più bot. Ognuno lo rileggeva per conto suo. La lettura condivisa vale solo per il giro in corso, quindi non serve mai un contenuto vecchio; ogni bot vede il contenuto con il nome che ha dato alla sua sorgente.
+- **Al massimo tre letture parallele verso lo stesso server.** Le sei letture parallele restano, ma non più tutte verso Spreaker insieme.
+- **Gli invii a Telegram hanno un tempo massimo di 45 secondi.** Telegraf ne aveva uno di 500: una connessione appesa (PC che si risveglia, Wi-Fi che cambia) teneva ferma per otto minuti a tentativo la coda di invio di tutti i bot. L'arresto del motore invece non interrompe una chiamata in volo: se il messaggio è già partito, l'esito va registrato, altrimenti al giro dopo uscirebbe due volte. Verificato con un server locale che non risponde: la richiesta si interrompe al tempo previsto ed è trattata come errore transitorio.
+- **Controllo al risveglio.** Dopo una sospensione del computer, passati 30 secondi per dare tempo alla rete di tornare, Titan controlla tutte le sorgenti: prima il giro in calendario scattava subito al risveglio, spesso senza rete, e ogni sorgente aspettava il suo intervallo dopo l'errore. Se in quel momento un giro è in corso, riprova poco dopo.
+
+Verifica: 9 test nuovi (109 in tutto) su ritentativi, lettura condivisa, tetto per server e tempo massimo degli invii.

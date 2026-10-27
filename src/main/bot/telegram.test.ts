@@ -36,16 +36,44 @@ describe('renderItemMessage', () => {
 function clientWith(replies: Array<'ok' | 'reject'>) {
     const client = new TelegramClient('123:abc', '@c');
     const sent: string[] = [];
+    const signals: AbortSignal[] = [];
     (client as any).client = {
-        sendMessage: vi.fn(async (_chat: string, text: string) => {
-            sent.push(text);
+        callApi: vi.fn(async (method: string, payload: { text: string }, opts: { signal: AbortSignal }) => {
+            expect(method).toBe('sendMessage');
+            sent.push(payload.text);
+            signals.push(opts.signal);
             if (replies.shift() === 'reject') {
                 throw { response: { error_code: 400, description: "Bad Request: can't parse entities" } };
             }
         }),
     };
-    return { client, sent };
+    return { client, sent, signals };
 }
+
+describe('sendMessage', () => {
+    it('ogni chiamata a Telegram ha un tempo massimo proprio', async () => {
+        const { client, signals } = clientWith(['ok']);
+        await client.sendMessage('ciao');
+        expect(signals[0]).toBeInstanceOf(AbortSignal);
+        expect(signals[0].aborted).toBe(false);
+    });
+
+    it('un timeout è un errore transitorio, da ritentare', async () => {
+        const client = new TelegramClient('123:abc', '@c');
+        let calls = 0;
+        (client as any).client = {
+            callApi: async () => {
+                calls++;
+                if (calls === 1) throw Object.assign(new Error('The user aborted a request.'), { name: 'AbortError', type: 'aborted' });
+            },
+        };
+        // Pausa tra i tentativi accorciata: qui conta solo che si ritenti.
+        (client as any).abortableSleep = async () => false;
+        const res = await client.sendMessage('ciao');
+        expect(res.ok).toBe(true);
+        expect(calls).toBe(2);
+    });
+});
 
 describe('sendFormattedMessage con un template personalizzato rifiutato', () => {
     it('ripiega sul modello predefinito invece di perdere il contenuto', async () => {

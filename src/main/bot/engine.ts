@@ -6,7 +6,7 @@ import { BotConfig, FeedConfig, RssItem } from '../../shared/types';
 import { TitanLogger } from '../logger';
 import { app, BrowserWindow, Notification } from 'electron';
 import {
-    buildDigestMessage, isFeedDue, isMuted, isTimeAllowed,
+    buildDigestMessage, hostOf, isFeedDue, isMuted, isTimeAllowed, isTransientFetchError,
     loopIntervalMinutes, parseStartDate, parseUtcTimestamp, passesKeywordFilter, startupMessage,
 } from './rules';
 
@@ -40,6 +40,18 @@ const MAX_RETRIES = 2;
  */
 const RSS_FETCH_CONCURRENCY = 6;
 
+/**
+ * Letture parallele verso lo stesso server. Molti podcast stanno sullo stesso host (Spreaker):
+ * sei letture insieme verso di lui, ripetute per ogni bot, sono il sospetto del 19/10, quando
+ * sette feed sono andati in timeout nello stesso momento.
+ */
+const PER_HOST_CONCURRENCY = 3;
+
+/** Attesa prima del secondo tentativo di lettura di un feed. */
+const FEED_RETRY_DELAY_MS = 5000;
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const contentTypeOf = (feed: FeedConfig): 'youtube' | 'rss' => (feed.type === 'youtube' ? 'youtube' : 'rss');
 
 export class BotEngine {
@@ -68,6 +80,16 @@ export class BotEngine {
      */
     private scanningRun: number | null = null;
     private statusListeners = new Set<(running: boolean) => void>();
+    /**
+     * Letture RSS del giro in corso, per indirizzo: lo stesso feed usato da più bot si legge
+     * una volta sola. Si svuota a ogni giro, quindi non serve mai un contenuto vecchio.
+     */
+    private scanFeedReads = new Map<string, Promise<{ items: RssItem[]; retried: boolean }>>();
+    /** Letture in corso e in attesa, per server (vedi PER_HOST_CONCURRENCY). */
+    private hostActive = new Map<string, number>();
+    private hostWaiters = new Map<string, Array<() => void>>();
+    /** Campo e non costante solo perché i test possano accorciarla. */
+    private feedRetryDelayMs = FEED_RETRY_DELAY_MS;
 
     /** Avvisa chi ascolta (l'icona nell'area di notifica) quando il motore si accende o si spegne. */
     onStatusChange(listener: (running: boolean) => void): () => void {
@@ -145,6 +167,7 @@ export class BotEngine {
 
         // Invalida la cache YouTube alla fermata — fix #19
         clearYouTubeCache();
+        this.scanFeedReads.clear();
 
         this.scanningRun = null;
         TitanLogger.log("🛑 Engine Stopped", { type: 'engine-stop' });
@@ -158,13 +181,15 @@ export class BotEngine {
      *
      * Non apre mai un secondo giro accanto a uno in corso: in quel caso risponde `busy`.
      */
-    scanNow(): 'started' | 'busy' | 'stopped' {
+    scanNow(reason: 'user' | 'resume' = 'user'): 'started' | 'busy' | 'stopped' {
         if (!this.isRunning) return 'stopped';
         if (this.isScanning()) return 'busy';
         const run = this.runId;
         if (this.timeoutId) clearTimeout(this.timeoutId);
         this.timeoutId = null;
-        TitanLogger.log('👆 Controllo immediato richiesto: tutte le sorgenti attive, senza aspettare il loro intervallo.');
+        TitanLogger.log(reason === 'resume'
+            ? '💤 Ripresa dalla sospensione: controllo di tutte le sorgenti attive, senza aspettare il loro intervallo.'
+            : '👆 Controllo immediato richiesto: tutte le sorgenti attive, senza aspettare il loro intervallo.');
         this.checkLoop(run, true)
             .catch(e => TitanLogger.log(`❌ Errore non gestito in checkLoop: ${e}`))
             .finally(() => this.scheduleNext(run));
@@ -280,6 +305,7 @@ export class BotEngine {
         // Il contatore riparte a ogni giro: se un drenaggio precedente è ancora in corso
         // (coda lunga, invii lenti) il suo residuo confluisce nel riepilogo di questo giro.
         this.publishedInScan = 0;
+        this.scanFeedReads.clear();
         TitanLogger.log(`🔄 Checking ${bots.length} bots...`, { type: 'scan-start', count: bots.length });
 
         for (const bot of bots) {
@@ -428,6 +454,56 @@ export class BotEngine {
         await Promise.all(runners);
     }
 
+    /** Lettura di un feed RSS, condivisa tra i bot del giro e limitata per server. */
+    private readFeedOnce(url: string, name: string, run: number): Promise<{ items: RssItem[]; retried: boolean }> {
+        let read = this.scanFeedReads.get(url);
+        if (!read) {
+            read = this.withHostSlot(url, () => this.fetchWithRetry(name, url, run));
+            this.scanFeedReads.set(url, read);
+        }
+        return read;
+    }
+
+    /**
+     * Una lettura con un secondo tentativo, dopo qualche secondo, se la prima fallisce per un
+     * singhiozzo di rete (vedi `isTransientFetchError`). Prima un timeout isolato diventava
+     * subito un errore nel diario, e il feed aspettava il giro successivo.
+     */
+    private async fetchWithRetry(name: string, url: string, run: number): Promise<{ items: RssItem[]; retried: boolean }> {
+        try {
+            return { items: await fetchFeed(name, url), retried: false };
+        } catch (e) {
+            if (!isTransientFetchError(String(e)) || !this.isLive(run)) throw e;
+            await sleep(this.feedRetryDelayMs);
+            if (!this.isLive(run)) throw e;
+            return { items: await fetchFeed(name, url), retried: true };
+        }
+    }
+
+    /** Esegue `task` quando c'è un posto libero tra le letture verso quel server. */
+    private async withHostSlot<T>(url: string, task: () => Promise<T>): Promise<T> {
+        const host = hostOf(url);
+        while ((this.hostActive.get(host) ?? 0) >= PER_HOST_CONCURRENCY) {
+            await new Promise<void>(resolve => {
+                const waiters = this.hostWaiters.get(host) ?? [];
+                waiters.push(resolve);
+                this.hostWaiters.set(host, waiters);
+            });
+        }
+        this.hostActive.set(host, (this.hostActive.get(host) ?? 0) + 1);
+        try {
+            return await task();
+        } finally {
+            const left = (this.hostActive.get(host) ?? 1) - 1;
+            if (left > 0) this.hostActive.set(host, left);
+            else this.hostActive.delete(host);
+            const waiters = this.hostWaiters.get(host);
+            const next = waiters?.shift();
+            if (waiters && waiters.length === 0) this.hostWaiters.delete(host);
+            next?.();
+        }
+    }
+
     private async processFeed(bot: BotConfig, feed: FeedConfig, cutoffTime: number, run: number) {
         try {
             const tag = `[${bot.name}]`;
@@ -435,9 +511,17 @@ export class BotEngine {
                 type: 'source-start', bot: bot.name, source: feed.name
             });
 
-            const items: RssItem[] = feed.type === 'youtube'
-                ? await fetchYouTubeVideos(feed.url)
-                : await fetchFeed(feed.name, feed.url);
+            let items: RssItem[];
+            if (feed.type === 'youtube') {
+                items = await fetchYouTubeVideos(feed.url);
+            } else {
+                const read = await this.readFeedOnce(feed.url, feed.name, run);
+                // La lettura può venire da un altro bot: il nome della sorgente è quello di questo.
+                items = read.items.map(item => ({ ...item, feedName: feed.name }));
+                if (read.retried) {
+                    TitanLogger.log(`  ⚠️ ${tag} ${feed.name}: letto al secondo tentativo (il primo era andato in timeout o la connessione era caduta).`, 'warn');
+                }
+            }
 
             if (!this.isLive(run)) return;
 

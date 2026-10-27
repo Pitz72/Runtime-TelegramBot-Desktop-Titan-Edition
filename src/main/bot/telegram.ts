@@ -40,6 +40,24 @@ export function renderItemMessage(item: any, template: string): string {
     return previewHack + tidyMessage(text);
 }
 
+/**
+ * Tempo massimo di una singola chiamata a Telegram. Telegraf ne ha uno suo di 500 secondi:
+ * una connessione rimasta appesa (il PC che si risveglia, il Wi-Fi che cambia) teneva ferma
+ * la coda di invio di **tutti** i bot per otto minuti a tentativo. Un invio normale dura meno
+ * di un secondo; il margine resta largo perché un messaggio arrivato a Telegram, ma la cui
+ * risposta si perde, al tentativo successivo uscirebbe due volte.
+ *
+ * L'arresto del motore, invece, non interrompe la chiamata in volo, per la stessa ragione:
+ * se il messaggio è già partito, l'esito va registrato.
+ */
+const SEND_TIMEOUT_MS = 45_000;
+
+/**
+ * Il tipo di segnale che dichiara telegraf viene da un vecchio shim di AbortController, non
+ * da quello di Node: a runtime node-fetch accetta il segnale nativo, solo i tipi divergono.
+ */
+type TelegrafSignal = NonNullable<NonNullable<Parameters<Telegram['callApi']>[2]>['signal']>;
+
 /** Pause tra i tentativi per gli errori transitori: ~35 secondi in tutto. */
 const TRANSIENT_BACKOFF_MS = [5000, 10000, 20000];
 /** Tetto all'attesa chiesta da Telegram: oltre, si lascia il contenuto al giro successivo. */
@@ -90,13 +108,17 @@ export class TelegramClient {
             }
 
             try {
-                await this.client.sendMessage(this.channelId, text, {
+                // callApi invece di sendMessage: è l'unica via di telegraf che accetta un segnale,
+                // e senza segnale una connessione appesa aspettava i suoi 500 secondi.
+                await this.client.callApi('sendMessage', {
+                    chat_id: this.channelId,
+                    text,
                     parse_mode: 'HTML',
                     disable_notification: options.silent === true,
                     link_preview_options: previewDisabled
                         ? { is_disabled: true }
                         : { is_disabled: false, show_above_text: true },
-                });
+                }, { signal: AbortSignal.timeout(SEND_TIMEOUT_MS) as unknown as TelegrafSignal });
                 return { ok: true };
             } catch (e) {
                 const info = classifyTelegramError(e);
