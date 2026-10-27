@@ -19,7 +19,7 @@
 
 Un'applicazione desktop che sorveglia feed RSS, podcast e canali YouTube e pubblica automaticamente i nuovi contenuti su canali Telegram. Gestisce più bot e più canali contemporaneamente da un'unica interfaccia, gira interamente sulla tua macchina e non parla con nessun server che non siano i feed, Telegram e YouTube.
 
-Nasce nel 2025 come script Python da terminale per i canali di [Runtime Radio](https://runtimeradio.com) e diventa applicazione Electron nel corso del 2026. È stato distribuito come prodotto commerciale fino all'agosto 2026, quando è stato ritirato dalla vendita e aperto sotto licenza MIT.
+Nasce nel 2025 come [script Python da terminale](docs/storico/bot-python/LEGGIMI.md) per i canali di [Runtime Radio](https://runtimeradio.com) e diventa applicazione Electron nel corso del 2026. È stato distribuito come prodotto commerciale fino all'agosto 2026, quando è stato ritirato dalla vendita e aperto sotto licenza MIT.
 
 > **Stato del progetto.** Funzionalmente completo e in produzione. Non ci sono sviluppi pianificati: viene mantenuto per correzioni. Le pull request sono benvenute — vedi [CONTRIBUTING.md](CONTRIBUTING.md).
 

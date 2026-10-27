@@ -41,6 +41,6 @@ Indice della documentazione del progetto.
 
 ## Archivio storico
 
-La cartella [`storico/`](storico/) raccoglie tutto ciò che è concluso e **non viene più aggiornato**: analisi tecniche superate, relazioni su incidenti risolti, roadmap completate, progetti chiusi, l'EULA proprietaria pre-apertura e i manuali della serie 1.7.x.
+La cartella [`storico/`](storico/) raccoglie tutto ciò che è concluso e **non viene più aggiornato**: analisi tecniche superate, relazioni su incidenti risolti, roadmap completate, progetti chiusi, l'EULA proprietaria pre-apertura e i manuali della serie 1.7.x. C'è anche il [bot Python](storico/bot-python/LEGGIMI.md) da cui Titan è nato, con il codice del 2025.
 
 La regola è semplice: se un documento sta in `storico/` è materiale d'epoca; se sta fuori, è attuale e mantenuto.

@@ -4,6 +4,12 @@
 
 Se cerchi lo stato attuale, il punto di partenza è [`docs/README.md`](../README.md).
 
+## Prima di Titan
+
+| Documento | Cosa racconta |
+| :--- | :--- |
+| [bot-python/](bot-python/LEGGIMI.md) | Il bot Python a riga di comando da cui Titan è nato: molti feed, un solo canale Telegram, giugno–dicembre 2025. Codice delle versioni v2.0.0 e v2.0.3, ripulito dai token, con la sua storia in due commit fusi nel grafo di `main`. |
+
 ## Analisi tecniche e cronache di bug
 
 | Documento | Cosa racconta |
