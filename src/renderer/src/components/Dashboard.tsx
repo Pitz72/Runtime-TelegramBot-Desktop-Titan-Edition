@@ -32,6 +32,8 @@ export function Dashboard({ updater }: { updater?: Updater }) {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     // Sorgente in lettura e prossimo giro: si riscrivono sul posto, non si accodano al diario
     const [activity, setActivity] = useState<string | null>(null);
+    /** Giri conclusi: fa rileggere le sorgenti, con l'esito delle ultime letture */
+    const [scanRound, setScanRound] = useState(0);
     const [nextScanAt, setNextScanAt] = useState<Date | null>(null);
     const [stats, setStats] = useState<{ total: number; today: number; week: number } | null>(null);
     const [statsKey, setStatsKey] = useState(0);
@@ -79,6 +81,7 @@ export function Dashboard({ updater }: { updater?: Updater }) {
                 const type = entry.event?.type;
                 if (type === 'source-start') setActivity(entry.event!.source ?? null);
                 else if (type === 'scan-end' || type === 'engine-stop') setActivity(null);
+                if (type === 'scan-end') setScanRound(n => n + 1);
                 if (type === 'next-scan' && entry.event?.count) setNextScanAt(new Date((entry.time ?? Date.now()) + entry.event.count * 60000));
                 if (type === 'engine-stop') setNextScanAt(null);
                 if (type === 'engine-start') setRunning(true);
@@ -252,7 +255,7 @@ export function Dashboard({ updater }: { updater?: Updater }) {
 
                             {wide ? (
                                 <div className="grid min-h-[420px] flex-1 grid-cols-2 divide-x divide-line">
-                                    <FeedManager botId={selectedBot.id} />
+                                    <FeedManager botId={selectedBot.id} refreshKey={scanRound} />
                                     <div className="min-h-0 bg-surface-1">{journal}</div>
                                 </div>
                             ) : (
@@ -269,7 +272,7 @@ export function Dashboard({ updater }: { updater?: Updater }) {
                                         ]}
                                     />
                                     <TabPanel idBase="workspace" id={panel} className="min-h-0 flex-1">
-                                        {panel === 'feeds' ? <FeedManager botId={selectedBot.id} showTitle={false} /> : journal}
+                                        {panel === 'feeds' ? <FeedManager botId={selectedBot.id} showTitle={false} refreshKey={scanRound} /> : journal}
                                     </TabPanel>
                                 </div>
                             )}

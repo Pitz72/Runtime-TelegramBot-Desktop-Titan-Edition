@@ -33,9 +33,11 @@ function Row({ tone, label, text }: { tone: Tone; label: string; text: string })
  * risultato si azzera appena token o canale cambiano: non deve restare un «tutto a posto»
  * riferito a valori che non ci sono più.
  */
-export function BotCheck({ token, channelId, headingLevel = 3 }: {
+export function BotCheck({ token, channelId, topicId = '', headingLevel = 3 }: {
     token: string;
     channelId: string;
+    /** Argomento del gruppo, se c'è: si verifica che il gruppo abbia gli argomenti attivi */
+    topicId?: string;
     /** Livello del titolo nella pagina che lo ospita: 3 dentro un dialogo, 2 sotto l'h1 del wizard */
     headingLevel?: 2 | 3;
 }) {
@@ -52,7 +54,7 @@ export function BotCheck({ token, channelId, headingLevel = 3 }: {
         setResult(null);
         setFailure('');
         setRunning(false);
-    }, [token, channelId]);
+    }, [token, channelId, topicId]);
 
     const run = async () => {
         const id = ++request.current;
@@ -60,7 +62,7 @@ export function BotCheck({ token, channelId, headingLevel = 3 }: {
         setResult(null);
         setFailure('');
         try {
-            const r = await window.api.testBot({ token: token.trim(), channelId: channelId.trim() });
+            const r = await window.api.testBot({ token: token.trim(), channelId: channelId.trim(), topicId: topicId.trim() || null });
             if (id === request.current) setResult(r);
         } catch (e) {
             if (id === request.current) setFailure(errorMessage(e));
@@ -99,7 +101,14 @@ export function BotCheck({ token, channelId, headingLevel = 3 }: {
                     : t(`botCheck.rights_${rights.status}`),
             },
         ];
-        allGood = tk.status === 'ok' && chat.status === 'ok' && rights.status === 'ok';
+        if (result.topic) {
+            rows.push({
+                label: t('botCheck.topic'),
+                tone: result.topic.status === 'ok' ? 'ok' : 'bad',
+                text: t(`botCheck.topic_${result.topic.status}`),
+            });
+        }
+        allGood = tk.status === 'ok' && chat.status === 'ok' && rights.status === 'ok' && (!result.topic || result.topic.status === 'ok');
     }
 
     return (

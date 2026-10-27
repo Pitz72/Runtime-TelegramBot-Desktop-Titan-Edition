@@ -281,6 +281,28 @@ export function sameChannel(a: string, b: string): boolean {
     return normalizeChannelId(a).toLowerCase() === normalizeChannelId(b).toLowerCase();
 }
 
+/**
+ * L'argomento (topic) di un gruppo con argomenti, da ciò che ha scritto l'utente: il numero
+ * o il link di un messaggio dell'argomento, come lo copia Telegram — «t.me/c/1234567890/45»
+ * o «t.me/nomegruppo/45». `null` se il campo è vuoto (si pubblica nella chat intera).
+ * Lancia un errore se c'è qualcosa ma non è un argomento.
+ */
+export function parseTopicId(value: unknown): number | null {
+    if (value === undefined || value === null) return null;
+    if (typeof value === 'number') {
+        if (Number.isInteger(value) && value > 0) return value;
+        throw new Error(`Argomento non valido: ${value}`);
+    }
+    const raw = String(value).trim();
+    if (raw === '') return null;
+    if (/^\d+$/.test(raw) && Number(raw) > 0) return Number(raw);
+    // Link: l'argomento è il numero dopo la chat. «t.me/c/<chat>/<argomento>[/<messaggio>]»
+    // per i gruppi privati, «t.me/<nome>/<argomento>[/<messaggio>]» per quelli pubblici.
+    const link = raw.match(/^(?:https?:\/\/)?t\.me\/(?:c\/\d+|[A-Za-z]\w{3,})\/(\d+)(?:\/\d+)?\/?(?:\?.*)?$/i);
+    if (link && Number(link[1]) > 0) return Number(link[1]);
+    throw new Error(`Argomento non valido: «${raw}». Scrivi il numero dell'argomento o incolla il link di un suo messaggio.`);
+}
+
 /** Esito della verifica dei permessi di pubblicazione del bot in una chat. */
 export type PostRight = 'ok' | 'notMember' | 'notAdmin' | 'noPostRight' | 'restricted';
 

@@ -4,7 +4,7 @@
  * Tutto è inventato: nomi, canali, feed. Nessuna chiamata di rete, nessun file toccato.
  * Il motore simulato emette lotti di righe di log realistici, così il diario si riempie.
  */
-import type { BotConfig, FeedConfig, LogEntry } from '../../src/shared/types';
+import type { BotConfig, BotQueues, FeedConfig, HistoryEntry, LogEntry } from '../../src/shared/types';
 
 const listeners: Record<string, Array<(...a: any[]) => void>> = {};
 const on = (ch: string, cb: (...a: any[]) => void) => {
@@ -20,32 +20,34 @@ let bots: BotConfig[] = empty ? [] : [
     {
         id: 1, name: 'Radio Notizie', token: '123456789:AAEXAMPLEexampleEXAMPLEexample00000', channel_id: '@radio_notizie_demo',
         start_date: '2026-09-01', check_interval: 15, send_from: '07:00', send_until: '23:00',
-        notifications_enabled: true, is_active: true, silent_start: false, mute_mode: 'window', mute_from: '23:00', mute_until: '07:00',
+        notifications_enabled: true, is_active: true, silent_start: false, mute_mode: 'window', mute_from: '23:00', mute_until: '07:00', topic_id: null,
     },
     {
         id: 2, name: 'Podcast della settimana', token: '987654321:AAEXAMPLEexampleEXAMPLEexample11111', channel_id: '-1001234567890',
         start_date: '2026-10-01', check_interval: 30, send_from: '00:00', send_until: '23:59',
-        notifications_enabled: false, is_active: true, silent_start: true, mute_mode: 'off', mute_from: '22:00', mute_until: '07:00',
+        notifications_enabled: false, is_active: true, silent_start: true, mute_mode: 'off', mute_from: '22:00', mute_until: '07:00', topic_id: 12,
     },
     {
         id: 3, name: 'Archivio tecnico', token: '', channel_id: 'archivio_demo',
         start_date: '2026-08-15', check_interval: 60, send_from: '00:00', send_until: '23:59',
-        notifications_enabled: true, is_active: false, silent_start: false, mute_mode: 'always', mute_from: '22:00', mute_until: '07:00',
+        notifications_enabled: true, is_active: false, silent_start: false, mute_mode: 'always', mute_from: '22:00', mute_until: '07:00', topic_id: null,
     },
 ];
 
 const feed = (id: number, bot_id: number, name: string, url: string, type: FeedConfig['type'], extra: Partial<FeedConfig> = {}): FeedConfig => ({
     id, bot_id, name, url, type, is_active: true, keyword_filter: null, check_interval: null,
-    last_fetch_at: null, digest_interval: null, digest_last_sent: null, ...extra,
+    last_fetch_at: null, digest_interval: null, digest_last_sent: null,
+    last_status: 'ok', last_error: null, last_checked_at: new Date(Date.now() - 6 * 60000).toISOString(), last_item_count: 20,
+    digest_waiting: 0, ...extra,
 });
 
 let feeds: FeedConfig[] = [
     feed(1, 1, 'Notizie dal mondo', 'https://example.org/notizie/rss.xml', 'news'),
     feed(2, 1, 'Tecnologia e scienza', 'https://example.org/tech/feed', 'news', { keyword_filter: JSON.stringify({ include: ['AI', 'Linux'], exclude: [] }), check_interval: 5 }),
-    feed(3, 1, 'Il podcast del mattino', 'https://example.org/podcast/mattino.xml', 'podcast', { digest_interval: 1440 }),
-    feed(4, 1, 'Canale video di esempio', 'https://www.youtube.com/@esempio', 'youtube'),
+    feed(3, 1, 'Il podcast del mattino', 'https://example.org/podcast/mattino.xml', 'podcast', { digest_interval: 1440, digest_waiting: 3 }),
+    feed(4, 1, 'Canale video di esempio', 'https://www.youtube.com/@esempio', 'youtube', { last_status: 'error', last_error: 'Lettura del feed non riuscita: Request timed out after 30000ms' }),
     feed(5, 1, 'Cultura (in pausa)', 'https://example.org/cultura/rss', 'news', { is_active: false }),
-    feed(6, 2, 'Puntate della settimana', 'https://example.org/settimana.xml', 'podcast'),
+    feed(6, 2, 'Puntate della settimana', 'https://example.org/settimana.xml', 'podcast', { last_status: null, last_checked_at: null, last_item_count: null }),
 ];
 
 let running = false;
@@ -103,12 +105,12 @@ const ok = <T,>(v: T) => new Promise<T>(r => setTimeout(() => r(v), 120));
     createBot: (b: any) => {
         if (!b.name?.trim()) return Promise.reject(new Error("Error invoking remote method 'create-bot': Error: Campo obbligatorio mancante o non valido: \"name\""));
         const id = Math.max(0, ...bots.map(x => x.id)) + 1;
-        bots = [...bots, { id, name: b.name, token: b.token, channel_id: b.channelId, start_date: b.startDate, check_interval: 15, send_from: '00:00', send_until: '23:59', notifications_enabled: true, is_active: true, silent_start: false, mute_mode: 'off', mute_from: '22:00', mute_until: '07:00' }];
+        bots = [...bots, { id, name: b.name, token: b.token, channel_id: b.channelId, start_date: b.startDate, check_interval: 15, send_from: '00:00', send_until: '23:59', notifications_enabled: true, is_active: true, silent_start: false, mute_mode: 'off', mute_from: '22:00', mute_until: '07:00', topic_id: null }];
         return ok(id);
     },
     deleteBot: (id: number) => { bots = bots.filter(b => b.id !== id); return ok(undefined); },
     updateBot: (d: any) => {
-        bots = bots.map(b => b.id === d.id ? { ...b, name: d.name, token: d.token, channel_id: d.channelId, is_active: d.isActive, start_date: d.startDate, check_interval: d.checkInterval, notifications_enabled: d.notificationsEnabled, send_from: d.sendFrom, send_until: d.sendUntil, template_news: d.templateNews, template_podcast: d.templatePodcast, template_youtube: d.templateYoutube, template_startup: d.templateStartup, silent_start: d.silentStart ?? b.silent_start, mute_mode: d.muteMode ?? b.mute_mode, mute_from: d.muteFrom ?? b.mute_from, mute_until: d.muteUntil ?? b.mute_until } : b);
+        bots = bots.map(b => b.id === d.id ? { ...b, name: d.name, token: d.token, channel_id: d.channelId, is_active: d.isActive, start_date: d.startDate, check_interval: d.checkInterval, notifications_enabled: d.notificationsEnabled, send_from: d.sendFrom, send_until: d.sendUntil, template_news: d.templateNews, template_podcast: d.templatePodcast, template_youtube: d.templateYoutube, template_startup: d.templateStartup, silent_start: d.silentStart ?? b.silent_start, mute_mode: d.muteMode ?? b.mute_mode, mute_from: d.muteFrom ?? b.mute_from, mute_until: d.muteUntil ?? b.mute_until, topic_id: d.topicId === undefined ? b.topic_id : (Number(d.topicId) || null) } : b);
         return ok(undefined);
     },
     getFeeds: (botId: number) => ok(feeds.filter(f => f.bot_id === botId)),
@@ -166,6 +168,15 @@ const ok = <T,>(v: T) => new Promise<T>(r => setTimeout(() => r(v), 120));
     onLogsBatch: (cb: any) => { listeners['bot-logs-batch'] = [cb]; },
     onYouTubeApiError: () => {},
     getStats: (id: number) => ok(id === 1 ? { total: 1284, today: 7, week: 52 } : { total: 96, today: 0, week: 4 }),
+    getQueues: (id: number) => ok<BotQueues>(id !== 1 ? { sending: 0, quietHours: [], digest: [] } : {
+        sending: 1,
+        quietHours: [{ title: 'Edizione della notte', feedName: 'Notizie dal mondo', at: new Date(Date.now() - 3 * 3600000).toISOString() }],
+        digest: [1, 2, 3].map(n => ({ title: `Puntata ${n} del mattino`, feedName: 'Il podcast del mattino', at: new Date(Date.now() - n * 7200000).toISOString() })),
+    }),
+    getHistory: (id: number) => ok<HistoryEntry[]>(id !== 1 ? [] : Array.from({ length: 12 }, (_, i) => ({
+        title: i === 4 ? '' : `Notizia di esempio numero ${12 - i}`, feedName: i % 3 === 0 ? 'Tecnologia e scienza' : 'Notizie dal mondo',
+        contentType: 'rss' as const, at: new Date(Date.now() - i * 3600000).toISOString(),
+    }))),
     getDetailedStats: (id: number) => ok({
         total: 1284, today: 7, week: 52,
         byFeed: id === 1 ? [

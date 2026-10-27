@@ -12,6 +12,12 @@ import { useToast } from './ui/Toast';
 import { useTranslation } from '../locales/I18nContext';
 import { errorMessage } from '../lib/errors';
 import { validateTemplate } from '../utils/templateValidator';
+import { parseTopicId } from '../../../main/bot/rules';
+
+/** Il campo dell'argomento è valido se vuoto, un numero o il link di un messaggio dell'argomento. */
+function topicValid(value: string): boolean {
+    try { parseTopicId(value); return true; } catch { return false; }
+}
 
 interface Props {
     open: boolean;
@@ -57,6 +63,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
     const [token, setToken] = useState(bot.token);
     const [showToken, setShowToken] = useState(false);
     const [channelId, setChannelId] = useState(bot.channel_id);
+    const [topic, setTopic] = useState(bot.topic_id ? String(bot.topic_id) : '');
     const [isActive, setIsActive] = useState(bot.is_active);
     const [notifications, setNotifications] = useState(bot.notifications_enabled ?? true);
     const [silentStart, setSilentStart] = useState(bot.silent_start ?? false);
@@ -87,6 +94,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
         window.api.getDefaultTemplates().then(setDefaults).catch(() => {});
         setTab('general');
         setName(bot.name); setToken(bot.token); setShowToken(false); setChannelId(bot.channel_id);
+        setTopic(bot.topic_id ? String(bot.topic_id) : '');
         setIsActive(bot.is_active); setNotifications(bot.notifications_enabled ?? true); setSilentStart(bot.silent_start ?? false);
         setMuteMode(bot.mute_mode ?? 'off'); setMuteFrom(bot.mute_from || '22:00'); setMuteUntil(bot.mute_until || '07:00');
         setStartDate(dateInputValue(bot.start_date)); setIntervalMinutes(String(bot.check_interval || 15));
@@ -103,10 +111,11 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
         // non si può decifrare. Va detto qui, non lasciato fallire al salvataggio.
         token: !token.trim() ? t('botForm.tokenMissing') : '',
         channel: !channelId.trim() ? t('botForm.required') : '',
+        topic: topicValid(topic) ? '' : t('botSettings.topicInvalid'),
         startDate: !startDate ? t('botForm.required') : '',
         interval: !Number.isInteger(intervalNumber) || intervalNumber < 1 || intervalNumber > 1440 ? t('botSettings.intervalRange') : '',
     };
-    const generalInvalid = !!(errors.name || errors.token || errors.channel);
+    const generalInvalid = !!(errors.name || errors.token || errors.channel || errors.topic);
     const scheduleInvalid = !!(errors.startDate || errors.interval);
 
     const save = async () => {
@@ -130,7 +139,7 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                 startDate: startDate !== dateInputValue(bot.start_date) ? startDate : undefined,
                 checkInterval: intervalNumber, notificationsEnabled: notifications, sendFrom, sendUntil,
                 templatePodcast: tplPodcast, templateNews: tplNews, templateYoutube: tplYoutube, templateStartup: tplStartup,
-                silentStart, muteMode, muteFrom, muteUntil,
+                silentStart, muteMode, muteFrom, muteUntil, topicId: topic.trim(),
             });
             success(t('botSettings.saved'));
             onSaved();
@@ -234,7 +243,18 @@ export function BotSettingsModal({ open, bot, onClose, onSaved, onDeleted, onHis
                                 error={submitted ? errors.channel : ''}
                                 required
                             />
-                            <BotCheck token={token} channelId={channelId} />
+                            <TextField
+                                label={t('botSettings.topic')}
+                                hint={t('botSettings.topicHint')}
+                                className="font-mono text-sm"
+                                spellCheck={false}
+                                inputMode="url"
+                                value={topic}
+                                onChange={e => setTopic(e.target.value)}
+                                error={errors.topic}
+                                containerClassName="max-w-md"
+                            />
+                            <BotCheck token={token} channelId={channelId} topicId={errors.topic ? '' : topic} />
                             <div className="space-y-4 rounded-lg border border-line bg-surface-2 p-4">
                                 <Switch checked={isActive} onChange={setIsActive} label={t('botSettings.active')} description={t('botSettings.activeHint')} />
                                 <div className="h-px bg-line" aria-hidden="true" />

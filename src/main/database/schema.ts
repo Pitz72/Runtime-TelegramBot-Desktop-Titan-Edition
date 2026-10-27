@@ -165,6 +165,7 @@ export function initDB() {
             mute_mode TEXT DEFAULT 'off',
             mute_from TEXT DEFAULT '22:00',
             mute_until TEXT DEFAULT '07:00',
+            topic_id INTEGER DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -180,6 +181,10 @@ export function initDB() {
             last_fetch_at DATETIME DEFAULT NULL,
             digest_interval INTEGER DEFAULT NULL,
             digest_last_sent DATETIME DEFAULT NULL,
+            last_status TEXT DEFAULT NULL,
+            last_error TEXT DEFAULT NULL,
+            last_checked_at DATETIME DEFAULT NULL,
+            last_item_count INTEGER DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(bot_id) REFERENCES bots(id) ON DELETE CASCADE
         );
@@ -241,8 +246,8 @@ export function initDB() {
         // Indice di deduplica title_hash scoped per content_type (IronShield v2).
         // Va creato qui: il fresh-install ritorna prima del blocco migrazioni/safety-check.
         db.exec(`CREATE INDEX IF NOT EXISTS idx_history_title_dedup ON history(bot_id, title_hash, content_type)`);
-        db.pragma('user_version = 13');
-        console.log("Nuova installazione rilevata. Database inizializzato alla v13.");
+        db.pragma('user_version = 14');
+        console.log("Nuova installazione rilevata. Database inizializzato alla v14.");
         console.log('Database initialized at:', dbPath);
         return db;
     }
@@ -253,7 +258,7 @@ export function initDB() {
     // 4. Backup automatico SOLO se servono migrazioni — fix #20
     // Cattura lo stato pre-migrazione per consentire il ripristino in caso di errore.
     // Su DB già alla versione corrente (nessuna migrazione), nessun backup viene creato.
-    if (currentVersion < 13) {
+    if (currentVersion < 14) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
@@ -473,6 +478,18 @@ export function initDB() {
         console.log("Database version set to 13");
     }
 
+    if (currentVersion < 14) {
+        console.log("Migration v14: argomento dei gruppi per bot, stato dell'ultima lettura per sorgente...");
+        try { db.exec(`ALTER TABLE bots ADD COLUMN topic_id INTEGER DEFAULT NULL`); } catch (e) { }
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN last_status TEXT DEFAULT NULL`); } catch (e) { }
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN last_error TEXT DEFAULT NULL`); } catch (e) { }
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN last_checked_at DATETIME DEFAULT NULL`); } catch (e) { }
+        try { db.exec(`ALTER TABLE feeds ADD COLUMN last_item_count INTEGER DEFAULT NULL`); } catch (e) { }
+        db.pragma('user_version = 14');
+        currentVersion = 14;
+        console.log("Database version set to 14");
+    }
+
     try {
         const botCols = db.pragma('table_info(bots)') as any[];
         const v13Columns: Array<[string, string]> = [
@@ -480,6 +497,7 @@ export function initDB() {
             ['mute_mode', `TEXT DEFAULT 'off'`],
             ['mute_from', `TEXT DEFAULT '22:00'`],
             ['mute_until', `TEXT DEFAULT '07:00'`],
+            ['topic_id', 'INTEGER DEFAULT NULL'],
         ];
         for (const [name, definition] of v13Columns) {
             if (!botCols.some((c: any) => c.name === name)) {
@@ -531,6 +549,18 @@ export function initDB() {
         if (!feedCols.some((c: any) => c.name === 'digest_last_sent')) {
             console.warn('Safety fix: digest_last_sent mancante dalla tabella feeds — aggiunto retroattivamente.');
             db.exec(`ALTER TABLE feeds ADD COLUMN digest_last_sent DATETIME DEFAULT NULL`);
+        }
+        const v14FeedColumns: Array<[string, string]> = [
+            ['last_status', 'TEXT DEFAULT NULL'],
+            ['last_error', 'TEXT DEFAULT NULL'],
+            ['last_checked_at', 'DATETIME DEFAULT NULL'],
+            ['last_item_count', 'INTEGER DEFAULT NULL'],
+        ];
+        for (const [name, definition] of v14FeedColumns) {
+            if (!feedCols.some((c: any) => c.name === name)) {
+                console.warn(`Safety fix: ${name} mancante dalla tabella feeds — aggiunto retroattivamente.`);
+                db.exec(`ALTER TABLE feeds ADD COLUMN ${name} ${definition}`);
+            }
         }
     } catch (e) {
         console.error('Safety check feeds columns fallito:', e);

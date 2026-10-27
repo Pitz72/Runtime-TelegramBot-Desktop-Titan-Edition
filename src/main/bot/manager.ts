@@ -1,6 +1,6 @@
 import { getDB } from '../database/schema';
 const db = () => getDB(); // lazy accessor — fix #16
-import { BotConfig, FeedConfig } from '../../shared/types';
+import { BotConfig, FeedConfig, HistoryEntry, QueuedItem } from '../../shared/types';
 import { safeStorage } from 'electron';
 import nodeCrypto from 'node:crypto';
 import { encryptToken, decryptToken } from '../crypto';
@@ -170,6 +170,8 @@ export interface BotBehavior {
     muteMode?: MuteMode;
     muteFrom?: string;
     muteUntil?: string;
+    /** Argomento del gruppo (schema v14): `null` = chat intera, `undefined` = invariato */
+    topicId?: number | null;
 }
 
 /** Riga del DB → BotConfig: token decifrato, booleani SQLite (0/1) in boolean — fix #18. */
@@ -183,16 +185,19 @@ function rowToBot(row: any): BotConfig {
         mute_mode: MUTE_MODES.includes(row.mute_mode) ? row.mute_mode : 'off',
         mute_from: TIME_REGEX.test(row.mute_from ?? '') ? row.mute_from : '22:00',
         mute_until: TIME_REGEX.test(row.mute_until ?? '') ? row.mute_until : '07:00',
+        topic_id: Number.isInteger(row.topic_id) && row.topic_id > 0 ? row.topic_id : null,
     } as BotConfig;
 }
 
 /** Il comportamento di un bot letto da un profilo .rtb: valori sconosciuti → predefiniti. */
 function rtbBehavior(source: any): BotBehavior {
+    const topic = Number(source?.topicId ?? source?.topic_id);
     return {
         silentStart: source?.silentStart === true || source?.silent_start === true || source?.silent_start === 1,
         muteMode: MUTE_MODES.includes(source?.muteMode ?? source?.mute_mode) ? (source.muteMode ?? source.mute_mode) : 'off',
         muteFrom: rtbAssertTimeOrDefault(source?.muteFrom ?? source?.mute_from, '22:00'),
         muteUntil: rtbAssertTimeOrDefault(source?.muteUntil ?? source?.mute_until, '07:00'),
+        topicId: Number.isInteger(topic) && topic > 0 ? topic : null,
     };
 }
 
@@ -218,11 +223,12 @@ export class BotManager {
         const sFrom = sendFrom || '00:00';
         const sUntil = sendUntil || '23:59';
         const secureToken = encryptToken(token);
-        const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup, silent_start, mute_mode, mute_from, mute_until) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const stmt = db().prepare('INSERT INTO bots (name, token, channel_id, start_date, check_interval, notifications_enabled, send_from, send_until, template_podcast, template_news, template_youtube, template_startup, silent_start, mute_mode, mute_from, mute_until, topic_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         const info = stmt.run(
             name, secureToken, channelId, date, interval, notif, sFrom, sUntil,
             templatePodcast || null, templateNews || null, templateYoutube || null, templateStartup || null,
             behavior.silentStart ? 1 : 0, behavior.muteMode ?? 'off', behavior.muteFrom ?? '22:00', behavior.muteUntil ?? '07:00',
+            behavior.topicId ?? null,
         );
         return info.lastInsertRowid;
     }
@@ -240,6 +246,10 @@ export class BotManager {
             behavior.muteMode ?? null, behavior.muteFrom ?? null, behavior.muteUntil ?? null,
             id,
         );
+        // L'argomento a parte: `null` vuol dire «togli l'argomento», e COALESCE non lo saprebbe dire.
+        if (behavior.topicId !== undefined) {
+            db().prepare('UPDATE bots SET topic_id = ? WHERE id = ?').run(behavior.topicId, id);
+        }
     }
     static deleteBot(id: number) {
         db().prepare('DELETE FROM bots WHERE id = ?').run(id);
@@ -257,9 +267,56 @@ export class BotManager {
 
     // --- FEEDS ---
     static getFeeds(botId: number): FeedConfig[] {
-        const rows = db().prepare('SELECT * FROM feeds WHERE bot_id = ? ORDER BY created_at DESC').all(botId) as any[];
+        // `digest_waiting`: quanti contenuti aspettano il prossimo digest di quella sorgente.
+        const rows = db().prepare(`
+            SELECT f.*, (SELECT COUNT(*) FROM digest_queue d WHERE d.feed_id = f.id) AS digest_waiting
+            FROM feeds f WHERE f.bot_id = ? ORDER BY f.created_at DESC
+        `).all(botId) as any[];
         // Normalizza is_active SQLite (0/1) in boolean TypeScript — fix #18
         return rows.map(f => ({ ...f, is_active: f.is_active === 1 })) as FeedConfig[];
+    }
+
+    /**
+     * Esito dell'ultima lettura di una sorgente (schema v14). Prima l'unico modo per sapere
+     * che un feed non rispondeva più era cercare il suo nome nel diario.
+     */
+    static recordFeedResult(id: number, result: { ok: true; count: number } | { ok: false; error: string }) {
+        db().prepare(`
+            UPDATE feeds SET last_status = ?, last_error = ?, last_item_count = COALESCE(?, last_item_count),
+                last_checked_at = strftime('%Y-%m-%dT%H:%M:%SZ','now')
+            WHERE id = ?
+        `).run(result.ok ? 'ok' : 'error', result.ok ? null : result.error.slice(0, 500), result.ok ? result.count : null, id);
+    }
+
+    /** Cosa aspetta di uscire, per bot: ore di silenzio e digest (la coda d'invio la conta il motore). */
+    static getQueues(botId: number): { quietHours: QueuedItem[]; digest: QueuedItem[] } {
+        const quietHours = db().prepare(`
+            SELECT p.item_title AS title, f.name AS feedName, p.item_date AS at
+            FROM pending_queue p LEFT JOIN feeds f ON f.id = p.feed_id
+            WHERE p.bot_id = ? ORDER BY p.item_date ASC LIMIT 200
+        `).all(botId) as any[];
+        const digest = db().prepare(`
+            SELECT d.item_title AS title, f.name AS feedName, d.added_at AS at
+            FROM digest_queue d LEFT JOIN feeds f ON f.id = d.feed_id
+            WHERE d.bot_id = ? ORDER BY d.added_at ASC LIMIT 200
+        `).all(botId) as any[];
+        const clean = (r: any): QueuedItem => ({ title: r.title ?? '', feedName: r.feedName ?? null, at: r.at ?? null });
+        return { quietHours: quietHours.map(clean), digest: digest.map(clean) };
+    }
+
+    /** Gli ultimi contenuti registrati nello storico del bot, dal più recente. */
+    static getRecentHistory(botId: number, limit = 100): HistoryEntry[] {
+        const rows = db().prepare(`
+            SELECT h.title AS title, f.name AS feedName, h.content_type AS contentType, h.sent_at AS at
+            FROM history h LEFT JOIN feeds f ON f.id = h.feed_id
+            WHERE h.bot_id = ? ORDER BY h.sent_at DESC, h.rowid DESC LIMIT ?
+        `).all(botId, Math.max(1, Math.min(500, limit))) as any[];
+        return rows.map(r => ({
+            title: r.title ?? '',
+            feedName: r.feedName ?? null,
+            contentType: r.contentType === 'youtube' ? 'youtube' : 'rss',
+            at: r.at,
+        }));
     }
 
     static addFeed(bot_id: number, name: string, url: string, type: 'podcast' | 'news' | 'youtube', keywordFilter?: string | null, checkInterval?: number | null, digestInterval?: number | null): number {
@@ -436,6 +493,7 @@ export class BotManager {
                 mute_mode: bot.mute_mode,
                 mute_from: bot.mute_from,
                 mute_until: bot.mute_until,
+                topic_id: bot.topic_id,
                 feeds: feeds.map(f => ({
                     name: f.name,
                     url: f.url,
@@ -532,7 +590,8 @@ export class BotManager {
                     silentStart: botRecord.silent_start === 1,
                     muteMode: botRecord.mute_mode ?? 'off',
                     muteFrom: botRecord.mute_from ?? '22:00',
-                    muteUntil: botRecord.mute_until ?? '07:00'
+                    muteUntil: botRecord.mute_until ?? '07:00',
+                    topicId: botRecord.topic_id ?? null,
                 },
                 feeds: feeds.map(f => ({
                     name: f.name,

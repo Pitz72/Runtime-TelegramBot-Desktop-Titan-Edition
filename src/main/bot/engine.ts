@@ -109,6 +109,11 @@ export class BotEngine {
         return this.scanningRun !== null && this.scanningRun === this.runId;
     }
 
+    /** Contenuti del bot nella coda di invio in questo momento (code visibili). */
+    queuedFor(botId: number): number {
+        return this.publishQueue.filter(job => job.botId === botId).length;
+    }
+
     /** Stato corrente del motore — usato dal renderer per sincronizzare la UI al mount. */
     isEngineRunning(): boolean {
         return this.isRunning;
@@ -214,11 +219,11 @@ export class BotEngine {
      * messaggi continuavano ad andare al canale vecchio fino al riavvio del motore.
      */
     private getClient(bot: BotConfig): TelegramClient {
-        const signature = `${bot.token}\n${bot.channel_id}`;
+        const signature = `${bot.token}\n${bot.channel_id}\n${bot.topic_id ?? ''}`;
         const cached = this.clients.get(bot.id);
         if (cached && cached.signature === signature) return cached.client;
         cached?.client.abort();
-        const client = new TelegramClient(bot.token, bot.channel_id);
+        const client = new TelegramClient(bot.token, bot.channel_id, bot.topic_id);
         this.clients.set(bot.id, { client, signature });
         return client;
     }
@@ -535,6 +540,7 @@ export class BotEngine {
 
             // Aggiorna il timestamp dell'ultimo fetch (F5) — anche se non ci sono nuovi item
             BotManager.updateFeedLastFetch(feed.id);
+            BotManager.recordFeedResult(feed.id, { ok: true, count: items.length });
 
             let newCount = 0;
             let skipCount = 0;
@@ -626,6 +632,9 @@ export class BotEngine {
 
         } catch (e) {
             TitanLogger.log(tm('feedFailed', { feed: feed.name, error: String(e) }), 'error');
+            try {
+                BotManager.recordFeedResult(feed.id, { ok: false, error: e instanceof Error ? e.message : String(e) });
+            } catch { /* la sorgente può essere stata eliminata nel frattempo */ }
             if (feed.type === 'youtube' && !this.hasNotifiedYoutubeError) {
                 this.hasNotifiedYoutubeError = true;
                 BrowserWindow.getAllWindows().forEach(win => {

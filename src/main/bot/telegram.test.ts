@@ -58,6 +58,17 @@ describe('sendMessage', () => {
         expect(signals[0].aborted).toBe(false);
     });
 
+    it('con un argomento il messaggio va lì (message_thread_id), senza va nella chat intera', async () => {
+        const payloads: any[] = [];
+        for (const topic of [45, null]) {
+            const client = new TelegramClient('123:abc', '-1001234', topic);
+            (client as any).client = { callApi: async (_m: string, payload: any) => { payloads.push(payload); } };
+            await client.sendMessage('ciao');
+        }
+        expect(payloads[0].message_thread_id).toBe(45);
+        expect('message_thread_id' in payloads[1]).toBe(false);
+    });
+
     it('un timeout è un errore transitorio, da ritentare', async () => {
         const client = new TelegramClient('123:abc', '@c');
         let calls = 0;

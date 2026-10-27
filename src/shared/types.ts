@@ -81,6 +81,8 @@ export interface BotConfig {
     mute_from: string;
     /** Fine della fascia senza suono, "HH:MM" */
     mute_until: string;
+    /** Argomento di un gruppo con argomenti (forum) in cui pubblicare; null = chat intera (schema v14) */
+    topic_id: number | null;
 }
 
 export interface FeedConfig {
@@ -100,6 +102,43 @@ export interface FeedConfig {
     digest_interval: number | null;
     /** Timestamp ISO dell'ultimo digest inviato — null = mai inviato (F9) */
     digest_last_sent: string | null;
+    /** Esito dell'ultima lettura — null = mai letta da quando c'è lo schema v14 */
+    last_status: 'ok' | 'error' | null;
+    /** Motivo dell'ultimo errore di lettura, se l'ultima lettura è fallita */
+    last_error: string | null;
+    /** Istante (ISO-UTC) dell'ultima lettura tentata, riuscita o no */
+    last_checked_at: string | null;
+    /** Contenuti trovati nell'ultima lettura riuscita */
+    last_item_count: number | null;
+    /** Contenuti raccolti e in attesa del prossimo digest */
+    digest_waiting?: number;
+}
+
+/** Un contenuto in attesa: nelle ore di silenzio o nel prossimo digest. */
+export interface QueuedItem {
+    title: string;
+    feedName: string | null;
+    /** ISO-UTC: data di pubblicazione (ore di silenzio) o di arrivo in coda (digest) */
+    at: string | null;
+}
+
+/** Le code di un bot: cosa sta per uscire, e perché non è ancora uscito. */
+export interface BotQueues {
+    /** In coda di invio adesso */
+    sending: number;
+    /** Rimandati dalle ore di silenzio */
+    quietHours: QueuedItem[];
+    /** Raccolti per il digest */
+    digest: QueuedItem[];
+}
+
+/** Una riga dello storico: contenuto pubblicato (o raccolto per il digest, o saltato). */
+export interface HistoryEntry {
+    title: string;
+    feedName: string | null;
+    contentType: 'rss' | 'youtube';
+    /** ISO-UTC */
+    at: string;
 }
 
 export interface RssItem {
@@ -117,6 +156,8 @@ export interface BotCheckResult {
     token: { status: 'ok' | 'invalid' | 'network'; username?: string; error?: string };
     chat: { status: 'ok' | 'notFound' | 'noAccess' | 'network' | 'skipped'; title?: string; type?: string; error?: string };
     rights: { status: 'ok' | 'notMember' | 'notAdmin' | 'noPostRight' | 'restricted' | 'unknown' | 'network' | 'skipped'; error?: string };
+    /** Solo se è indicato un argomento: la chat deve essere un gruppo con gli argomenti attivi */
+    topic?: { status: 'ok' | 'notForum' };
 }
 
 /** Avvio e chiusura dell'applicazione (Impostazioni → Generale). */

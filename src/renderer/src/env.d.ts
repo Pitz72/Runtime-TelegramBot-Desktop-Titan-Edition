@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import { BotCheckResult, BotConfig, DesktopSettings, FeedConfig, LogEntry } from '../../shared/types'
+import { BotCheckResult, BotConfig, BotQueues, DesktopSettings, FeedConfig, HistoryEntry, LogEntry } from '../../shared/types'
 
 export interface TitanAPI {
     // Bot Management
@@ -26,8 +26,11 @@ export interface TitanAPI {
         muteMode?: 'off' | 'always' | 'window'
         muteFrom?: string
         muteUntil?: string
+        topicId?: string | number | null
     }) => Promise<void>
-    testBot: (data: { token: string; channelId: string }) => Promise<BotCheckResult>
+    testBot: (data: { token: string; channelId: string; topicId?: string | number | null }) => Promise<BotCheckResult>
+    getQueues: (botId: number) => Promise<BotQueues>
+    getHistory: (botId: number) => Promise<HistoryEntry[]>
     getDefaultTemplates: () => Promise<{ news: string; podcast: string; youtube: string }>
 
     // Feed Management

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash2, Rss, Newspaper, Youtube, Pencil, Filter, Clock, Upload, BookOpen, Search, X } from 'lucide-react';
+import { Plus, Trash2, Rss, Newspaper, Youtube, Pencil, Filter, Clock, Upload, BookOpen, Search, X, CheckCircle2, AlertCircle, Inbox } from 'lucide-react';
 import { FeedConfig } from '../../../shared/types';
 import { useToast } from './ui/Toast';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -14,6 +14,36 @@ interface Props {
     botId: number;
     /** false quando la sezione è già nominata da una scheda: il titolo resta solo per i lettori di schermo */
     showTitle?: boolean;
+    /** Cambia a ogni giro concluso: l'elenco si rilegge e mostra l'esito delle letture */
+    refreshKey?: number;
+}
+
+/**
+ * L'esito dell'ultima lettura di una sorgente (schema v14). Prima, per sapere che un feed
+ * non rispondeva più, bisognava cercarne il nome nel diario.
+ */
+function FeedStatus({ feed }: { feed: FeedConfig }) {
+    const { t, locale } = useTranslation();
+    if (!feed.last_checked_at || !feed.last_status) {
+        return <p className="mt-1.5 text-sm text-fg-3">{t('feeds.statusNever')}</p>;
+    }
+    const when = new Date(feed.last_checked_at).toLocaleString(locale === 'it' ? 'it-IT' : 'en-GB', {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+    });
+    if (feed.last_status === 'ok') {
+        return (
+            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-fg-3">
+                <CheckCircle2 size={14} className="shrink-0 text-success" aria-hidden="true" />
+                {t('feeds.statusOk').replace('{time}', when).replace('{n}', String(feed.last_item_count ?? 0))}
+            </p>
+        );
+    }
+    return (
+        <p className="mt-1.5 flex items-start gap-1.5 text-sm text-danger" title={feed.last_error ?? undefined}>
+            <AlertCircle size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <span className="line-clamp-2 break-words">{t('feeds.statusError').replace('{time}', when).replace('{error}', feed.last_error ?? '')}</span>
+        </p>
+    );
 }
 
 const TYPE_STYLE: Record<FeedConfig['type'], { icon: typeof Rss; tone: BadgeTone; tile: string }> = {
@@ -22,7 +52,7 @@ const TYPE_STYLE: Record<FeedConfig['type'], { icon: typeof Rss; tone: BadgeTone
     youtube: { icon: Youtube, tone: 'youtube', tile: 'text-youtube' },
 };
 
-export function FeedManager({ botId, showTitle = true }: Props) {
+export function FeedManager({ botId, showTitle = true, refreshKey = 0 }: Props) {
     const { t } = useTranslation();
     const { toast } = useToast();
     const duration = useDurationLabel();
@@ -44,6 +74,8 @@ export function FeedManager({ botId, showTitle = true }: Props) {
     };
 
     useEffect(() => { setLoading(true); setQuery(''); loadFeeds(); }, [botId]);
+    // A fine giro gli esiti delle letture sono cambiati: si rilegge senza mostrare il caricamento.
+    useEffect(() => { if (refreshKey > 0) loadFeeds(); }, [refreshKey]);
 
     // Ricerca locale al canale: nome, URL, tipo e parole del filtro. Più termini = tutti.
     const filtered = useMemo(() => {
@@ -176,7 +208,9 @@ export function FeedManager({ botId, showTitle = true }: Props) {
                                             {feed.keyword_filter && <Badge tone="accent" icon={Filter}>{t('feeds.badgeFilter')}</Badge>}
                                             {feed.check_interval != null && <Badge icon={Clock}>{t('feedForm.every').replace('{d}', duration(feed.check_interval))}</Badge>}
                                             {feed.digest_interval != null && <Badge tone="warning" icon={BookOpen}>{t('feeds.badgeDigest').replace('{d}', duration(feed.digest_interval))}</Badge>}
+                                            {!!feed.digest_waiting && <Badge icon={Inbox}>{t('feeds.digestWaiting').replace('{n}', String(feed.digest_waiting))}</Badge>}
                                         </div>
+                                        {feed.is_active && <FeedStatus feed={feed} />}
                                     </div>
                                     <div className="flex shrink-0 items-center gap-1">
                                         <Switch checked={!!feed.is_active} onChange={() => toggle(feed)} ariaLabel={t('feeds.toggle').replace('{name}', feed.name)} className="mr-1" />

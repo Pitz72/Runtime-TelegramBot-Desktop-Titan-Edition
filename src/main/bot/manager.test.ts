@@ -119,6 +119,62 @@ describe('deduplica', () => {
     });
 });
 
+describe('argomento dei gruppi', () => {
+    it('si salva, si toglie e resta invariato se non indicato', () => {
+        const id = Number(BotManager.createBot('Gruppo', TOKEN, '-1001234', undefined, 15, true, '00:00', '23:59', undefined, undefined, undefined, undefined, { topicId: 45 }));
+        expect(BotManager.getBot(id)!.topic_id).toBe(45);
+        BotManager.updateBot(id, 'Gruppo', TOKEN, '-1001234', true, undefined, 15, true, '00:00', '23:59', undefined, undefined, undefined, undefined, {});
+        expect(BotManager.getBot(id)!.topic_id).toBe(45);
+        BotManager.updateBot(id, 'Gruppo', TOKEN, '-1001234', true, undefined, 15, true, '00:00', '23:59', undefined, undefined, undefined, undefined, { topicId: null });
+        expect(BotManager.getBot(id)!.topic_id).toBeNull();
+    });
+
+    it('viaggia nei profili .rtb', () => {
+        const id = Number(BotManager.createBot('Gruppo', TOKEN, '-1001234', undefined, 15, true, '00:00', '23:59', undefined, undefined, undefined, undefined, { topicId: 7 }));
+        const exported = BotManager.exportSingleBot(id);
+        expect(JSON.parse(exported).bot.topicId).toBe(7);
+        getDB().prepare('UPDATE bots SET is_active = 0').run();
+        const { botId } = BotManager.importSingleBot(exported);
+        expect(BotManager.getBot(botId)!.topic_id).toBe(7);
+    });
+});
+
+describe('stato delle sorgenti, code e storico', () => {
+    it('ricorda l\'esito dell\'ultima lettura, riuscita o no', () => {
+        const botId = Number(BotManager.createBot('Bot', TOKEN, '@c'));
+        const feedId = BotManager.addFeed(botId, 'F', 'https://example.org/f.xml', 'news');
+        BotManager.recordFeedResult(feedId, { ok: true, count: 20 });
+        expect(BotManager.getFeeds(botId)[0]).toMatchObject({ last_status: 'ok', last_error: null, last_item_count: 20 });
+        BotManager.recordFeedResult(feedId, { ok: false, error: 'timeout' });
+        const feed = BotManager.getFeeds(botId)[0];
+        // Il numero dell'ultima lettura riuscita resta: l'errore non lo cancella.
+        expect(feed).toMatchObject({ last_status: 'error', last_error: 'timeout', last_item_count: 20 });
+        expect(Date.parse(feed.last_checked_at!)).toBeGreaterThan(Date.now() - 60_000);
+    });
+
+    it('mostra cosa aspetta: ore di silenzio e digest, con il nome della sorgente', () => {
+        const botId = Number(BotManager.createBot('Bot', TOKEN, '@c'));
+        const feedId = BotManager.addFeed(botId, 'Notizie', 'https://example.org/f.xml', 'news', null, null, 60);
+        BotManager.addToPendingQueue(botId, feedId, { id: 'p1', title: 'Di notte', link: 'https://example.org/1', summary: '', pubDate: new Date() });
+        BotManager.addToDigestQueue(botId, feedId, { id: 'd1', title: 'Nel digest', link: 'https://example.org/2', summary: '' });
+        const queues = BotManager.getQueues(botId);
+        expect(queues.quietHours).toEqual([expect.objectContaining({ title: 'Di notte', feedName: 'Notizie' })]);
+        expect(queues.digest).toEqual([expect.objectContaining({ title: 'Nel digest', feedName: 'Notizie' })]);
+        expect(BotManager.getFeeds(botId)[0].digest_waiting).toBe(1);
+    });
+
+    it('lo storico elenca gli ultimi contenuti, dal più recente', () => {
+        const botId = Number(BotManager.createBot('Bot', TOKEN, '@c'));
+        const feedId = BotManager.addFeed(botId, 'Notizie', 'https://example.org/f.xml', 'news');
+        BotManager.markProcessed(botId, feedId, 'a', 'Primo');
+        getDB().prepare("UPDATE history SET sent_at = datetime('now', '-1 hour') WHERE id = 'a'").run();
+        BotManager.markProcessed(botId, feedId, 'b', 'Secondo', 'youtube');
+        const history = BotManager.getRecentHistory(botId);
+        expect(history.map(h => h.title)).toEqual(['Secondo', 'Primo']);
+        expect(history[0]).toMatchObject({ feedName: 'Notizie', contentType: 'youtube' });
+    });
+});
+
 describe('coda del digest', () => {
     it('digestFeedIds trova i feed con contenuti in attesa, anche a digest spento', () => {
         const botId = Number(BotManager.createBot('Bot', TOKEN, '@c'));

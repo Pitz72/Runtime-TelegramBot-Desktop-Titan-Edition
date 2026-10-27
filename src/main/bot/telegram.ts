@@ -73,9 +73,13 @@ export class TelegramClient {
     private channelId: string;
     private aborted: boolean = false;
 
-    constructor(token: string, channelId: string) {
+    /** Argomento di un gruppo con argomenti: i messaggi vanno lì invece che nel «Generale». */
+    private topicId: number | null;
+
+    constructor(token: string, channelId: string, topicId: number | null = null) {
         this.client = new Telegram(token);
         this.channelId = normalizeChannelId(channelId);
+        this.topicId = topicId;
     }
 
     /**
@@ -117,6 +121,7 @@ export class TelegramClient {
                 // e senza segnale una connessione appesa aspettava i suoi 500 secondi.
                 await this.client.callApi('sendMessage', {
                     chat_id: this.channelId,
+                    ...(this.topicId ? { message_thread_id: this.topicId } : {}),
                     text,
                     parse_mode: 'HTML',
                     disable_notification: options.silent === true,

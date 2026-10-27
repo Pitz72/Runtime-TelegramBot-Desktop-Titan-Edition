@@ -4,8 +4,27 @@ import {
     isFeedDue, isTimeAllowed, loopIntervalMinutes, parseStartDate, parseUtcTimestamp,
     isMuted, normalizeChannelId, passesKeywordFilter, pickUrl, pickYouTubeChannel, postingRight, startupMessage, truncate,
     youtubeChannelRef, adaptLockupView, itemTitle, tidyMessage, sameChannel, DERIVED_TITLE_MAX,
-    isTransientFetchError, hostOf,
+    isTransientFetchError, hostOf, parseTopicId,
 } from './rules';
+
+describe('parseTopicId', () => {
+    it('legge il numero o il link di un messaggio dell\'argomento', () => {
+        expect(parseTopicId('45')).toBe(45);
+        expect(parseTopicId(45)).toBe(45);
+        expect(parseTopicId('https://t.me/c/1234567890/45')).toBe(45);
+        expect(parseTopicId('https://t.me/c/1234567890/45/678')).toBe(45);
+        expect(parseTopicId('t.me/gruppo_pubblico/12/99')).toBe(12);
+    });
+    it('vuoto vuol dire «chat intera»', () => {
+        expect(parseTopicId('')).toBeNull();
+        expect(parseTopicId('   ')).toBeNull();
+        expect(parseTopicId(null)).toBeNull();
+        expect(parseTopicId(undefined)).toBeNull();
+    });
+    it('rifiuta ciò che non è un argomento', () => {
+        for (const v of ['abc', '0', '-3', 'https://example.org/45', 4.5]) expect(() => parseTopicId(v)).toThrow();
+    });
+});
 
 describe('isTransientFetchError', () => {
     it('ritenta i singhiozzi di rete e i server sovraccarichi', () => {

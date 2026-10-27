@@ -62,3 +62,14 @@ Chiude il problema noto registrato il 27/10: con l'interfaccia in inglese, parte
 E un difetto dei test trovato strada facendo: con Electron 44.9.3 il pacchetto `electron`, importato fuori da Electron, scarica il binario se manca, e i test che importavano anche solo i testi del main restavano appesi. Ora i test usano un sostituto di Electron (`src/test-support/electron-stub.ts`, collegato in `vitest.config.ts`) e non dipendono più dal binario.
 
 Verifica: 5 test nuovi (121 in tutto): stesse chiavi e stessi segnaposto in italiano e in inglese, modelli italiani identici alla 2.4.1, cambio di lingua.
+
+## Blocco 6 — Stato delle sorgenti, code, storico, argomenti dei gruppi
+
+Le quattro funzioni rimaste negli appunti della 2.4. Lo schema del database passa alla **v14** (con il solito backup automatico prima della migrazione).
+
+- **Stato di ogni sorgente.** Sotto ogni sorgente attiva c'è l'esito dell'ultima lettura: «Letta il 27 ott, 11:46: 20 contenuti nel feed», oppure, in rosso, «Lettura non riuscita il …» con il motivo. Prima, per accorgersi che un feed non rispondeva più, bisognava cercarne il nome nel diario. L'elenco si aggiorna da solo a fine giro. Le sorgenti a riepilogo mostrano anche quanti contenuti aspettano il prossimo riepilogo.
+- **Code visibili.** La finestra delle statistiche diventa **Attività del bot**, con tre schede. **In attesa** mostra cosa è stato trovato ma non è ancora uscito, e perché: in coda di invio adesso, rimandato dalle ore di silenzio, raccolto per il prossimo riepilogo. Ogni contenuto ha titolo, sorgente e ora.
+- **Storico consultabile.** La scheda **Storico** elenca gli ultimi 100 contenuti registrati per il bot, dal più recente, con sorgente e ora. Comprende anche quelli raccolti per il riepilogo e quelli rifiutati da Telegram, perché anche quelli sono «già gestiti» e non ripartiranno.
+- **Argomenti dei gruppi.** Nei gruppi Telegram con gli argomenti (forum) un bot può pubblicare in un argomento preciso invece che nel «Generale». Nelle impostazioni del bot c'è il campo **Argomento del gruppo**: il numero, oppure il link di un messaggio dell'argomento così come lo copia Telegram (`t.me/c/…/45`). **Prova il bot** controlla anche che il gruppo abbia gli argomenti attivi. L'argomento viaggia nei profili `.rtb`. Valgono per l'argomento anche il messaggio di avvio e i riepiloghi.
+
+Verifica: 12 test nuovi (133 in tutto), tra cui la migrazione reale di un database costruito come quello della 2.4.1 alla v14, con i dati che restano al loro posto e il backup creato. Nel banco di prova: stato delle sorgenti (riuscita, errore, mai letta), le tre schede dell'attività, il campo dell'argomento con un valore sbagliato (errore annunciato) e con un link valido.

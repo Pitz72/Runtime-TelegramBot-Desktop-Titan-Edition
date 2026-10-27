@@ -32,8 +32,11 @@ const api = {
         muteMode?: 'off' | 'always' | 'window'
         muteFrom?: string
         muteUntil?: string
+        topicId?: string | number | null
     }) => ipcRenderer.invoke('update-bot', data),
-    testBot: (data: { token: string; channelId: string }) => ipcRenderer.invoke('test-bot', data),
+    testBot: (data: { token: string; channelId: string; topicId?: string | number | null }) => ipcRenderer.invoke('test-bot', data),
+    getQueues: (botId: number) => ipcRenderer.invoke('get-queues', botId),
+    getHistory: (botId: number) => ipcRenderer.invoke('get-history', botId),
     getDefaultTemplates: () => ipcRenderer.invoke('get-default-templates') as Promise<{ news: string; podcast: string; youtube: string }>,
 
     // Feed Management

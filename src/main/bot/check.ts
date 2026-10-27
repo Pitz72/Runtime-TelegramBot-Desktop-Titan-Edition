@@ -30,7 +30,7 @@ function withTimeout<T>(promise: Promise<T>): Promise<T> {
 
 const isNetwork = (e: unknown) => classifyTelegramError(e).kind === 'transient' && !(e as any)?.response;
 
-export async function checkBot(token: string, channelId: string): Promise<BotCheckResult> {
+export async function checkBot(token: string, channelId: string, topicId: number | null = null): Promise<BotCheckResult> {
     const secret = token.trim();
     // Un errore di rete può riportare l'indirizzo chiamato, token compreso: non deve
     // arrivare all'interfaccia (né a chi fa uno screenshot del risultato).
@@ -58,6 +58,9 @@ export async function checkBot(token: string, channelId: string): Promise<BotChe
         const chat: any = await withTimeout(api.getChat(chatId));
         chatType = chat.type;
         result.chat = { status: 'ok', type: chat.type, title: chat.title ?? chat.username ?? chat.first_name };
+        // Un argomento ha senso solo in un gruppo con gli argomenti attivi: altrove Telegram
+        // rifiuterebbe ogni messaggio.
+        if (topicId) result.topic = { status: chat.is_forum === true ? 'ok' : 'notForum' };
     } catch (e) {
         const status = (e as any)?.response?.error_code;
         result.chat = {

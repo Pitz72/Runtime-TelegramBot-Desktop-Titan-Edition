@@ -19,19 +19,21 @@ Contenuto:
 | :--- | :--- |
 | `titan.db` | Il database. Con `-wal` e `-shm` accanto mentre l'applicazione gira. |
 | `titan.db.backup-<timestamp>` | Copie automatiche pre-migrazione, ne vengono conservate le ultime 3. |
+| `backups/titan-YYYY-MM-DD.db` | Backup quotidiano automatico (`src/main/database/backup.ts`), gli ultimi 7. |
+| `backups/titan-before-import-<timestamp>.db` | Copia del database attuale prima di ogni «Importa database», le ultime 3. |
 | `.machine-key` | Chiave AES-256 (permessi `0600`), presente solo dove `safeStorage` non è disponibile. |
-| `titan-settings.json` | Performance Mode e ultima versione vista (per la schermata «Novità»). |
+| `titan-settings.json` | Impostazioni dell'app: lingua, zoom, «Riduci effetti», azione della X, avvio del motore, ultima versione vista. Scritto in modo atomico, una modifica alla volta (`updateSettings`). |
 | `logs/titan-YYYY-MM-DD.log` | Log giornalieri, cancellati automaticamente dopo 7 giorni. |
 
 > **Attenzione:** cambiare `productName` sposta questa cartella e fa perdere agli utenti esistenti bot, feed, storico e token. Vedi [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-## Tabelle (schema v12)
+## Tabelle (schema v14)
 
 ### `bots`
-Un record per bot Telegram. `token` è **cifrato** (`ss:` safeStorage oppure `mk:` AES-256-GCM — vedi `src/main/crypto.ts`); `start_date` è la data di cutoff oltre la quale i contenuti vengono pubblicati; `send_from`/`send_until` delimitano le quiet hours; le quattro colonne `template_*` contengono i modelli di messaggio in HTML Telegram.
+Un record per bot Telegram. `token` è **cifrato** (`ss:` safeStorage oppure `mk:` AES-256-GCM — vedi `src/main/crypto.ts`); `start_date` è la data di cutoff oltre la quale i contenuti vengono pubblicati; `send_from`/`send_until` delimitano le quiet hours; le quattro colonne `template_*` contengono i modelli di messaggio in HTML Telegram. `silent_start`, `mute_mode`, `mute_from`, `mute_until` (v13) governano l'avvio silenzioso e la pubblicazione senza suono; `topic_id` (v14) è l'argomento di un gruppo con argomenti in cui pubblicare, `NULL` per la chat intera.
 
 ### `feeds`
-Sorgenti associate a un bot (`ON DELETE CASCADE`). `type` è vincolata a `podcast | news | youtube`. `keyword_filter` è una stringa JSON `{include:[], exclude:[]}`. `check_interval` sovrascrive l'intervallo del bot per il singolo feed; `last_fetch_at` regola lo scheduler. `digest_interval` e `digest_last_sent` governano la modalità digest.
+Sorgenti associate a un bot (`ON DELETE CASCADE`). `type` è vincolata a `podcast | news | youtube`. `keyword_filter` è una stringa JSON `{include:[], exclude:[]}`. `check_interval` sovrascrive l'intervallo del bot per il singolo feed; `last_fetch_at` regola lo scheduler. `digest_interval` e `digest_last_sent` governano la modalità digest. `last_status`, `last_error`, `last_checked_at`, `last_item_count` (v14) ricordano l'esito dell'ultima lettura, che l'interfaccia mostra sotto ogni sorgente.
 
 ### `history`
 Chiave primaria composta `(id, bot_id)` dove `id` è l'MD5 del link. È il registro anti-duplicati.
@@ -44,14 +46,14 @@ La tabella è potata a ogni avvio a **20.000 righe per bot**, un tetto enormemen
 Coda persistente delle quiet hours. Gli item trovati durante la fascia di silenzio finiscono qui su disco, non in memoria: un riavvio nel cuore della notte non li perde. `UNIQUE(bot_id, item_id)`.
 
 ### `digest_queue`
-Buffer dei feed in modalità digest, svuotato dopo l'invio del messaggio riepilogativo. `UNIQUE(bot_id, feed_id, item_id)`.
+Buffer dei feed in modalità digest, svuotato dopo l'invio del messaggio riepilogativo. `UNIQUE(bot_id, feed_id, item_id)`. Se il digest di una sorgente viene spento, i contenuti rimasti partono in un ultimo digest al giro successivo.
 
 ### Indici
 `idx_history_bot_id`, `idx_history_bot_id_sent_at`, e `idx_history_title_dedup` su `(bot_id, title_hash, content_type)`.
 
 ## Migrazioni
 
-Il versionamento usa `PRAGMA user_version`. Una nuova installazione crea direttamente lo schema completo e imposta `user_version = 12` senza passare dalle migrazioni.
+Il versionamento usa `PRAGMA user_version`. Una nuova installazione crea direttamente lo schema completo e imposta `user_version = 14` senza passare dalle migrazioni.
 
 | Versione | Cosa introduce |
 | :---: | :--- |
@@ -67,10 +69,12 @@ Il versionamento usa `PRAGMA user_version`. Una nuova installazione crea diretta
 | 10 | `feeds.digest_interval`, `digest_last_sent`, tabella `digest_queue` |
 | 11 | Tabella `pending_queue` |
 | 12 | `history.content_type` + backfill, indice di dedup ricostruito (IronShield v2) |
+| 13 | `bots.silent_start`, `mute_mode`, `mute_from`, `mute_until` — avvio silenzioso e pubblicazione senza suono (2.4.0) |
+| 14 | `bots.topic_id` — argomenti dei gruppi; `feeds.last_status`, `last_error`, `last_checked_at`, `last_item_count` — stato dell'ultima lettura |
 
 ### Regole
 1. **Si aggiunge solo in coda.** Non riordinare né rinumerare i blocchi esistenti: girano su database con anni di storico.
-2. **Backup automatico** prima di qualsiasi migrazione (solo se ce n'è davvero una da applicare), con rotazione a 3 copie.
+2. **Backup automatico** prima di qualsiasi migrazione (solo se ce n'è davvero una da applicare), con rotazione a 3 copie. Prima della copia si fa il checkpoint del WAL: dopo una chiusura non pulita le ultime scritture stanno ancora nel `-wal`.
 3. **Safety check post-migrazione.** Dopo la catena, il codice verifica *fisicamente* con `PRAGMA table_info` che le colonne critiche esistano e le aggiunge se mancano. Difende dallo stato corrotto in cui `user_version` è avanzato ma un `ALTER TABLE` è fallito in silenzio.
 4. **Le migrazioni legacy non sono transazionali**, per statement. È una scelta consapevole: il safety check è la rete, e riscriverle su codice che funziona è più rischioso del problema che risolverebbe.
 5. **Provare sempre su una copia** di un `titan.db` reale, mai direttamente sul proprio.
@@ -78,3 +82,7 @@ Il versionamento usa `PRAGMA user_version`. Una nuova installazione crea diretta
 ## Chiusura
 
 `closeDB()` esegue `wal_checkpoint(TRUNCATE)` prima di chiudere, così che tutto confluisca in `titan.db` e il file `-wal` non cresca tra un avvio e l'altro. È chiamata da `app.on('before-quit')`. I percorsi che usano `app.exit()` — eccezione fatale, importazione di un database — non passano da lì: nel primo caso lo stato è già compromesso, nel secondo la chiusura è già stata fatta a mano.
+
+## Backup e importazione
+
+I backup quotidiani e quello prima di un'importazione si fanno con l'API di backup di SQLite (`db.backup()`), non copiando il file: con il WAL attivo il solo `titan.db` può non avere le ultime scritture. Per lo stesso motivo «Importa database» copia il file scelto con la stessa API in `titan.db.importing`, salva il database attuale nella cartella `backups`, toglie i `-wal`/`-shm` del vecchio e solo allora sostituisce il file. Se la sostituzione fallisce, riapre il database di prima.

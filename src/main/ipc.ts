@@ -14,7 +14,7 @@ import { readSettings, updateSettings, applyZoom, CLOSE_ACTIONS } from './settin
 import { canHideToTray, getOpenAtLogin, markQuitting, setOpenAtLogin } from './desktop';
 import { join, dirname } from 'path';
 import { tm, setMainLocale } from './i18n';
-import { MUTE_MODES, parseStartDate } from './bot/rules';
+import { MUTE_MODES, parseStartDate, parseTopicId } from './bot/rules';
 import type { BotBehavior } from './bot/manager';
 import { checkBot } from './bot/check';
 import { defaultTemplate } from './bot/telegram';
@@ -138,6 +138,7 @@ function assertBehavior(data: any): BotBehavior {
     }
     if (data?.muteFrom !== undefined) behavior.muteFrom = assertTimeOrDefault(data.muteFrom, '22:00');
     if (data?.muteUntil !== undefined) behavior.muteUntil = assertTimeOrDefault(data.muteUntil, '07:00');
+    if (data?.topicId !== undefined) behavior.topicId = parseTopicId(data.topicId);
     return behavior;
 }
 
@@ -246,8 +247,17 @@ export function setupIpc() {
     ipcMain.handle('test-bot', (_, data) => {
         const token = assertString(data?.token, 'token');
         const channelId = assertString(data?.channelId, 'channelId');
-        return checkBot(token, channelId);
+        return checkBot(token, channelId, parseTopicId(data?.topicId));
     });
+
+    // Code visibili: cosa sta per uscire e perché non è ancora uscito.
+    ipcMain.handle('get-queues', (_, botId) => {
+        const id = assertPositiveInt(botId, 'botId');
+        return { sending: getBotEngine().queuedFor(id), ...BotManager.getQueues(id) };
+    });
+
+    // Storico consultabile: gli ultimi contenuti registrati per il bot.
+    ipcMain.handle('get-history', (_, botId) => BotManager.getRecentHistory(assertPositiveInt(botId, 'botId'), 100));
 
     // --- FEED MANAGEMENT ---
     ipcMain.handle('get-feeds', (_, botId) => BotManager.getFeeds(assertPositiveInt(botId, 'botId')));
