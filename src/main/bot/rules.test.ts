@@ -3,7 +3,7 @@ import {
     buildDigestMessage, classifyTelegramError, DIGEST_TEXT_BUDGET, escapeHtml, escapeUrl,
     isFeedDue, isTimeAllowed, loopIntervalMinutes, parseStartDate, parseUtcTimestamp,
     isMuted, normalizeChannelId, passesKeywordFilter, pickUrl, pickYouTubeChannel, postingRight, startupMessage, truncate,
-    youtubeChannelRef,
+    youtubeChannelRef, adaptLockupView,
 } from './rules';
 
 const at = (h: number, m: number) => new Date(2026, 9, 19, h, m, 0);
@@ -300,5 +300,46 @@ describe('pickYouTubeChannel', () => {
     });
     it('se nessuno corrisponde non inventa: null', () => {
         expect(pickYouTubeChannel(results, '@altro')).toBeNull();
+    });
+});
+describe('adaptLockupView', () => {
+    const lockup = (over: Record<string, unknown> = {}) => ({
+        type: 'LockupView',
+        content_id: 'QEM3EHUV5ko',
+        content_type: 'VIDEO',
+        content_image: { image: [{ url: 'https://i.ytimg.com/vi/QEM3EHUV5ko/hq720.jpg' }] },
+        metadata: {
+            title: { text: 'Un video' },
+            metadata: { metadata_rows: [
+                { metadata_parts: [{ text: { text: 'YouTube' } }] },
+                { metadata_parts: [{ text: { text: '311K' } }, { text: { text: '18h ago' } }] },
+            ] },
+        },
+        ...over,
+    });
+
+    it('porta titolo, data e miniatura dove li legge il parser (forma di youtubei.js 17.2)', () => {
+        expect(adaptLockupView(lockup())).toEqual({
+            id: 'QEM3EHUV5ko',
+            video_id: 'QEM3EHUV5ko',
+            title: { text: 'Un video' },
+            published: { text: '18h ago' },
+            thumbnails: [{ url: 'https://i.ytimg.com/vi/QEM3EHUV5ko/hq720.jpg' }],
+            type: 'LockupView',
+        });
+    });
+    it('riconosce la data italiana e le prime visioni', () => {
+        const it2 = (t: string) => lockup({ metadata: { title: { text: 'x' }, metadata: { metadata_rows: [{ metadata_parts: [{ text: { text: t } }] }] } } });
+        expect(adaptLockupView(it2('2 giorni fa'))?.published.text).toBe('2 giorni fa');
+        expect(adaptLockupView(it2('Premiere 20/10'))?.published.text).toBe('Premiere 20/10');
+    });
+    it('scarta playlist, canali e ID non validi', () => {
+        expect(adaptLockupView(lockup({ content_type: 'PLAYLIST' }))).toBeNull();
+        expect(adaptLockupView(lockup({ content_id: 'corto' }))).toBeNull();
+        expect(adaptLockupView(null)).toBeNull();
+    });
+    it('senza miniatura usa quella standard del video', () => {
+        expect(adaptLockupView(lockup({ content_image: undefined }))?.thumbnails[0].url)
+            .toBe('https://i.ytimg.com/vi/QEM3EHUV5ko/hqdefault.jpg');
     });
 });

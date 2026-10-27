@@ -168,10 +168,10 @@ function createWindow(startHidden = false): void {
     }, 10000);
 
     mainWindow.webContents.setWindowOpenHandler((details) => {
-        // Solo http/https finiscono nel browser di sistema: schemi come file:, smb: o
-        // custom-protocol non devono poter essere aperti dal renderer (stessa regola
-        // dell'handler IPC 'open-external').
-        if (/^https?:\/\//i.test(details.url)) {
+        // Solo https finisce nel browser di sistema: schemi come file:, smb: o
+        // custom-protocol non devono poter essere aperti dal renderer. È la stessa regola
+        // dell'handler IPC 'open-external' — prima qui passava anche http.
+        if (/^https:\/\//i.test(details.url)) {
             shell.openExternal(details.url)
         }
         return { action: 'deny' }

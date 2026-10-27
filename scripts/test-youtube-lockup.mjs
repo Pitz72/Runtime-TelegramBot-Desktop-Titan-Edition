@@ -44,7 +44,8 @@ console.log('Canale:', channel?.metadata?.title);
 
 const videosTab = await channel.getVideos();
 const native = videosTab?.videos || [];
-console.log('videosTab.videos (parser nativo 17.0.1):', native.length);
+// Dalla 17.2 `videos` contiene anch'essi nodi LockupView: Titan li adatta con adaptLockupView (rules.ts).
+console.log('videosTab.videos (parser nativo):', native.length, 'tipi:', [...new Set(native.map((v) => v.type))]);
 
 const lockups = videosTab?.memo?.get?.('LockupView') || [];
 console.log('Nodi LockupView nel memo:', lockups.length);

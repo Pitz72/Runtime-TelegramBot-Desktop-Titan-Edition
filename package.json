@@ -45,7 +45,7 @@
         "@tanstack/react-virtual": "^3.13.24",
         "better-sqlite3": "^13.0.3",
         "clsx": "^2.1.0",
-        "electron-updater": "^6.8.9",
+        "electron-updater": "^6.8.11",
         "framer-motion": "^11.0.3",
         "lucide-react": "^0.316.0",
         "react": "^18.3.1",
@@ -53,7 +53,7 @@
         "rss-parser": "^3.13.0",
         "tailwind-merge": "^2.2.1",
         "telegraf": "^4.15.3",
-        "youtubei.js": "^17.0.1"
+        "youtubei.js": "^17.2.0"
     },
     "devDependencies": {
         "@types/better-sqlite3": "^7.6.13",
@@ -63,7 +63,7 @@
         "@vitejs/plugin-react": "^4.7.0",
         "autoprefixer": "^10.4.17",
         "axe-core": "^4.14.0",
-        "electron": "^44.9.0",
+        "electron": "^44.9.3",
         "electron-builder": "^26.15.3",
         "jsdom": "^26.1.0",
         "postcss": "^8.4.33",

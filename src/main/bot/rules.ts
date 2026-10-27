@@ -286,6 +286,52 @@ export function pickYouTubeChannel<T extends { author?: { name?: string; url?: s
     }) ?? null;
 }
 
+/** Un video nella forma che il parser di youtube.ts legge (quella del nodo `Video`). */
+export interface AdaptedVideo {
+    id: string;
+    video_id: string;
+    title: { text: string };
+    published: { text: string };
+    thumbnails: Array<{ url: string }>;
+    type: 'LockupView';
+}
+
+/**
+ * Un nodo `LockupView` di YouTube nella forma di un nodo `Video`, o `null` se non è un video.
+ *
+ * Titolo e data stanno in posti diversi: il titolo in `metadata.title`, la data tra le
+ * «metadata parts» (`["YouTube", "311K", "18h ago"]`), mescolata a canale e visualizzazioni.
+ */
+export function adaptLockupView(lockup: any): AdaptedVideo | null {
+    const type = lockup?.content_type;
+    if (type !== 'VIDEO' && type !== 'MOVIE' && type !== 'SHORT') return null;
+
+    const videoId = lockup?.content_id;
+    if (typeof videoId !== 'string' || !/^[a-zA-Z0-9_-]{11}$/.test(videoId)) return null;
+
+    const parts: string[] = (lockup.metadata?.metadata?.metadata_rows || [])
+        .flatMap((row: any) => row?.metadata_parts || [])
+        .map((part: any) => part?.text?.text || '')
+        .filter(Boolean);
+    const dateText = parts.find(t => /\bago\b|\bfa\b/i.test(t))
+        || parts.find(t => /premier|upcoming|scheduled|in attesa/i.test(t))
+        || '';
+
+    const img = lockup.content_image;
+    const thumbUrl = img?.image?.[0]?.url               // ThumbnailView
+        || img?.primary_thumbnail?.image?.[0]?.url      // CollectionThumbnailView
+        || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+    return {
+        id: videoId,
+        video_id: videoId,
+        title: { text: lockup.metadata?.title?.text || '' },
+        published: { text: dateText },
+        thumbnails: [{ url: thumbUrl }],
+        type: 'LockupView',
+    };
+}
+
 // ─── Notifiche senza suono ───────────────────────────────────────────────────
 
 /** `off` = notifiche normali; `always` = sempre senza suono; `window` = senza suono in una fascia oraria. */

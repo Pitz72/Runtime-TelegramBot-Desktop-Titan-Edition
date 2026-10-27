@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { RssItem } from './types';
 import { validateFeedUrl } from './parser';
 import { TitanLogger } from '../logger';
-import { pickYouTubeChannel, youtubeChannelRef } from './rules';
+import { adaptLockupView, pickYouTubeChannel, youtubeChannelRef } from './rules';
 
 let youtube: any = null;
 
@@ -109,47 +109,26 @@ function generateId(link: string): string {
     return crypto.createHash('md5').update(link).digest('hex');
 }
 
-// --- Fallback LockupView (maggio 2026) ---
-// YouTube sta servendo le liste video dei canali come nodi `LockupView` invece di `Video`
-// (esperimento lato server, issue LuanRT/YouTube.js#1181). youtubei.js 17.0.1 non li include
-// in videosTab.videos: il fix upstream (PR #1163) è mergiato ma non ancora rilasciato su npm.
-// Estraiamo i LockupView dal memo del feed e li adattiamo alla forma `Video` usata nel loop
-// di parsing. Quando uscirà 17.1.0 questo fallback smetterà semplicemente di attivarsi.
-function extractLockupVideos(videosTab: any): any[] {
-    const lockups: any[] = videosTab?.memo?.get?.('LockupView') || [];
-    const adapted: any[] = [];
-
-    for (const lockup of lockups) {
-        const type = lockup?.content_type;
-        if (type !== 'VIDEO' && type !== 'MOVIE' && type !== 'SHORT') continue;
-
-        const videoId = lockup?.content_id;
-        if (!videoId || !/^[a-zA-Z0-9_-]{11}$/.test(videoId)) continue;
-
-        // Testo data: nelle metadata rows ("12.345 visualizzazioni • 2 giorni fa")
-        const parts: string[] = (lockup.metadata?.metadata?.metadata_rows || [])
-            .flatMap((row: any) => row?.metadata_parts || [])
-            .map((part: any) => part?.text?.text || '')
-            .filter(Boolean);
-        const dateText = parts.find((t: string) => /\bago\b|\bfa\b/i.test(t))
-            || parts.find((t: string) => /premier|upcoming|scheduled|in attesa/i.test(t))
-            || '';
-
-        const img = lockup.content_image;
-        const thumbUrl = img?.image?.[0]?.url               // ThumbnailView
-            || img?.primary_thumbnail?.image?.[0]?.url      // CollectionThumbnailView
-            || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-
-        adapted.push({
-            id: videoId,
-            video_id: videoId,
-            title: { text: lockup.metadata?.title?.text || 'No Title' },
-            published: { text: dateText },
-            thumbnails: [{ url: thumbUrl }],
-            type: 'LockupView'
-        });
+// --- Nodi LockupView ---
+// YouTube serve le liste video dei canali come nodi `LockupView` invece di `Video` (issue
+// LuanRT/YouTube.js#1181). youtubei.js 17.0.1 non li metteva in videosTab.videos, e Titan li
+// ripescava dal memo. Dalla 17.2 ci sono, ma con la forma del LockupView: niente `title.text`,
+// niente `published.text`. Presi così, ogni video aveva data illeggibile, finiva sul ripiego
+// del 2000 e veniva scartato — YouTube non avrebbe pubblicato più nulla. Ogni elemento della
+// lista passa quindi da `adaptLockupView` (rules.ts); il memo resta come ultima risorsa.
+function normalizeVideoList(videosTab: any): any[] {
+    const listed: any[] = videosTab?.videos || [];
+    const source = listed.length > 0 ? listed : (videosTab?.memo?.get?.('LockupView') || []);
+    const videos: any[] = [];
+    for (const v of source) {
+        if (v?.type === 'LockupView' || v?.content_id !== undefined) {
+            const adapted = adaptLockupView(v);
+            if (adapted) videos.push(adapted);
+        } else {
+            videos.push(v);
+        }
     }
-    return adapted;
+    return videos;
 }
 // -----------------------------------------
 
@@ -189,22 +168,14 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
 
         const videosTab = await channel.getVideos();
 
-        // Usiamo SOLO videosTab.videos — il fallback su videosTab.contents restituisce
-        // oggetti non-video (RichItem, sezioni) con v.id non corrispondente al videoId YouTube,
-        // producendo MD5 diversi tra sessioni diverse e bypassing del controllo isProcessed.
-        let videoList = videosTab?.videos || [];
+        // Usiamo SOLO videosTab.videos (o i LockupView del memo) — il fallback su
+        // videosTab.contents restituisce oggetti non-video (RichItem, sezioni) con v.id non
+        // corrispondente al videoId YouTube, producendo MD5 diversi tra sessioni diverse e
+        // bypassing del controllo isProcessed.
+        const videoList = normalizeVideoList(videosTab);
         // Risposta valida dall'API (anche se 0 video): la sessione funziona, azzera gli errori.
         consecutiveErrors = 0;
         TitanLogger.log(`[YouTube] Raw videos count: ${videoList.length}`);
-
-        if (videoList.length === 0) {
-            // Nuovo formato LockupView non riconosciuto da youtubei.js 17.0.1 — vedi helper sopra.
-            const lockupVideos = extractLockupVideos(videosTab);
-            if (lockupVideos.length > 0) {
-                TitanLogger.log(`[YouTube] Formato LockupView rilevato: ${lockupVideos.length} video estratti via fallback (fix upstream PR #1163 non ancora su npm)`);
-                videoList = lockupVideos;
-            }
-        }
 
         if (videoList.length === 0) {
             // v2.0.3: NON resettare la sessione su 0 risultati.
@@ -322,8 +293,12 @@ export async function fetchYouTubeVideos(channelIdOrHandle: string): Promise<Rss
                 || v.thumbnail?.url
                 || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : undefined);
 
+            // `v.title` è un oggetto Text: usarlo come ripiego metteva un oggetto al posto del titolo.
+            const titleText = typeof v.title?.text === 'string' ? v.title.text.trim()
+                : typeof v.title === 'string' ? v.title.trim()
+                : '';
             items.push({
-                title: v.title?.text || v.title || 'No Title',
+                title: titleText || 'No Title',
                 link: videoLink,
                 pubDate: date,
                 summary: v.description_snippet?.text || v.short_description || '',
