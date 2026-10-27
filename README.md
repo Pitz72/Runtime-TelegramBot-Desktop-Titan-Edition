@@ -63,13 +63,13 @@ L'italiano è la lingua sorgente: interfaccia, guide e manuale nascono lì e ven
 | Livello | Tecnologia |
 | :--- | :--- |
 | **Framework** | Electron 44 (Node.js 24 integrato) |
-| **Frontend** | React 18 + Vite 5 |
+| **Frontend** | React 18 + Vite 8 (Rolldown) |
 | **Stile** | TailwindCSS + Lucide React |
-| **Database** | SQLite via `better-sqlite3` 13, modulo N-API precompilato (WAL, schema v12) |
+| **Database** | SQLite via `better-sqlite3` 13, modulo N-API precompilato (WAL, schema v14) |
 | **Telegram** | Telegraf v4 |
 | **YouTube** | `youtubei.js` (InnerTube) |
 | **Build** | electron-builder 26 — NSIS, portable, AppImage, deb, rpm, pacman, tar.gz |
-| **Test** | Vitest — regole del motore, anti-SSRF, sanificazione, validazione template |
+| **Test** | Vitest 5 — regole del motore, gestore e motore su SQLite vero, cifratura, migrazioni, anti-SSRF, sanificazione, template |
 | **CI** | GitHub Actions (Windows x64, Linux x64 e arm64) |
 
 ---
