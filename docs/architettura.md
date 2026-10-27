@@ -123,9 +123,9 @@ Per inibire questa vulnerabilità alla radice, *Runtime TelegramBot Titan Editio
 
 ### 5.2 Cifratura Hardware-Bound con safeStorage
 Tutti i token vengono salvati all'interno di SQLite (`titan.db`) esclusivamente in formato crittografato. Questa operazione non si avvale di una chiave simmetrica cablata nel codice sorgente, ma sfrutta le API `safeStorage` di Electron. 
-Questo modulo interagisce direttamente con i gestori di credenziali nativi del sistema operativo ospite (come **DPAPI** su Windows o il **Keychain** su macOS). 
+Questo modulo interagisce direttamente con i gestori di credenziali nativi del sistema operativo ospite: **DPAPI** su Windows, il servizio Secret Service (GNOME Keyring, KWallet) su Linux. Dove il portachiavi non c'è, Titan usa una chiave AES-256 propria, salvata accanto al database con permessi ristretti. 
 Il risultato è una cifratura *Hardware-Bound*: il token è codificato utilizzando una chiave che esiste solo ed esclusivamente all'interno dell'ambiente fisico (o virtuale certificato) su cui è installata l'applicazione. Se il file `titan.db` viene copiato e aperto su un computer differente, i token risultano come sequenze di byte totalmente inintelligibili. 
-La comunicazione tra il *Main Process* e l'interfaccia grafica (*Renderer*) avviene tramite un rigido `contextBridge` isolato che decripta temporaneamente il token nella RAM solo quando l'operatore richiede di visualizzarlo nel pannello impostazioni, impedendo ogni possibilità di esfiltrazione tramite scripting malevolo lato frontend.
+Dalla revisione del 27 ottobre 2026 si usano solo le API **asincrone** di `safeStorage`: quelle sincrone sono deprecate da Electron 45 e spariscono nella 46. I token si decifrano una volta, all'avvio (`BotManager.loadTokens`), e restano nella memoria del *Main Process*, perché il motore li legge a ogni giro; si cifrano di nuovo a ogni salvataggio. L'interfaccia (*Renderer*) li riceve con l'elenco dei bot, attraverso un `contextBridge` che espone solo i canali previsti (nessun `ipcRenderer` generico), dentro una finestra con `sandbox`, `contextIsolation` e una Content Security Policy che vieta script esterni.
 
 ### 5.3 Il Paradosso della Portabilità: L'Invenzione del Protocollo OmniSync (.rtb)
 Il rigore crittografico generava tuttavia un paradosso operativo: come può un'azienda o un team di sviluppatori migrare o condividere la configurazione di un bot da una macchina all'altra se il database non è leggibile al di fuori dell'hardware originario?
@@ -133,9 +133,9 @@ Il rigore crittografico generava tuttavia un paradosso operativo: come può un'a
 Per superare l'ostacolo, il team ha ingegnerizzato l'ecosistema **OmniSync** (v1.7.0), introducendo uno standard di file proprietario certificato: il formato **`.rtb` (Runtime Telegram Bot)**.
 Il flusso architetturale di OmniSync si struttura in quattro fasi di transizione sicura:
 1.  **Estrazione Controllata:** L'operatore richiede l'esportazione di un singolo profilo. Il motore isola i dati (nome, configurazione, URL dei feed).
-2.  **Decifrazione in Volatile:** Solo in questa istanza, il token viene decifrato all'interno della memoria RAM (tramite l'API hardware) ed esposto in chiaro all'interno della cartuccia JSON codificata all'interno del file `.rtb`.
+2.  **Cifratura per la macchina:** Il token entra nel file `.rtb` cifrato con `safeStorage`, quindi legato al computer che esporta (dalla v1.7.8; prima viaggiava in chiaro). Sullo stesso computer si rilegge da solo; altrove arriva vuoto e va reinserito.
 3.  **Transitività:** Il file viene spostato fisicamente sulla nuova macchina (tramite chiavetta USB, rete sicura, ecc.).
-4.  **Re-Cifratura Dinamica:** Durante la routine di importazione, il database della nuova istanza assorbe la configurazione e individua il token. Prima di trascriverlo in SQLite, il sistema lo intercetta e **lo cifra nuovamente applicando la chiave hardware della nuova macchina ricevente**.
+4.  **Re-Cifratura Dinamica:** Durante la routine di importazione il token, se leggibile, viene **cifrato di nuovo con la chiave della macchina ricevente** prima di entrare in SQLite. Il bot importato **parte da adesso**, perché il file non porta lo storico di ciò che è già stato pubblicato, e resta spento se un altro bot attivo pubblica già sullo stesso canale.
 
 Il formato `.rtb` si impone così come lo standard professionale per l'interscambio di profili di automazione, combinando un'estrema portabilità operativa con una cecità crittografica persistente e inviolabile.
 
