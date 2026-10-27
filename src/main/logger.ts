@@ -148,6 +148,20 @@ class Logger {
         });
     }
 
+    /**
+     * Riga scritta subito e in modo sincrono: per gli errori fatali, quando il processo sta
+     * per chiudersi e una scrittura in coda non arriverebbe mai sul file. Prima finivano
+     * solo nella console, che nell'app installata nessuno vede.
+     */
+    public fatal(message: string) {
+        const line = `[${new Date().toLocaleTimeString()}] 💥 ${redactTokens(message)}`;
+        console.error(line);
+        try {
+            this.rotateIfNeeded();
+            fs.appendFileSync(this.logFilePath, line + '\n');
+        } catch { /* niente da fare: si sta già chiudendo per un errore */ }
+    }
+
     /** Le ultime righe registrate, dalla più vecchia alla più recente. */
     public getRecent(): LogEntry[] {
         return [...this.recent];

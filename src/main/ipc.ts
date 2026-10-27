@@ -7,8 +7,10 @@ import { BotManager } from './bot/manager';
 import { fetchFeed, validateFeedUrl } from './bot/parser';
 import { fetchYouTubeVideos } from './bot/youtube';
 import { TitanLogger } from './logger';
-import { writeFile, copyFile, readFile } from 'fs/promises';
-import { readSettings, writeSettings, applyZoom, CLOSE_ACTIONS } from './settings';
+import { writeFile, readFile } from 'fs/promises';
+import { mkdirSync, renameSync, rmSync } from 'fs';
+import { backupBeforeImport, backupDir } from './database/backup';
+import { readSettings, updateSettings, applyZoom, CLOSE_ACTIONS } from './settings';
 import { canHideToTray, getOpenAtLogin, markQuitting, setOpenAtLogin } from './desktop';
 import { join, dirname } from 'path';
 import { tm, setMainLocale } from './i18n';
@@ -188,10 +190,7 @@ export function setupIpc() {
             try { existingUser = BotManager.getBots().length > 0; } catch { /* DB non pronto */ }
         }
         const show = existingUser && previous !== current;
-        if (previous !== current) {
-            s.lastSeenVersion = current;
-            await writeSettings(s);
-        }
+        if (previous !== current) await updateSettings(next => { next.lastSeenVersion = current; });
         return { show, version: current };
     });
 
@@ -359,13 +358,13 @@ export function setupIpc() {
     ipcMain.handle('get-desktop-settings', desktopSettings);
 
     ipcMain.handle('set-desktop-settings', async (_, data) => {
-        const s = await readSettings();
-        if (data?.closeAction !== undefined) {
-            if (!CLOSE_ACTIONS.includes(data.closeAction)) throw new Error(`Azione di chiusura non valida: "${data.closeAction}"`);
-            s.closeAction = data.closeAction;
+        if (data?.closeAction !== undefined && !CLOSE_ACTIONS.includes(data.closeAction)) {
+            throw new Error(`Azione di chiusura non valida: "${data.closeAction}"`);
         }
-        if (data?.autoStartEngine !== undefined) s.autoStartEngine = data.autoStartEngine === true;
-        await writeSettings(s);
+        await updateSettings(s => {
+            if (data?.closeAction !== undefined) s.closeAction = data.closeAction;
+            if (data?.autoStartEngine !== undefined) s.autoStartEngine = data.autoStartEngine === true;
+        });
         if (data?.openAtLogin !== undefined) setOpenAtLogin(data.openAtLogin === true);
         return desktopSettings();
     });
@@ -466,10 +465,15 @@ export function setupIpc() {
             if (canceled || filePaths.length === 0) return { success: false, error: 'Cancelled' };
             rememberDir(filePaths[0]);
 
+            const dbPath = join(app.getPath('userData'), 'titan.db');
+            const staged = `${dbPath}.importing`;
+
             // Validazione PRIMA di toccare il DB attivo: un file corrotto o non-SQLite
             // sovrascritto su titan.db renderebbe l'app non avviabile (initDB lancerebbe
             // al riavvio, senza vie d'uscita dalla UI). Apriamo in sola lettura, verifichiamo
-            // l'integrità e la presenza della tabella "bots".
+            // l'integrità e la presenza della tabella "bots", e ne facciamo una copia accanto
+            // a titan.db con l'API di backup: copiare il file e basta perdeva le scritture
+            // ancora nel suo -wal, se il file scelto era il database di un Titan acceso.
             try {
                 const candidate = new Database(filePaths[0], { readonly: true, fileMustExist: true });
                 try {
@@ -477,25 +481,49 @@ export function setupIpc() {
                     if (integrity !== 'ok') throw new Error(`integrity_check ha restituito "${integrity}"`);
                     const hasBots = candidate.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='bots'").get();
                     if (!hasBots) throw new Error('non è un database Titan valido (tabella "bots" assente)');
+                    rmSync(staged, { force: true });
+                    await candidate.backup(staged);
                 } finally {
                     candidate.close();
                 }
             } catch (e: any) {
+                rmSync(staged, { force: true });
                 return { success: false, error: `File non importato: database non valido o corrotto. ${e.message || e}` };
             }
 
+            // Il database attuale non si perde: una copia resta nella cartella dei backup.
+            await backupBeforeImport();
+
             getBotEngine().stop();
-            // closeDB: checkpoint WAL e chiusura pulita, così il file -wal del vecchio
-            // database non resta accanto a quello nuovo.
+            // closeDB: checkpoint WAL e chiusura pulita. I file -wal e -shm rimasti si tolgono:
+            // accanto al database nuovo, SQLite proverebbe ad applicargli quelli del vecchio.
             closeDB();
-            const dbPath = join(app.getPath('userData'), 'titan.db');
-            await copyFile(filePaths[0], dbPath);
+            try {
+                rmSync(`${dbPath}-wal`, { force: true });
+                rmSync(`${dbPath}-shm`, { force: true });
+                renameSync(staged, dbPath);
+            } catch (e) {
+                // Sostituzione non riuscita (file bloccato da un antivirus, permessi): prima
+                // Titan restava aperto senza database, e ogni operazione falliva fino al riavvio.
+                // Si riapre il database di prima, che è ancora intatto.
+                rmSync(staged, { force: true });
+                initDB();
+                throw e;
+            }
 
             app.relaunch();
             app.exit(0);
         } catch (e: any) {
             return { success: false, error: e.message || String(e) };
         }
+    });
+
+    // Backup automatici (database/backup.ts): la cartella si apre nel file manager del sistema.
+    ipcMain.handle('open-backups-folder', async () => {
+        const dir = backupDir();
+        mkdirSync(dir, { recursive: true });
+        const error = await shell.openPath(dir);
+        return error ? { success: false, error } : { success: true, path: dir };
     });
 
     ipcMain.handle('export-config', async () => {
@@ -619,9 +647,7 @@ export function setupIpc() {
     });
 
     ipcMain.handle('set-performance-mode', async (_, enabled: boolean) => {
-        const s = await readSettings();
-        s.performanceMode = !!enabled;
-        await writeSettings(s);
+        await updateSettings(s => { s.performanceMode = !!enabled; });
         return { success: true };
     });
 

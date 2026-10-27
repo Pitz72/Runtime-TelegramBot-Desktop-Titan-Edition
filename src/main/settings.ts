@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron';
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, rename, writeFile } from 'fs/promises';
 import { join } from 'path';
 
 /**
@@ -30,16 +30,53 @@ function getSettingsPath(): string {
 }
 
 export async function readSettings(): Promise<TitanSettings> {
+    let raw: string;
     try {
-        const raw = await readFile(getSettingsPath(), 'utf-8');
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+        raw = await readFile(getSettingsPath(), 'utf-8');
     } catch {
+        return { ...DEFAULT_SETTINGS }; // prima apertura: il file non c'è ancora
+    }
+    try {
+        return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    } catch (e) {
+        // File illeggibile: si torna ai valori predefiniti, ma lo si dice e lo si mette da
+        // parte. Prima spariva in silenzio, e con lui l'avvio automatico del motore.
+        const aside = `${getSettingsPath()}.corrupt-${Date.now()}`;
+        console.error(`[settings] titan-settings.json illeggibile, spostato in ${aside}:`, e);
+        await rename(getSettingsPath(), aside).catch(() => {});
         return { ...DEFAULT_SETTINGS };
     }
 }
 
+/**
+ * Scrittura atomica: prima un file temporaneo, poi la sostituzione. Scritto direttamente,
+ * un'interruzione a metà (crash, PC spento) lasciava un JSON troncato.
+ */
 export async function writeSettings(settings: TitanSettings): Promise<void> {
-    await writeFile(getSettingsPath(), JSON.stringify(settings, null, 2), 'utf-8');
+    const target = getSettingsPath();
+    const temp = `${target}.tmp`;
+    await writeFile(temp, JSON.stringify(settings, null, 2), 'utf-8');
+    await rename(temp, target);
+}
+
+let settingsQueue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Legge, modifica e riscrive le impostazioni, una modifica alla volta.
+ *
+ * Ogni punto che salvava faceva leggi-modifica-scrivi per conto suo: due salvataggi vicini
+ * (lo zoom e l'azione della X, per dire) leggevano lo stesso file e l'ultimo cancellava la
+ * modifica del primo. Qui le modifiche passano in fila.
+ */
+export function updateSettings(mutate: (settings: TitanSettings) => void): Promise<TitanSettings> {
+    const next = settingsQueue.then(async () => {
+        const settings = await readSettings();
+        mutate(settings);
+        await writeSettings(settings);
+        return settings;
+    });
+    settingsQueue = next.catch(() => {});
+    return next;
 }
 
 // --- Ingrandimento dell'interfaccia ---
@@ -66,10 +103,6 @@ export async function applyZoom(win: BrowserWindow, value: number, persist = tru
         win.webContents.setZoomFactor(zoom);
         win.webContents.send('ui-zoom-changed', zoom);
     }
-    if (persist) {
-        const s = await readSettings();
-        s.uiZoom = zoom;
-        await writeSettings(s);
-    }
+    if (persist) await updateSettings(s => { s.uiZoom = zoom; });
     return zoom;
 }

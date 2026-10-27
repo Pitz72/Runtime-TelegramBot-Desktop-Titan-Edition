@@ -193,6 +193,7 @@ const ok = <T,>(v: T) => new Promise<T>(r => setTimeout(() => r(v), 120));
     exportLogs: () => ok({ success: false, error: 'Cancelled' }),
     exportDatabase: () => ok({ success: false, error: 'Cancelled' }),
     importDatabase: () => ok({ success: false, error: 'Cancelled' }),
+    openBackupsFolder: () => ok({ success: true, path: '/tmp/backups' }),
     exportConfig: () => ok({ success: false, error: 'Cancelled' }),
     importConfig: () => ok({ success: false, error: 'Cancelled' }),
     exportSingleBot: () => ok({ success: false }),

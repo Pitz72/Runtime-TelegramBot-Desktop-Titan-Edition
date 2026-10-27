@@ -132,6 +132,7 @@ const api = {
     exportLogs: () => ipcRenderer.invoke('export-logs'),
     exportDatabase: () => ipcRenderer.invoke('export-database'),
     importDatabase: () => ipcRenderer.invoke('import-database'),
+    openBackupsFolder: () => ipcRenderer.invoke('open-backups-folder'),
     exportConfig: () => ipcRenderer.invoke('export-config'),
     importConfig: () => ipcRenderer.invoke('import-config'),
     exportSingleBot: (botId: number) => ipcRenderer.invoke('export-single-bot', botId),

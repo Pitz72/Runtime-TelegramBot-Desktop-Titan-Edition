@@ -13,7 +13,7 @@ import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { getBotEngine } from './bot/engine';
 import { BotManager } from './bot/manager';
 import { onMainLocaleChange, tm } from './i18n';
-import { readSettings, writeSettings, type CloseAction } from './settings';
+import { readSettings, updateSettings, type CloseAction } from './settings';
 
 let tray: Tray | null = null;
 let quitting = false;
@@ -125,8 +125,7 @@ async function hideToTray(win: BrowserWindow) {
     const s = await readSettings();
     if (!s.trayHintShown && Notification.isSupported()) {
         new Notification({ title: tm('trayHintTitle'), body: tm('trayHintBody') }).show();
-        s.trayHintShown = true;
-        await writeSettings(s);
+        await updateSettings(next => { next.trayHintShown = true; });
     }
 }
 
@@ -163,10 +162,7 @@ async function decideClose(win: BrowserWindow) {
     });
     const choice = trayAvailable ? (['tray', 'quit', 'cancel'] as const)[response] : (['quit', 'cancel'] as const)[response];
     if (choice === 'cancel') return;
-    if (checkboxChecked) {
-        s.closeAction = choice;
-        await writeSettings(s);
-    }
+    if (checkboxChecked) await updateSettings(next => { next.closeAction = choice; });
     if (choice === 'tray') await hideToTray(win);
     else app.quit();
 }

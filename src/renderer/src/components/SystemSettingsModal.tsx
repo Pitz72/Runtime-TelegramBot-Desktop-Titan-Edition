@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Settings, Globe, RefreshCw, Accessibility, Database, Info, Download, Upload, FileCode, BookOpen,
-    Heart, Mail, Scale, FileText, CheckCircle2, Sparkles, Github, Power,
+    Heart, Mail, Scale, FileText, CheckCircle2, Sparkles, Github, Power, Archive, FolderOpen,
 } from 'lucide-react';
 import type { DesktopSettings } from '../../../shared/types';
 import { Dialog } from './ui/Dialog';
@@ -78,6 +78,10 @@ export function SystemSettingsModal({ open, onClose, updater, onBotsImported, on
     const importDb = () => run('importDb', async () => {
         const r = await window.api.importDatabase();
         if (!r.success && r.error !== 'Cancelled' && r.error !== 'Cancelled by user') error(`${t('system.data.failed')} ${r.error}`);
+    });
+    const openBackups = () => run('backups', async () => {
+        const r = await window.api.openBackupsFolder();
+        if (!r.success) error(`${t('system.data.failed')} ${r.error}`);
     });
     const exportConfig = () => run('exportConfig', async () => {
         const r = await window.api.exportConfig();
@@ -265,6 +269,9 @@ export function SystemSettingsModal({ open, onClose, updater, onBotsImported, on
                                     <Button variant="danger-ghost" icon={Upload} loading={busy === 'importDb'} disabled={!!busy} onClick={importDb}>{t('system.data.dbImport')}</Button>
                                 </div>
                                 <p className="mt-3 text-sm text-fg-3">{t('system.data.dbImportHint')}</p>
+                            </Section>
+                            <Section icon={Archive} title={t('system.data.backupsTitle')} text={t('system.data.backupsText')}>
+                                <Button icon={FolderOpen} loading={busy === 'backups'} disabled={!!busy} onClick={openBackups}>{t('system.data.backupsOpen')}</Button>
                             </Section>
                             <Section icon={FileCode} title={t('system.data.profilesTitle')} text={t('system.data.profilesText')}>
                                 <div className="flex flex-wrap gap-2">

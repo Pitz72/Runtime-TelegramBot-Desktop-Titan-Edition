@@ -83,6 +83,7 @@ export interface TitanAPI {
     exportLogs: () => Promise<{ success: boolean; path?: string; error?: string }>
     exportDatabase: () => Promise<{ success: boolean; path?: string; error?: string }>
     importDatabase: () => Promise<{ success: boolean; error?: string }>
+    openBackupsFolder: () => Promise<{ success: boolean; path?: string; error?: string }>
     exportConfig: () => Promise<{ success: boolean; path?: string; error?: string }>
     importConfig: () => Promise<{ success: boolean; imported?: number; paused?: Array<{ name: string; pausedFor: string }>; error?: string }>
     exportSingleBot: (botId: number) => Promise<{ success: boolean; path?: string; error?: string }>

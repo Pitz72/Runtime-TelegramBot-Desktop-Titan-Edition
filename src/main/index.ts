@@ -10,6 +10,7 @@ import { setupIpc } from './ipc'
 import { getBotEngine } from './bot/engine'
 import { BotManager } from './bot/manager'
 import { closeDB } from './database/schema'
+import { scheduleDailyBackups } from './database/backup'
 import { tm } from './i18n'
 import { readSettings, applyZoom, stepZoom } from './settings'
 import { HIDDEN_ARG, attachCloseHandler, canHideToTray, markQuitting, setupDesktop, showMainWindow } from './desktop'
@@ -21,6 +22,8 @@ let mainWindow: BrowserWindow | null = null
 // Cattura eccezioni non gestite (es. errori di sintassi, chiamate a metodi inesistenti)
 process.on('uncaughtException', (error) => {
     console.error('CRITICAL: uncaughtException:', error);
+    // Nel file di log della giornata, così finisce negli allegati di una segnalazione.
+    TitanLogger.fatal(`Errore fatale, Titan si chiude: ${error?.stack || error}`);
     // Usa un try-catch nel caso `dialog` fallisse se l'app è in uno stato troppo corrotto
     try {
         if (app.isReady()) {
@@ -42,6 +45,7 @@ process.on('uncaughtException', (error) => {
 // spegnere il bot a ogni singhiozzo di rete. Logghiamo e proseguiamo.
 process.on('unhandledRejection', (reason) => {
     console.error('unhandledRejection (non fatale, app mantenuta attiva):', reason);
+    TitanLogger.log(`⚠️ Errore non gestito (Titan resta acceso): ${(reason as any)?.stack || reason}`, 'warn');
 });
 
 // --- ISTANZA SINGOLA ---
@@ -267,6 +271,8 @@ app.whenReady().then(async () => {
         app.exit(1)
         return
     }
+
+    scheduleDailyBackups((message, level) => TitanLogger.log(message, level))
 
     const settings = await readSettings()
     setupDesktop(() => mainWindow)

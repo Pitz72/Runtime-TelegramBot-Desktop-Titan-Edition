@@ -257,6 +257,9 @@ export function initDB() {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = `${dbPath}.backup-${timestamp}`;
+            // Se l'ultima chiusura non è stata pulita, le ultime scritture sono ancora nel -wal:
+            // senza checkpoint la copia del solo file principale non le conterrebbe.
+            db.pragma('wal_checkpoint(TRUNCATE)');
             fs.copyFileSync(dbPath, backupPath);
             console.log(`Backup pre-migrazione creato: ${backupPath}`);
 
